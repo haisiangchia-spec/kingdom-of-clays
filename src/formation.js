@@ -3,7 +3,7 @@ export function alive(sideUnits){return sideUnits.filter(x=>!x.dead&&!x.corpse);
 export function isSelectable(unit,skill,side){
   if(unit.dead)return false;
   if(unit.corpse)return side==='enemy' && skill.kind!=='mark' && skill.kind!=='stress' && !['heal','groupHeal','guard','buff','cleanse','restore'].includes(skill.kind);
-  return !unit.stealthed || !!skill.ignoreStealth || !!skill.targetMode;
+  return !unit.stealthed || !!skill.ignoreStealth;
 }
 export function moveWithinFormation(state,unitId,delta){
   const entity=state.units.find(x=>x.id===unitId);
