@@ -8,10 +8,11 @@ import {SECOND_CLASS_SKILLS} from './class-skills-batch2.js';
 import {THIRD_CLASS_SKILLS} from './class-skills-batch3.js';
 import {FOURTH_CLASS_SKILLS} from './class-skills-batch4.js';
 import {FIFTH_CLASS_SKILLS} from './class-skills-batch5.js';
+import {SPIRITBOUND_SKILLS} from './class-skills-spiritbound.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
 export const randInt=(r,lo,hi)=>lo+Math.floor(r()*(hi-lo+1));
-export function unit(id,name,side,stats={}){return {id,name,side,size:stats.size??1,types:stats.types??[],hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0,debuff:stats.debuffResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false,usedSkills:{}};}
+export function unit(id,name,side,stats={}){return {id,name,side,size:stats.size??1,types:stats.types??[],hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0,debuff:stats.debuffResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false,usedSkills:{},form:stats.form??null,transformsUsed:0,transformUsedThisTurn:false};}
 export const ABILITIES={
  heavy_slash:{name:'Heavy Slash',from:[0,1],to:[0,1],acc:85,crit:2,mod:0},
  guardian_parry:{name:"Guardian's Parry",from:[0,1,2,3],to:[0,1,2,3],kind:'guard'},
@@ -35,12 +36,14 @@ export const ABILITIES={
  enemy_strike:{name:'Strike',from:[0,1,2,3],to:[0,1,2,3],acc:85},
  enemy_stress:{name:'Dark Whisper',from:[0,1,2,3],to:[0,1,2,3],kind:'stress',amount:15,acc:95}
 };
-Object.assign(ABILITIES,STARTER_CLASS_SKILLS,SECOND_CLASS_SKILLS,THIRD_CLASS_SKILLS,FOURTH_CLASS_SKILLS,FIFTH_CLASS_SKILLS);
+Object.assign(ABILITIES,STARTER_CLASS_SKILLS,SECOND_CLASS_SKILLS,THIRD_CLASS_SKILLS,FOURTH_CLASS_SKILLS,FIFTH_CLASS_SKILLS,SPIRITBOUND_SKILLS);
 export function ranks(state,side){return state.units.filter(u=>u.side===side&&!u.dead);}
 export function rank(state,id){return rankOf(state,id);}
 export {occupiedRanks,formationSlots};
-export function availableTargets(state,actorId,key){const a=state.units.find(x=>x.id===actorId),sk=ABILITIES[key];if(!a||!sk||a.dead||a.corpse||!occupiedRanks(state,a.id).some(i=>sk.from.includes(i)))return [];if(sk.maxUses&&(a.usedSkills?.[key]??0)>=sk.maxUses)return [];
-const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare','stealth','partyStressChance','selfHeal','stressOnly','variableHeal','selfHealStress','reverseGuard'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth','selfHeal','selfHealStress'].includes(sk.kind)||x.id===a.id)&& (sk.kind!=='reverseGuard'||x.id!==a.id));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?candidates.slice(0,1):candidates).filter(x=>side===a.side||isSelectable(x,sk,side)).map(x=>x.id);}
+export function availableTargets(state,actorId,key){const a=state.units.find(x=>x.id===actorId),sk=ABILITIES[key];if(!a||!sk||a.dead||a.corpse||!occupiedRanks(state,a.id).some(i=>sk.from.includes(i)))return [];
+if(sk.form&&sk.form!=='either'&&a.form!==sk.form)return [];
+if(sk.kind==='transform'&&(a.form!=='human'&&a.form!=='beast'||a.transformUsedThisTurn))return [];if(sk.maxUses&&(a.usedSkills?.[key]??0)>=sk.maxUses)return [];
+const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare','stealth','partyStressChance','selfHeal','stressOnly','variableHeal','selfHealStress','reverseGuard','transform'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth','selfHeal','selfHealStress','transform'].includes(sk.kind)||x.id===a.id)&& (sk.kind!=='reverseGuard'||x.id!==a.id));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?candidates.slice(0,1):candidates).filter(x=>side===a.side||isSelectable(x,sk,side)).map(x=>x.id);}
 export function startRound(state,r){state.round++;clearExpiredCorpses(state);state.queue=state.units.filter(x=>!x.dead&&!x.corpse).map(x=>({id:x.id,score:initiativeScore({...x,spd:x.spd+effectModifier(x,'speed')},r)})).sort((a,b)=>b.score-a.score||(state.units.find(x=>x.id===a.id).side==='hero'?-1:1)||rank(state,a.id)-rank(state,b.id)).map(x=>x.id);state.units.forEach(u=>u.acted=false);state.log.push(`Round ${state.round} begins`);return state;}
 export function currentActor(s){while(s.queue.length){const u=s.units.find(x=>x.id===s.queue[0]);if(u&&!u.dead&&!u.acted)return u;s.queue.shift();}return null;}
 function stress(state,u,amount,r){amount=Math.round(amount*effectiveCombatStats(u).stressMultiplier*(1-clamp(effectModifier(u,'stressResist'),0,90)/100));u.stress=clamp(u.stress+amount,0,200);if(u.stress>=100&&!u.affliction&&!u.virtue){const virtues=['Bravery','Clarity','Fighting Spirit','Unbreakable Will','Second Wind'];const afflicted=['Panic','Distrust','Self-Preservation','Recklessness','Aggression','Despair','Confusion'];if(r()<.25){u.virtue=virtues[randInt(r,0,4)];state.log.push(`${u.name} found ${u.virtue}!`);}else{u.affliction=afflicted[randInt(r,0,6)];state.log.push(`${u.name} suffers ${u.affliction}!`);}}if(u.stress===200&&u.side==='hero'){if(u.deathDoor){u.dead=true;state.log.push(`${u.name} dies at the Breaking Point!`);}else{u.hp=0;u.deathDoor=true;u.mortality='heartAttackRecovery';u.stress=170;state.log.push(`${u.name} reaches Death's Door from stress!`);}}}
@@ -60,6 +63,24 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(sk.maxUses){a.usedSkills??={};a.usedSkills[key]=(a.usedSkills[key]??0)+1;}
   if(sk.torch)state.torch=clamp((state.torch??75)+sk.torch,0,100);
   if(a.stun>0){consumeStun(a);state.log.push(`${a.name} loses a turn to stun`);}
+  else if(sk.kind==='transform'){
+    if(a.form==='human'){
+      a.form='beast';
+      for(const ally of ranks(state,a.side))if(ally.id!==a.id)stress(state,ally,8,r);
+      a.hp=Math.min(a.maxHp,a.hp+5);
+      if(a.deathDoor&&a.hp>0){a.deathDoor=false;a.mortality??='deathDoorRecovery';}
+      addTimedEffect(a,{kind:'buff',spiritFormBuff:true,turns:4,modifiers:{speed:1,blightResist:20}});
+      addTimedEffect(a,{kind:'buff',spiritFormBuff:true,turns:3,modifiers:{damage:10}});
+      state.log.push(`${a.name} awakens the beast spirit (+8 ally stress)`);
+    }else{
+      a.form='human';
+      a.effects=a.effects.filter(e=>!e.spiritFormBuff&&!e.rakeStack);
+      addTimedEffect(a,{kind:'debuff',turns:4,selfInflicted:true,modifiers:{speed:-4}});
+      for(const ally of ranks(state,a.side))if(ally.id!==a.id)ally.stress=clamp(ally.stress-2,0,200);
+      state.log.push(`${a.name} returns to human form (-2 ally stress)`);
+    }
+    a.transformsUsed++;a.transformUsedThisTurn=true;
+  }
   else if(sk.kind==='guard'){applyGuard(state,a,target.id,sk.guardTurns??3);if(sk.protectBuff)addTimedEffect(a,{...sk.protectBuff,kind:'buff'});state.log.push(`${a.name} guards ${target.name}`);}
   else if(sk.kind==='reverseGuard'){
     applyGuard(state,target,a.id,sk.guardTurns??2);
@@ -208,7 +229,7 @@ export function takeTurn(state,actorId,key,targetId,r){
         const blightBonus=(actual.dot??[]).some(d=>d.type==='blight')?(sk.vsBlighted??0):0;
         const stunBonus=actual.stun>0?(sk.vsStunned??0):0;
         const targetDamageTaken=effectModifier(actual,'damageTaken');
-        const dmg=(sk.mod??0)<=-1?0:directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1)*(1+blightBonus)*(1+stunBonus)*typeMultiplier*(1+(effectModifier(a,'damage')+guardedBonus+(sk.consumeFinale?effectModifier(a,'finaleDamage'):0))/100)*(1+targetDamageTaken/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
+        const dmg=(sk.mod??0)<=-1?0:directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1)*(1+blightBonus)*(1+stunBonus)*(1+(sk.rakeBonus?effectModifier(a,'rakeDamage'):0)/100)*typeMultiplier*(1+(effectModifier(a,'damage')+guardedBonus+(sk.consumeFinale?effectModifier(a,'finaleDamage'):0))/100)*(1+targetDamageTaken/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
         hurt(state,actual,dmg,r,crit);
         if(sk.selfHealOnHit&&dmg>0){a.hp=Math.min(a.maxHp,a.hp+sk.selfHealOnHit);if(a.hp>0&&a.deathDoor){a.deathDoor=false;a.mortality??='deathDoorRecovery';}}
         if(sk.markOnHit&&!actual.dead&&!actual.corpse)actual.marked=sk.markOnHit;
@@ -246,6 +267,7 @@ export function takeTurn(state,actorId,key,targetId,r){
     }
   }
   if(sk.selfBuff&&sk.targetMode==='all')addTimedEffect(a,{...sk.selfBuff,kind:'buff'});
+  if(sk.rakeBonus)addTimedEffect(a,{kind:'buff',rakeStack:true,turns:sk.rakeDuration??4,modifiers:{rakeDamage:sk.rakeBonus}});
   if(sk.consumeFinale){a.effects=a.effects.filter(e=>!e.finaleStack);}
   if(sk.finaleBuff)addTimedEffect(a,{kind:'buff',finaleStack:true,turns:8,modifiers:{finaleDamage:sk.finaleBuff.damage??0,finaleCrit:sk.finaleBuff.crit??0}});
   if(sk.selfBuff&&['partyBuff','stressOnly'].includes(sk.kind))addTimedEffect(a,{...sk.selfBuff,kind:'buff'});
@@ -256,7 +278,8 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(sk.riposte){a.riposte=sk.riposteDuration??3;a.riposteAcc=sk.riposteAcc??90;a.riposteMod=sk.riposteMod??-.4;}
   if(!wasStunned)completeUnstunnedTurn(a);
   if(a.stealthed&&sk.kind!=='stealth')a.stealthed=0;
-  a.acted=true;state.queue.shift();return state;
+  if(!sk.freeAction){a.acted=true;state.queue.shift();}
+  return state;
 }
 function executeRiposte(state,defender,attacker,r){
   const acc=defender.riposteAcc??(defender.side==='hero'?90:85);
@@ -269,6 +292,12 @@ function executeRiposte(state,defender,attacker,r){
 }
 export function beginTurn(state,id,r){
  const u=state.units.find(x=>x.id===id);if(!u||u.dead)return;
+ u.transformUsedThisTurn=false;
+ if(u.form==='beast'){
+  stress(state,u,6,r);
+  state.log.push(`${u.name} suffers 6 beast-form stress`);
+  if(u.affliction){revertSpiritbound(state,u,'affliction');}
+ }
  const healed=restorationTick(u);
  if(healed)state.log.push(`${u.name} restores ${healed} HP`);
  for(const dot of u.dot){
@@ -279,7 +308,24 @@ export function beginTurn(state,id,r){
  tickTimedEffects(u);
  if(u.stealthed>0)u.stealthed--;
 }
-export function status(s){return !hasLiveOpponents(s,'hero')?'defeat':!hasLiveOpponents(s,'enemy')?'victory':'ongoing';}
+function revertSpiritbound(state,u,reason){
+ if(u.form!=='beast')return;
+ u.form='human';
+ u.effects=u.effects.filter(e=>!e.spiritFormBuff&&!e.rakeStack);
+ for(const ally of ranks(state,u.side))if(ally.id!==u.id)ally.stress=clamp(ally.stress-2,0,200);
+ state.log.push(`${u.name} reverts to human form (${reason})`);
+}
+export function status(s){
+ const result=!hasLiveOpponents(s,'hero')?'defeat':!hasLiveOpponents(s,'enemy')?'victory':'ongoing';
+ if(result!=='ongoing')for(const u of s.units)if(u.form==='beast')revertSpiritbound(s,u,'battle end');
+ return result;
+}
+export function makeSpiritboundBattle(seed=1){
+ const b=makeBattle(seed);
+ b.units=[unit('h1','Warrior','hero',{hp:33,spd:1}),unit('h2','Spiritbound','hero',{hp:26,spd:7,dmgMin:6,dmgMax:11,form:'human',blightResist:60}),unit('h3','Priest','hero',{hp:24,spd:4}),unit('h4','Hunter','hero',{hp:25,spd:3}),...b.units.filter(u=>u.side==='enemy')];
+ b.log.unshift('Spiritbound transformation laboratory');
+ return b;
+}
 export function makeFifthClassBattle(seed=1){
  const b=makeBattle(seed);
  b.units=[unit('h1','Cursed Champion','hero',{hp:35,spd:2,dodge:0,dmgMin:8,dmgMax:14}),unit('h2','Treasure Hunter','hero',{hp:19,spd:5,dodge:10,dmgMin:3,dmgMax:6}),unit('h3','Hex Mage','hero',{hp:19,spd:6,dmgMin:4,dmgMax:7}),unit('h4','Warrior','hero',{hp:33,spd:1}),...b.units.filter(x=>x.side==='enemy')];
