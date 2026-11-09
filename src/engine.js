@@ -12,7 +12,7 @@ import {SPIRITBOUND_SKILLS} from './class-skills-spiritbound.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
 export const randInt=(r,lo,hi)=>lo+Math.floor(r()*(hi-lo+1));
-export function unit(id,name,side,stats={}){return {id,name,side,classId:stats.classId??(side==='hero'?name.toLowerCase().replace(/[^a-z0-9]+/g,'_'):null),size:stats.size??1,types:stats.types??[],hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0,debuff:stats.debuffResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false,usedSkills:{},form:stats.form??null,transformsUsed:0,transformUsedThisTurn:false};}
+export function unit(id,name,side,stats={}){return {id,name,side,classId:stats.classId??(side==='hero'?name.toLowerCase().replace(/[^a-z0-9]+/g,'_'):null),size:stats.size??1,types:stats.types??[],hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0,debuff:stats.debuffResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathDoorRecovery:false,heartAttackRecovery:false,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false,usedSkills:{},form:stats.form??null,transformsUsed:0,transformUsedThisTurn:false};}
 export const ABILITIES={
  heavy_slash:{name:'Heavy Slash',from:[0,1],to:[0,1],acc:85,crit:2,mod:0},
  guardian_parry:{name:"Guardian's Parry",from:[0,1,2,3],to:[0,1,2,3],kind:'guard'},
@@ -47,7 +47,41 @@ if(sk.kind==='transform'&&(a.form!=='human'&&a.form!=='beast'||a.transformUsedTh
 const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare','stealth','partyStressChance','selfHeal','stressOnly','variableHeal','selfHealStress','reverseGuard','transform'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth','selfHeal','selfHealStress','transform'].includes(sk.kind)||x.id===a.id)&& (sk.kind!=='reverseGuard'||x.id!==a.id));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?candidates.slice(0,1):candidates).filter(x=>side===a.side||isSelectable(x,sk,side)).map(x=>x.id);}
 export function startRound(state,r){state.round++;clearExpiredCorpses(state);state.queue=state.units.filter(x=>!x.dead&&!x.corpse).map(x=>({id:x.id,score:initiativeScore({...x,spd:x.spd+effectModifier(x,'speed')},r)})).sort((a,b)=>b.score-a.score||(state.units.find(x=>x.id===a.id).side==='hero'?-1:1)||rank(state,a.id)-rank(state,b.id)).map(x=>x.id);state.units.forEach(u=>u.acted=false);state.log.push(`Round ${state.round} begins`);return state;}
 export function currentActor(s){while(s.queue.length){const u=s.units.find(x=>x.id===s.queue[0]);if(u&&!u.dead&&!u.acted)return u;s.queue.shift();}return null;}
-function stress(state,u,amount,r){amount=Math.round(amount*effectiveCombatStats(u).stressMultiplier*(1-clamp(effectModifier(u,'stressResist'),0,90)/100));u.stress=clamp(u.stress+amount,0,200);if(u.stress>=100&&!u.affliction&&!u.virtue){const virtues=['Bravery','Clarity','Fighting Spirit','Unbreakable Will','Second Wind'];const afflicted=['Panic','Distrust','Self-Preservation','Recklessness','Aggression','Despair','Confusion'];if(r()<.25){u.virtue=virtues[randInt(r,0,4)];state.log.push(`${u.name} found ${u.virtue}!`);}else{u.affliction=afflicted[randInt(r,0,6)];state.log.push(`${u.name} suffers ${u.affliction}!`);if(u.form==='beast')revertSpiritbound(state,u,'affliction');}}if(u.stress===200&&u.side==='hero'){if(u.deathDoor){u.dead=true;state.log.push(`${u.name} dies at the Breaking Point!`);}else{u.hp=0;u.deathDoor=true;u.mortality='heartAttackRecovery';u.stress=170;state.log.push(`${u.name} reaches Death's Door from stress!`);}}}
+function stress(state,u,amount,r){
+ if(u.dead||amount<=0)return;
+ amount=Math.round(amount*effectiveCombatStats(u).stressMultiplier*(1-clamp(effectModifier(u,'stressResist'),0,90)/100));
+ u.stress=clamp(u.stress+amount,0,200);
+ if(u.stress>=100&&!u.affliction&&!u.virtue){
+  const virtues=['Bravery','Clarity','Fighting Spirit','Unbreakable Will','Second Wind'];
+  const afflicted=['Panic','Distrust','Self-Preservation','Recklessness','Aggression','Despair','Confusion'];
+  if(r()<.25){
+    u.virtue=virtues[randInt(r,0,4)];
+    u.stress=45;
+    for(const ally of ranks(state,u.side))if(ally.id!==u.id&&!ally.dead)ally.stress=clamp(ally.stress-6,0,200);
+    state.log.push(`${u.name} found ${u.virtue}!`);
+  }else{
+    u.affliction=afflicted[randInt(r,0,6)];
+    state.log.push(`${u.name} suffers ${u.affliction}!`);
+    if(u.form==='beast')revertSpiritbound(state,u,'affliction');
+  }
+ }
+ if(u.stress>=200&&u.side==='hero'){
+  if(u.virtue){
+    u.virtue=null;
+    u.stress=0;
+    state.log.push(`${u.name}'s virtue fades, avoiding a heart attack`);
+  }else if(u.deathDoor||u.hp===0){
+    u.dead=true;
+    state.log.push(`${u.name} dies of a heart attack!`);
+  }else{
+    u.hp=0;
+    u.deathDoor=true;
+    u.heartAttackRecovery=true;
+    u.stress=170;
+    state.log.push(`${u.name} reaches Death's Door from a heart attack!`);
+  }
+ }
+}
 function hurt(s,u,n,r,suppressCorpse=false,physicalHit=false){if(u.dead)return;if(u.side==='hero'&&u.deathDoor&&(n>0||physicalHit)){if(r()>=deathBlowResistance(u)/100){u.dead=true;s.log.push(`${u.name} suffers a Deathblow!`);}else{s.log.push(`${u.name} resists a Deathblow!`);}return;}u.hp=Math.max(0,u.hp-n);if(u.hp===0){if(u.side==='hero'){u.deathDoor=true;s.log.push(`${u.name} is at Death's Door!`);}else{u.dead=true;s.log.push(`${u.name} falls!`);if(!suppressCorpse&&corpseFromEnemy(u,s.round))s.log.push(`${u.name} remains in formation`);}}}
 export function takeTurn(state,actorId,key,targetId,r){
   const a=currentActor(state);
