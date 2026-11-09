@@ -49,7 +49,9 @@ test('normal direct kill creates enemy corpse which blocks front ranks',()=>{
  takeTurn(b,hero.id,'crushing_strike',enemy.id,()=>0);
  assert.equal(enemy.corpse,true);assert.equal(rank(b,enemy.id),0);
  assert.equal(enemy.hp,8);
- assert.ok(!availableTargets(b,'h2','crushing_strike').includes('e2'));
+ assert.equal(rank(b,'e2'),1);
+ assert.equal(rank(b,'e3'),2);
+ assert.ok(availableTargets(b,'h2','crushing_strike').includes(enemy.id));
 });
 test('critical kill leaves no corpse',()=>{
  const b=makeBattle(),hero=b.units.find(u=>u.id==='h2'),enemy=b.units.find(u=>u.id==='e1');
