@@ -228,6 +228,18 @@ export function beginTurn(state,id,r){
  if(u.stealthed>0)u.stealthed--;
 }
 export function status(s){return !hasLiveOpponents(s,'hero')?'defeat':!hasLiveOpponents(s,'enemy')?'victory':'ongoing';}
+export function makeSecondClassBattle(seed=1){
+ const state=makeBattle(seed);
+ const replacements=[
+  unit('h1','Warrior','hero',{hp:33,spd:1}),
+  unit('h2','Thief','hero',{hp:20,spd:8,dodge:10,dmgMin:4,dmgMax:8}),
+  unit('h3','Mage','hero',{hp:22,spd:7,dmgMin:4,dmgMax:7}),
+  unit('h4','Hunter','hero',{hp:27,spd:3,dmgMin:4,dmgMax:8})
+ ];
+ state.units=[...replacements,...state.units.filter(x=>x.side==='enemy')];
+ state.log=['Hunter, Thief and Mage skill laboratory',...state.log];
+ return state;
+}
 export function makeLargeMonsterBattle(seed=1){
  const state=makeBattle(seed);
  state.units=state.units.filter(u=>u.id!=='e1'&&u.id!=='e2'&&u.id!=='e3');
