@@ -1,9 +1,10 @@
 // Kingdom of Clays: deterministic, UI-independent combat prototype.
 import {clamp,hitChance,rollCrit,directDamage,resistChance,dotDuration,deathBlowResistance,initiativeScore,effectiveCombatStats} from './dd1-math.js';
+import {stunResistance,inflictStun,consumeStun,completeUnstunnedTurn,applyGuard,guardTarget,canCounter,tickTimedEffects,effectModifier} from './status.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
 export const randInt=(r,lo,hi)=>lo+Math.floor(r()*(hi-lo+1));
-export function unit(id,name,side,stats={}){return {id,name,side,hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20},dot:[],stun:0,deathDoor:false,mortality:null,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false};}
+export function unit(id,name,side,stats={}){return {id,name,side,hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20},dot:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false};}
 export const ABILITIES={
  heavy_slash:{name:'Heavy Slash',from:[0,1],to:[0,1],acc:85,crit:2,mod:0},
  guardian_parry:{name:"Guardian's Parry",from:[0,1,2,3],to:[0,1,2,3],kind:'guard'},
@@ -36,8 +37,8 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(!sk)throw Error('Unknown skill');
   if(!availableTargets(state,actorId,key).includes(targetId))throw Error('Illegal target or rank');
   const target=state.units.find(x=>x.id===targetId);
-  if(a.stun>0){a.stun--;state.log.push(`${a.name} loses a turn to stun`);}
-  else if(sk.kind==='guard'){a.guard=target.id;state.log.push(`${a.name} guards ${target.name}`);}
+  if(a.stun>0){consumeStun(a);state.log.push(`${a.name} loses a turn to stun`);}
+  else if(sk.kind==='guard'){applyGuard(state,a,target.id,3);state.log.push(`${a.name} guards ${target.name}`);}
   else if(sk.kind==='mark'){target.marked=3;state.log.push(`${target.name} is marked`);}
   else if(sk.kind==='groupHeal'){
     for(const u of ranks(state,a.side)){
@@ -54,8 +55,8 @@ export function takeTurn(state,actorId,key,targetId,r){
     state.log.push(`${a.name} heals ${target.name} for ${v}`);
   }else{
     let actual=target;
-    if(target.side!==a.side){const guard=state.units.find(x=>x.guard===target.id&&!x.dead);if(guard)actual=guard;}
-    const chance=hitChance({accuracy:sk.acc??85,accModifier:effectiveCombatStats(a).accuracy,dodge:actual.dodge,missStreak:a.misses});
+    if(target.side!==a.side){actual=guardTarget(state,target);if(actual!==target)state.log.push(`${actual.name} intercepts an attack aimed at ${target.name}`);}
+    const chance=hitChance({accuracy:sk.acc??85,accModifier:effectiveCombatStats(a).accuracy+effectModifier(a,'accuracy'),dodge:actual.dodge+effectModifier(actual,'dodge'),missStreak:a.misses});
     if(r()*100<chance){
       a.misses=0;
       if(sk.kind==='stress'){
@@ -68,23 +69,34 @@ export function takeTurn(state,actorId,key,targetId,r){
         state.log.push(`${a.name} uses ${sk.name} on ${actual.name}: ${dmg}${crit?' CRIT':''}`);
         if(sk.status&&!actual.dead){
           const st=sk.status;
-          if(r()*100<resistChance({applicationChance:st.chance,resistance:actual.resist[st.type]??0,crit})){ 
-            if(st.type==='stun')actual.stun++;
+          if(r()*100<resistChance({applicationChance:st.chance,resistance:st.type==='stun'?stunResistance(actual):(actual.resist[st.type]??0),crit})){ 
+            if(st.type==='stun')inflictStun(actual);
             else actual.dot.push({type:st.type,value:st.value,turns:dotDuration(st.turns,crit)});
             state.log.push(`${actual.name} gains ${st.type}`);
           }
         }
       }
     }else{a.misses++;state.log.push(`${a.name} misses ${actual.name}`);}
+    if(canCounter(actual,a,sk))executeRiposte(state,actual,a,r);
   }
   if(sk.advance){
     const side=ranks(state,a.side),idx=side.findIndex(x=>x.id===a.id),next=Math.max(0,idx-sk.advance);
     side.splice(idx,1);side.splice(next,0,a);
     state.units=state.units.filter(x=>x.side!==a.side).concat(side);
   }
-  if(sk.riposte)a.riposte=2;
+  if(sk.riposte)a.riposte=3;
+  if(a.stun===0)completeUnstunnedTurn(a);
   a.acted=true;state.queue.shift();return state;
 }
-export function beginTurn(state,id,r){const u=state.units.find(x=>x.id===id);if(!u||u.dead)return;for(const dot of u.dot){hurt(state,u,dot.value,r);state.log.push(`${u.name} takes ${dot.value} ${dot.type}`);dot.turns--;}u.dot=u.dot.filter(x=>x.turns>0);if(u.marked>0)u.marked--;if(u.riposte>0)u.riposte--;}
+function executeRiposte(state,defender,attacker,r){
+  const acc=defender.side==='hero'?90:85;
+  const chance=hitChance({accuracy:acc,accModifier:effectiveCombatStats(defender).accuracy+effectModifier(defender,'accuracy'),dodge:attacker.dodge+effectModifier(attacker,'dodge')});
+  if(r()*100>=chance){state.log.push(`${defender.name} counters ${attacker.name} but misses`);return;}
+  const crit=rollCrit({baseCrit:defender.crit},r);
+  const damage=directDamage({minDamage:defender.dmgMin,maxDamage:defender.dmgMax,skillMultiplier:.6,crit,prot:attacker.prot,damageMultiplier:effectiveCombatStats(defender).damageMultiplier},r);
+  hurt(state,attacker,damage,r);
+  state.log.push(`${defender.name} ripostes ${attacker.name}: ${damage}${crit?' CRIT':''}`);
+}
+export function beginTurn(state,id,r){const u=state.units.find(x=>x.id===id);if(!u||u.dead)return;for(const dot of u.dot){hurt(state,u,dot.value,r);state.log.push(`${u.name} takes ${dot.value} ${dot.type}`);dot.turns--;}u.dot=u.dot.filter(x=>x.turns>0);tickTimedEffects(u);}
 export function status(s){const h=ranks(s,'hero').length,e=ranks(s,'enemy').length;return h===0?'defeat':e===0?'victory':'ongoing';}
 export function makeBattle(seed=1){const units=[unit('h1','Swordsman','hero',{hp:33,spd:3,prot:10}),unit('h2','Warrior','hero',{hp:33,spd:1}),unit('h3','Hunter','hero',{hp:25,spd:3}),unit('h4','Priest','hero',{hp:24,spd:4}),unit('e1','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5}),unit('e2','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5}),unit('e3','Skeleton Archer','enemy',{hp:14,spd:4,dodge:8}),unit('e4','Skeleton Court Mage','enemy',{hp:13,spd:5,dodge:9})];return {seed,round:0,units,queue:[],log:['Combat begins!']};}
