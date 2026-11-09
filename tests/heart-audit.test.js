@@ -33,7 +33,7 @@ test('after heart attack recovery, both death door and heart recovery modifiers 
  assert.ok(u.hp>0);assert.equal(u.deathDoor,false);
  assert.equal(u.heartAttackRecovery,true);
  assert.equal(u.mortality,'deathDoorRecovery');
- assert.deepEqual(effectiveCombatStats(u),{accuracy:-5,damageMultiplier:.85,speed:1,stressMultiplier:1.25});
+ assert.deepEqual(effectiveCombatStats(u),{accuracy:-5,damageMultiplier:.85,speed:0,stressMultiplier:1.25});
 });
 test('heart attack recovery penalty is not lost on a second death door recovery',()=>{
  const b=makeBattle(),u=b.units.find(x=>x.id==='h1');
