@@ -23,7 +23,7 @@ export const FIFTH_CLASS_SKILLS=Object.freeze({
  blinding_powder:{name:'Blinding Powder',classId:'treasure_hunter',source:'Flashpowder',from:[0,1,2,3],to:[0,1,2,3],acc:95,mod:-1,ignoreStealth:true,removeStealth:true,debuff:{chance:100,turns:2,modifiers:{accuracy:-10}}},
  protective_tonic:{name:'Protective Tonic',classId:'treasure_hunter',source:'Fortifying Vapours',from:[0,1],to:[0,1,2,3],kind:'heal',min:1,max:1,afterHealBuff:{turns:3,modifiers:{bleedResist:10,blightResist:10}}},
  evasion_tonic:{name:'Evasion Tonic',classId:'treasure_hunter',source:'Invigorating Vapours',from:[0,1],to:[0,1,2,3],kind:'partyBuff',buff:{turns:3,modifiers:{dodge:3}}},
- take_cover:{name:'Take Cover!',classId:'treasure_hunter',source:'Protect Me!',from:[0,1,2,3],to:[0,1,2,3],kind:'reverseGuard',guardTurns:2,protectBuff:{turns:3,modifiers:{prot:10,dodge:10}}}
+ take_cover:{name:'Take Cover!',classId:'treasure_hunter',source:'Protect Me',from:[0,1,2,3],to:[0,1,2,3],kind:'reverseGuard',guardTurns:2,protectBuff:{turns:3,modifiers:{prot:10,dodge:10}}}
 });
 export const FIFTH_CLASS_KEYS=Object.freeze({
  cursed_champion:['executioners_cleave','greatsword_sweep','overwhelming_force','cursed_strength','unyielding_body','warriors_meditation','dreadful_presence'],
