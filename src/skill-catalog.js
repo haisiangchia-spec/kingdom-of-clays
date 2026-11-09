@@ -1,5 +1,6 @@
-// Frozen reskin mapping for the 15 base-DD1 classes. Data ONLY: mechanics remain
-// pending until a source-verified implementation is linked. Do not infer stat values.
+// Frozen reskin mapping for the 15 base-DD1 classes. Coverage tracks level-one
+// integrations separately from the still-pending level-two through level-five upgrades.
+import {STARTER_CLASS_SKILLS} from './class-skills.js';
 export const CLASS_SKILL_CATALOG = [
   {
     "id": "swordsman",
@@ -737,7 +738,7 @@ export const CLASS_SKILL_CATALOG = [
     ]
   }
 ];
-export const SKILL_CATALOG = CLASS_SKILL_CATALOG.flatMap(c=>c.skills.map(s=>({...s,classId:c.id,className:c.name,dd1Class:c.dd1})));
+export const SKILL_CATALOG = CLASS_SKILL_CATALOG.flatMap(c=>c.skills.map(s=>({...s,classId:c.id,className:c.name,dd1Class:c.dd1,mechanics:Object.values(STARTER_CLASS_SKILLS).some(v=>v.classId===c.id&&v.source===s.dd1Source&&v.name===s.name)?'level1-integrated':'pending'})));
 export function catalogSkill(classId,sourceId){
   return SKILL_CATALOG.find(s=>s.classId===classId&&s.id===sourceId)??null;
 }
