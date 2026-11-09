@@ -1,3 +1,4 @@
+import {consumeStun} from './status.js';
 import {makeBattle,rng,startRound,currentActor,rank,ranks,availableTargets,takeTurn,beginTurn,status,ABILITIES} from './engine.js';
 let seed=(Date.now()>>>0)||1,random=rng(seed),battle=makeBattle(seed),selected=null,preparedActorId=null;
 const skills={h1:['heavy_slash','guardian_parry','riposte_stance'],h2:['crushing_strike','concussive_blow'],h3:['eagle_eye_shot','hunters_mark'],h4:['greater_heal','group_healing','sacred_strike'],e1:['enemy_strike'],e2:['enemy_strike'],e3:['enemy_strike'],e4:['enemy_stress','enemy_strike']};
@@ -18,7 +19,7 @@ function ensure(){
    }
    if(actor.dead){battle.queue.shift();preparedActorId=null;continue;}
    if(actor.stun>0){
-     actor.stun--;actor.acted=true;battle.queue.shift();
+     consumeStun(actor);actor.acted=true;battle.queue.shift();
      battle.log.push(`${actor.name} loses a turn to stun`);
      preparedActorId=null;continue;
    }
