@@ -6,6 +6,7 @@ import {isSelectable,moveWithinFormation,attemptDisplacement,corpseFromEnemy,cle
 import {STARTER_CLASS_SKILLS} from './class-skills.js';
 import {SECOND_CLASS_SKILLS} from './class-skills-batch2.js';
 import {THIRD_CLASS_SKILLS} from './class-skills-batch3.js';
+import {FOURTH_CLASS_SKILLS} from './class-skills-batch4.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
 export const randInt=(r,lo,hi)=>lo+Math.floor(r()*(hi-lo+1));
@@ -33,12 +34,12 @@ export const ABILITIES={
  enemy_strike:{name:'Strike',from:[0,1,2,3],to:[0,1,2,3],acc:85},
  enemy_stress:{name:'Dark Whisper',from:[0,1,2,3],to:[0,1,2,3],kind:'stress',amount:15,acc:95}
 };
-Object.assign(ABILITIES,STARTER_CLASS_SKILLS,SECOND_CLASS_SKILLS,THIRD_CLASS_SKILLS);
+Object.assign(ABILITIES,STARTER_CLASS_SKILLS,SECOND_CLASS_SKILLS,THIRD_CLASS_SKILLS,FOURTH_CLASS_SKILLS);
 export function ranks(state,side){return state.units.filter(u=>u.side===side&&!u.dead);}
 export function rank(state,id){return rankOf(state,id);}
 export {occupiedRanks,formationSlots};
 export function availableTargets(state,actorId,key){const a=state.units.find(x=>x.id===actorId),sk=ABILITIES[key];if(!a||!sk||a.dead||a.corpse||!occupiedRanks(state,a.id).some(i=>sk.from.includes(i)))return [];if(sk.maxUses&&(a.usedSkills?.[key]??0)>=sk.maxUses)return [];
-const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare','stealth'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth'].includes(sk.kind)||x.id===a.id));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?candidates.slice(0,1):candidates).filter(x=>side===a.side||isSelectable(x,sk,side)).map(x=>x.id);}
+const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare','stealth','partyStressChance','selfHeal','stressOnly'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth','selfHeal'].includes(sk.kind)||x.id===a.id));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?candidates.slice(0,1):candidates).filter(x=>side===a.side||isSelectable(x,sk,side)).map(x=>x.id);}
 export function startRound(state,r){state.round++;clearExpiredCorpses(state);state.queue=state.units.filter(x=>!x.dead&&!x.corpse).map(x=>({id:x.id,score:initiativeScore({...x,spd:x.spd+effectModifier(x,'speed')},r)})).sort((a,b)=>b.score-a.score||(state.units.find(x=>x.id===a.id).side==='hero'?-1:1)||rank(state,a.id)-rank(state,b.id)).map(x=>x.id);state.units.forEach(u=>u.acted=false);state.log.push(`Round ${state.round} begins`);return state;}
 export function currentActor(s){while(s.queue.length){const u=s.units.find(x=>x.id===s.queue[0]);if(u&&!u.dead&&!u.acted)return u;s.queue.shift();}return null;}
 function stress(state,u,amount,r){amount=Math.round(amount*effectiveCombatStats(u).stressMultiplier*(1-clamp(effectModifier(u,'stressResist'),0,90)/100));u.stress=clamp(u.stress+amount,0,200);if(u.stress>=100&&!u.affliction&&!u.virtue){const virtues=['Bravery','Clarity','Fighting Spirit','Unbreakable Will','Second Wind'];const afflicted=['Panic','Distrust','Self-Preservation','Recklessness','Aggression','Despair','Confusion'];if(r()<.25){u.virtue=virtues[randInt(r,0,4)];state.log.push(`${u.name} found ${u.virtue}!`);}else{u.affliction=afflicted[randInt(r,0,6)];state.log.push(`${u.name} suffers ${u.affliction}!`);}}if(u.stress===200&&u.side==='hero'){if(u.deathDoor){u.dead=true;state.log.push(`${u.name} dies at the Breaking Point!`);}else{u.hp=0;u.deathDoor=true;u.mortality='heartAttackRecovery';u.stress=170;state.log.push(`${u.name} reaches Death's Door from stress!`);}}}
@@ -110,6 +111,21 @@ export function takeTurn(state,actorId,key,targetId,r){
       }
     }
   }
+  else if(sk.kind==='partyStressChance'){
+    for(const ally of ranks(state,a.side))if(r()*100<(sk.stressHealChance??0))ally.stress=clamp(ally.stress-sk.stressHeal,0,200);
+    state.log.push(`${a.name} comforts the party with ${sk.name}`);
+  }
+  else if(sk.kind==='stressOnly'){
+    target.stress=clamp(target.stress-(sk.stressHeal??0),0,200);
+    if(sk.stressResist)addTimedEffect(target,{kind:'buff',turns:3,modifiers:{stressResist:sk.stressResist}});
+    state.log.push(`${a.name} soothes ${target.name}`);
+  }
+  else if(sk.kind==='selfHeal'){
+    const amount=randInt(r,sk.min,sk.max);
+    a.hp=Math.min(a.maxHp,a.hp+amount);
+    if(a.hp>0&&a.deathDoor){a.deathDoor=false;a.mortality??='deathDoorRecovery';}
+    state.log.push(`${a.name} recovers ${amount} HP`);
+  }
   else if(sk.kind==='stressHeal'){
     const amount=randInt(r,sk.min,sk.max);
     target.hp=Math.min(target.maxHp,target.hp+amount);
@@ -155,7 +171,7 @@ export function takeTurn(state,actorId,key,targetId,r){
     for(const affectedTarget of affected){
     let pendingStatus=null;
     let actual=affectedTarget;
-    if(sk.targetMode!=='all'&&affectedTarget.side!==a.side){actual=guardTarget(state,affectedTarget);if(actual!==target)state.log.push(`${actual.name} intercepts an attack aimed at ${affectedTarget.name}`);}
+    if(sk.targetMode!=='all'&&!sk.bypassGuard&&affectedTarget.side!==a.side){actual=guardTarget(state,affectedTarget);if(actual!==target)state.log.push(`${actual.name} intercepts an attack aimed at ${affectedTarget.name}`);}
     const chance=hitChance({accuracy:sk.acc??85,accModifier:effectiveCombatStats(a).accuracy+effectModifier(a,'accuracy'),dodge:actual.dodge+effectModifier(actual,'dodge'),missStreak:a.misses});
     if(r()*100<chance){
       a.misses=0;
@@ -163,13 +179,13 @@ export function takeTurn(state,actorId,key,targetId,r){
         stress(state,actual,sk.amount,r);
         state.log.push(`${a.name} stresses ${actual.name} (+${sk.amount})`);
       }else{
-        const crit=!sk.neverCrit&&rollCrit({baseCrit:a.crit+effectModifier(a,'crit')+(actual.marked?effectModifier(actual,'critReceivedWhileMarked')+(sk.critVsMarked??0):0),skillCrit:sk.crit??0},r);
+        const crit=!sk.neverCrit&&rollCrit({baseCrit:a.crit+effectModifier(a,'crit')+(actual.marked?effectModifier(actual,'critReceivedWhileMarked')+(sk.critVsMarked??0):0)+(sk.consumeFinale?effectModifier(a,'finaleCrit'):0)+effectModifier(actual,'critReceived'),skillCrit:sk.crit??0},r);
         const typeMultiplier=Object.entries(sk.vsTypes??{}).reduce((mult,[tag,bonus])=>mult*(actual.types?.includes(tag)?1+bonus:1),1);
         const guardedBonus=a.guard?effectModifier(a,'damageWhileGuarded'):0;
         const blightBonus=(actual.dot??[]).some(d=>d.type==='blight')?(sk.vsBlighted??0):0;
         const stunBonus=actual.stun>0?(sk.vsStunned??0):0;
         const targetDamageTaken=effectModifier(actual,'damageTaken');
-        const dmg=(sk.mod??0)<=-1?0:directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1)*(1+blightBonus)*(1+stunBonus)*typeMultiplier*(1+(effectModifier(a,'damage')+guardedBonus)/100)*(1+targetDamageTaken/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
+        const dmg=(sk.mod??0)<=-1?0:directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1)*(1+blightBonus)*(1+stunBonus)*typeMultiplier*(1+(effectModifier(a,'damage')+guardedBonus+(sk.consumeFinale?effectModifier(a,'finaleDamage'):0))/100)*(1+targetDamageTaken/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
         hurt(state,actual,dmg,r,crit);
         if(sk.selfHealOnHit&&dmg>0){a.hp=Math.min(a.maxHp,a.hp+sk.selfHealOnHit);if(a.hp>0&&a.deathDoor){a.deathDoor=false;a.mortality??='deathDoorRecovery';}}
         if(sk.markOnHit&&!actual.dead&&!actual.corpse)actual.marked=sk.markOnHit;
@@ -206,6 +222,9 @@ export function takeTurn(state,actorId,key,targetId,r){
     }
     }
   }
+  if(sk.consumeFinale){a.effects=a.effects.filter(e=>!e.finaleStack);}
+  if(sk.finaleBuff)addTimedEffect(a,{kind:'buff',finaleStack:true,turns:8,modifiers:{finaleDamage:sk.finaleBuff.damage??0,finaleCrit:sk.finaleBuff.crit??0}});
+  if(sk.selfBuff&&['partyBuff','stressOnly'].includes(sk.kind))addTimedEffect(a,{...sk.selfBuff,kind:'buff'});
   if(sk.selfDebuff)addTimedEffect(a,{...sk.selfDebuff,kind:'debuff',selfInflicted:true});
   if(sk.markSelf)a.marked=sk.markSelf;
   if(sk.advance)moveWithinFormation(state,a.id,-sk.advance);
@@ -237,6 +256,12 @@ export function beginTurn(state,id,r){
  if(u.stealthed>0)u.stealthed--;
 }
 export function status(s){return !hasLiveOpponents(s,'hero')?'defeat':!hasLiveOpponents(s,'enemy')?'victory':'ongoing';}
+export function makeFourthClassBattle(seed=1){
+ const b=makeBattle(seed);
+ b.units=[unit('h1','Dark Knight','hero',{hp:23,spd:5,dmgMin:5,dmgMax:10}),unit('h2','Beastmaster','hero',{hp:21,spd:5,dmgMin:4,dmgMax:7}),unit('h3','Bard','hero',{hp:19,spd:7,dmgMin:4,dmgMax:7}),unit('h4','Priest','hero',{hp:24,spd:4}),...b.units.filter(x=>x.side==='enemy')];
+ b.log.unshift('Dark Knight, Beastmaster and Bard combat laboratory');
+ return b;
+}
 export function makeThirdClassBattle(seed=1){
  const b=makeBattle(seed);
  b.units=[
