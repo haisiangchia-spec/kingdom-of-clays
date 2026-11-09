@@ -48,11 +48,11 @@ test('Berserker exhaustion, Priest healing and Monster Slayer mark all resolve i
  });
  expect(result).toEqual({stun:1,exhaustion:-20,healed:true,marked:3,priest:'Priest',slayer:'Monster Slayer'});
 });
-test('skill catalog now contains 98 integrated level-one abilities',async ({page})=>{
+test('skill catalog now contains 105 integrated level-one abilities',async ({page})=>{
  await page.goto('/');
  const data=await page.evaluate(async ()=>{
   const {SKILL_CATALOG}=await import('./src/skill-catalog.js');
   return {total:SKILL_CATALOG.length,integrated:SKILL_CATALOG.filter(s=>s.mechanics==='level1-integrated').length};
  });
- expect(data).toEqual({total:105,integrated:98});
+ expect(data).toEqual({total:105,integrated:105});
 });
