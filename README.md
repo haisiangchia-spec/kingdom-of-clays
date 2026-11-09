@@ -17,13 +17,14 @@ Serve the repository root with `python3 -m http.server 8000` and open `http://lo
 - `src/combat-effects.js` — group targeting, cleansing, restoration.
 - `src/status.js` — guard, stun, riposte, temporary buffs and debuffs.
 - `src/dd1-math.js` — combat calculations.
-- `src/skill-catalog.js` — **105 locked display-name mappings** (15 base-game classes × 7 abilities). All catalog entries explicitly remain `mechanics: "pending"` until fully validated; the catalog **does not** claim 105 implemented skills.
+- `src/skill-catalog.js` — **105 locked display-name mappings** (15 base-game classes × 7 abilities). Exactly 14 now carry `level1-integrated` coverage; all remaining entries are pending. Levels 2–5 and full DD1 parity remain incomplete.
+- `src/class-skills.js` — 14 source-checked level-one Swordsman (Man-at-Arms) and Warrior (Crusader) specifications, with rank, effect and combat parameters based on the official DD1 wiki. These are still subject to end-to-end fidelity audit.
 - `tests/` — deterministic Node tests and `tests/browser/` Chromium tests.
 
 ## Fidelity boundaries
 
 The engine has working examples of rank-based targeting, movement, bleed/blight, effects, guarding, marking, riposte, corpses and large enemies, but many skills and quantitative values remain provisional. In particular, DD1 class-specific skill rank scaling, enemy attacks and AI, enemy resistances, turn sequencing, stun edge cases, multi-action bosses, stalling rules, status-effect combinations, deathblow transitions and the complete bestiary **require additional implementation and verification**. A three-rank boss does not leave a corpse; an eligible two-rank enemy may leave a two-rank corpse.
 
-Visuals are still placeholders. No copyrighted anime illustrations are packaged here. The next work should resolve one class's seven skills at a time with exact target/rank rules and tests, then add monster templates and enemy skill data.
+Visuals are still placeholders. No copyrighted anime illustrations are packaged here. The first two classes now have seven level-one skills each. The next work should implement the remaining classes, add skill upgrades/level scaling, and audit exact effect ordering, then enemy templates and boss abilities.
 
 Sandbox campaign and dungeon-exploration layers remain deferred until combat fidelity is sufficiently verified.
