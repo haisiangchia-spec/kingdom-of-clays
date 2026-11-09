@@ -73,7 +73,7 @@ export function attemptDisplacement(state,entity,move,rng){
   return moved;
 }
 export function corpseFromEnemy(enemy,round){
-  if(enemy.corpse||enemy.noCorpse)return false;
+  if(enemy.corpse||enemy.noCorpse||widthOf(enemy)>=3)return false;
   enemy.name='Remains of '+enemy.name;
   enemy.id='corpse_'+enemy.id;
   enemy.corpse=true;enemy.dead=false;
