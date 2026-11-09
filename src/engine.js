@@ -206,7 +206,7 @@ export function takeTurn(state,actorId,key,targetId,r){
           addTimedEffect(actual,{...sk.debuff,kind:'debuff'});
           state.log.push(`${actual.name} is debuffed by ${sk.name}`);
         }
-        if(sk.selfBuff)addTimedEffect(a,{...sk.selfBuff,kind:'buff'});
+        if(sk.selfBuff&&sk.targetMode!=='all')addTimedEffect(a,{...sk.selfBuff,kind:'buff'});
         if(sk.moveTarget&&!actual.dead&&!actual.corpse){const moved=attemptDisplacement(state,actual,sk.moveTarget,r);if(moved)state.log.push(`${actual.name} moves ${Math.abs(moved)} rank(s)`);}
       }
     }else{a.misses++;state.log.push(`${a.name} misses ${actual.name}`);}
@@ -222,6 +222,7 @@ export function takeTurn(state,actorId,key,targetId,r){
     }
     }
   }
+  if(sk.selfBuff&&sk.targetMode==='all')addTimedEffect(a,{...sk.selfBuff,kind:'buff'});
   if(sk.consumeFinale){a.effects=a.effects.filter(e=>!e.finaleStack);}
   if(sk.finaleBuff)addTimedEffect(a,{kind:'buff',finaleStack:true,turns:8,modifiers:{finaleDamage:sk.finaleBuff.damage??0,finaleCrit:sk.finaleBuff.crit??0}});
   if(sk.selfBuff&&['partyBuff','stressOnly'].includes(sk.kind))addTimedEffect(a,{...sk.selfBuff,kind:'buff'});
