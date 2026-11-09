@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {directDamage,deathBlowResistance} from '../src/dd1-math.js';
+import {directDamage,deathBlowResistance,dotDuration} from '../src/dd1-math.js';
 import {makeBattle,takeTurn,beginTurn} from '../src/engine.js';
 
 test('zero-base-damage attacks calculate zero, not a fabricated one-damage floor',()=>{
@@ -52,6 +52,13 @@ test('bleed/blight ticks still use their own Death Door checks',()=>{
  hero.hp=0;hero.deathDoor=true;hero.dot=[{type:'bleed',value:1,turns:1}];
  beginTurn(b,'h1',()=>.99);
  assert.equal(hero.dead,true);
+});
+test('critical bleed/blight durations are 150 percent, rounded up',()=>{
+ assert.equal(dotDuration(2,true),3);
+ assert.equal(dotDuration(3,true),5);
+ assert.equal(dotDuration(4,true),6);
+ assert.equal(dotDuration(5,true),8);
+ assert.equal(dotDuration(4,false),4);
 });
 test('Death Blow resistance remains limited to the DD1 maximum',()=>{
  assert.equal(deathBlowResistance({deathResist:140}),87);
