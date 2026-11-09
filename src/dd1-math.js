@@ -25,6 +25,9 @@ export function directDamage({minDamage,maxDamage,skillMultiplier=1,crit=false,p
   // DD1 crit: 150% of the *maximum* attack damage, not a random roll.
   const raw=crit?1.5*maxDamage*skillMultiplier:Math.floor(rng()*(maxDamage-minDamage+1)+minDamage)*skillMultiplier;
   const reduction=ignoreProt?1:1-clamp(prot,0,80)/100;
+  // A genuinely non-damaging attack can display 0; this is distinct from a
+  // damaging attack reduced to a minimum of 1 by rounding/protection.
+  if(raw<=0||damageMultiplier<=0)return 0;
   return Math.max(1,Math.round(raw*damageMultiplier*reduction));
 }
 export function resistChance({applicationChance,resistance=0,crit=false}) {
