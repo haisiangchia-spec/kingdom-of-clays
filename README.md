@@ -1,26 +1,29 @@
-# Kingdom of Clays — Combat Lab 0.1
+# Kingdom of Clays — Combat Lab (work in progress)
 
-A static GitHub Pages-ready HTML5 **combat engine scaffold** for the Kingdom of Clays fan-game concept. It does not yet reproduce DD1 in full. No original anime assets are included.
+HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
-## Run
-Serve the folder with a static server (e.g. `python3 -m http.server 8000`) and visit `http://localhost:8000`. Import maps are not needed. GitHub Pages can host this folder as-is.
+## Run and test
 
-## Tests
-Node.js 18+; `npm test`.
+Serve the repository root with `python3 -m http.server 8000` and open `http://localhost:8000`. Use Node.js 22+ and `npm test` for the unit/regression suite. On every push/PR, GitHub Actions also runs real Chromium tests via Playwright.
 
-## Current coverage
-Seeded random, initiative SPD + 1–8, rank targeting, attacks, hit chance including +5 hidden accuracy and escalating miss bonus, crit, armour protection, healing, marks, guard redirection, basic stun, DOT, 100 stress resolve check, Death's Door and 200 stress breaking point, and battle victory/defeat. UI demonstrates six reskinned classes against Catacombs enemies.
+- **New Battle** — original four-versus-four prototype combat.
+- **Goblin Emperor Demo** — four heroes against one three-rank Goblin Emperor and a rear enemy. Boss skill values and AI are **temporary test fixtures**.
+- Repeated skill targeting of any occupied rank hits a giant **once**. Multi-rank AoE attacks likewise hit it **once**, not once per slot.
 
-## Known non-fidelity areas — DO NOT call this full DD1 fidelity
-This prototype deliberately contains simplified or incomplete values and mechanics. It does not implement all seven skills of all 15 base classes, complete enemy ability data, class-specific skill levels, affliction involuntary behaviours, status timing fidelity, riposte retaliatory attacks, movement swapping and enemy AI strategy, skill chance resist curves, quirks, trinkets, buff durations, stalling, complete target/rank overrides, stun recovery resist, deathblow modifiers, religious interactions, multi-target actions or enemy-size interactions. Some current skill values are placeholders. It is an architectural starter, not a DD1-certified combat simulation.
+## Architecture
 
-## Future milestones
-1. Authoritative data fixtures for the 15 base classes, all 105 combat skills, and enemies.
-2. Exact effect sequence and status lifecycle; mechanics parity tests.
-3. Enemy AI and bosses; battle content regression.
-4. Visual sprite integration using your separately generated assets.
-5. Dungeon exploration.
-6. Settlement sandbox and Temple Resurrection.
+- `src/engine.js` — turn order, combat resolution, sample playable skills, scenario fixtures.
+- `src/formation.js` — four-slot formations, contiguous size-one to size-four entities, push/pull, corpse footprints.
+- `src/combat-effects.js` — group targeting, cleansing, restoration.
+- `src/status.js` — guard, stun, riposte, temporary buffs and debuffs.
+- `src/dd1-math.js` — combat calculations.
+- `src/skill-catalog.js` — **105 locked display-name mappings** (15 base-game classes × 7 abilities). All catalog entries explicitly remain `mechanics: "pending"` until fully validated; the catalog **does not** claim 105 implemented skills.
+- `tests/` — deterministic Node tests and `tests/browser/` Chromium tests.
 
-## Design baseline
-Single fixed settlement, duplicates allowed, base DD1 only; Clays presentation and optional Temple Resurrection are the sole planned deviations. Proposed endgame dungeon and monster reskins are locked. Company ownership of upgrades is bookkeeping only.
+## Fidelity boundaries
+
+The engine has working examples of rank-based targeting, movement, bleed/blight, effects, guarding, marking, riposte, corpses and large enemies, but many skills and quantitative values remain provisional. In particular, DD1 class-specific skill rank scaling, enemy attacks and AI, enemy resistances, turn sequencing, stun edge cases, multi-action bosses, stalling rules, status-effect combinations, deathblow transitions and the complete bestiary **require additional implementation and verification**. A three-rank boss does not leave a corpse; an eligible two-rank enemy may leave a two-rank corpse.
+
+Visuals are still placeholders. No copyrighted anime illustrations are packaged here. The next work should resolve one class's seven skills at a time with exact target/rank rules and tests, then add monster templates and enemy skill data.
+
+Sandbox campaign and dungeon-exploration layers remain deferred until combat fidelity is sufficiently verified.
