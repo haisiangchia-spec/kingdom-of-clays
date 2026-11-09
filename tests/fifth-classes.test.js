@@ -7,14 +7,14 @@ import {SKILL_CATALOG} from '../src/skill-catalog.js';
 const battle=(actor='h1')=>{const b=makeFifthClassBattle(8);b.queue=[actor];return b;};
 const use=(actor,skill,target,r=()=>.3)=>{const b=battle(actor);takeTurn(b,actor,skill,target,r);return b;};
 
-test('fifth class skills register exactly 21 names with 98 integrated in 105-name catalog',()=>{
+test('fifth class skills register exactly 21 names with 105 integrated in 105-name catalog',()=>{
  assert.equal(Object.keys(FIFTH_CLASS_SKILLS).length,21);
  for(const [cls,keys] of Object.entries(FIFTH_CLASS_KEYS)){
   assert.equal(keys.length,7);
   for(const key of keys){assert.equal(ABILITIES[key].classId,cls);assert.ok(ABILITIES[key].source);}
  }
  assert.equal(SKILL_CATALOG.length,105);
- assert.equal(SKILL_CATALOG.filter(x=>x.mechanics==='level1-integrated').length,98);
+ assert.equal(SKILL_CATALOG.filter(x=>x.mechanics==='level1-integrated').length,105);
 });
 test('Cursed Champion Chop targets first two ranks and Hew hits both',()=>{
  const b=battle();
