@@ -1,15 +1,19 @@
 // Kingdom of Clays: deterministic, UI-independent combat prototype.
 import {clamp,hitChance,rollCrit,directDamage,resistChance,dotDuration,deathBlowResistance,initiativeScore,effectiveCombatStats} from './dd1-math.js';
-import {stunResistance,inflictStun,consumeStun,completeUnstunnedTurn,applyGuard,guardTarget,canCounter,tickTimedEffects,effectModifier} from './status.js';
+import {stunResistance,inflictStun,consumeStun,completeUnstunnedTurn,applyGuard,guardTarget,canCounter,tickTimedEffects,addTimedEffect,effectModifier} from './status.js';
+import {resolveTargets,cleanseUnit,restorationTick,addRestoration} from './combat-effects.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
 export const randInt=(r,lo,hi)=>lo+Math.floor(r()*(hi-lo+1));
-export function unit(id,name,side,stats={}){return {id,name,side,hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20},dot:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false};}
+export function unit(id,name,side,stats={}){return {id,name,side,hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false};}
 export const ABILITIES={
  heavy_slash:{name:'Heavy Slash',from:[0,1],to:[0,1],acc:85,crit:2,mod:0},
  guardian_parry:{name:"Guardian's Parry",from:[0,1,2,3],to:[0,1,2,3],kind:'guard'},
  riposte_stance:{name:'Riposte Stance',from:[0,1,2],to:[0,1,2],acc:85,mod:-.25,riposte:true},
  crushing_strike:{name:'Crushing Strike',from:[0,1],to:[0,1],acc:85,mod:0},
+ sweeping_assault:{name:'Sweeping Assault',from:[0,1],to:[0,1],targetMode:'all',acc:85,crit:0,mod:-.40},
+ purification_spell:{name:'Purification Spell',from:[2,3],to:[0,1,2,3],kind:'cleanse',cleanse:['bleed','blight'],min:1,max:1},
+ empowerment_spell:{name:'Empowerment Spell',from:[2,3],to:[0,1,2,3],kind:'buff',buff:{turns:3,modifiers:{accuracy:10}}},
  concussive_blow:{name:'Concussive Blow',from:[0,1],to:[0,1],acc:80,mod:-.5,status:{type:'stun',chance:100}},
  eagle_eye_shot:{name:'Eagle-Eye Shot',from:[1,2,3],to:[1,2,3],acc:95,crit:5,mod:0},
  hunters_mark:{name:"Hunter's Mark",from:[1,2,3],to:[0,1,2,3],kind:'mark'},
@@ -25,7 +29,7 @@ export const ABILITIES={
 };
 export function ranks(state,side){return state.units.filter(u=>u.side===side&&!u.dead);}
 export function rank(state,id){const u=state.units.find(u=>u.id===id);return u?ranks(state,u.side).findIndex(x=>x.id===id):-1;}
-export function availableTargets(state,actorId,key){const a=state.units.find(x=>x.id===actorId),sk=ABILITIES[key];if(!a||!sk||a.dead||!sk.from.includes(rank(state,a.id)))return [];const side=['heal','groupHeal','guard'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');return ranks(state,side).filter(x=>sk.to.includes(rank(state,x.id))).map(x=>x.id);}
+export function availableTargets(state,actorId,key){const a=state.units.find(x=>x.id===actorId),sk=ABILITIES[key];if(!a||!sk||a.dead||!sk.from.includes(rank(state,a.id)))return [];const side=['heal','groupHeal','guard','cleanse','buff','restore'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>sk.to.includes(rank(state,x.id))&&(!x.stealthed||sk.ignoreStealth||side===a.side));return (sk.targetMode==='all'&&sk.kind!=='groupHeal'?candidates.slice(0,1):candidates).map(x=>x.id);}
 export function startRound(state,r){state.round++;state.queue=state.units.filter(x=>!x.dead).map(x=>({id:x.id,score:initiativeScore(x,r)})).sort((a,b)=>b.score-a.score||(state.units.find(x=>x.id===a.id).side==='hero'?-1:1)||rank(state,a.id)-rank(state,b.id)).map(x=>x.id);state.units.forEach(u=>u.acted=false);state.log.push(`Round ${state.round} begins`);return state;}
 export function currentActor(s){while(s.queue.length){const u=s.units.find(x=>x.id===s.queue[0]);if(u&&!u.dead&&!u.acted)return u;s.queue.shift();}return null;}
 function stress(state,u,amount,r){amount=Math.round(amount*effectiveCombatStats(u).stressMultiplier);u.stress=clamp(u.stress+amount,0,200);if(u.stress>=100&&!u.affliction&&!u.virtue){const virtues=['Bravery','Clarity','Fighting Spirit','Unbreakable Will','Second Wind'];const afflicted=['Panic','Distrust','Self-Preservation','Recklessness','Aggression','Despair','Confusion'];if(r()<.25){u.virtue=virtues[randInt(r,0,4)];state.log.push(`${u.name} found ${u.virtue}!`);}else{u.affliction=afflicted[randInt(r,0,6)];state.log.push(`${u.name} suffers ${u.affliction}!`);}}if(u.stress===200&&u.side==='hero'){if(u.deathDoor){u.dead=true;state.log.push(`${u.name} dies at the Breaking Point!`);}else{u.hp=0;u.deathDoor=true;u.mortality='heartAttackRecovery';u.stress=170;state.log.push(`${u.name} reaches Death's Door from stress!`);}}}
@@ -41,6 +45,19 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(a.stun>0){consumeStun(a);state.log.push(`${a.name} loses a turn to stun`);}
   else if(sk.kind==='guard'){applyGuard(state,a,target.id,3);state.log.push(`${a.name} guards ${target.name}`);}
   else if(sk.kind==='mark'){target.marked=3;state.log.push(`${target.name} is marked`);}
+  else if(sk.kind==='cleanse'){
+    const cleared=cleanseUnit(target,sk.cleanse);
+    if(sk.max){const healed=randInt(r,sk.min,sk.max);target.hp=Math.min(target.maxHp,target.hp+healed);if(target.hp>0&&target.deathDoor){target.deathDoor=false;target.mortality??='deathDoorRecovery';}}
+    state.log.push(`${a.name} uses ${sk.name} on ${target.name}; removed ${cleared} conditions`);
+  }
+  else if(sk.kind==='buff'){
+    addTimedEffect(target,{...sk.buff,kind:'buff'});
+    state.log.push(`${a.name} strengthens ${target.name} with ${sk.name}`);
+  }
+  else if(sk.kind==='restore'){
+    addRestoration(target,sk.value,sk.turns??3);
+    state.log.push(`${a.name} applies restoration to ${target.name}`);
+  }
   else if(sk.kind==='groupHeal'){
     for(const u of ranks(state,a.side)){
       const crit=r()<.05;
@@ -59,9 +76,11 @@ export function takeTurn(state,actorId,key,targetId,r){
     if(target.hp>0&&target.deathDoor){target.deathDoor=false;target.mortality=target.mortality??'deathDoorRecovery';}
     state.log.push(`${a.name} heals ${target.name} for ${v}`);
   }else{
+    const affected=sk.targetMode==='all'?resolveTargets(state,a,sk,target.id):[target];
+    for(const affectedTarget of affected){
     let pendingStatus=null;
-    let actual=target;
-    if(target.side!==a.side){actual=guardTarget(state,target);if(actual!==target)state.log.push(`${actual.name} intercepts an attack aimed at ${target.name}`);}
+    let actual=affectedTarget;
+    if(sk.targetMode!=='all'&&affectedTarget.side!==a.side){actual=guardTarget(state,affectedTarget);if(actual!==target)state.log.push(`${actual.name} intercepts an attack aimed at ${affectedTarget.name}`);}
     const chance=hitChance({accuracy:sk.acc??85,accModifier:effectiveCombatStats(a).accuracy+effectModifier(a,'accuracy'),dodge:actual.dodge+effectModifier(actual,'dodge'),missStreak:a.misses});
     if(r()*100<chance){
       a.misses=0;
@@ -96,6 +115,7 @@ export function takeTurn(state,actorId,key,targetId,r){
         state.log.push(`${actual.name} gains ${st.type}`);
       }
     }
+    }
   }
   if(sk.advance){
     const side=ranks(state,a.side),idx=side.findIndex(x=>x.id===a.id),next=Math.max(0,idx-sk.advance);
@@ -115,6 +135,16 @@ function executeRiposte(state,defender,attacker,r){
   hurt(state,attacker,damage,r);
   state.log.push(`${defender.name} ripostes ${attacker.name}: ${damage}${crit?' CRIT':''}`);
 }
-export function beginTurn(state,id,r){const u=state.units.find(x=>x.id===id);if(!u||u.dead)return;for(const dot of u.dot){hurt(state,u,dot.value,r);state.log.push(`${u.name} takes ${dot.value} ${dot.type}`);dot.turns--;}u.dot=u.dot.filter(x=>x.turns>0);tickTimedEffects(u);}
+export function beginTurn(state,id,r){
+ const u=state.units.find(x=>x.id===id);if(!u||u.dead)return;
+ const healed=restorationTick(u);
+ if(healed)state.log.push(`${u.name} restores ${healed} HP`);
+ for(const dot of u.dot){
+  if(u.dead)break;
+  hurt(state,u,dot.value,r);state.log.push(`${u.name} takes ${dot.value} ${dot.type}`);dot.turns--;
+ }
+ u.dot=u.dot.filter(x=>x.turns>0);
+ tickTimedEffects(u);
+}
 export function status(s){const h=ranks(s,'hero').length,e=ranks(s,'enemy').length;return h===0?'defeat':e===0?'victory':'ongoing';}
 export function makeBattle(seed=1){const units=[unit('h1','Swordsman','hero',{hp:33,spd:3,prot:10}),unit('h2','Warrior','hero',{hp:33,spd:1}),unit('h3','Hunter','hero',{hp:25,spd:3}),unit('h4','Priest','hero',{hp:24,spd:4}),unit('e1','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5}),unit('e2','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5}),unit('e3','Skeleton Archer','enemy',{hp:14,spd:4,dodge:8}),unit('e4','Skeleton Court Mage','enemy',{hp:13,spd:5,dodge:9})];return {seed,round:0,units,queue:[],log:['Combat begins!']};}
