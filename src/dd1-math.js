@@ -35,7 +35,8 @@ export function resistChance({applicationChance,resistance=0,crit=false}) {
   return clamp(applicationChance+(crit?20:0)-resistance,0,100);
 }
 export function dotDuration(base=3,crit=false){
-  return crit&&base===3?5:base;
+  // DD1 critical bleed/blight lasts 50% longer, rounded up for any base duration.
+  return crit?Math.ceil(base*1.5):base;
 }
 export function deathBlowResistance(u){
   return clamp(u.deathResist??67,0,87);
