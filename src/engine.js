@@ -1,5 +1,5 @@
 // Kingdom of Clays: deterministic, UI-independent combat prototype.
-import {clamp,hitChance,rollCrit,directDamage,resistChance,dotDuration,deathBlowResistance,initiativeScore,effectiveCombatStats} from './dd1-math.js';
+import {clamp,hitChance,rollCrit,directDamage,resistChance,dotDuration,deathBlowResistance,initiativeScore,effectiveCombatStats,combinedAttackMultiplier} from './dd1-math.js';
 import {stunResistance,inflictStun,consumeStun,completeUnstunnedTurn,applyGuard,guardTarget,canCounter,tickTimedEffects,addTimedEffect,effectModifier} from './status.js';
 import {resolveTargets,cleanseUnit,restorationTick,addRestoration} from './combat-effects.js';
 import {isSelectable,moveWithinFormation,attemptDisplacement,corpseFromEnemy,clearExpiredCorpses,hasLiveOpponents,rankOf,occupiedRanks,formationSlots,widthOf} from './formation.js';
@@ -259,12 +259,20 @@ export function takeTurn(state,actorId,key,targetId,r){
         state.log.push(`${a.name} stresses ${actual.name} (+${sk.amount})`);
       }else{
         const crit=!sk.neverCrit&&rollCrit({baseCrit:a.crit+effectModifier(a,'crit')+(actual.marked?effectModifier(actual,'critReceivedWhileMarked')+(sk.critVsMarked??0):0)+(sk.consumeFinale?effectModifier(a,'finaleCrit'):0)+effectModifier(actual,'critReceived'),skillCrit:sk.crit??0},r);
-        const typeMultiplier=Object.entries(sk.vsTypes??{}).reduce((mult,[tag,bonus])=>mult*(actual.types?.includes(tag)?1+bonus:1),1);
+        const typeBonuses=Object.entries(sk.vsTypes??{}).reduce((sum,[tag,bonus])=>sum+(actual.types?.includes(tag)?bonus*100:0),0);
         const guardedBonus=a.guard?effectModifier(a,'damageWhileGuarded'):0;
-        const blightBonus=(actual.dot??[]).some(d=>d.type==='blight')?(sk.vsBlighted??0):0;
-        const stunBonus=actual.stun>0?(sk.vsStunned??0):0;
+        const blightBonus=(actual.dot??[]).some(d=>d.type==='blight')?(sk.vsBlighted??0)*100:0;
+        const stunBonus=actual.stun>0?(sk.vsStunned??0)*100:0;
         const targetDamageTaken=effectModifier(actual,'damageTaken');
-        const dmg=(sk.mod??0)<=-1?0:directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1)*(1+blightBonus)*(1+stunBonus)*(1+(sk.rakeBonus?effectModifier(a,'rakeDamage'):0)/100)*typeMultiplier*(1+(effectModifier(a,'damage')+guardedBonus+(sk.consumeFinale?effectModifier(a,'finaleDamage'):0))/100)*(1+targetDamageTaken/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
+        const bonusPoints=[
+          actual.marked>0?(sk.vsMarked??0)*100:0,
+          blightBonus,stunBonus,typeBonuses,
+          sk.rakeBonus?effectModifier(a,'rakeDamage'):0,
+          effectModifier(a,'damage'),guardedBonus,
+          sk.consumeFinale?effectModifier(a,'finaleDamage'):0
+        ];
+        const attackMultiplier=combinedAttackMultiplier(sk.mod??0,bonusPoints);
+        const dmg=attackMultiplier===0?0:directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:attackMultiplier*(1+targetDamageTaken/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
         hurt(state,actual,dmg,r,crit,(sk.mod??0)>-1||sk.physicalHit===true);
         if(sk.selfHealOnHit&&dmg>0){a.hp=Math.min(a.maxHp,a.hp+sk.selfHealOnHit);if(a.hp>0&&a.deathDoor){a.deathDoor=false;a.mortality??='deathDoorRecovery';}}
         if(sk.markOnHit&&!actual.dead&&!actual.corpse)actual.marked=sk.markOnHit;
