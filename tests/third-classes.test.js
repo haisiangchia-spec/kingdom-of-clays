@@ -59,7 +59,7 @@ test('Slayer Hunter Execution has marked and human damage bonuses',()=>{
   takeTurn(b,'h3','hunters_execution','e2',()=>.3);
   return 16-foe.hp;
  };
- assert.equal(dmg(false),6);assert.equal(dmg(true),11);
+ assert.equal(dmg(false),6);assert.equal(dmg(true),10); // +90% marked and +15% human are additive
 });
 test('Slayer Identify Weakness applies mark, PROT debuff and self speed buff',()=>{
  const b=act('h3','identify_weakness','e1'),h=b.units.find(x=>x.id==='h3'),e=b.units.find(x=>x.id==='e1');
