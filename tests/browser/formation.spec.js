@@ -25,7 +25,7 @@ test('marked attack, stealth targeting and displacement work inside Chromium',as
   e2.stealthed=2;const forbidden=!availableTargets(b,'h3','eagle_eye_shot').includes(e2.id);
   e2.stealthed=0;e2.marked=3;hunter.dmgMin=hunter.dmgMax=10;
   b.queue=['h3'];const hp=e2.hp;
-  takeTurn(b,'h3','eagle_eye_shot',e2.id,()=>0);
+  takeTurn(b,'h3','eagle_eye_shot',e2.id,()=>.1);
   return {before,after,forbidden,damage:hp-e2.hp};
  });
  expect(got).toEqual({before:2,after:0,forbidden:true,damage:15});
