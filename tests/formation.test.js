@@ -38,7 +38,7 @@ test('marked target takes bonus damage only from marked-synergy skill',()=>{
  const attack=(mark)=>{
    const b=makeBattle(),hero=b.units.find(u=>u.id==='h3'),target=b.units.find(u=>u.id==='e2');
    hero.dmgMin=hero.dmgMax=10;hero.crit=0;target.marked=mark?3:0;
-   b.queue=['h3'];takeTurn(b,'h3','eagle_eye_shot','e2',()=>0);
+   b.queue=['h3'];takeTurn(b,'h3','eagle_eye_shot','e2',()=>.1);
    return 16-target.hp;
  };
  assert.equal(attack(false),10);assert.equal(attack(true),15);
