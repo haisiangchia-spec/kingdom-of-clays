@@ -39,6 +39,7 @@ test('Priest Greater Heal and Group Healing have proper starting ranges',()=>{
 test('Priest Revealing Light targets stealthed enemy and cannot crit',()=>{
  const b=build(),foe=b.units.find(x=>x.id==='e2'),p=b.units.find(x=>x.id==='h4');
  foe.stealthed=2;p.crit=100;p.dmgMin=p.dmgMax=10;
+ b.units=[b.units[0],b.units[1],p,b.units[2],...b.units.filter(u=>u.side==='enemy')];
  assert.ok(availableTargets(b,'h4','revealing_light').includes('e2'));
  takeTurn(b,'h4','revealing_light','e2',()=>.3);
  assert.equal(foe.stealthed,0);assert.equal(effectModifier(foe,'dodge'),-20);assert.equal(b.torch,80);
@@ -69,7 +70,9 @@ test('Slayer Grappling Hook marks and pulls rear enemy',()=>{
  assert.equal(e.marked,2);assert.equal(rank(b,e.id),1);
 });
 test('Slayer Brutal Uppercut pushes and stuns',()=>{
- const b=act('h3','brutal_uppercut','e1'),e=b.units.find(x=>x.id==='e1');
+ const b=build('h3'),e=b.units.find(x=>x.id==='e1');
+ b.units=[b.units[0],b.units[2],b.units[1],b.units[3],...b.units.filter(x=>x.side==='enemy')];
+ takeTurn(b,'h3','brutal_uppercut','e1',()=>.3);
  assert.equal(e.stun,1);assert.equal(rank(b,e.id),2);
 });
 test('Slayer Flash Bomb shuffles and stuns without direct damage',()=>{
