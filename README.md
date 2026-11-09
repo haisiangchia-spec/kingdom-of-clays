@@ -8,6 +8,7 @@ Serve the repository root with `python3 -m http.server 8000` and open `http://lo
 
 - **New Battle** — original four-versus-four prototype combat.
 - **Goblin Emperor Demo** — four heroes against one three-rank Goblin Emperor and a rear enemy. Boss skill values and AI are **temporary test fixtures**.
+- **Hunter / Thief / Mage** — testing lineup with Warrior front, Thief second, Mage third, Hunter fourth, allowing interaction with the newest ability handlers. Some rear-only abilities require repositioning.
 - Repeated skill targeting of any occupied rank hits a giant **once**. Multi-rank AoE attacks likewise hit it **once**, not once per slot.
 
 ## Architecture
@@ -17,14 +18,15 @@ Serve the repository root with `python3 -m http.server 8000` and open `http://lo
 - `src/combat-effects.js` — group targeting, cleansing, restoration.
 - `src/status.js` — guard, stun, riposte, temporary buffs and debuffs.
 - `src/dd1-math.js` — combat calculations.
-- `src/skill-catalog.js` — **105 locked display-name mappings** (15 base-game classes × 7 abilities). Exactly 14 now carry `level1-integrated` coverage; all remaining entries are pending. Levels 2–5 and full DD1 parity remain incomplete.
-- `src/class-skills.js` — 14 source-checked level-one Swordsman (Man-at-Arms) and Warrior (Crusader) specifications, with rank, effect and combat parameters based on the official DD1 wiki. These are still subject to end-to-end fidelity audit.
+- `src/skill-catalog.js` — **105 locked display-name mappings** (15 base-game classes × 7 abilities). Exactly 35 now carry `level1-integrated` coverage across Swordsman, Warrior, Hunter, Thief and Mage; all remaining entries are pending. Levels 2–5 and full DD1 parity remain incomplete.
+- `src/class-skills.js` — 14 level-one Swordsman (Man-at-Arms) and Warrior (Crusader) specifications.
+- `src/class-skills-batch2.js` — 21 level-one Hunter (Arbalest), Thief (Grave Robber), and Mage (Plague Doctor) specifications. Ability data is grounded in original DD1 skill tables; fidelity audit, skill upgrades, edge cases and hero stats remain outstanding.
 - `tests/` — deterministic Node tests and `tests/browser/` Chromium tests.
 
 ## Fidelity boundaries
 
 The engine has working examples of rank-based targeting, movement, bleed/blight, effects, guarding, marking, riposte, corpses and large enemies, but many skills and quantitative values remain provisional. In particular, DD1 class-specific skill rank scaling, enemy attacks and AI, enemy resistances, turn sequencing, stun edge cases, multi-action bosses, stalling rules, status-effect combinations, deathblow transitions and the complete bestiary **require additional implementation and verification**. A three-rank boss does not leave a corpse; an eligible two-rank enemy may leave a two-rank corpse.
 
-Visuals are still placeholders. No copyrighted anime illustrations are packaged here. The first two classes now have seven level-one skills each. The next work should implement the remaining classes, add skill upgrades/level scaling, and audit exact effect ordering, then enemy templates and boss abilities.
+Visuals are still placeholders. No copyrighted anime illustrations are packaged here. Five classes now have seven level-one skills each. The next work should implement the remaining classes, add skill upgrades/level scaling, and audit exact effect ordering, then enemy templates and boss abilities.
 
 Sandbox campaign and dungeon-exploration layers remain deferred until combat fidelity is sufficiently verified.
