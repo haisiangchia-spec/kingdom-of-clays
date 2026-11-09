@@ -48,7 +48,7 @@ const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','s
 export function startRound(state,r){state.round++;clearExpiredCorpses(state);state.queue=state.units.filter(x=>!x.dead&&!x.corpse).map(x=>({id:x.id,score:initiativeScore({...x,spd:x.spd+effectModifier(x,'speed')},r)})).sort((a,b)=>b.score-a.score||(state.units.find(x=>x.id===a.id).side==='hero'?-1:1)||rank(state,a.id)-rank(state,b.id)).map(x=>x.id);state.units.forEach(u=>u.acted=false);state.log.push(`Round ${state.round} begins`);return state;}
 export function currentActor(s){while(s.queue.length){const u=s.units.find(x=>x.id===s.queue[0]);if(u&&!u.dead&&!u.acted)return u;s.queue.shift();}return null;}
 function stress(state,u,amount,r){amount=Math.round(amount*effectiveCombatStats(u).stressMultiplier*(1-clamp(effectModifier(u,'stressResist'),0,90)/100));u.stress=clamp(u.stress+amount,0,200);if(u.stress>=100&&!u.affliction&&!u.virtue){const virtues=['Bravery','Clarity','Fighting Spirit','Unbreakable Will','Second Wind'];const afflicted=['Panic','Distrust','Self-Preservation','Recklessness','Aggression','Despair','Confusion'];if(r()<.25){u.virtue=virtues[randInt(r,0,4)];state.log.push(`${u.name} found ${u.virtue}!`);}else{u.affliction=afflicted[randInt(r,0,6)];state.log.push(`${u.name} suffers ${u.affliction}!`);if(u.form==='beast')revertSpiritbound(state,u,'affliction');}}if(u.stress===200&&u.side==='hero'){if(u.deathDoor){u.dead=true;state.log.push(`${u.name} dies at the Breaking Point!`);}else{u.hp=0;u.deathDoor=true;u.mortality='heartAttackRecovery';u.stress=170;state.log.push(`${u.name} reaches Death's Door from stress!`);}}}
-function hurt(s,u,n,r,suppressCorpse=false){if(u.dead)return;if(u.side==='hero'&&u.deathDoor&&n>0){if(r()>=deathBlowResistance(u)/100){u.dead=true;s.log.push(`${u.name} suffers a Deathblow!`);}else{s.log.push(`${u.name} resists a Deathblow!`);}return;}u.hp=Math.max(0,u.hp-n);if(u.hp===0){if(u.side==='hero'){u.deathDoor=true;s.log.push(`${u.name} is at Death's Door!`);}else{u.dead=true;s.log.push(`${u.name} falls!`);if(!suppressCorpse&&corpseFromEnemy(u,s.round))s.log.push(`${u.name} remains in formation`);}}}
+function hurt(s,u,n,r,suppressCorpse=false,physicalHit=false){if(u.dead)return;if(u.side==='hero'&&u.deathDoor&&(n>0||physicalHit)){if(r()>=deathBlowResistance(u)/100){u.dead=true;s.log.push(`${u.name} suffers a Deathblow!`);}else{s.log.push(`${u.name} resists a Deathblow!`);}return;}u.hp=Math.max(0,u.hp-n);if(u.hp===0){if(u.side==='hero'){u.deathDoor=true;s.log.push(`${u.name} is at Death's Door!`);}else{u.dead=true;s.log.push(`${u.name} falls!`);if(!suppressCorpse&&corpseFromEnemy(u,s.round))s.log.push(`${u.name} remains in formation`);}}}
 export function takeTurn(state,actorId,key,targetId,r){
   const a=currentActor(state);
   if(!a||a.id!==actorId)throw Error('Not this actor’s turn');
@@ -231,7 +231,7 @@ export function takeTurn(state,actorId,key,targetId,r){
         const stunBonus=actual.stun>0?(sk.vsStunned??0):0;
         const targetDamageTaken=effectModifier(actual,'damageTaken');
         const dmg=(sk.mod??0)<=-1?0:directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1)*(1+blightBonus)*(1+stunBonus)*(1+(sk.rakeBonus?effectModifier(a,'rakeDamage'):0)/100)*typeMultiplier*(1+(effectModifier(a,'damage')+guardedBonus+(sk.consumeFinale?effectModifier(a,'finaleDamage'):0))/100)*(1+targetDamageTaken/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
-        hurt(state,actual,dmg,r,crit);
+        hurt(state,actual,dmg,r,crit,(sk.mod??0)>-1||sk.physicalHit===true);
         if(sk.selfHealOnHit&&dmg>0){a.hp=Math.min(a.maxHp,a.hp+sk.selfHealOnHit);if(a.hp>0&&a.deathDoor){a.deathDoor=false;a.mortality??='deathDoorRecovery';}}
         if(sk.markOnHit&&!actual.dead&&!actual.corpse)actual.marked=sk.markOnHit;
         if(sk.removeStealth&&actual.stealthed)actual.stealthed=0;
@@ -288,7 +288,7 @@ function executeRiposte(state,defender,attacker,r){
   if(r()*100>=chance){state.log.push(`${defender.name} counters ${attacker.name} but misses`);return;}
   const crit=rollCrit({baseCrit:defender.crit},r);
   const damage=directDamage({minDamage:defender.dmgMin,maxDamage:defender.dmgMax,skillMultiplier:1+(defender.riposteMod??-.4),crit,prot:attacker.prot+effectModifier(attacker,'prot'),damageMultiplier:effectiveCombatStats(defender).damageMultiplier},r);
-  hurt(state,attacker,damage,r,crit);
+  hurt(state,attacker,damage,r,crit,true);
   state.log.push(`${defender.name} ripostes ${attacker.name}: ${damage}${crit?' CRIT':''}`);
 }
 // One shared start-of-turn path for player-controlled and AI-controlled units.
