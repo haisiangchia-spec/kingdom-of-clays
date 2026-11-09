@@ -1,8 +1,9 @@
+import {occupiedRanks} from './formation.js';
 // Targeting and status utilities shared by the browser and the DD1 combat engine.
 // The ability data decides which targets/conditions apply; these helpers only resolve them.
 export function eligibleRanks(state,side,allowedRanks){
   return state.units.filter(u=>u.side===side&&!u.dead)
-    .filter((u,rank)=>allowedRanks.includes(rank));
+    .filter(u=>occupiedRanks(state,u.id).some(rank=>allowedRanks.includes(rank)));
 }
 export function resolveTargets(state,actor,skill,selectedId){
   const side=['heal','groupHeal','guard','cleanse','buff','restore'].includes(skill.kind)
