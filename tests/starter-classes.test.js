@@ -84,7 +84,7 @@ test('Warrior Bulwark of Faith is self-only, once-per-battle, and adds torch',()
 });
 test('Warrior Battle Heal gives base 2 to 3 HP and respects caps',()=>{
  const b=fresh('h2'),target=b.units.find(x=>x.id==='h1');target.hp=10;
- takeTurn(b,'h2','warrior_recovery','h1',()=>.1);
+ takeTurn(b,'h2','warrior_recovery','h1',()=>.2);
  assert.equal(target.hp,12);
 });
 test('Warrior Holy Lance is from rear ranks, targets enemy back ranks and advances',()=>{
