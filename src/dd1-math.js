@@ -12,13 +12,14 @@ export function criticalChance({baseCrit=0,skillCrit=0,bonusCrit=0}) {
 export function rollCrit(args,rng){return rng()*100<criticalChance(args);}
 export function effectiveCombatStats(u){
   const d=u.deathDoor;
-  const recovery=!d&&u.mortality==='deathDoorRecovery';
-  const heart=!d&&u.mortality==='heartAttackRecovery';
+  const recovery=!d&&(u.mortality==='deathDoorRecovery'||u.deathDoorRecovery===true);
+  const heart=!d&&(u.mortality==='heartAttackRecovery'||u.heartAttackRecovery===true);
+  // Both mortality penalties apply after recovery from a heart attack.
   return {
-    accuracy:(u.accMod??0)+(d?-10:recovery?-2:heart?-3:0),
-    damageMultiplier:d?.75:recovery?.95:heart?.90:1,
-    speed:(u.spd??0)+(d?-5:recovery?-1:heart?-2:0),
-    stressMultiplier:d?1.33:recovery?1.10:heart?1.15:1
+    accuracy:(u.accMod??0)+(d?-10:-(recovery?2:0)-(heart?3:0)),
+    damageMultiplier:d?.75:1-(recovery?.05:0)-(heart?.10:0),
+    speed:(u.spd??0)+(d?-5:-(recovery?1:0)-(heart?2:0)),
+    stressMultiplier:d?1.33:1+(recovery?.10:0)+(heart?.15:0)
   };
 }
 export function directDamage({minDamage,maxDamage,skillMultiplier=1,crit=false,prot=0,ignoreProt=false,damageMultiplier=1},rng){
