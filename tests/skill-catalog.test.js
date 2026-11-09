@@ -28,6 +28,6 @@ test('prototype skill names are represented by catalog while enemy names are exc
  const represented=implementedSkillNames(ABILITIES);
  assert.ok(represented.some(s=>s.name==='Guardian\'s Parry'));
  assert.ok(represented.some(s=>s.name==='Grappling Hook'));
- assert.ok(represented.length<105,'prototype must not claim complete mechanics');
+ assert.equal(represented.length,105,'all level-one skill names are registered; full DD1 fidelity remains pending');
  assert.ok(represented.every(s=>SKILL_CATALOG.includes(SKILL_CATALOG.find(x=>x.classId===s.classId&&x.id===s.id))));
 });
