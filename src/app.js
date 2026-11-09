@@ -1,5 +1,4 @@
-import {consumeStun} from './status.js';
-import {makeBattle,makeLargeMonsterBattle,makeSecondClassBattle,makeThirdClassBattle,makeFourthClassBattle,makeFifthClassBattle,makeSpiritboundBattle,rng,startRound,currentActor,rank,ranks,availableTargets,takeTurn,beginTurn,status,ABILITIES} from './engine.js';
+import {makeBattle,makeLargeMonsterBattle,makeSecondClassBattle,makeThirdClassBattle,makeFourthClassBattle,makeFifthClassBattle,makeSpiritboundBattle,rng,startRound,currentActor,rank,ranks,availableTargets,takeTurn,prepareActorTurn,status,ABILITIES} from './engine.js';
 let seed=(Date.now()>>>0)||1,random=rng(seed),battle=makeBattle(seed),selected=null,preparedActorId=null,mode='normal';
 const skills={h1:['heavy_slash','countering_advance','battle_shout','guardian_parry','riposte_stance','swordmasters_orders','steadfast_resolve'],h2:['crushing_strike','sweeping_assault','concussive_blow','iron_fortress','warrior_recovery','charging_blade','rallying_roar'],h3:['eagle_eye_shot','hunters_mark'],h4:['greater_heal','group_healing','sacred_strike'],e1:['enemy_strike'],e2:['enemy_strike'],e3:['enemy_strike'],e4:['enemy_stress','enemy_strike'],boss:['enemy_strike']};
 const classLabSkills={h1:['crushing_strike','sweeping_assault','concussive_blow','iron_fortress','warrior_recovery','charging_blade','rallying_roar'],h2:['armour_piercing_stab','shadow_lunge','twin_dagger_flurry','vanishing_step','precision_throw','venom_needle','antidote_preparation'],h3:['corrosive_bolt','toxic_explosion','blinding_mist','arcane_blade','purification_spell','empowerment_spell','displacement_spell'],h4:['eagle_eye_shot','arrow_barrage','hunters_mark','entangling_shot','instinctive_shot','field_dressing','signal_arrow']};
@@ -10,7 +9,7 @@ const spiritLabSkills={h1:['crushing_strike','sweeping_assault','concussive_blow
 const skillsFor=id=>mode==='spiritLab'&&spiritLabSkills[id]?spiritLabSkills[id]:mode==='fifthLab'&&fifthLabSkills[id]?fifthLabSkills[id]:mode==='fourthLab'&&fourthLabSkills[id]?fourthLabSkills[id]:mode==='thirdLab'&&thirdLabSkills[id]?thirdLabSkills[id]:mode==='classLab'&&classLabSkills[id]?classLabSkills[id]:skills[id]??[];
 const $=id=>document.getElementById(id);
 const label=u=>`${u.name}${u.form?' · '+u.form.toUpperCase()+' FORM':''} · ${u.hp}/${u.maxHp} HP${u.deathDoor?' · DEATH’S DOOR':''}${u.stun?' · STUN':''}${u.marked?' · MARKED':''}`;
-function ai(){let guard=0;while(status(battle)==='ongoing'&&currentActor(battle)?.side==='enemy'&&guard++<20){const a=currentActor(battle);beginTurn(battle,a.id,random);if(a.dead){battle.queue.shift();continue;}let opts=skillsFor(a.id).flatMap(k=>availableTargets(battle,a.id,k).map(t=>({k,t})));if(!opts.length){a.acted=true;battle.queue.shift();battle.log.push(`${a.name} passes`);continue;}let v=opts[Math.floor(random()*opts.length)];takeTurn(battle,a.id,v.k,v.t,random);}}
+function ai(){let guard=0;while(status(battle)==='ongoing'&&currentActor(battle)?.side==='enemy'&&guard++<20){const a=currentActor(battle);if(prepareActorTurn(battle,a.id,random)!=='ready')continue;let opts=skillsFor(a.id).flatMap(k=>availableTargets(battle,a.id,k).map(t=>({k,t})));if(!opts.length){a.acted=true;battle.queue.shift();battle.log.push(`${a.name} passes`);continue;}let v=opts[Math.floor(random()*opts.length)];takeTurn(battle,a.id,v.k,v.t,random);}}
 function ensure(){
  let iterations=0;
  while(status(battle)==='ongoing'&&iterations++<50){
@@ -20,14 +19,9 @@ function ensure(){
    if(!actor)continue;
    if(actor.side!=='hero')continue;
    if(preparedActorId!==actor.id){
-     beginTurn(battle,actor.id,random);
+     const result=prepareActorTurn(battle,actor.id,random);
+     if(result!=='ready'){preparedActorId=null;continue;}
      preparedActorId=actor.id;
-   }
-   if(actor.dead){battle.queue.shift();preparedActorId=null;continue;}
-   if(actor.stun>0){
-     consumeStun(actor);actor.acted=true;battle.queue.shift();
-     battle.log.push(`${actor.name} loses a turn to stun`);
-     preparedActorId=null;continue;
    }
    return;
  }
