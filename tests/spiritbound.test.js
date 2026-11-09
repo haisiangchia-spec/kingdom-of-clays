@@ -101,6 +101,7 @@ test('Rake increases future Rake damage but does not amplify Rage',()=>{
  assert.equal(effectModifier(h,'damage'),10);
  b.queue=['h2'];h.acted=false;beginTurn(b,'h2',()=>.3);
  const e=b.units.find(x=>x.id==='e2'),before=e.hp;
+ assert.ok(availableTargets(b,'h2','spirit_claw').includes('e2'),JSON.stringify({form:h.form,actorRank:b.units.filter(x=>x.side==='hero').indexOf(h),targets:availableTargets(b,'h2','spirit_claw'),enemyHP:e.hp}));
  takeTurn(b,'h2','spirit_claw','e2',()=>.3);
  assert.ok(before-e.hp>=6);
  assert.equal(effectModifier(h,'rakeDamage'),30);
