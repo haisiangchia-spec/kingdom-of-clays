@@ -69,6 +69,7 @@ test('Beastmaster Hunt Command marks and reduces protection',()=>{
 test('Beastmaster Comforting Howl probabilistically heals party stress',()=>{
  const s=b('h2');
  for(const u of s.units.filter(x=>x.side==='hero'))u.stress=10;
+ s.units=[s.units[0],s.units[2],s.units[1],s.units[3],...s.units.filter(x=>x.side==='enemy')];
  takeTurn(s,'h2','comforting_howl','h1',()=>.3);
  for(const u of s.units.filter(x=>x.side==='hero'))assert.equal(u.stress,8);
 });
