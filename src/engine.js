@@ -237,6 +237,18 @@ export function beginTurn(state,id,r){
  if(u.stealthed>0)u.stealthed--;
 }
 export function status(s){return !hasLiveOpponents(s,'hero')?'defeat':!hasLiveOpponents(s,'enemy')?'victory':'ongoing';}
+export function makeThirdClassBattle(seed=1){
+ const b=makeBattle(seed);
+ b.units=[
+  unit('h1','Berserker','hero',{hp:26,spd:4,dodge:10,crit:5,dmgMin:6,dmgMax:12,bleedResist:40}),
+  unit('h2','Warrior','hero',{hp:33,spd:1}),
+  unit('h3','Monster Slayer','hero',{hp:25,spd:5,dmgMin:5,dmgMax:10}),
+  unit('h4','Priest','hero',{hp:24,spd:4,dmgMin:4,dmgMax:8}),
+  ...b.units.filter(x=>x.side==='enemy')
+ ];
+ b.log.unshift('Priest, Monster Slayer and Berserker ability laboratory');
+ return b;
+}
 export function makeSecondClassBattle(seed=1){
  const state=makeBattle(seed);
  const replacements=[
