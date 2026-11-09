@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {rng,unit,makeBattle,rank,availableTargets,startRound,currentActor,takeTurn,status,beginTurn} from '../src/engine.js';
+test('seeded random generator reproduces sequence',()=>assert.deepEqual([rng(2)(),rng(2)()],[rng(2)(),rng(2)()]));
+test('four heroes and four enemies in initial ranks',()=>{const b=makeBattle();assert.equal(b.units.length,8);assert.equal(rank(b,'h1'),0);assert.equal(rank(b,'h4'),3)});
+test('rank restrictions reject frontline archer',()=>{const b=makeBattle();assert.deepEqual(availableTargets(b,'h3','eagle_eye_shot'),['e2','e3','e4']);assert.deepEqual(availableTargets(b,'h1','eagle_eye_shot'),[])});
+test('healing cannot exceed max HP',()=>{const b=makeBattle();b.units.find(x=>x.id==='h1').hp=32;b.queue=['h4'];takeTurn(b,'h4','greater_heal','h1',()=>.1);assert.equal(b.units.find(x=>x.id==='h1').hp,33)});
+test('invalid skill target rejects without spending turn',()=>{const b=makeBattle();b.queue=['h1'];assert.throws(()=>takeTurn(b,'h1','heavy_slash','e4',()=>.1));assert.equal(currentActor(b).id,'h1')});
+test('enemy death removes target from rank and victory can occur',()=>{const b=makeBattle();b.units.filter(x=>x.side==='enemy').forEach(x=>x.dead=true);assert.equal(status(b),'victory')});
+test('speed initiative creates valid queue',()=>{const b=makeBattle();startRound(b,rng(101));assert.equal(b.queue.length,8);assert.equal(new Set(b.queue).size,8)});
+test('DOT causes damage at turn start',()=>{const b=makeBattle();const u=b.units[0];u.dot.push({type:'blight',value:2,turns:2});beginTurn(b,u.id,()=>.1);assert.equal(u.hp,31);assert.equal(u.dot[0].turns,1)});
+test('guard selects allied target only',()=>{const b=makeBattle();assert.equal(availableTargets(b,'h1','guardian_parry').includes('h4'),true);assert.equal(availableTargets(b,'h1','guardian_parry').includes('e1'),false)});
