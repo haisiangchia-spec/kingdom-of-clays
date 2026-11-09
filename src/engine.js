@@ -276,7 +276,7 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(sk.advance)moveWithinFormation(state,a.id,-sk.advance);
   if(sk.selfBack)moveWithinFormation(state,a.id,sk.selfBack);
   if(sk.riposte){a.riposte=sk.riposteDuration??3;a.riposteAcc=sk.riposteAcc??90;a.riposteMod=sk.riposteMod??-.4;}
-  if(!wasStunned)completeUnstunnedTurn(a);
+  if(!wasStunned&&!sk.freeAction)completeUnstunnedTurn(a);
   if(a.stealthed&&sk.kind!=='stealth')a.stealthed=0;
   if(!sk.freeAction){a.acted=true;state.queue.shift();}
   return state;
@@ -289,6 +289,27 @@ function executeRiposte(state,defender,attacker,r){
   const damage=directDamage({minDamage:defender.dmgMin,maxDamage:defender.dmgMax,skillMultiplier:1+(defender.riposteMod??-.4),crit,prot:attacker.prot+effectModifier(attacker,'prot'),damageMultiplier:effectiveCombatStats(defender).damageMultiplier},r);
   hurt(state,attacker,damage,r,crit);
   state.log.push(`${defender.name} ripostes ${attacker.name}: ${damage}${crit?' CRIT':''}`);
+}
+// One shared start-of-turn path for player-controlled and AI-controlled units.
+// It resolves restoration, DOT and status duration exactly once per scheduled turn.
+// Stun consumes the turn BEFORE the controller may choose any skill.
+export function prepareActorTurn(state,id,r){
+ const actor=currentActor(state);
+ if(!actor||actor.id!==id)throw Error('Not this actor’s turn');
+ beginTurn(state,id,r);
+ if(actor.dead||actor.corpse){
+   actor.acted=true;
+   state.queue.shift();
+   return 'dead';
+ }
+ if(actor.stun>0){
+   consumeStun(actor);
+   actor.acted=true;
+   state.queue.shift();
+   state.log.push(`${actor.name} loses a turn to stun`);
+   return 'stunned';
+ }
+ return 'ready';
 }
 export function beginTurn(state,id,r){
  const u=state.units.find(x=>x.id===id);if(!u||u.dead)return;
