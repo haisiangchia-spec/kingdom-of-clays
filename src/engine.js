@@ -4,6 +4,7 @@ import {stunResistance,inflictStun,consumeStun,completeUnstunnedTurn,applyGuard,
 import {resolveTargets,cleanseUnit,restorationTick,addRestoration} from './combat-effects.js';
 import {isSelectable,moveWithinFormation,attemptDisplacement,corpseFromEnemy,clearExpiredCorpses,hasLiveOpponents,rankOf,occupiedRanks,formationSlots,widthOf} from './formation.js';
 import {STARTER_CLASS_SKILLS} from './class-skills.js';
+import {SECOND_CLASS_SKILLS} from './class-skills-batch2.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
 export const randInt=(r,lo,hi)=>lo+Math.floor(r()*(hi-lo+1));
@@ -31,12 +32,12 @@ export const ABILITIES={
  enemy_strike:{name:'Strike',from:[0,1,2,3],to:[0,1,2,3],acc:85},
  enemy_stress:{name:'Dark Whisper',from:[0,1,2,3],to:[0,1,2,3],kind:'stress',amount:15,acc:95}
 };
-Object.assign(ABILITIES,STARTER_CLASS_SKILLS);
+Object.assign(ABILITIES,STARTER_CLASS_SKILLS,SECOND_CLASS_SKILLS);
 export function ranks(state,side){return state.units.filter(u=>u.side===side&&!u.dead);}
 export function rank(state,id){return rankOf(state,id);}
 export {occupiedRanks,formationSlots};
 export function availableTargets(state,actorId,key){const a=state.units.find(x=>x.id===actorId),sk=ABILITIES[key];if(!a||!sk||a.dead||a.corpse||!occupiedRanks(state,a.id).some(i=>sk.from.includes(i)))return [];if(sk.maxUses&&(a.usedSkills?.[key]??0)>=sk.maxUses)return [];
-const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (sk.kind!=='selfBuff'||x.id===a.id));return (sk.targetMode==='all'&&sk.kind!=='groupHeal'?candidates.slice(0,1):candidates).filter(x=>isSelectable(x,sk,side)).map(x=>x.id);}
+const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth'].includes(sk.kind)||x.id===a.id));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?candidates.slice(0,1):candidates).filter(x=>side===a.side||isSelectable(x,sk,side)).map(x=>x.id);}
 export function startRound(state,r){state.round++;clearExpiredCorpses(state);state.queue=state.units.filter(x=>!x.dead&&!x.corpse).map(x=>({id:x.id,score:initiativeScore({...x,spd:x.spd+effectModifier(x,'speed')},r)})).sort((a,b)=>b.score-a.score||(state.units.find(x=>x.id===a.id).side==='hero'?-1:1)||rank(state,a.id)-rank(state,b.id)).map(x=>x.id);state.units.forEach(u=>u.acted=false);state.log.push(`Round ${state.round} begins`);return state;}
 export function currentActor(s){while(s.queue.length){const u=s.units.find(x=>x.id===s.queue[0]);if(u&&!u.dead&&!u.acted)return u;s.queue.shift();}return null;}
 function stress(state,u,amount,r){amount=Math.round(amount*effectiveCombatStats(u).stressMultiplier*(1-clamp(effectModifier(u,'stressResist'),0,90)/100));u.stress=clamp(u.stress+amount,0,200);if(u.stress>=100&&!u.affliction&&!u.virtue){const virtues=['Bravery','Clarity','Fighting Spirit','Unbreakable Will','Second Wind'];const afflicted=['Panic','Distrust','Self-Preservation','Recklessness','Aggression','Despair','Confusion'];if(r()<.25){u.virtue=virtues[randInt(r,0,4)];state.log.push(`${u.name} found ${u.virtue}!`);}else{u.affliction=afflicted[randInt(r,0,6)];state.log.push(`${u.name} suffers ${u.affliction}!`);}}if(u.stress===200&&u.side==='hero'){if(u.deathDoor){u.dead=true;state.log.push(`${u.name} dies at the Breaking Point!`);}else{u.hp=0;u.deathDoor=true;u.mortality='heartAttackRecovery';u.stress=170;state.log.push(`${u.name} reaches Death's Door from stress!`);}}}
@@ -47,14 +48,42 @@ export function takeTurn(state,actorId,key,targetId,r){
   const sk=ABILITIES[key];
   if(!sk)throw Error('Unknown skill');
   if(!availableTargets(state,actorId,key).includes(targetId))throw Error('Illegal target or rank');
-  const target=state.units.find(x=>x.id===targetId);
+  let target=state.units.find(x=>x.id===targetId);
+  if(sk.kind==='randomAttack'){
+    const possible=ranks(state,a.side==='hero'?'enemy':'hero').filter(u=>!u.corpse);
+    if(possible.length)target=possible[Math.floor(r()*possible.length)];
+  }
   const wasStunned=a.stun>0;
   if(sk.maxUses){a.usedSkills??={};a.usedSkills[key]=(a.usedSkills[key]??0)+1;}
   if(sk.torch)state.torch=clamp((state.torch??75)+sk.torch,0,100);
   if(a.stun>0){consumeStun(a);state.log.push(`${a.name} loses a turn to stun`);}
   else if(sk.kind==='guard'){applyGuard(state,a,target.id,sk.guardTurns??3);if(sk.protectBuff)addTimedEffect(a,{...sk.protectBuff,kind:'buff'});state.log.push(`${a.name} guards ${target.name}`);}
-  else if(sk.kind==='mark'){target.marked=3;state.log.push(`${target.name} is marked`);}
-  else if(sk.kind==='stealth'){a.stealthed=sk.stealthTurns??2;state.log.push(`${a.name} vanishes into the shadows`);}
+  else if(sk.kind==='mark'){
+    const chance=hitChance({accuracy:sk.acc??100,accModifier:effectiveCombatStats(a).accuracy+effectModifier(a,'accuracy'),dodge:target.dodge+effectModifier(target,'dodge'),missStreak:a.misses});
+    if(r()*100<chance){
+      target.marked=sk.markTurns??3;
+      if(sk.debuff&&r()*100<resistChance({applicationChance:sk.debuff.chance,resistance:(target.resist.debuff??0)-effectModifier(target,'debuffResist')}))addTimedEffect(target,{...sk.debuff,kind:'debuff'});
+      state.log.push(`${a.name} marks ${target.name}`);
+    }else state.log.push(`${a.name} fails to mark ${target.name}`);
+  }
+  else if(sk.kind==='stealth'){
+    a.stealthed=sk.stealthTurns??2;
+    for(const buff of sk.buffs??[])addTimedEffect(a,{...buff,kind:'buff'});
+    state.log.push(`${a.name} vanishes into the shadows`);
+  }
+  else if(sk.kind==='selfCleanseBuff'){
+    const removed=cleanseUnit(a,sk.cleanse);
+    addTimedEffect(a,{...sk.buff,kind:'buff'});
+    state.log.push(`${a.name} uses ${sk.name}, curing ${removed} effects`);
+  }
+  else if(sk.kind==='rallyFlare'){
+    for(const ally of ranks(state,a.side))if(ally.id!==a.id){
+      ally.stun=0;ally.marked=0;
+      if(r()*100<(sk.stressHealChance??0))ally.stress=clamp(ally.stress-(sk.stressHeal??0),0,200);
+    }
+    for(const foe of ranks(state,a.side==='hero'?'enemy':'hero'))if(!foe.corpse)foe.stealthed=0;
+    state.log.push(`${a.name} signals the entire party with ${sk.name}`);
+  }
   else if(sk.kind==='moveOnly'){
     const changed=attemptDisplacement(state,target,sk.moveTarget,r);
     state.log.push(`${a.name} uses ${sk.name} on ${target.name}: ${changed===0?'resisted or blocked':'moved '+Math.abs(changed)+' rank(s)'}`);
@@ -87,6 +116,7 @@ export function takeTurn(state,actorId,key,targetId,r){
   }
   else if(sk.kind==='cleanse'){
     const cleared=cleanseUnit(target,sk.cleanse);
+    if(sk.cleanseSelf&&a.id!==target.id)cleanseUnit(a,sk.cleanse);
     if(sk.max){const healed=randInt(r,sk.min,sk.max);target.hp=Math.min(target.maxHp,target.hp+healed);if(target.hp>0&&target.deathDoor){target.deathDoor=false;target.mortality??='deathDoorRecovery';}}
     state.log.push(`${a.name} uses ${sk.name} on ${target.name}; removed ${cleared} conditions`);
   }
@@ -102,7 +132,7 @@ export function takeTurn(state,actorId,key,targetId,r){
     for(const u of ranks(state,a.side)){
       const crit=r()<.05;
       const v=randInt(r,sk.min,sk.max)*(crit?2:1);
-      u.hp=Math.min(u.maxHp,u.hp+v);
+      u.hp=Math.min(u.maxHp,u.hp+Math.round(v*(1+effectModifier(u,'healingReceived')/100)));
       if(crit){u.stress=clamp(u.stress-4,0,200);state.log.push(`${u.name} receives a critical heal`);}
       if(u.hp>0&&u.deathDoor){u.deathDoor=false;u.mortality=u.mortality??'deathDoorRecovery';}
     }
@@ -111,12 +141,14 @@ export function takeTurn(state,actorId,key,targetId,r){
   else if(sk.kind==='heal'){
     const crit=r()<.12;
     const v=randInt(r,sk.min,sk.max)*(crit?2:1);
-    target.hp=Math.min(target.maxHp,target.hp+v);
+    target.hp=Math.min(target.maxHp,target.hp+Math.round(v*(1+effectModifier(target,'healingReceived')/100)));
+    if(sk.afterHealBuff)addTimedEffect(target,{...sk.afterHealBuff,kind:'buff'});
     if(crit){target.stress=clamp(target.stress-4,0,200);state.log.push(`${target.name} receives a critical heal`);}
     if(target.hp>0&&target.deathDoor){target.deathDoor=false;target.mortality=target.mortality??'deathDoorRecovery';}
     state.log.push(`${a.name} heals ${target.name} for ${v}`);
   }else{
     const affected=sk.targetMode==='all'?resolveTargets(state,a,sk,target.id):[target];
+    if(sk.clearCorpses){for(const corpse of ranks(state,a.side==='hero'?'enemy':'hero').filter(x=>x.corpse))corpse.dead=true;}
     for(const affectedTarget of affected){
     let pendingStatus=null;
     let actual=affectedTarget;
@@ -128,10 +160,11 @@ export function takeTurn(state,actorId,key,targetId,r){
         stress(state,actual,sk.amount,r);
         state.log.push(`${a.name} stresses ${actual.name} (+${sk.amount})`);
       }else{
-        const crit=rollCrit({baseCrit:a.crit+effectModifier(a,'crit')+(actual.marked?effectModifier(actual,'critReceivedWhileMarked'):0),skillCrit:sk.crit??0},r);
+        const crit=rollCrit({baseCrit:a.crit+effectModifier(a,'crit')+(actual.marked?effectModifier(actual,'critReceivedWhileMarked')+(sk.critVsMarked??0):0),skillCrit:sk.crit??0},r);
         const typeMultiplier=Object.entries(sk.vsTypes??{}).reduce((mult,[tag,bonus])=>mult*(actual.types?.includes(tag)?1+bonus:1),1);
         const guardedBonus=a.guard?effectModifier(a,'damageWhileGuarded'):0;
-        const dmg=directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1)*typeMultiplier*(1+(effectModifier(a,'damage')+guardedBonus)/100),crit,prot:actual.prot+effectModifier(actual,'prot'),damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
+        const blightBonus=(actual.dot??[]).some(d=>d.type==='blight')?(sk.vsBlighted??0):0;
+        const dmg=directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1)*(1+blightBonus)*typeMultiplier*(1+(effectModifier(a,'damage')+guardedBonus)/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
         hurt(state,actual,dmg,r,crit);
         state.log.push(`${a.name} uses ${sk.name} on ${actual.name}: ${dmg}${crit?' CRIT':''}`);
         if(crit){
@@ -145,6 +178,11 @@ export function takeTurn(state,actorId,key,targetId,r){
           }
         }
         if(sk.status&&!actual.dead&&!actual.corpse)pendingStatus={...sk.status,crit};
+        if(sk.debuff&&!actual.dead&&!actual.corpse&&r()*100<resistChance({applicationChance:sk.debuff.chance,resistance:(actual.resist.debuff??0)-effectModifier(actual,'debuffResist'),crit})){
+          addTimedEffect(actual,{...sk.debuff,kind:'debuff'});
+          state.log.push(`${actual.name} is debuffed by ${sk.name}`);
+        }
+        if(sk.selfBuff)addTimedEffect(a,{...sk.selfBuff,kind:'buff'});
         if(sk.moveTarget&&!actual.dead&&!actual.corpse){const moved=attemptDisplacement(state,actual,sk.moveTarget,r);if(moved)state.log.push(`${actual.name} moves ${Math.abs(moved)} rank(s)`);}
       }
     }else{a.misses++;state.log.push(`${a.name} misses ${actual.name}`);}
@@ -152,7 +190,7 @@ export function takeTurn(state,actorId,key,targetId,r){
     // Riposte happens before secondary effects: killing the attacker prevents its DOT or debuff.
     if(pendingStatus&&!a.dead&&!actual.dead){
       const st=pendingStatus;
-      if(r()*100<resistChance({applicationChance:st.chance,resistance:st.type==='stun'?stunResistance(actual):(actual.resist[st.type]??0),crit:st.crit})){
+      if(r()*100<resistChance({applicationChance:st.chance,resistance:st.type==='stun'?stunResistance(actual):(actual.resist[st.type]??0)-effectModifier(actual,st.type+'Resist'),crit:st.crit})){
         if(st.type==='stun')inflictStun(actual);
         else actual.dot.push({type:st.type,value:st.value,turns:dotDuration(st.turns,st.crit)});
         state.log.push(`${actual.name} gains ${st.type}`);
