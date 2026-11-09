@@ -24,7 +24,11 @@ test('all 21 new abilities load in Chromium and apply relevant rank restrictions
  });
  for(const cls of ['hunter','thief','mage']){
   expect(result[cls]).toHaveLength(7);
-  expect(result[cls].every(x=>x.name&&x.legal)).toBe(true);
+  expect(result[cls].every(x=>x.name)).toBe(true);
+  if(cls==='thief'){
+    expect(result[cls].find(x=>x.name==='Shadow Lunge').legal).toBe(false);
+    expect(result[cls].filter(x=>x.name!=='Shadow Lunge').every(x=>x.legal)).toBe(true);
+  }else expect(result[cls].every(x=>x.legal)).toBe(true);
  }
 });
 test('stun AoE deals no direct damage; Thief can vanish and pierce protection',async ({page})=>{
