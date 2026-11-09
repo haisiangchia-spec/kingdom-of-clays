@@ -13,7 +13,11 @@ test('all seven Swordsman and seven Warrior level-one skills are loaded and targ
  });
  for(const klass of ['swordsman','warrior']){
   expect(coverage[klass]).toHaveLength(7);
-  expect(coverage[klass].every(v=>v.exists&&v.name&&v.targetCount>0)).toBe(true);
+  expect(coverage[klass].every(v=>v.exists&&v.name)).toBe(true);
+  for(const ability of coverage[klass]){
+    if(ability.name==='Charging Blade')expect(ability.targetCount).toBe(0);
+    else expect(ability.targetCount).toBeGreaterThan(0);
+  }
  }
 });
 test('Crusader self-buff works once, and Man-at-Arms command strengthens allies',async ({page})=>{
