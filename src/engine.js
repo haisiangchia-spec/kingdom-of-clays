@@ -3,10 +3,11 @@ import {clamp,hitChance,rollCrit,directDamage,resistChance,dotDuration,deathBlow
 import {stunResistance,inflictStun,consumeStun,completeUnstunnedTurn,applyGuard,guardTarget,canCounter,tickTimedEffects,addTimedEffect,effectModifier} from './status.js';
 import {resolveTargets,cleanseUnit,restorationTick,addRestoration} from './combat-effects.js';
 import {isSelectable,moveWithinFormation,attemptDisplacement,corpseFromEnemy,clearExpiredCorpses,hasLiveOpponents,rankOf,occupiedRanks,formationSlots,widthOf} from './formation.js';
+import {STARTER_CLASS_SKILLS} from './class-skills.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
 export const randInt=(r,lo,hi)=>lo+Math.floor(r()*(hi-lo+1));
-export function unit(id,name,side,stats={}){return {id,name,side,size:stats.size??1,hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false};}
+export function unit(id,name,side,stats={}){return {id,name,side,size:stats.size??1,types:stats.types??[],hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0,debuff:stats.debuffResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false,usedSkills:{}};}
 export const ABILITIES={
  heavy_slash:{name:'Heavy Slash',from:[0,1],to:[0,1],acc:85,crit:2,mod:0},
  guardian_parry:{name:"Guardian's Parry",from:[0,1,2,3],to:[0,1,2,3],kind:'guard'},
@@ -30,10 +31,12 @@ export const ABILITIES={
  enemy_strike:{name:'Strike',from:[0,1,2,3],to:[0,1,2,3],acc:85},
  enemy_stress:{name:'Dark Whisper',from:[0,1,2,3],to:[0,1,2,3],kind:'stress',amount:15,acc:95}
 };
+Object.assign(ABILITIES,STARTER_CLASS_SKILLS);
 export function ranks(state,side){return state.units.filter(u=>u.side===side&&!u.dead);}
 export function rank(state,id){return rankOf(state,id);}
 export {occupiedRanks,formationSlots};
-export function availableTargets(state,actorId,key){const a=state.units.find(x=>x.id===actorId),sk=ABILITIES[key];if(!a||!sk||a.dead||a.corpse||!occupiedRanks(state,a.id).some(i=>sk.from.includes(i)))return [];const side=['heal','groupHeal','guard','cleanse','buff','restore'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side));return (sk.targetMode==='all'&&sk.kind!=='groupHeal'?candidates.slice(0,1):candidates).filter(x=>isSelectable(x,sk,side)).map(x=>x.id);}
+export function availableTargets(state,actorId,key){const a=state.units.find(x=>x.id===actorId),sk=ABILITIES[key];if(!a||!sk||a.dead||a.corpse||!occupiedRanks(state,a.id).some(i=>sk.from.includes(i)))return [];if(sk.maxUses&&(a.usedSkills?.[key]??0)>=sk.maxUses)return [];
+const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (sk.kind!=='selfBuff'||x.id===a.id));return (sk.targetMode==='all'&&sk.kind!=='groupHeal'?candidates.slice(0,1):candidates).filter(x=>isSelectable(x,sk,side)).map(x=>x.id);}
 export function startRound(state,r){state.round++;clearExpiredCorpses(state);state.queue=state.units.filter(x=>!x.dead&&!x.corpse).map(x=>({id:x.id,score:initiativeScore(x,r)})).sort((a,b)=>b.score-a.score||(state.units.find(x=>x.id===a.id).side==='hero'?-1:1)||rank(state,a.id)-rank(state,b.id)).map(x=>x.id);state.units.forEach(u=>u.acted=false);state.log.push(`Round ${state.round} begins`);return state;}
 export function currentActor(s){while(s.queue.length){const u=s.units.find(x=>x.id===s.queue[0]);if(u&&!u.dead&&!u.acted)return u;s.queue.shift();}return null;}
 function stress(state,u,amount,r){amount=Math.round(amount*effectiveCombatStats(u).stressMultiplier);u.stress=clamp(u.stress+amount,0,200);if(u.stress>=100&&!u.affliction&&!u.virtue){const virtues=['Bravery','Clarity','Fighting Spirit','Unbreakable Will','Second Wind'];const afflicted=['Panic','Distrust','Self-Preservation','Recklessness','Aggression','Despair','Confusion'];if(r()<.25){u.virtue=virtues[randInt(r,0,4)];state.log.push(`${u.name} found ${u.virtue}!`);}else{u.affliction=afflicted[randInt(r,0,6)];state.log.push(`${u.name} suffers ${u.affliction}!`);}}if(u.stress===200&&u.side==='hero'){if(u.deathDoor){u.dead=true;state.log.push(`${u.name} dies at the Breaking Point!`);}else{u.hp=0;u.deathDoor=true;u.mortality='heartAttackRecovery';u.stress=170;state.log.push(`${u.name} reaches Death's Door from stress!`);}}}
@@ -46,13 +49,41 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(!availableTargets(state,actorId,key).includes(targetId))throw Error('Illegal target or rank');
   const target=state.units.find(x=>x.id===targetId);
   const wasStunned=a.stun>0;
+  if(sk.maxUses){a.usedSkills??={};a.usedSkills[key]=(a.usedSkills[key]??0)+1;}
+  if(sk.torch)state.torch=clamp((state.torch??75)+sk.torch,0,100);
   if(a.stun>0){consumeStun(a);state.log.push(`${a.name} loses a turn to stun`);}
-  else if(sk.kind==='guard'){applyGuard(state,a,target.id,3);state.log.push(`${a.name} guards ${target.name}`);}
+  else if(sk.kind==='guard'){applyGuard(state,a,target.id,sk.guardTurns??3);if(sk.protectBuff)addTimedEffect(a,{...sk.protectBuff,kind:'buff'});state.log.push(`${a.name} guards ${target.name}`);}
   else if(sk.kind==='mark'){target.marked=3;state.log.push(`${target.name} is marked`);}
   else if(sk.kind==='stealth'){a.stealthed=sk.stealthTurns??2;state.log.push(`${a.name} vanishes into the shadows`);}
   else if(sk.kind==='moveOnly'){
     const changed=attemptDisplacement(state,target,sk.moveTarget,r);
     state.log.push(`${a.name} uses ${sk.name} on ${target.name}: ${changed===0?'resisted or blocked':'moved '+Math.abs(changed)+' rank(s)'}`);
+  }
+  else if(sk.kind==='partyBuff'){
+    for(const ally of ranks(state,a.side))addTimedEffect(ally,{...sk.buff,kind:'buff'});
+    state.log.push(`${a.name} uses ${sk.name} on the party`);
+  }
+  else if(sk.kind==='selfBuff'){
+    addTimedEffect(a,{...sk.buff,kind:'buff'});
+    state.log.push(`${a.name} uses ${sk.name}`);
+  }
+  else if(sk.kind==='debuffAll'){
+    for(const foe of resolveTargets(state,a,sk,target.id)){
+      if(foe.corpse)continue;
+      const acc=hitChance({accuracy:sk.acc??85,accModifier:effectiveCombatStats(a).accuracy+effectModifier(a,'accuracy'),dodge:foe.dodge+effectModifier(foe,'dodge')});
+      if(r()*100>=acc){state.log.push(`${a.name} misses ${foe.name} with ${sk.name}`);continue;}
+      if(r()*100<resistChance({applicationChance:sk.debuff.chance,resistance:foe.resist.debuff??0})){
+        addTimedEffect(foe,{...sk.debuff,kind:'debuff'});
+        state.log.push(`${foe.name} is weakened by ${sk.name}`);
+      }
+    }
+  }
+  else if(sk.kind==='stressHeal'){
+    const amount=randInt(r,sk.min,sk.max);
+    target.hp=Math.min(target.maxHp,target.hp+amount);
+    if(target.hp>0&&target.deathDoor){target.deathDoor=false;target.mortality??='deathDoorRecovery';}
+    target.stress=clamp(target.stress-(sk.stressHeal??0),0,200);
+    state.log.push(`${a.name} rallies ${target.name}: +${amount} HP, -${sk.stressHeal} stress`);
   }
   else if(sk.kind==='cleanse'){
     const cleared=cleanseUnit(target,sk.cleanse);
@@ -98,7 +129,9 @@ export function takeTurn(state,actorId,key,targetId,r){
         state.log.push(`${a.name} stresses ${actual.name} (+${sk.amount})`);
       }else{
         const crit=rollCrit({baseCrit:a.crit,skillCrit:sk.crit??0},r);
-        const dmg=directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1),crit,prot:actual.prot,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
+        const typeMultiplier=Object.entries(sk.vsTypes??{}).reduce((mult,[tag,bonus])=>mult*(actual.types?.includes(tag)?1+bonus:1),1);
+        const guardedBonus=a.guard?effectModifier(a,'damageWhileGuarded'):0;
+        const dmg=directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1)*typeMultiplier*(1+(effectModifier(a,'damage')+guardedBonus)/100),crit,prot:actual.prot+effectModifier(actual,'prot'),damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
         hurt(state,actual,dmg,r,crit);
         state.log.push(`${a.name} uses ${sk.name} on ${actual.name}: ${dmg}${crit?' CRIT':''}`);
         if(crit){
@@ -127,19 +160,20 @@ export function takeTurn(state,actorId,key,targetId,r){
     }
     }
   }
+  if(sk.markSelf)a.marked=sk.markSelf;
   if(sk.advance)moveWithinFormation(state,a.id,-sk.advance);
   if(sk.selfBack)moveWithinFormation(state,a.id,sk.selfBack);
-  if(sk.riposte)a.riposte=3;
+  if(sk.riposte){a.riposte=sk.riposteDuration??3;a.riposteAcc=sk.riposteAcc??90;a.riposteMod=sk.riposteMod??-.4;}
   if(!wasStunned)completeUnstunnedTurn(a);
   if(a.stealthed&&sk.kind!=='stealth')a.stealthed=0;
   a.acted=true;state.queue.shift();return state;
 }
 function executeRiposte(state,defender,attacker,r){
-  const acc=defender.side==='hero'?90:85;
+  const acc=defender.riposteAcc??(defender.side==='hero'?90:85);
   const chance=hitChance({accuracy:acc,accModifier:effectiveCombatStats(defender).accuracy+effectModifier(defender,'accuracy'),dodge:attacker.dodge+effectModifier(attacker,'dodge')});
   if(r()*100>=chance){state.log.push(`${defender.name} counters ${attacker.name} but misses`);return;}
   const crit=rollCrit({baseCrit:defender.crit},r);
-  const damage=directDamage({minDamage:defender.dmgMin,maxDamage:defender.dmgMax,skillMultiplier:.6,crit,prot:attacker.prot,damageMultiplier:effectiveCombatStats(defender).damageMultiplier},r);
+  const damage=directDamage({minDamage:defender.dmgMin,maxDamage:defender.dmgMax,skillMultiplier:1+(defender.riposteMod??-.4),crit,prot:attacker.prot+effectModifier(attacker,'prot'),damageMultiplier:effectiveCombatStats(defender).damageMultiplier},r);
   hurt(state,attacker,damage,r,crit);
   state.log.push(`${defender.name} ripostes ${attacker.name}: ${damage}${crit?' CRIT':''}`);
 }
@@ -163,4 +197,4 @@ export function makeLargeMonsterBattle(seed=1){
  state.log=['A giant foe occupies three ranks!',...state.log];
  return state;
 }
-export function makeBattle(seed=1){const units=[unit('h1','Swordsman','hero',{hp:33,spd:3,prot:10}),unit('h2','Warrior','hero',{hp:33,spd:1}),unit('h3','Hunter','hero',{hp:25,spd:3}),unit('h4','Priest','hero',{hp:24,spd:4}),unit('e1','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5}),unit('e2','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5}),unit('e3','Skeleton Archer','enemy',{hp:14,spd:4,dodge:8}),unit('e4','Skeleton Court Mage','enemy',{hp:13,spd:5,dodge:9})];return {seed,round:0,units,queue:[],log:['Combat begins!']};}
+export function makeBattle(seed=1){const units=[unit('h1','Swordsman','hero',{hp:33,spd:3,prot:10}),unit('h2','Warrior','hero',{hp:33,spd:1}),unit('h3','Hunter','hero',{hp:25,spd:3}),unit('h4','Priest','hero',{hp:24,spd:4}),unit('e1','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5}),unit('e2','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5}),unit('e3','Skeleton Archer','enemy',{hp:14,spd:4,dodge:8}),unit('e4','Skeleton Court Mage','enemy',{hp:13,spd:5,dodge:9})];return {seed,round:0,torch:75,units,queue:[],log:['Combat begins!']};}
