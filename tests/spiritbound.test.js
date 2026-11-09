@@ -61,7 +61,7 @@ test('beast form accrues six stress at the beginning of each later turn',()=>{
 test('reversion is free, relieves party stress by two and applies minus-four speed',()=>{
  const b=fresh(),h=b.units.find(x=>x.id==='h2');transform(b);
  takeTurn(b,'h2','primal_fury','e2',()=>.3);
- b.queue=['h2'];beginTurn(b,'h2',()=>.3);
+ b.queue=['h2'];h.acted=false;beginTurn(b,'h2',()=>.3);
  transform(b);
  assert.equal(h.form,'human');assert.equal(h.transformsUsed,2);
  assert.equal(effectModifier(h,'speed'),-4);
@@ -99,7 +99,7 @@ test('Rake increases future Rake damage but does not amplify Rage',()=>{
  takeTurn(b,'h2','spirit_claw','e1',()=>.3);
  assert.equal(effectModifier(h,'rakeDamage'),15);
  assert.equal(effectModifier(h,'damage'),10);
- b.queue=['h2'];beginTurn(b,'h2',()=>.3);
+ b.queue=['h2'];h.acted=false;beginTurn(b,'h2',()=>.3);
  const e=b.units.find(x=>x.id==='e2'),before=e.hp;
  takeTurn(b,'h2','spirit_claw','e2',()=>.3);
  assert.ok(before-e.hp>=6);
