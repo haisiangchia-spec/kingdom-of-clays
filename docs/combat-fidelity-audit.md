@@ -60,3 +60,27 @@ Prioritize damage/protection and Death's Door edge cases with reference examples
 - The fidelity of 105 individual hero skills and their level 2–5 upgrades, multi-target reactions, and the monster/boss roster.
 
 Next: prioritize the exact damage modifier pipeline and Death's Door party-stress/heart-attack edge cases, then class-by-class rank and numerical tables.
+
+## Pass 3 — Heart attack, Virtue and damage-bonus ordering (2026-11-10)
+
+**Corrected and tested**
+- At **200 stress**, a hero already Virtuous loses the Virtue and returns to **0 stress**, rather than suffering a heart attack. A non-Virtuous hero instead experiences a heart attack: at positive HP the hero reaches Death's Door and stress returns to **170**; at 0 HP the hero dies outright, irrespective of Death Blow Resistance.
+- On successful Virtue activation at 100 stress, the hero's stress resets to **45** and living allies lose **6 stress**. An Affliction does not reset to 45.
+- Heart Attack Recovery is now **separate and cumulative** with Death's Door Recovery upon healing. The combined penalties are **-5 ACC, -15% DMG, -3 SPD, +25% Stress received**, compared with Death's Door Recovery alone at -2 ACC, -5% DMG, -1 SPD, +10% Stress.
+- The skill's base damage modifier remains a separate multiplier; other attacker damage percentage bonuses such as marked targets, enemy type, trinket-style buffs, and temporary skill buffs now accumulate **additively** before calculating damage. Damage-taken modifiers remain a separate target-side factor.
+- The Monster Slayer's +90% damage against marked and +15% against human now combine to +105%, not ×1.9×1.15. Deterministic unit and Chromium scenarios exercise the difference.
+- `tests/heart-audit.test.js`, `tests/damage-modifiers-audit.test.js` and `tests/browser/heart-modifiers-audit.spec.js` cover these transitions.
+
+**Supporting DD1 sources**
+- [Heart attack](https://darkestdungeon.wiki.gg/wiki/Heart_attack)
+- [Virtue](https://darkestdungeon.wiki.gg/wiki/Virtue)
+- [Death's Door](https://darkestdungeon.wiki.gg/wiki/Death%27s_Door)
+- [Combat Mechanics](https://darkestdungeon.wiki.gg/wiki/Combat_Mechanics_(Darkest_Dungeon))
+- [DD1 community discussion of additive damage bonuses](https://www.reddit.com/r/darkestdungeon/comments/11wzcsv)
+
+**Not yet certified**
+- The *exact* numerical stress applied to all allies upon Death's Door entry and witnessing permanent death remains unimplemented; external reference pages confirm the event but do not provide an unambiguous base-value and probability fixture. Do not invent these values.
+- Individual skill level progression, rounding order at each intermediate damage calculation, and specialized debuff/condition stacking still need dedicated tests against original DD1 data.
+- Enemy AI, full bestiary, champion scaling and boss multi-actions are still incomplete.
+
+**Next audit:** distinguish DD1's end-of-turn vs start-of-turn duration expiration for status effects and reconcile the skill leveling tables before implementing enemies.
