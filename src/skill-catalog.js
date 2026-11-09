@@ -4,6 +4,7 @@ import {STARTER_CLASS_SKILLS} from './class-skills.js';
 import {SECOND_CLASS_SKILLS} from './class-skills-batch2.js';
 import {THIRD_CLASS_SKILLS} from './class-skills-batch3.js';
 import {FOURTH_CLASS_SKILLS} from './class-skills-batch4.js';
+import {FIFTH_CLASS_SKILLS} from './class-skills-batch5.js';
 export const CLASS_SKILL_CATALOG = [
   {
     "id": "swordsman",
@@ -741,7 +742,7 @@ export const CLASS_SKILL_CATALOG = [
     ]
   }
 ];
-export const SKILL_CATALOG = CLASS_SKILL_CATALOG.flatMap(c=>c.skills.map(s=>({...s,classId:c.id,className:c.name,dd1Class:c.dd1,mechanics:Object.values({...STARTER_CLASS_SKILLS,...SECOND_CLASS_SKILLS,...THIRD_CLASS_SKILLS,...FOURTH_CLASS_SKILLS}).some(v=>v.classId===c.id&&v.source===s.dd1Source&&v.name===s.name)?'level1-integrated':'pending'})));
+export const SKILL_CATALOG = CLASS_SKILL_CATALOG.flatMap(c=>c.skills.map(s=>({...s,classId:c.id,className:c.name,dd1Class:c.dd1,mechanics:Object.values({...STARTER_CLASS_SKILLS,...SECOND_CLASS_SKILLS,...THIRD_CLASS_SKILLS,...FOURTH_CLASS_SKILLS,...FIFTH_CLASS_SKILLS}).some(v=>v.classId===c.id&&v.source===s.dd1Source&&v.name===s.name)?'level1-integrated':'pending'})));
 export function catalogSkill(classId,sourceId){
   return SKILL_CATALOG.find(s=>s.classId===classId&&s.id===sourceId)??null;
 }
