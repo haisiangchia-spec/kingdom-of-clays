@@ -22,6 +22,13 @@ export function effectiveCombatStats(u){
     stressMultiplier:d?1.33:1+(recovery?.10:0)+(heart?.15:0)
   };
 }
+// DD1: the skill modifier is a separate factor, while other positive/negative
+// attacker damage percentages combine additively before PROT is applied.
+// Bonuses are percentage points, e.g. 60 for +60% against marked.
+export function combinedAttackMultiplier(skillMod=0,bonuses=[]){
+ const sum=bonuses.reduce((total,value)=>total+(Number.isFinite(value)?value:0),0);
+ return Math.max(0,(1+skillMod)*(1+sum/100));
+}
 export function directDamage({minDamage,maxDamage,skillMultiplier=1,crit=false,prot=0,ignoreProt=false,damageMultiplier=1},rng){
   // DD1 crit: 150% of the *maximum* attack damage, not a random roll.
   const raw=crit?1.5*maxDamage*skillMultiplier:Math.floor(rng()*(maxDamage-minDamage+1)+minDamage)*skillMultiplier;
