@@ -39,11 +39,11 @@ test('reverse guard and occult healing resolve in browser engine',async ({page})
  });
  expect(data).toEqual({guardian:'h1',hp:16,bleed:0,hex:'Hex Mage'});
 });
-test('skill catalog counts 98 of 105 integrated level-one abilities',async ({page})=>{
+test('skill catalog counts 105 of 105 integrated level-one abilities',async ({page})=>{
  await page.goto('/');
  const r=await page.evaluate(async ()=>{
   const {SKILL_CATALOG}=await import('./src/skill-catalog.js');
   return {total:SKILL_CATALOG.length,integrated:SKILL_CATALOG.filter(x=>x.mechanics==='level1-integrated').length};
  });
- expect(r).toEqual({total:105,integrated:98});
+ expect(r).toEqual({total:105,integrated:105});
 });
