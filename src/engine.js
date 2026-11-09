@@ -37,23 +37,29 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(!sk)throw Error('Unknown skill');
   if(!availableTargets(state,actorId,key).includes(targetId))throw Error('Illegal target or rank');
   const target=state.units.find(x=>x.id===targetId);
+  const wasStunned=a.stun>0;
   if(a.stun>0){consumeStun(a);state.log.push(`${a.name} loses a turn to stun`);}
   else if(sk.kind==='guard'){applyGuard(state,a,target.id,3);state.log.push(`${a.name} guards ${target.name}`);}
   else if(sk.kind==='mark'){target.marked=3;state.log.push(`${target.name} is marked`);}
   else if(sk.kind==='groupHeal'){
     for(const u of ranks(state,a.side)){
-      const v=randInt(r,sk.min,sk.max);
+      const crit=r()<.05;
+      const v=randInt(r,sk.min,sk.max)*(crit?2:1);
       u.hp=Math.min(u.maxHp,u.hp+v);
+      if(crit){u.stress=clamp(u.stress-4,0,200);state.log.push(`${u.name} receives a critical heal`);}
       if(u.hp>0&&u.deathDoor){u.deathDoor=false;u.mortality=u.mortality??'deathDoorRecovery';}
     }
     state.log.push(`${a.name} casts ${sk.name}`);
   }
   else if(sk.kind==='heal'){
-    const v=randInt(r,sk.min,sk.max);
+    const crit=r()<.12;
+    const v=randInt(r,sk.min,sk.max)*(crit?2:1);
     target.hp=Math.min(target.maxHp,target.hp+v);
+    if(crit){target.stress=clamp(target.stress-4,0,200);state.log.push(`${target.name} receives a critical heal`);}
     if(target.hp>0&&target.deathDoor){target.deathDoor=false;target.mortality=target.mortality??'deathDoorRecovery';}
     state.log.push(`${a.name} heals ${target.name} for ${v}`);
   }else{
+    let pendingStatus=null;
     let actual=target;
     if(target.side!==a.side){actual=guardTarget(state,target);if(actual!==target)state.log.push(`${actual.name} intercepts an attack aimed at ${target.name}`);}
     const chance=hitChance({accuracy:sk.acc??85,accModifier:effectiveCombatStats(a).accuracy+effectModifier(a,'accuracy'),dodge:actual.dodge+effectModifier(actual,'dodge'),missStreak:a.misses});
@@ -67,17 +73,29 @@ export function takeTurn(state,actorId,key,targetId,r){
         const dmg=directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:1+(sk.mod??0),crit,prot:actual.prot,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
         hurt(state,actual,dmg,r);
         state.log.push(`${a.name} uses ${sk.name} on ${actual.name}: ${dmg}${crit?' CRIT':''}`);
-        if(sk.status&&!actual.dead){
-          const st=sk.status;
-          if(r()*100<resistChance({applicationChance:st.chance,resistance:st.type==='stun'?stunResistance(actual):(actual.resist[st.type]??0),crit})){ 
-            if(st.type==='stun')inflictStun(actual);
-            else actual.dot.push({type:st.type,value:st.value,turns:dotDuration(st.turns,crit)});
-            state.log.push(`${actual.name} gains ${st.type}`);
+        if(crit){
+          if(a.side==='hero'){
+            a.stress=clamp(a.stress-3,0,200);
+            for(const u of ranks(state,'hero'))if(u.id!==a.id&&r()<.25)u.stress=clamp(u.stress-3,0,200);
+          }
+          if(actual.side==='hero'){
+            stress(state,actual,10,r);
+            for(const u of ranks(state,'hero'))if(r()<.50)stress(state,u,5,r);
           }
         }
+        if(sk.status&&!actual.dead)pendingStatus={...sk.status,crit};
       }
     }else{a.misses++;state.log.push(`${a.name} misses ${actual.name}`);}
     if(canCounter(actual,a,sk))executeRiposte(state,actual,a,r);
+    // Riposte happens before secondary effects: killing the attacker prevents its DOT or debuff.
+    if(pendingStatus&&!a.dead&&!actual.dead){
+      const st=pendingStatus;
+      if(r()*100<resistChance({applicationChance:st.chance,resistance:st.type==='stun'?stunResistance(actual):(actual.resist[st.type]??0),crit:st.crit})){
+        if(st.type==='stun')inflictStun(actual);
+        else actual.dot.push({type:st.type,value:st.value,turns:dotDuration(st.turns,st.crit)});
+        state.log.push(`${actual.name} gains ${st.type}`);
+      }
+    }
   }
   if(sk.advance){
     const side=ranks(state,a.side),idx=side.findIndex(x=>x.id===a.id),next=Math.max(0,idx-sk.advance);
@@ -85,7 +103,7 @@ export function takeTurn(state,actorId,key,targetId,r){
     state.units=state.units.filter(x=>x.side!==a.side).concat(side);
   }
   if(sk.riposte)a.riposte=3;
-  if(a.stun===0)completeUnstunnedTurn(a);
+  if(!wasStunned)completeUnstunnedTurn(a);
   a.acted=true;state.queue.shift();return state;
 }
 function executeRiposte(state,defender,attacker,r){
