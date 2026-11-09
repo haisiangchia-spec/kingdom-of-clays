@@ -35,3 +35,28 @@ Reference basis:
 ## Next pass
 
 Prioritize damage/protection and Death's Door edge cases with reference examples; then proceed through the 15 classes' numerical skill tables. The user-approved Temple resurrection deviation remains separate from ordinary DD1 combat.
+
+## Pass 2 — Damage, protection, critical DOT, Death's Door (2026-11-10)
+
+**Implemented and regression-tested**
+- A physical hit doing **zero** damage can still trigger a Death Blow resistance roll if the target is already at Death's Door. The hit must actually land; a miss does not count. Non-damaging control spells and support skills do not automatically trigger the physical-hit rule.
+- `directDamage` distinguishes genuinely zero-base-damage attacks (`0`) from positive raw attacks reduced by modifiers/PROT (which retain the existing minimum-one calculation). This is specifically tested, rather than treating a zero damage roll as a fabricated one-point hit.
+- Direct damage continues to cap effective PROT at **80%**, with ignore-PROT abilities handled separately. Bleed and blight remain outside direct PROT reduction.
+- Critical direct damage remains **150% of the attack's maximum damage**, tested both with and without PROT.
+- Critical bleed and blight duration is now **150% of base duration, rounded up**, not just a special case for three-turn effects. Regression fixtures verify 2→3, 3→5, 4→6, 5→8 turns.
+- Death Blow resistance retains the **67% base / 87% maximum** rule. Repeated DOT damage at Death's Door continues to resolve with its own checks.
+- The new `tests/damage-audit.test.js` and `tests/browser/damage-audit.spec.js` validate these edge cases in Node and Chromium.
+
+**Primary references**
+- [Official Combat Mechanics](https://darkestdungeon.wiki.gg/wiki/Combat_Mechanics_(Darkest_Dungeon)) — critical, PROT and status-independent calculation rules
+- [Official Critical Hit](https://darkestdungeon.wiki.gg/wiki/Critical_Hit_(Darkest_Dungeon)) — maximum damage ×1.5 and status duration extension
+- [Official Death's Door](https://darkestdungeon.wiki.gg/wiki/Death%27s_Door) — resistance and mortality rules
+- [Official Getting Started](https://darkestdungeon.wiki.gg/wiki/Getting_Started) — zero-damage physical attacks and Death Blow triggering
+
+**Still unverified or incomplete**
+- Precise buff/debuff additive aggregation and intermediate rounding against DD1's runtime.
+- The exact numerical stress response for entering Death's Door and observing a comrade die (references confirm it occurs, but this pass does not introduce a guessed value).
+- Heart-attack chains, virtue exceptions and exact mortality duration.
+- The fidelity of 105 individual hero skills and their level 2–5 upgrades, multi-target reactions, and the monster/boss roster.
+
+Next: prioritize the exact damage modifier pipeline and Death's Door party-stress/heart-attack edge cases, then class-by-class rank and numerical tables.
