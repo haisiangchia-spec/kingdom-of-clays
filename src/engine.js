@@ -5,6 +5,7 @@ import {resolveTargets,cleanseUnit,restorationTick,addRestoration} from './comba
 import {isSelectable,moveWithinFormation,attemptDisplacement,corpseFromEnemy,clearExpiredCorpses,hasLiveOpponents,rankOf,occupiedRanks,formationSlots,widthOf} from './formation.js';
 import {STARTER_CLASS_SKILLS} from './class-skills.js';
 import {SECOND_CLASS_SKILLS} from './class-skills-batch2.js';
+import {THIRD_CLASS_SKILLS} from './class-skills-batch3.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
 export const randInt=(r,lo,hi)=>lo+Math.floor(r()*(hi-lo+1));
@@ -32,7 +33,7 @@ export const ABILITIES={
  enemy_strike:{name:'Strike',from:[0,1,2,3],to:[0,1,2,3],acc:85},
  enemy_stress:{name:'Dark Whisper',from:[0,1,2,3],to:[0,1,2,3],kind:'stress',amount:15,acc:95}
 };
-Object.assign(ABILITIES,STARTER_CLASS_SKILLS,SECOND_CLASS_SKILLS);
+Object.assign(ABILITIES,STARTER_CLASS_SKILLS,SECOND_CLASS_SKILLS,THIRD_CLASS_SKILLS);
 export function ranks(state,side){return state.units.filter(u=>u.side===side&&!u.dead);}
 export function rank(state,id){return rankOf(state,id);}
 export {occupiedRanks,formationSlots};
@@ -63,6 +64,7 @@ export function takeTurn(state,actorId,key,targetId,r){
     if(r()*100<chance){
       target.marked=sk.markTurns??3;
       if(sk.debuff&&r()*100<resistChance({applicationChance:sk.debuff.chance,resistance:(target.resist.debuff??0)-effectModifier(target,'debuffResist')}))addTimedEffect(target,{...sk.debuff,kind:'debuff'});
+      if(sk.selfBuff)addTimedEffect(a,{...sk.selfBuff,kind:'buff'});
       state.log.push(`${a.name} marks ${target.name}`);
     }else state.log.push(`${a.name} fails to mark ${target.name}`);
   }
@@ -73,6 +75,7 @@ export function takeTurn(state,actorId,key,targetId,r){
   }
   else if(sk.kind==='selfCleanseBuff'){
     const removed=cleanseUnit(a,sk.cleanse);
+    if(sk.max){a.hp=Math.min(a.maxHp,a.hp+randInt(r,sk.min,sk.max));if(a.hp>0&&a.deathDoor){a.deathDoor=false;a.mortality??='deathDoorRecovery';}}
     addTimedEffect(a,{...sk.buff,kind:'buff'});
     state.log.push(`${a.name} uses ${sk.name}, curing ${removed} effects`);
   }
@@ -160,12 +163,17 @@ export function takeTurn(state,actorId,key,targetId,r){
         stress(state,actual,sk.amount,r);
         state.log.push(`${a.name} stresses ${actual.name} (+${sk.amount})`);
       }else{
-        const crit=rollCrit({baseCrit:a.crit+effectModifier(a,'crit')+(actual.marked?effectModifier(actual,'critReceivedWhileMarked')+(sk.critVsMarked??0):0),skillCrit:sk.crit??0},r);
+        const crit=!sk.neverCrit&&rollCrit({baseCrit:a.crit+effectModifier(a,'crit')+(actual.marked?effectModifier(actual,'critReceivedWhileMarked')+(sk.critVsMarked??0):0),skillCrit:sk.crit??0},r);
         const typeMultiplier=Object.entries(sk.vsTypes??{}).reduce((mult,[tag,bonus])=>mult*(actual.types?.includes(tag)?1+bonus:1),1);
         const guardedBonus=a.guard?effectModifier(a,'damageWhileGuarded'):0;
         const blightBonus=(actual.dot??[]).some(d=>d.type==='blight')?(sk.vsBlighted??0):0;
-        const dmg=(sk.mod??0)<=-1?0:directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1)*(1+blightBonus)*typeMultiplier*(1+(effectModifier(a,'damage')+guardedBonus)/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
+        const stunBonus=actual.stun>0?(sk.vsStunned??0):0;
+        const targetDamageTaken=effectModifier(actual,'damageTaken');
+        const dmg=(sk.mod??0)<=-1?0:directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:(1+(sk.mod??0))*(actual.marked>0?1+(sk.vsMarked??0):1)*(1+blightBonus)*(1+stunBonus)*typeMultiplier*(1+(effectModifier(a,'damage')+guardedBonus)/100)*(1+targetDamageTaken/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
         hurt(state,actual,dmg,r,crit);
+        if(sk.selfHealOnHit&&dmg>0){a.hp=Math.min(a.maxHp,a.hp+sk.selfHealOnHit);if(a.hp>0&&a.deathDoor){a.deathDoor=false;a.mortality??='deathDoorRecovery';}}
+        if(sk.markOnHit&&!actual.dead&&!actual.corpse)actual.marked=sk.markOnHit;
+        if(sk.removeStealth&&actual.stealthed)actual.stealthed=0;
         state.log.push(`${a.name} uses ${sk.name} on ${actual.name}: ${dmg}${crit?' CRIT':''}`);
         if(crit){
           if(a.side==='hero'){
@@ -198,6 +206,7 @@ export function takeTurn(state,actorId,key,targetId,r){
     }
     }
   }
+  if(sk.selfDebuff)addTimedEffect(a,{...sk.selfDebuff,kind:'debuff',selfInflicted:true});
   if(sk.markSelf)a.marked=sk.markSelf;
   if(sk.advance)moveWithinFormation(state,a.id,-sk.advance);
   if(sk.selfBack)moveWithinFormation(state,a.id,sk.selfBack);
