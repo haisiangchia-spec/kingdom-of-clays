@@ -36,11 +36,18 @@ test('whole-unit displacement cannot split a multi-rank monster',()=>{
  assert.deepEqual(occupiedRanks(b,'boss'),[1,2,3]);
  assert.deepEqual(occupiedRanks(b,'e4'),[0]);
 });
-test('wide corpse preserves occupied ranks and live enemies retain rear position',()=>{
+test('three-rank boss does not leave a corpse, as in base DD1',()=>{
  const b=makeLargeMonsterBattle(),boss=b.units.find(x=>x.id==='boss');
- corpseFromEnemy(boss,0);
- assert.deepEqual(occupiedRanks(b,boss.id),[0,1,2]);
- assert.equal(rank(b,'e4'),3);
+ assert.equal(corpseFromEnemy(boss,0),false);
+ assert.equal(boss.corpse,undefined);
+});
+test('two-rank enemies leave corpses that preserve both occupied ranks',()=>{
+ const b=makeLargeMonsterBattle();
+ const boss=b.units.find(x=>x.id==='boss');boss.dead=true;
+ const enemy=b.units.find(x=>x.id==='e4');enemy.size=2;
+ assert.deepEqual(occupiedRanks(b,enemy.id),[0,1]);
+ assert.equal(corpseFromEnemy(enemy,0),true);
+ assert.deepEqual(occupiedRanks(b,enemy.id),[0,1]);
 });
 test('formation rejects more than four occupied ranks',()=>{
  const b=makeBattle();b.units.find(u=>u.id==='e1').size=2;
