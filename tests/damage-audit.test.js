@@ -18,7 +18,8 @@ test('zero-damage physical strike still checks deathblow at Death Door',()=>{
  const b=makeBattle(),enemy=b.units.find(x=>x.id==='e1'),hero=b.units.find(x=>x.id==='h1');
  hero.hp=0;hero.deathDoor=true;enemy.dmgMin=enemy.dmgMax=0;
  b.queue=['e1'];
- takeTurn(b,'e1','enemy_strike','h1',()=>.99);
+ const rolls=[.1,.9,.9,.99];let i=0;
+ takeTurn(b,'e1','enemy_strike','h1',()=>rolls[i++]??.99);
  assert.equal(hero.dead,true);
  assert.ok(b.log.some(x=>x.includes('Deathblow')));
 });
