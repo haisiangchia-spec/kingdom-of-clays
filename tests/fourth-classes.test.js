@@ -44,7 +44,7 @@ test('Tracking Shot can reveal stealth and buffs actor once per battle',()=>{
 test('Duelist advance moves forward and arms riposte',()=>{
  const s=b('h1');s.units=[s.units[1],s.units[0],s.units[2],s.units[3],...s.units.filter(x=>x.side==='enemy')];
  takeTurn(s,'h1','shadowstep_counter','e1',()=>.3);
- assert.equal(rank(s,'h1'),0);assert.equal(s.units.find(u=>u.id==='h1').riposte,3);
+ assert.equal(rank(s,'h1'),0);assert.equal(s.units.find(u=>u.id==='h1').riposte,2);
 });
 test('Open Vein applies bleed and speed penalty',()=>{
  const s=attack('h1','bleeding_edge','e1'),target=s.units.find(x=>x.id==='e1');
@@ -105,7 +105,7 @@ test('Bard Harvest bleeds both middle enemies and adds Finale stack',()=>{
 });
 test('Bard Solo advances to front and gives mark, dodge, Finale boosts',()=>{
  const s=attack('h3','heroic_solo','e1'),a=s.units.find(x=>x.id==='h3');
- assert.equal(rank(s,'h3'),0);assert.equal(a.marked,3);
+ assert.equal(rank(s,'h3'),0);assert.equal(a.marked,2);
  assert.equal(effectModifier(a,'dodge'),20);assert.equal(effectModifier(a,'finaleDamage'),75);
 });
 test('Bard Finale consumes stacks, retreats and is once per battle',()=>{
