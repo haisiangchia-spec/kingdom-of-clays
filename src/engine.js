@@ -446,12 +446,12 @@ export function makeLargeMonsterBattle(seed=1){
 }
 export function makeProgressionBattle(seed=1){
  const state=makeBattle(seed);
- setActorSkillLevel(state,'h1','heavy_slash',5);
- setActorSkillLevel(state,'h1','countering_advance',5);
- setActorSkillLevel(state,'h2','crushing_strike',5);
- setActorSkillLevel(state,'h4','greater_heal',5);
- setActorSkillLevel(state,'h4','group_healing',5);
- state.log.unshift('Verified level-five skill progression laboratory (five upgraded skills)');
+ for(const [heroId,keys] of [
+   ['h1',Object.keys(STARTER_CLASS_SKILLS).filter(k=>STARTER_CLASS_SKILLS[k].classId==='swordsman')],
+   ['h2',Object.keys(STARTER_CLASS_SKILLS).filter(k=>STARTER_CLASS_SKILLS[k].classId==='warrior')],
+   ['h4',Object.keys(THIRD_CLASS_SKILLS).filter(k=>THIRD_CLASS_SKILLS[k].classId==='priest')]
+ ])for(const key of keys)setActorSkillLevel(state,heroId,key,5);
+ state.log.unshift('Verified level-five skill progression laboratory (21 upgraded skills)');
  return state;
 }
 export function makeBattle(seed=1){const units=[unit('h1','Swordsman','hero',{hp:33,spd:3,prot:10}),unit('h2','Warrior','hero',{hp:33,spd:1}),unit('h3','Hunter','hero',{hp:25,spd:3}),unit('h4','Priest','hero',{hp:24,spd:4}),unit('e1','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5,types:['unholy']}),unit('e2','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5,types:['unholy']}),unit('e3','Skeleton Archer','enemy',{hp:14,spd:4,dodge:8,types:['unholy']}),unit('e4','Skeleton Court Mage','enemy',{hp:13,spd:5,dodge:9,types:['unholy']})];return {seed,round:0,torch:75,units,queue:[],log:['Combat begins!']};}
