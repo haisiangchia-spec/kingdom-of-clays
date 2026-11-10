@@ -13,7 +13,7 @@ Serve the repository root with `python3 -m http.server 8000` and open `http://lo
 - **Dark Knight / Beastmaster / Bard** — three-class testing lineup with Dark Knight front, Beastmaster second, Bard third and Priest rear. Several combat abilities only become legal after rank movement.
 - **Champion / Hex Mage / Treasure Hunter** — testing lineup with Cursed Champion front, Treasure Hunter second, Hex Mage third, Warrior rear. Includes reverse guard, variable healing, limited-use self buffs and rank movement.
 - **Spiritbound Transformation** — testing lineup with Warrior front, Spiritbound second, Priest third and Hunter rear. Spiritbound has three human skills, three beast skills and one shared free Transform.
-- **Verified Lv5 Skills** — four-hero combat lab with level-five upgrades for Swordsman's Heavy Slash and Countering Advance, Warrior's Crushing Strike, and Priest's Greater Heal and Group Healing. All other skills remain level one until their upgrade tables are verified.
+- **Verified Lv5 Skills** — four-hero combat lab with **all seven level-five abilities** for Swordsman, Warrior and Priest (21 skills total). Hunter remains level one; other class upgrades are pending.
 - Repeated skill targeting of any occupied rank hits a giant **once**. Multi-rank AoE attacks likewise hit it **once**, not once per slot.
 
 ## Architecture
@@ -23,8 +23,8 @@ Serve the repository root with `python3 -m http.server 8000` and open `http://lo
 - `src/combat-effects.js` — group targeting, cleansing, restoration.
 - `src/status.js` — guard, stun, riposte, temporary buffs and debuffs.
 - `src/dd1-math.js` — combat calculations.
-- `src/skill-catalog.js` — **105 locked display-name mappings** (15 base-game classes × 7 abilities). All 105 hero skills have level-one prototype handlers, but this does not establish full DD1 parity. A separate `verifiedLevels` field identifies source-checked higher upgrades; exactly five skills currently have full level 1–5 tables.
-- `src/skill-progression.js` — actor-specific skill levels and **verified-only** progression patches. Upgrades are rejected, not guessed, when original DD1 values are unverified. First five researched skills have level 2–5 values and are playable through the level-five lab.
+- `src/skill-catalog.js` — **105 locked display-name mappings** (15 base-game classes × 7 abilities). All 105 hero skills have level-one prototype handlers, but this does not establish full DD1 parity. A separate `verifiedLevels` field identifies source-checked higher upgrades; exactly 21 skills currently have full level 1–5 tables (Swordsman, Warrior, Priest).
+- `src/skill-progression.js` — actor-specific skill levels and **verified-only** progression patches. Upgrades are rejected, not guessed, when original DD1 values are unverified. All 21 Swordsman/Warrior/Priest skills have researched level 2–5 values and are playable through the level-five lab.
 - `src/class-skills.js` — 14 level-one Swordsman (Man-at-Arms) and Warrior (Crusader) specifications.
 - `src/class-skills-batch2.js` — 21 level-one Hunter (Arbalest), Thief (Grave Robber), and Mage (Plague Doctor) specifications.
 - `src/class-skills-batch3.js` — 21 level-one Priest (Vestal), Monster Slayer (Bounty Hunter), and Berserker (Hellion) specifications; includes self-exhaustion, conditional attack bonuses, self-healing, torch, stealth detection and crowd control.
@@ -37,6 +37,6 @@ Serve the repository root with `python3 -m http.server 8000` and open `http://lo
 
 The engine has working examples of rank-based targeting, movement, bleed/blight, effects, guarding, marking, riposte, corpses and large enemies, but many skills and quantitative values remain provisional. In particular, DD1 class-specific skill rank scaling, enemy attacks and AI, enemy resistances, turn sequencing, stun edge cases, multi-action bosses, stalling rules, status-effect combinations, deathblow transitions and the complete bestiary **require additional implementation and verification**. A three-rank boss does not leave a corpse; an eligible two-rank enemy may leave a two-rank corpse.
 
-Visuals are still placeholders. No copyrighted anime illustrations are packaged here. Fifteen classes now have seven level-one ability definitions each. The next work should extend verified skill progression beyond the initial five skills (5 of 105 researched to level five), audit skill data/effect order, then implement the full enemy/boss ability roster.
+Visuals are still placeholders. No copyrighted anime illustrations are packaged here. Fifteen classes now have seven level-one ability definitions each. The next work should extend verified skill progression beyond the initial 21 skills (21 of 105 researched to level five), audit skill data/effect order, then implement the full enemy/boss ability roster.
 
 Sandbox campaign and dungeon-exploration layers remain deferred until combat fidelity is sufficiently verified.
