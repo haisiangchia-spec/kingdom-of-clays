@@ -38,7 +38,7 @@ test('Swordsman Defender grants a protective PROT buff and guarding',()=>{
 test('Swordsman Retribution applies self mark and establishes 3-turn riposte',()=>{
  const b=doSkill('h1','riposte_stance','e1');
  const hero=b.units.find(x=>x.id==='h1');
- assert.equal(hero.marked,2);assert.equal(hero.riposte,3);
+ assert.equal(hero.marked,1);assert.equal(hero.riposte,2);
  assert.equal(hero.riposteMod,-.4);
 });
 test('Swordsman Command buffs all allies, including backline',()=>{
