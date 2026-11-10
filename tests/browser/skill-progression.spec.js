@@ -12,7 +12,11 @@ test('verified level-five laboratory loads and labels upgraded abilities',async 
     base:ABILITIES.heavy_slash.acc,
     upgraded:getActorSkill(b.units.find(u=>u.id==='h1'),'heavy_slash').acc};
  });
- expect(loaded).toEqual({hero:{heavy_slash:5,countering_advance:5},base:85,upgraded:105});
+ expect(loaded.hero.heavy_slash).toBe(5);
+ expect(loaded.hero.countering_advance).toBe(5);
+ expect(Object.keys(loaded.hero)).toHaveLength(7);
+ expect(loaded.base).toBe(85);
+ expect(loaded.upgraded).toBe(105);
  expect(errors).toEqual([]);
 });
 test('level-five healing uses exact reference numbers in Chromium',async ({page})=>{
@@ -32,10 +36,10 @@ test('unverified skill upgrade is blocked without changing actor state',async ({
   const {makeBattle,setActorSkillLevel,ABILITIES}=await import('./src/engine.js');
   const b=makeBattle(),u=b.units.find(x=>x.id==='h2');
   let error='';
-  try{setActorSkillLevel(b,'h2','sweeping_assault',5);}catch(e){error=e.message;}
-  return {error,levels:u.skillLevels,base:ABILITIES.sweeping_assault.mod};
+  try{setActorSkillLevel(b,'h2','shadow_lunge',5);}catch(e){error=e.message;}
+  return {error,levels:u.skillLevels,base:ABILITIES.shadow_lunge.mod};
  });
  expect(result.error).toContain('Unverified skill upgrade');
  expect(result.levels).toEqual({});
- expect(result.base).toBe(-.4);
+ expect(result.base).toBe(.4);
 });
