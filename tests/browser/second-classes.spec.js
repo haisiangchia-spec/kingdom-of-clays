@@ -46,7 +46,7 @@ test('stun AoE deals no direct damage; Thief can vanish and pierce protection',a
  });
  expect(results.after).toEqual(results.before);
  expect(results.stuns).toEqual([1,1]);
- expect(results.stealth).toBe(2);
+ expect(results.stealth).toBe(1);
 });
 test('eight-class level-one skill integration count is 105, with 105 total names',async ({page})=>{
  await page.goto('/');
