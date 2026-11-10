@@ -9,10 +9,11 @@ import {THIRD_CLASS_SKILLS} from './class-skills-batch3.js';
 import {FOURTH_CLASS_SKILLS} from './class-skills-batch4.js';
 import {FIFTH_CLASS_SKILLS} from './class-skills-batch5.js';
 import {SPIRITBOUND_SKILLS} from './class-skills-spiritbound.js';
+import {resolveSkillDefinition,equipVerifiedSkillLevel} from './skill-progression.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
 export const randInt=(r,lo,hi)=>lo+Math.floor(r()*(hi-lo+1));
-export function unit(id,name,side,stats={}){return {id,name,side,classId:stats.classId??(side==='hero'?name.toLowerCase().replace(/[^a-z0-9]+/g,'_'):null),size:stats.size??1,types:stats.types??[],hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0,debuff:stats.debuffResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathDoorRecovery:false,heartAttackRecovery:false,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false,usedSkills:{},form:stats.form??null,transformsUsed:0,transformUsedThisTurn:false};}
+export function unit(id,name,side,stats={}){return {id,name,side,classId:stats.classId??(side==='hero'?name.toLowerCase().replace(/[^a-z0-9]+/g,'_'):null),size:stats.size??1,types:stats.types??[],hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0,debuff:stats.debuffResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathDoorRecovery:false,heartAttackRecovery:false,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false,usedSkills:{},skillLevels:{...stats.skillLevels},form:stats.form??null,transformsUsed:0,transformUsedThisTurn:false};}
 export const ABILITIES={
  heavy_slash:{name:'Heavy Slash',from:[0,1],to:[0,1],acc:85,crit:2,mod:0},
  guardian_parry:{name:"Guardian's Parry",from:[0,1,2,3],to:[0,1,2,3],kind:'guard'},
@@ -37,10 +38,16 @@ export const ABILITIES={
  enemy_stress:{name:'Dark Whisper',from:[0,1,2,3],to:[0,1,2,3],kind:'stress',amount:15,acc:95}
 };
 Object.assign(ABILITIES,STARTER_CLASS_SKILLS,SECOND_CLASS_SKILLS,THIRD_CLASS_SKILLS,FOURTH_CLASS_SKILLS,FIFTH_CLASS_SKILLS,SPIRITBOUND_SKILLS);
+export function getActorSkill(actor,key){return resolveSkillDefinition(ABILITIES,key,actor.skillLevels?.[key]??1);}
+export function setActorSkillLevel(state,actorId,key,level){
+ const actor=state.units.find(u=>u.id===actorId);
+ if(!actor||actor.side!=='hero'||actor.dead)throw Error('Active hero not found');
+ return equipVerifiedSkillLevel(actor,key,level,ABILITIES);
+}
 export function ranks(state,side){return state.units.filter(u=>u.side===side&&!u.dead);}
 export function rank(state,id){return rankOf(state,id);}
 export {occupiedRanks,formationSlots};
-export function availableTargets(state,actorId,key){const a=state.units.find(x=>x.id===actorId),sk=ABILITIES[key];if(!a||!sk||a.dead||a.corpse||!occupiedRanks(state,a.id).some(i=>sk.from.includes(i)))return [];
+export function availableTargets(state,actorId,key){const a=state.units.find(x=>x.id===actorId),sk=a&&ABILITIES[key]?getActorSkill(a,key):null;if(!a||!sk||a.dead||a.corpse||!occupiedRanks(state,a.id).some(i=>sk.from.includes(i)))return [];
 if(sk.classId&&a.classId!==sk.classId)return [];
 if(sk.form&&sk.form!=='either'&&a.form!==sk.form)return [];
 if(sk.kind==='transform'&&(a.form!=='human'&&a.form!=='beast'||a.transformUsedThisTurn))return [];if(sk.maxUses&&(a.usedSkills?.[key]??0)>=sk.maxUses)return [];
@@ -86,8 +93,7 @@ function hurt(s,u,n,r,suppressCorpse=false,physicalHit=false){if(u.dead)return;i
 export function takeTurn(state,actorId,key,targetId,r){
   const a=currentActor(state);
   if(!a||a.id!==actorId)throw Error('Not this actor’s turn');
-  const sk=ABILITIES[key];
-  if(!sk)throw Error('Unknown skill');
+  const sk=getActorSkill(a,key);
   if(!availableTargets(state,actorId,key).includes(targetId))throw Error('Illegal target or rank');
   let target=state.units.find(x=>x.id===targetId);
   if(sk.kind==='randomAttack'){
@@ -436,6 +442,16 @@ export function makeLargeMonsterBattle(seed=1){
  state.units=state.units.filter(u=>u.id!=='e1'&&u.id!=='e2'&&u.id!=='e3');
  state.units.splice(4,0,unit('boss','Goblin Emperor','enemy',{size:3,hp:96,spd:2,dodge:3,prot:15,moveResist:80,dmgMin:7,dmgMax:13}));
  state.log=['A giant foe occupies three ranks!',...state.log];
+ return state;
+}
+export function makeProgressionBattle(seed=1){
+ const state=makeBattle(seed);
+ setActorSkillLevel(state,'h1','heavy_slash',5);
+ setActorSkillLevel(state,'h1','countering_advance',5);
+ setActorSkillLevel(state,'h2','crushing_strike',5);
+ setActorSkillLevel(state,'h4','greater_heal',5);
+ setActorSkillLevel(state,'h4','group_healing',5);
+ state.log.unshift('Verified level-five skill progression laboratory (five upgraded skills)');
  return state;
 }
 export function makeBattle(seed=1){const units=[unit('h1','Swordsman','hero',{hp:33,spd:3,prot:10}),unit('h2','Warrior','hero',{hp:33,spd:1}),unit('h3','Hunter','hero',{hp:25,spd:3}),unit('h4','Priest','hero',{hp:24,spd:4}),unit('e1','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5,types:['unholy']}),unit('e2','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5,types:['unholy']}),unit('e3','Skeleton Archer','enemy',{hp:14,spd:4,dodge:8,types:['unholy']}),unit('e4','Skeleton Court Mage','enemy',{hp:13,spd:5,dodge:9,types:['unholy']})];return {seed,round:0,torch:75,units,queue:[],log:['Combat begins!']};}
