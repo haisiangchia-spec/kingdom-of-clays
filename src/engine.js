@@ -44,7 +44,7 @@ export function availableTargets(state,actorId,key){const a=state.units.find(x=>
 if(sk.classId&&a.classId!==sk.classId)return [];
 if(sk.form&&sk.form!=='either'&&a.form!==sk.form)return [];
 if(sk.kind==='transform'&&(a.form!=='human'&&a.form!=='beast'||a.transformUsedThisTurn))return [];if(sk.maxUses&&(a.usedSkills?.[key]??0)>=sk.maxUses)return [];
-const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare','stealth','partyStressChance','selfHeal','stressOnly','variableHeal','selfHealStress','reverseGuard','transform'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth','selfHeal','selfHealStress','transform'].includes(sk.kind)||x.id===a.id)&& (sk.kind!=='reverseGuard'||x.id!==a.id));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?candidates.slice(0,1):candidates).filter(x=>side===a.side||isSelectable(x,sk,side)).map(x=>x.id);}
+const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare','stealth','partyStressChance','selfHeal','stressOnly','variableHeal','selfHealStress','reverseGuard','transform'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth','selfHeal','selfHealStress','transform'].includes(sk.kind)||x.id===a.id)&& (sk.kind!=='reverseGuard'||x.id!==a.id));const selectable=candidates.filter(x=>side===a.side||isSelectable(x,sk,side));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?selectable.slice(0,1):selectable).map(x=>x.id);}
 export function startRound(state,r){state.round++;clearExpiredCorpses(state);state.queue=state.units.filter(x=>!x.dead&&!x.corpse).map(x=>({id:x.id,score:initiativeScore({...x,spd:x.spd+effectModifier(x,'speed')},r)})).sort((a,b)=>b.score-a.score||(state.units.find(x=>x.id===a.id).side==='hero'?-1:1)||rank(state,a.id)-rank(state,b.id)).map(x=>x.id);state.units.forEach(u=>u.acted=false);state.log.push(`Round ${state.round} begins`);return state;}
 export function currentActor(s){while(s.queue.length){const u=s.units.find(x=>x.id===s.queue[0]);if(u&&!u.dead&&!u.acted)return u;s.queue.shift();}return null;}
 export function stress(state,u,amount,r){
@@ -321,7 +321,7 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(sk.riposte){a.riposte=sk.riposteDuration??3;a.riposteAcc=sk.riposteAcc??90;a.riposteMod=sk.riposteMod??-.4;}
   if(!wasStunned&&!sk.freeAction)completeUnstunnedTurn(a);
   if(a.stealthed&&sk.kind!=='stealth')a.stealthed=0;
-  if(!sk.freeAction){a.acted=true;state.queue.shift();}
+  if(!sk.freeAction){finishActorTurn(a);a.acted=true;state.queue.shift();}
   return state;
 }
 function executeRiposte(state,defender,attacker,r){
@@ -347,12 +347,19 @@ export function prepareActorTurn(state,id,r){
  }
  if(actor.stun>0){
    consumeStun(actor);
+   finishActorTurn(actor);
    actor.acted=true;
    state.queue.shift();
    state.log.push(`${actor.name} loses a turn to stun`);
    return 'stunned';
  }
  return 'ready';
+}
+// Ordinary buffs, marks, guards, ripostes and stealth expire at the end of
+// their owner's completed turn. Bleed, blight and restoration tick at turn start.
+export function finishActorTurn(actor){
+ tickTimedEffects(actor);
+ if(actor.stealthed>0)actor.stealthed--;
 }
 export function beginTurn(state,id,r){
  const u=state.units.find(x=>x.id===id);if(!u||u.dead)return;
@@ -369,8 +376,6 @@ export function beginTurn(state,id,r){
   hurt(state,u,dot.value,r,true);state.log.push(`${u.name} takes ${dot.value} ${dot.type}`);dot.turns--;
  }
  u.dot=u.dot.filter(x=>x.turns>0);
- tickTimedEffects(u);
- if(u.stealthed>0)u.stealthed--;
 }
 function revertSpiritbound(state,u,reason){
  if(u.form!=='beast')return;
