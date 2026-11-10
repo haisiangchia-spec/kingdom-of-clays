@@ -324,7 +324,7 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(sk.markSelf)a.marked=sk.markSelf;
   if(sk.advance)moveWithinFormation(state,a.id,-sk.advance);
   if(sk.selfBack)moveWithinFormation(state,a.id,sk.selfBack);
-  if(sk.riposte){a.riposte=sk.riposteDuration??3;a.riposteAcc=sk.riposteAcc??90;a.riposteMod=sk.riposteMod??-.4;}
+  if(sk.riposte){a.riposte=sk.riposteDuration??3;a.riposteAcc=sk.riposteAcc??90;a.riposteMod=sk.riposteMod??-.4;a.riposteCrit=sk.riposteCrit??0;}
   if(!wasStunned&&!sk.freeAction)completeUnstunnedTurn(a);
   if(a.stealthed&&sk.kind!=='stealth')a.stealthed=0;
   if(!sk.freeAction){finishActorTurn(a);a.acted=true;state.queue.shift();}
@@ -334,7 +334,7 @@ function executeRiposte(state,defender,attacker,r){
   const acc=defender.riposteAcc??(defender.side==='hero'?90:85);
   const chance=hitChance({accuracy:acc,accModifier:effectiveCombatStats(defender).accuracy+effectModifier(defender,'accuracy'),dodge:attacker.dodge+effectModifier(attacker,'dodge')});
   if(r()*100>=chance){state.log.push(`${defender.name} counters ${attacker.name} but misses`);return;}
-  const crit=rollCrit({baseCrit:defender.crit},r);
+  const crit=rollCrit({baseCrit:defender.crit,skillCrit:defender.riposteCrit??0},r);
   const damage=directDamage({minDamage:defender.dmgMin,maxDamage:defender.dmgMax,skillMultiplier:1+(defender.riposteMod??-.4),crit,prot:attacker.prot+effectModifier(attacker,'prot'),damageMultiplier:effectiveCombatStats(defender).damageMultiplier},r);
   hurt(state,attacker,damage,r,crit,true);
   state.log.push(`${defender.name} ripostes ${attacker.name}: ${damage}${crit?' CRIT':''}`);
