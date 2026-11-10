@@ -102,3 +102,36 @@ Next: prioritize the exact damage modifier pipeline and Death's Door party-stres
 - [Official DD1 Riposte](https://darkestdungeon.wiki.gg/wiki/Riposte) — counterattack expiry and stun interactions
 
 **Remaining work:** Mark and guard refresh nuances, special enemy-only stealth modifiers, critical buff duration edge cases, ability-specific turn-end expiry overrides, horror and affliction lifecycle, enemy action sequencing and the level 2–5 skills still need independent verification. This pass adds lifecycle correctness for the shared implementation; it is not a full fidelity certification.
+
+## Pass 5 — Verified skill progression architecture (2026-11-11)
+
+**Implemented**
+- Added `src/skill-progression.js`: a strictly validated, data-driven **level 1–5** upgrade patch registry, separate from the locked skill display names and level-one specifications.
+- `getActorSkill(actor,id)` now returns the **actor-specific** effective skill specification. `availableTargets` and `takeTurn` use that specification; rank rules, damage, healing, stun and displacement therefore read the selected level automatically.
+- Upgrades belong to individual hero instances (`skillLevels`). A second copy of the same class does not inherit another hero's upgrades. The global `ABILITIES` level-one definitions are never mutated.
+- `setActorSkillLevel` verifies class ownership, integer levels 1–5 and **source-confirmed** upgrade values. It throws on unknown/unverified upgrades rather than inventing plausible statistics.
+- Added a **Verified Lv5 Skills** browser encounter and a `verifiedLevels` field to the 105-skill catalog so developers and players can distinguish implemented levels from pending ones.
+
+**First five skills with verified complete level 1–5 tables**
+| Clays skill | DD1 original | Level progression implemented |
+| --- | --- | --- |
+| Heavy Slash | Man-at-Arms Crush | ACC 85→105 (+5/level), CRIT 5→9 (+1/level) |
+| Countering Advance | Man-at-Arms Rampart | ACC 90→110, CRIT 5→9, stun/knockback application 100→140 |
+| Crushing Strike | Crusader Smite | ACC 85→105, CRIT 0→4, +DMG vs Unholy 15→35% |
+| Greater Heal | Vestal Divine Grace | Heal range 4–5→8–9 |
+| Group Healing | Vestal Divine Comfort | Heal ranges 1–3, 2–3, 3–3, 3–4, 4–5 |
+
+All other 100 skills remain explicitly **level-one only**. Five verified paths do not mean all five classes' seven skills, equipment or level progression is finished.
+
+**Reference tables**
+- [Official Man-at-Arms combat skills](https://darkestdungeon.wiki.gg/wiki/Man-at-Arms)
+- [Official Crusader combat skills](https://darkestdungeon.wiki.gg/wiki/Crusader)
+- [Official Vestal combat skills](https://darkestdungeon.wiki.gg/wiki/Vestal)
+
+**Tests**
+- `tests/skill-progression.test.js` checks complete tables, deep effect patching, live damage and healing, class ownership, duplicate hero isolation, invalid input and unverified upgrades.
+- `tests/browser/skill-progression.spec.js` covers the playable level-five laboratory and verifies browser calculations and rejection paths.
+- Full existing level-one tests continue to run with the default skill level of one.
+
+**Next**
+Expand verified level 2–5 skill tables systematically, starting with the remaining Swordsman, Warrior and Priest abilities. Audit numerical progression against the current base-game DD1 version; do not substitute old/rebalanced values without explicit source verification.
