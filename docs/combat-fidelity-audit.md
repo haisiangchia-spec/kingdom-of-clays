@@ -135,3 +135,29 @@ All other 100 skills remain explicitly **level-one only**. Five verified paths d
 
 **Next**
 Expand verified level 2–5 skill tables systematically, starting with the remaining Swordsman, Warrior and Priest abilities. Audit numerical progression against the current base-game DD1 version; do not substitute old/rebalanced values without explicit source verification.
+
+## Pass 6 — Complete three-class progression tables (2026-11-11)
+
+**Scope:** Implement and test **all 21** base-game level-one-to-five ability tables for **Swordsman (Man-at-Arms), Warrior (Crusader) and Priest (Vestal)**.
+
+**Verified skill upgrade coverage:** Increased from **5/105** to **21/105** skill tracks. Four upgrade patches per track = **84 level 2–5 patches**. Other 84 hero skills remain level one; unsupported upgrades still throw instead of defaulting to guessed data.
+
+**Original DD1 references:**
+- [Official Man-at-Arms combat skill tables](https://darkestdungeon.wiki.gg/wiki/Man-at-Arms) — Bellow, Defender, Retribution, Command and Bolster
+- [Official Crusader combat skill tables](https://darkestdungeon.wiki.gg/wiki/Crusader) — Zealous Accusation, Stunning Blow, Bulwark of Faith, Battle Heal, Holy Lance and Inspiring Cry
+- [Official Vestal combat skill tables](https://darkestdungeon.wiki.gg/wiki/Vestal) — Mace Bash, Judgement, Dazzling Light, Illumination and Hand of Light
+
+**Engine integration:**
+- `src/skill-progression.js` merges nested damage, healing, stun, debuff, guard, protection, stress-heal and torch upgrades into each actor's skill definition without mutating the base skill shared by other heroes.
+- Added missing `riposteCrit` propagation and combat calculation for the upgraded Man-at-Arms Retribution riposte. It previously supported the upgraded riposte damage multiplier but ignored its increased critical chance.
+- The **Verified Lv5 Skills** demonstration now upgrades seven Swordsman, seven Warrior and seven Priest abilities on their corresponding heroes; all other heroes retain their original level-one skill specifications.
+- `SKILL_CATALOG.verifiedLevels` reflects all 21 researched tracks.
+
+**Regression evidence:**
+- `tests/three-class-upgrades.test.js`: all 84 patches, numerical tables and relevant runtime effects.
+- `tests/browser/three-class-upgrades.spec.js`: 21 upgraded skills in Chromium, upgraded riposte, and Vestal Illumination behaviour.
+- Existing `tests/skill-progression.test.js` and browser tests now expect 21 upgrades rather than five.
+
+**Limitations:** Base-game ability levels are verified against published tables, but not every conditional/status effect ordering interaction has been certified against live DD1 runtime. Equipment levels, Resolve XP, gold costs and availability, enemy-specific resistance scaling, character abilities outside the base 15 classes, and all progression for the other twelve classes remain pending.
+
+**Next:** Implement skill 2–5 tables for Hunter, Thief and Mage, then continue through all remaining classes. Keep 105/105 level-one handlers separate from the **21/105 verified level-five tracks** completion metric.
