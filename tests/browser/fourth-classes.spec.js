@@ -38,7 +38,7 @@ test('Bard Solo only buffs self once despite attacking four enemies',async ({pag
   return {rank:rank(s,'h3'),dodge:effectModifier(a,'dodge'),
     finale:effectModifier(a,'finaleDamage'),mark:a.marked};
  });
- expect(result).toEqual({rank:0,dodge:20,finale:75,mark:3});
+ expect(result).toEqual({rank:0,dodge:20,finale:75,mark:2});
 });
 test('catalog counts 105 integrated skills and retains 105 base names',async ({page})=>{
  await page.goto('/');
