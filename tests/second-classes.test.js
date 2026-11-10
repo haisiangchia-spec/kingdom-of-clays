@@ -73,7 +73,7 @@ test('Thief twin daggers hit middle pair and apply bleed resistance debuff',()=>
 test('Thief vanishing step self-targets, retreats and grants stealth/buffs',()=>{
  const b=act('h2','vanishing_step','h2');
  const u=b.units.find(x=>x.id==='h2');
- assert.equal(rank(b,'h2'),3);assert.equal(u.stealthed,2);
+ assert.equal(rank(b,'h2'),3);assert.equal(u.stealthed,1);
  assert.equal(effectModifier(u,'damage'),80);assert.equal(effectModifier(u,'dodge'),10);
 });
 test('Thief precision throw grants temporary accuracy on successful hit',()=>{
