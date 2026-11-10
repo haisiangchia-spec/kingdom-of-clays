@@ -84,3 +84,21 @@ Next: prioritize the exact damage modifier pipeline and Death's Door party-stres
 - Enemy AI, full bestiary, champion scaling and boss multi-actions are still incomplete.
 
 **Next audit:** distinguish DD1's end-of-turn vs start-of-turn duration expiration for status effects and reconcile the skill leveling tables before implementing enemies.
+
+## Pass 4 — End-of-turn status timing and stealth AoE eligibility (2026-11-11)
+
+**Verified implementation changes**
+- Moved guard, riposte, mark, stealth, and timed buff/debuff countdown from **start of actor turn** to **end of completed actor turn**. DD1's official Switch 1.2.0 patch notes explicitly changed buffs to tick at the end of turns. This means a self-applied two-turn buff remains active until the end of its owner's following turn, rather than expiring before that actor can benefit from it.
+- Kept bleed, blight, and restoration processing at the **start** of the affected actor's turn. Independent DOT stacks still tick and expire separately.
+- Stun consumes an actor's scheduled turn but now also advances their timed status counters, without performing an attack. Death to turn-start DOT remains processed before stun, as covered in Pass 1.
+- Fixed AoE selection when the **frontmost legal enemy is stealthed but another legal enemy is visible**. Selectability is filtered before choosing the single area-attack anchor. The AoE can then hit both visible and stealthed targets. If all eligible enemies are stealthed, ordinary AoE remains unavailable.
+- Updated legacy test expectations for statuses applied on the actor's own turn, plus new Node and Chromium regression coverage in `tests/status-timing-audit.test.js` and `tests/browser/status-timing-audit.spec.js`.
+
+**Reference**
+- [Official DD1 status effects](https://darkestdungeon.wiki.gg/wiki/Status_Effects_(Darkest_Dungeon)) — independent stacking, DOT timing
+- [Official DD1 Buff](https://darkestdungeon.wiki.gg/wiki/Buff_(Darkest_Dungeon)) — durations decrease at the end of a hero's turn
+- [Official DD1 Stealth](https://darkestdungeon.wiki.gg/wiki/Stealth_(Darkest_Dungeon)) — area attacks may strike stealth if a non-stealthed target is legal
+- [DD1 Switch patch 1.2.0 notes](https://benoitren.be/switchpatchnotes/darkestdungeon.html) — explicit end-turn buff timing correction
+- [Official DD1 Riposte](https://darkestdungeon.wiki.gg/wiki/Riposte) — counterattack expiry and stun interactions
+
+**Remaining work:** Mark and guard refresh nuances, special enemy-only stealth modifiers, critical buff duration edge cases, ability-specific turn-end expiry overrides, horror and affliction lifecycle, enemy action sequencing and the level 2–5 skills still need independent verification. This pass adds lifecycle correctness for the shared implementation; it is not a full fidelity certification.
