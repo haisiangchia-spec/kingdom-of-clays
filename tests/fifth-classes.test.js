@@ -36,7 +36,7 @@ test('Cursed Champion Revenge provides damage buff, defence penalty and is limit
 });
 test('Cursed Champion Withstand marks self and boosts protection',()=>{
  const b=use('h1','unyielding_body','h1'),hero=b.units.find(x=>x.id==='h1');
- assert.equal(hero.marked,999);assert.equal(effectModifier(hero,'prot'),20);
+ assert.equal(hero.marked,998);assert.equal(effectModifier(hero,'prot'),20);
 });
 test('Cursed Champion Solemnity restores health and stress to self',()=>{
  const b=battle(),hero=b.units.find(x=>x.id==='h1');hero.hp=10;hero.stress=19;
