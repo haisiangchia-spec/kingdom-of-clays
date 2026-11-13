@@ -4,9 +4,22 @@
 // four-target skills four times the selection chance of single-target skills.
 const PROFILES=Object.freeze({
   'Skeleton Archer':Object.freeze({targetPreference:'rear'}),
-  'Skeleton Court Mage':Object.freeze({skillWeights:Object.freeze({court_curse:3,court_blight:1,enemy_stress:3,enemy_strike:1}),targetPreference:'stressed'})
+  'Skeleton Court Mage':Object.freeze({skillWeights:Object.freeze({court_curse:3,court_blight:1,enemy_stress:3,enemy_strike:1}),targetPreference:'stressed'}),
+  'Goblin Emperor':Object.freeze({
+    phaseWeights:Object.freeze({
+      commanding:Object.freeze({emperor_slam:1,emperor_roar:3}),
+      desperate:Object.freeze({emperor_slam:4,emperor_roar:1})
+    }),targetPreference:'weakest'
+  })
 });
 export const ENEMY_TACTICS=PROFILES;
+
+// HP-threshold boss tactics are a Kingdom of Clays test fixture, NOT an
+// original-DD1 Goblin Emperor rule. Evaluate from current HP each action.
+export function bossPhase(actor){
+ if(!actor||actor.enemyProfile!=='emperor')return null;
+ return actor.hp>0&&actor.hp<=actor.maxHp/2?'desperate':'commanding';
+}
 
 function weightedChoice(items,weightFor,random){
   const weighted=items.map(item=>({item,weight:weightFor(item)}))
@@ -25,7 +38,7 @@ export function chooseEnemyAction(state,actorId,skillIds,random,abilities,availa
     const skill=abilities[key];
     if(!skill)continue;
     const targets=availableTargets(state,actorId,key);
-    const weight=profile.skillWeights?.[key]??skill.aiWeight??1;
+    const weight=profile.phaseWeights?.[bossPhase(actor)]?.[key]??profile.skillWeights?.[key]??skill.aiWeight??1;
     if(!targets.length||!Number.isFinite(weight)||weight<=0)continue;
     choices.push({key,targets,weight});
   }
@@ -42,6 +55,7 @@ export function chooseEnemyAction(state,actorId,skillIds,random,abilities,availa
       return 1+allies.indexOf(unit); // more rearward targets receive higher weight
     }
     if(profile.targetPreference==='stressed')return 1+Math.floor((unit.stress??0)/25);
+    if(profile.targetPreference==='weakest')return 1+Math.max(0,Math.floor((1-unit.hp/Math.max(1,unit.maxHp))*4));
     return 1;
   },random);
   return {key:picked.key,targetId:target};
