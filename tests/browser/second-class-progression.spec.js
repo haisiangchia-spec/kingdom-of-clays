@@ -16,7 +16,7 @@ test('Hunter Thief Mage Lv5 laboratory shows complete 21-track progression',asyn
    mage:getActorSkill(b.units.find(x=>x.id==='h3'),'corrosive_bolt').status.value
   };
  });
- expect(result).toEqual({upgraded:21,verified:63,hunter:1,thief:4,mage:7});
+ expect(result).toEqual({upgraded:21,verified:84,hunter:1,thief:4,mage:7});
  expect(errors).toEqual([]);
 });
 test('Hunter level-five Battlefield Bandage heals and applies healing-received bonus',async ({page})=>{
