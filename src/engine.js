@@ -108,15 +108,17 @@ export function takeTurn(state,actorId,key,targetId,r){
     if(a.form==='human'){
       a.form='beast';
       for(const ally of ranks(state,a.side))if(ally.id!==a.id)stress(state,ally,8,r);
-      a.hp=Math.min(a.maxHp,a.hp+5);
+      const transform=sk.beastTransform??{heal:5,speed:1,blightResist:20,damage:10};
+      a.hp=Math.min(a.maxHp,a.hp+transform.heal);
       if(a.deathDoor&&a.hp>0){a.deathDoor=false;a.mortality??='deathDoorRecovery';}
-      addTimedEffect(a,{kind:'buff',spiritFormBuff:true,turns:4,modifiers:{speed:1,blightResist:20}});
-      addTimedEffect(a,{kind:'buff',spiritFormBuff:true,turns:3,modifiers:{damage:10}});
+      addTimedEffect(a,{kind:'buff',spiritFormBuff:true,turns:4,modifiers:{speed:transform.speed,blightResist:transform.blightResist}});
+      addTimedEffect(a,{kind:'buff',spiritFormBuff:true,turns:3,modifiers:{damage:transform.damage}});
       state.log.push(`${a.name} awakens the beast spirit (+8 ally stress)`);
     }else{
       a.form='human';
       a.effects=a.effects.filter(e=>!e.spiritFormBuff&&!e.rakeStack);
-      addTimedEffect(a,{kind:'debuff',turns:4,selfInflicted:true,modifiers:{speed:-4}});
+      const speedPenalty=sk.humanTransform?.speedPenalty??-4;
+      if(speedPenalty!==0)addTimedEffect(a,{kind:'debuff',turns:4,selfInflicted:true,modifiers:{speed:speedPenalty}});
       for(const ally of ranks(state,a.side))if(ally.id!==a.id)ally.stress=clamp(ally.stress-2,0,200);
       state.log.push(`${a.name} returns to human form (-2 ally stress)`);
     }
@@ -126,6 +128,7 @@ export function takeTurn(state,actorId,key,targetId,r){
   else if(sk.kind==='reverseGuard'){
     applyGuard(state,target,a.id,sk.guardTurns??2);
     if(sk.protectBuff)addTimedEffect(target,{...sk.protectBuff,kind:'buff'});
+    if(sk.markTarget)target.marked=sk.markTarget;
     state.log.push(`${target.name} protects ${a.name}`);
   }
   else if(sk.kind==='mark'){
@@ -406,6 +409,18 @@ export function makeFifthClassBattle(seed=1){
  b.units=[unit('h1','Cursed Champion','hero',{hp:35,spd:2,dodge:0,dmgMin:8,dmgMax:14}),unit('h2','Treasure Hunter','hero',{hp:19,spd:5,dodge:10,dmgMin:3,dmgMax:6}),unit('h3','Hex Mage','hero',{hp:19,spd:6,dmgMin:4,dmgMax:7}),unit('h4','Warrior','hero',{hp:33,spd:1}),...b.units.filter(x=>x.side==='enemy')];
  b.log.unshift('Cursed Champion, Treasure Hunter and Hex Mage combat laboratory');
  return b;
+}
+export function makeFinalProgressionBattle(seed=1){
+ const state=makeFifthClassBattle(seed);
+ for(const [actorId,cls] of [['h2','treasure_hunter'],['h3','hex_mage']]){
+  for(const [key,sk] of Object.entries(ABILITIES))if(sk.classId===cls)setActorSkillLevel(state,actorId,key,5);
+ }
+ const spirit=state.units.find(u=>u.id==='h1');
+ spirit.name='Spiritbound';spirit.classId='spiritbound';
+ spirit.hp=spirit.maxHp=26;spirit.spd=7;spirit.dmgMin=6;spirit.dmgMax=11;spirit.form='human';
+ for(const [key,sk] of Object.entries(ABILITIES))if(sk.classId==='spiritbound')setActorSkillLevel(state,spirit.id,key,5);
+ state.log.unshift('Level-five Spiritbound, Treasure Hunter and Hex Mage laboratory');
+ return state;
 }
 export function makeFourthProgressionBattle(seed=1){
  const state=makeFourthClassBattle(seed);
