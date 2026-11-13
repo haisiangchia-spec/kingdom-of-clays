@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ABILITIES,makeFifthClassBattle,makeSecondClassBattle,setActorSkillLevel,getActorSkill,availableTargets,takeTurn} from '../src/engine.js';
-import {effectModifier,guardTarget} from '../src/status.js';
+import {effectModifier,guardTarget,applyGuard} from '../src/status.js';
 const battle=(actor='h3')=>{const b=makeFifthClassBattle(17);b.queue=[actor];return b;};
 const unit=(b,id)=>b.units.find(x=>x.id===id);
 
@@ -111,4 +111,43 @@ test('pure mark skills with no damage modifier remain non-damaging',()=>{
  takeTurn(b,'h4','hunters_mark','e1',()=>.3);
  assert.equal(foe.hp,hp);
  assert.equal(foe.marked,3);
+});
+
+test('Guard redirects a physical marking hit, Mark and dodge debuff to protector',()=>{
+ const b=battle(),original=unit(b,'e1'),protector=unit(b,'e2');
+ const beforeOriginal=original.hp,beforeProtector=protector.hp;
+ applyGuard(b,protector,'e1',3);
+ takeTurn(b,'h3','curse_of_exposure','e1',()=>.2);
+ assert.equal(original.hp,beforeOriginal);
+ assert.equal(original.marked??0,0);
+ assert.equal(effectModifier(original,'dodge'),0);
+ assert.ok(protector.hp<beforeProtector,'interceptor should take the physical hit');
+ assert.equal(protector.marked,3);
+ assert.equal(effectModifier(protector,'dodge'),-15);
+ assert.ok(b.log.some(line=>line.includes('intercepts')));
+});
+
+test('Guard also redirects non-damaging marks without introducing physical damage',()=>{
+ const b=makeSecondClassBattle(21),original=unit(b,'e1'),protector=unit(b,'e2');
+ const beforeOriginal=original.hp,beforeProtector=protector.hp;
+ applyGuard(b,protector,'e1',3);
+ b.queue=['h4'];
+ takeTurn(b,'h4','hunters_mark','e1',()=>.2);
+ assert.equal(original.hp,beforeOriginal);
+ assert.equal(protector.hp,beforeProtector);
+ assert.equal(original.marked??0,0);
+ assert.equal(protector.marked,3);
+});
+
+test('a guardian dodge miss prevents both physical damage and status application',()=>{
+ const b=battle(),original=unit(b,'e1'),protector=unit(b,'e2');
+ original.dodge=0;protector.dodge=100;
+ applyGuard(b,protector,'e1',3);
+ const originalHp=original.hp,protectorHp=protector.hp;
+ takeTurn(b,'h3','curse_of_exposure','e1',()=>.5);
+ assert.equal(original.hp,originalHp);
+ assert.equal(protector.hp,protectorHp);
+ assert.equal(original.marked??0,0);
+ assert.equal(protector.marked??0,0);
+ assert.equal(effectModifier(protector,'dodge'),0);
 });
