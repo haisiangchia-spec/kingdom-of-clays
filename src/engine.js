@@ -101,8 +101,13 @@ export function takeTurn(state,actorId,key,targetId,r){
     if(possible.length)target=possible[Math.floor(r()*possible.length)];
   }
   const wasStunned=a.stun>0;
-  if(sk.maxUses){a.usedSkills??={};a.usedSkills[key]=(a.usedSkills[key]??0)+1;}
-  if(sk.torch)state.torch=clamp((state.torch??75)+sk.torch,0,100);
+  // A stunned actor forfeits the action: do not spend limited uses or torch.
+  // prepareActorTurn normally handles stun before skill selection, but this
+  // defensive path must preserve the same semantics for direct callers.
+  if(a.stun===0){
+    if(sk.maxUses){a.usedSkills??={};a.usedSkills[key]=(a.usedSkills[key]??0)+1;}
+    if(sk.torch)state.torch=clamp((state.torch??75)+sk.torch,0,100);
+  }
   if(a.stun>0){consumeStun(a);state.log.push(`${a.name} loses a turn to stun`);}
   else if(sk.kind==='transform'){
     if(a.form==='human'){
