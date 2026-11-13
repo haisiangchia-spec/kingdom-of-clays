@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeBattle,makeSpiritboundBattle,takeTurn,prepareActorTurn,currentActor} from '../src/engine.js';
+import {makeBattle,makeSpiritboundBattle,makeFifthClassBattle,takeTurn,prepareActorTurn,currentActor} from '../src/engine.js';
 import {stunResistance} from '../src/status.js';
 
 test('enemy stun skips enemy action and advances queue',()=>{
@@ -51,4 +51,21 @@ test('free Spiritbound transformation retains post-stun resistance until actual 
  assert.equal(stunResistance(a),70);
  takeTurn(b,'h2','primal_fury','e2',()=>.5);
  assert.equal(stunResistance(a),20);
+});
+
+test('direct stunned-turn fallback does not consume limited-use Protect Me',()=>{
+ const b=makeFifthClassBattle(17),actor=b.units.find(x=>x.id==='h2');
+ b.queue=['h2'];actor.stun=1;
+ takeTurn(b,'h2','take_cover','h1',()=>.5);
+ assert.equal(actor.stun,0);
+ assert.equal(actor.usedSkills.take_cover,undefined);
+ assert.equal(b.queue.length,0);
+ assert.equal(b.units.find(x=>x.id==='h1').guard,null);
+});
+test('direct stunned-turn fallback does not spend torch on an unexecuted attack',()=>{
+ const b=makeFifthClassBattle(17),actor=b.units.find(x=>x.id==='h3');
+ b.queue=['h3'];actor.stun=1;b.torch=75;
+ takeTurn(b,'h3','abyssal_grasp','e1',()=>.5);
+ assert.equal(b.torch,75);
+ assert.equal(actor.stun,0);
 });
