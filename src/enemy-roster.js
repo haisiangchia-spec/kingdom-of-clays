@@ -21,7 +21,7 @@ export const ENEMY_PROFILES=Object.freeze({
     size:3,actionsPerRound:2,hp:96,spd:2,dodge:3,prot:15,dmgMin:7,dmgMax:13,
     stunResist:70,bleedResist:60,blightResist:50,moveResist:80,debuffResist:60,
     types:['human']
-  }),skills:['emperor_slam','emperor_roar']})
+  }),skills:['emperor_slam','emperor_roar','emperor_call']})
 });
 
 export const ENCOUNTER_PRESETS=Object.freeze({
