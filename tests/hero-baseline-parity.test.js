@@ -83,6 +83,7 @@ test('Protect Me has three-use cap at level one and retains cap at level five',(
  }
  assert.equal(a.usedSkills.take_cover,3);
  assert.deepEqual(availableTargets(b,'h2','take_cover'),[]);
+ b.queue=['h2'];a.acted=false;
  assert.throws(()=>takeTurn(b,'h2','take_cover','h1',()=>.2),/Illegal target or rank/);
  setActorSkillLevel(b,'h2','take_cover',5);
  assert.equal(getActorSkill(a,'take_cover').maxUses,3);
