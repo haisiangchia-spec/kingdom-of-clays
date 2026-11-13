@@ -18,7 +18,7 @@ test('Slayer Berserker Dark Knight level-five laboratory exposes 21 upgrades',as
    highwayRiposte:getActorSkill(heroes.find(x=>x.id==='h4'),'shadowstep_counter').riposteCrit
   };
  });
- expect(result).toEqual({upgraded:21,totalVerified:63,warrior:0,hunterHuman:.35,hellionBleed:5,highwayRiposte:5});
+ expect(result).toEqual({upgraded:21,totalVerified:84,warrior:0,hunterHuman:.35,hellionBleed:5,highwayRiposte:5});
  expect(errors).toEqual([]);
 });
 test('level-five Berserker Adrenaline Rush heals and provides attack buff',async ({page})=>{
