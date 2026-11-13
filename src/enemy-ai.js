@@ -7,8 +7,8 @@ const PROFILES=Object.freeze({
   'Skeleton Court Mage':Object.freeze({skillWeights:Object.freeze({court_curse:3,court_blight:1,enemy_stress:3,enemy_strike:1}),targetPreference:'stressed'}),
   'Goblin Emperor':Object.freeze({
     phaseWeights:Object.freeze({
-      commanding:Object.freeze({emperor_slam:1,emperor_roar:3}),
-      desperate:Object.freeze({emperor_slam:4,emperor_roar:1})
+      commanding:Object.freeze({emperor_slam:1,emperor_roar:3,emperor_call:0}),
+      desperate:Object.freeze({emperor_slam:4,emperor_roar:1,emperor_call:3})
     }),targetPreference:'weakest'
   })
 });
