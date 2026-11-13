@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {chooseEnemyAction} from '../src/enemy-ai.js';
-import {makeBattle,ABILITIES,availableTargets,rng} from '../src/engine.js';
+import {chooseEnemyAction,bossPhase} from '../src/enemy-ai.js';
+import {makeBattle,makeLargeMonsterBattle,ABILITIES,availableTargets,rng} from '../src/engine.js';
 
 test('enemy decision selects skill uniformly before target, not over all skill-target pairs',()=>{
  const state={};
@@ -61,4 +61,42 @@ test('target preferences update after party order changes',()=>{
  state.units.unshift(rear);
  const result=chooseEnemyAction(state,archer.id,['enemy_strike'],()=>.99,ABILITIES,availableTargets);
  assert.equal(result.targetId,'h3','after reordering, the new rear hero is preferred');
+});
+
+test('Goblin Emperor phase changes only at or below half HP',()=>{
+ const b=makeLargeMonsterBattle(18),boss=b.units.find(x=>x.id==='boss');
+ assert.equal(bossPhase(boss),'commanding');
+ boss.hp=49;assert.equal(bossPhase(boss),'commanding');
+ boss.hp=48;assert.equal(bossPhase(boss),'desperate');
+ boss.hp=1;assert.equal(bossPhase(boss),'desperate');
+ assert.equal(bossPhase(b.units.find(x=>x.id==='e4')),null);
+});
+test('Goblin Emperor favors roar before half HP and slam afterward',()=>{
+ const b=makeLargeMonsterBattle(19),boss=b.units.find(x=>x.id==='boss');
+ const choose=()=>chooseEnemyAction(b,'boss',boss.enemySkills,()=>.5,ABILITIES,availableTargets);
+ assert.equal(choose().key,'emperor_roar','normal phase weights 1:3');
+ boss.hp=48;
+ assert.equal(choose().key,'emperor_slam','desperate phase weights 4:1');
+ assert.ok(availableTargets(b,'boss',choose().key).includes(choose().targetId));
+});
+test('boss target preference favors injured legal heroes without excluding healthy heroes',()=>{
+ const b=makeLargeMonsterBattle(20),boss=b.units.find(x=>x.id==='boss');
+ const first=b.units.find(x=>x.id==='h1'),second=b.units.find(x=>x.id==='h2');
+ first.hp=1;
+ // Skill roll .1 selects slam, target roll .5 selects first injured hero.
+ const picks=[.1,.5];let n=0;
+ const selected=chooseEnemyAction(b,'boss',boss.enemySkills,()=>picks[n++],ABILITIES,availableTargets);
+ assert.equal(selected.key,'emperor_slam');
+ assert.equal(selected.targetId,'h1');
+ assert.ok(second.hp>first.hp);
+});
+test('boss phase selection re-evaluates dynamically between two action slots',()=>{
+ const b=makeLargeMonsterBattle(21),boss=b.units.find(x=>x.id==='boss');
+ b.queue=['boss','boss'];
+ const before=chooseEnemyAction(b,'boss',boss.enemySkills,()=>.5,ABILITIES,availableTargets);
+ boss.hp=48;
+ const after=chooseEnemyAction(b,'boss',boss.enemySkills,()=>.5,ABILITIES,availableTargets);
+ assert.equal(before.key,'emperor_roar');
+ assert.equal(after.key,'emperor_slam');
+ assert.deepEqual(b.queue,['boss','boss']);
 });
