@@ -24,6 +24,7 @@ Serve the repository root with `python3 -m http.server 8000` and open `http://lo
 
 - `src/engine.js` — turn order, combat resolution, sample playable skills, scenario fixtures.
 - `src/enemy-ai.js` — deterministic skill-first enemy choice with provisional per-monster tactics. Skeleton Archer favours rear-rank targets; Skeleton Court Mage favours stress abilities and stressed targets. Target weighting uses current formation and never overrides legal targets. These behavioural weights are **Clays testing assumptions, not yet verified DD1 monster AI**.
+- `src/enemy-skills.js` — provisional undead encounter roster: Rustblade Cleave and Shieldbreaker Bash for Skeleton Swordsmen, Bone Arrow and Pinning Arrow for Skeleton Archers, Courtly Dread and Withering Sigil for Skeleton Court Mages, and Imperial Slam and Tyrant Roar for the Goblin Emperor demo. These enemy ability statistics and monster loadouts are **not** source-verified DD1 values.
 - `src/formation.js` — four-slot formations, contiguous size-one to size-four entities, push/pull, corpse footprints.
 - `src/combat-effects.js` — group targeting, cleansing, restoration.
 - `src/status.js` — guard, stun, riposte, temporary buffs and debuffs.
