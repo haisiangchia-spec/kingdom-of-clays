@@ -50,7 +50,7 @@ test('summon limit remains exhausted even after the reinforcement is defeated',(
 
 test('reinforcement gets one action at the next round initiative without changing boss action count',()=>{
  const b=makeLargeMonsterBattle(15),mage=get(b,'e4');
- mage.dead=true;b.queue=['boss','boss','h1'];
+ mage.dead=true;get(b,'boss').hp=48;b.queue=['boss','boss','h1'];
  takeTurn(b,'boss','emperor_call','boss',()=>.5);
  startRound(b,rng(42));
  assert.equal(b.queue.filter(id=>id==='reinforcement_1').length,1);
