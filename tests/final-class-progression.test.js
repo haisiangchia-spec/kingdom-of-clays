@@ -107,6 +107,7 @@ test('Spiritbound Manacles and Bile upgrade stun, DOT and debuff chance',()=>{
  const b=battle(),h=u(b,'h1'),chains=getActorSkill(h,'spirit_chains'),bile=getActorSkill(h,'corrupting_essence');
  assert.deepEqual([chains.acc,chains.crit,chains.status.chance],[115,5,130]);
  assert.deepEqual([bile.acc,bile.crit,bile.status.chance,bile.status.value,bile.debuff.modifiers.blightResist],[115,6,140,5,-33]);
+ b.units=[b.units[1],b.units[0],...b.units.slice(2)];
  b.queue=['h1'];takeTurn(b,'h1','corrupting_essence','e2',()=>.2);
  assert.ok(u(b,'e2').dot.some(dot=>dot.type==='blight'&&dot.value===5));
 });
