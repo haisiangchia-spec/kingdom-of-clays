@@ -108,7 +108,14 @@ export function takeTurn(state,actorId,key,targetId,r){
     if(sk.maxUses){a.usedSkills??={};a.usedSkills[key]=(a.usedSkills[key]??0)+1;}
     if(sk.torch)state.torch=clamp((state.torch??75)+sk.torch,0,100);
   }
-  if(a.stun>0){consumeStun(a);state.log.push(`${a.name} loses a turn to stun`);}
+  if(a.stun>0){
+    consumeStun(a);
+    finishActorTurn(a);
+    a.acted=true;
+    state.queue.shift();
+    state.log.push(`${a.name} loses a turn to stun`);
+    return state; // Do not apply movement, marks, riposte or any post-skill effects.
+  }
   else if(sk.kind==='transform'){
     if(a.form==='human'){
       a.form='beast';
