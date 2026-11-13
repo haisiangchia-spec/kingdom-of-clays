@@ -218,8 +218,17 @@ export function takeTurn(state,actorId,key,targetId,r){
     state.log.push(`${a.name} soothes ${target.name}`);
   }
   else if(sk.kind==='variableHeal'){
-    const amount=randInt(r,sk.min,sk.max);
+    // DD1 Wyrd Reconstruction is a single-target heal: 12% fixed critical
+    // chance, twice the rolled amount, and -4 stress to the recipient.
+    // Bleed is a separate skill application/resistance roll, even for 0 heals.
+    const critical=r()<.12;
+    const rolled=randInt(r,sk.min,sk.max);
+    const amount=Math.max(0,Math.round(rolled*(critical?2:1)*(1+effectModifier(target,'healingReceived')/100)));
     target.hp=Math.min(target.maxHp,target.hp+amount);
+    if(critical){
+      target.stress=clamp(target.stress-4,0,200);
+      state.log.push(`${target.name} receives a critical heal`);
+    }
     if(target.hp>0&&target.deathDoor){target.deathDoor=false;target.mortality??='deathDoorRecovery';}
     if(r()*100<resistChance({applicationChance:sk.bleedChance??0,resistance:(target.resist.bleed??0)+effectModifier(target,'bleedResist')})){
       target.dot.push({type:'bleed',value:sk.bleedValue??3,turns:sk.bleedTurns??3});
