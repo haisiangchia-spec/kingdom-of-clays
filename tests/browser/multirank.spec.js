@@ -16,18 +16,18 @@ test('large monster demo renders one boss occupying three ranks and permits targ
  expect(state.targets).toContain('boss');
  expect(errors).toEqual([]);
 });
-test('multi-rank boss can be damaged and turn order contains one boss action',async ({page})=>{
+test('multi-rank boss can be damaged and turn order contains two boss actions',async ({page})=>{
  await page.goto('/');
  const result=await page.evaluate(async ()=>{
   const {makeLargeMonsterBattle,takeTurn,startRound,occupiedRanks}=await import('./src/engine.js');
   const b=makeLargeMonsterBattle();
   startRound(b,()=>0);
-  const onlyOne=b.queue.filter(id=>id==='boss').length===1;
+  const twoActions=b.queue.filter(id=>id==='boss').length===2;
   b.queue=['h2'];const before=b.units.find(x=>x.id==='boss').hp;
   takeTurn(b,'h2','sweeping_assault','boss',()=>.1);
-  return {onlyOne,ranks:occupiedRanks(b,'boss'),damage:before-b.units.find(x=>x.id==='boss').hp};
+  return {twoActions,ranks:occupiedRanks(b,'boss'),damage:before-b.units.find(x=>x.id==='boss').hp};
  });
- expect(result.onlyOne).toBe(true);
+ expect(result.twoActions).toBe(true);
  expect(result.ranks).toEqual([0,1,2]);
  expect(result.damage).toBeGreaterThan(0);
 });
