@@ -18,7 +18,7 @@ test('Beastmaster Bard Cursed Champion level-five laboratory contains 21 upgrade
    championProtection:getActorSkill(h.find(u=>u.id==='h1'),'unyielding_body').buff.modifiers.prot
   };
  });
- expect(result).toEqual({upgraded:21,verified:84,noPriestUpgrades:true,wolfBleed:3,bardFinale:160,championProtection:30});
+ expect(result).toEqual({upgraded:21,verified:105,noPriestUpgrades:true,wolfBleed:3,bardFinale:160,championProtection:30});
  expect(errors).toEqual([]);
 });
 test('level-five Leper self-heals and then benefits from Revenge',async ({page})=>{
