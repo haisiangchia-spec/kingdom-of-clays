@@ -31,3 +31,34 @@ test('real enemy skill choice is deterministic for a seed and targets are legal'
  assert.ok(keys.includes(first.key));
  assert.ok(availableTargets(b,a.id,first.key).includes(first.targetId));
 });
+
+test('Skeleton Archer prioritizes rear ranks but never targets an illegal rank',()=>{
+ const state=makeBattle(55),archer=state.units.find(u=>u.id==='e3');
+ const sequence=[.2,.7];let i=0;
+ const result=chooseEnemyAction(state,archer.id,['enemy_strike'],()=>sequence[i++],ABILITIES,availableTargets);
+ assert.equal(result.key,'enemy_strike');
+ assert.equal(result.targetId,'h4','70% weighted draw favors the rearmost hero');
+ assert.ok(availableTargets(state,archer.id,result.key).includes(result.targetId));
+});
+test('Court Mage skill preference and high-stress targeting use independent rolls',()=>{
+ const state=makeBattle(55),mage=state.units.find(u=>u.id==='e4');
+ state.units.find(u=>u.id==='h4').stress=100;
+ const sequence=[.6,.9];let i=0;
+ const result=chooseEnemyAction(state,mage.id,['enemy_stress','enemy_strike'],()=>sequence[i++],ABILITIES,availableTargets);
+ assert.deepEqual(result,{key:'enemy_stress',targetId:'h4'});
+});
+test('profiles gracefully fall back to uniform choice on unknown monsters',()=>{
+ const state=makeBattle(55),enemy=state.units.find(u=>u.id==='e1');
+ enemy.name='Unknown Monster';
+ const result=chooseEnemyAction(state,'e1',['enemy_strike'],()=>.75,ABILITIES,availableTargets);
+ assert.deepEqual(result,{key:'enemy_strike',targetId:'h4'});
+});
+test('target preferences update after party order changes',()=>{
+ const state=makeBattle(55);
+ const archer=state.units.find(u=>u.id==='e3');
+ const rear=state.units.find(u=>u.id==='h4');
+ state.units.splice(state.units.indexOf(rear),1);
+ state.units.unshift(rear);
+ const result=chooseEnemyAction(state,archer.id,['enemy_strike'],()=>.99,ABILITIES,availableTargets);
+ assert.equal(result.targetId,'h3','after reordering, the new rear hero is preferred');
+});
