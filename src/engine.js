@@ -407,6 +407,17 @@ export function makeFifthClassBattle(seed=1){
  b.log.unshift('Cursed Champion, Treasure Hunter and Hex Mage combat laboratory');
  return b;
 }
+export function makeFourthProgressionBattle(seed=1){
+ const state=makeFourthClassBattle(seed);
+ const champion=state.units.find(u=>u.id==='h1');
+ champion.name='Cursed Champion';champion.classId='cursed_champion';
+ champion.hp=champion.maxHp=35;champion.spd=2;champion.dmgMin=8;champion.dmgMax=14;
+ for(const [actorId,cls] of [['h1','cursed_champion'],['h2','beastmaster'],['h3','bard']]){
+  for(const [id,skill] of Object.entries(ABILITIES))if(skill.classId===cls)setActorSkillLevel(state,actorId,id,5);
+ }
+ state.log.unshift('Cursed Champion, Beastmaster and Bard level-five upgrade lab');
+ return state;
+}
 export function makeFourthClassBattle(seed=1){
  const b=makeBattle(seed);
  b.units=[unit('h1','Dark Knight','hero',{hp:23,spd:5,dmgMin:5,dmgMax:10}),unit('h2','Beastmaster','hero',{hp:21,spd:5,dmgMin:4,dmgMax:7}),unit('h3','Bard','hero',{hp:19,spd:7,dmgMin:4,dmgMax:7}),unit('h4','Priest','hero',{hp:24,spd:4}),...b.units.filter(x=>x.side==='enemy')];
