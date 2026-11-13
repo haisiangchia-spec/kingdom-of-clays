@@ -9,10 +9,10 @@ import {SECOND_CLASS_KEYS} from '../src/class-skills-batch2.js';
 const groups=['hunter','thief','mage'];
 const ids=groups.flatMap(group=>SECOND_CLASS_KEYS[group]);
 const level=(id,n)=>resolveSkillDefinition(ABILITIES,id,n);
-test('all 21 second-batch skills have exact 1–5 paths, 84 higher patches and 42 total verified paths',()=>{
+test('all 21 second-batch skills have exact 1–5 paths, 84 higher patches and 63 total verified paths',()=>{
  assert.equal(ids.length,21);assert.equal(new Set(ids).size,21);
- assert.equal(Object.keys(SKILL_UPGRADES).length,42);
- assert.equal(SKILL_CATALOG.filter(x=>x.verifiedLevels.length===5).length,42);
+ assert.equal(Object.keys(SKILL_UPGRADES).length,63);
+ assert.equal(SKILL_CATALOG.filter(x=>x.verifiedLevels.length===5).length,63);
  for(const id of ids){
   assert.deepEqual(availableVerifiedLevels(id),[1,2,3,4,5]);
   assert.equal(Object.keys(SKILL_UPGRADES[id]).length,4);
