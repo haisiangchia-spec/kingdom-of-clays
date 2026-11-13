@@ -18,7 +18,7 @@ export const ENEMY_PROFILES=Object.freeze({
     types:['unholy']
   }),skills:['court_curse','court_blight']}),
   emperor:Object.freeze({name:'Goblin Emperor',stats:Object.freeze({
-    size:3,hp:96,spd:2,dodge:3,prot:15,dmgMin:7,dmgMax:13,
+    size:3,actionsPerRound:2,hp:96,spd:2,dodge:3,prot:15,dmgMin:7,dmgMax:13,
     stunResist:70,bleedResist:60,blightResist:50,moveResist:80,debuffResist:60,
     types:['human']
   }),skills:['emperor_slam','emperor_roar']})
