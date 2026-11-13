@@ -9,7 +9,7 @@ test('enemy stun skips enemy action and advances queue',()=>{
  b.queue=['e1','h1'];e.stun=1;
  const before=next.hp;
  assert.equal(prepareActorTurn(b,'e1',()=>.5),'stunned');
- assert.equal(e.stun,0);assert.equal(stunResistance(e),70);
+ assert.equal(e.stun,0);assert.equal(stunResistance(e),e.resist.stun+50);
  assert.equal(currentActor(b).id,'h1');assert.equal(next.hp,before);
  assert.throws(()=>takeTurn(b,'e1','enemy_strike','h1',()=>0),/Not this actor/);
 });
