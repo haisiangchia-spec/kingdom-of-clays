@@ -425,6 +425,15 @@ export function makeThirdClassBattle(seed=1){
  b.log.unshift('Priest, Monster Slayer and Berserker ability laboratory');
  return b;
 }
+export function makeSecondProgressionBattle(seed=1){
+ const state=makeSecondClassBattle(seed);
+ for(const [heroId,classId] of [['h2','thief'],['h3','mage'],['h4','hunter']]){
+   for(const [key,skill] of Object.entries(SECOND_CLASS_SKILLS))
+     if(skill.classId===classId)setActorSkillLevel(state,heroId,key,5);
+ }
+ state.log.unshift('Level-five Hunter, Thief, Mage progression laboratory (21 upgraded skills)');
+ return state;
+}
 export function makeSecondClassBattle(seed=1){
  const state=makeBattle(seed);
  const replacements=[
