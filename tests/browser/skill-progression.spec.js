@@ -36,8 +36,8 @@ test('unverified skill upgrade is blocked without changing actor state',async ({
   const {makeBattle,setActorSkillLevel,ABILITIES}=await import('./src/engine.js');
   const b=makeBattle(),u=b.units.find(x=>x.id==='h2');
   let error='';
-  try{setActorSkillLevel(b,'h2','wolfs_assault',5);}catch(e){error=e.message;}
-  return {error,levels:u.skillLevels,base:ABILITIES.wolfs_assault.mod};
+  try{setActorSkillLevel(b,'h2','ritual_dagger',5);}catch(e){error=e.message;}
+  return {error,levels:u.skillLevels,base:ABILITIES.ritual_dagger.mod};
  });
  expect(result.error).toContain('Unverified skill upgrade');
  expect(result.levels).toEqual({});
