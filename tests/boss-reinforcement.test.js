@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeLargeMonsterBattle,availableTargets,takeTurn,prepareActorTurn,startRound,formationSlots,rng} from '../src/engine.js';
-import {corpseFromEnemy} from '../src/formation.js';
+import {corpseFromEnemy,moveWithinFormation} from '../src/formation.js';
 import {chooseEnemyAction,bossPhase} from '../src/enemy-ai.js';
 import {ABILITIES} from '../src/engine.js';
 
@@ -69,4 +69,50 @@ test('boss AI only considers calling reinforcements when space exists in despera
  assert.equal(action.targetId,'boss');
  boss.hp=96;
  assert.notEqual(chooseEnemyAction(b,'boss',boss.enemySkills,()=>.9,ABILITIES,availableTargets).key,'emperor_call');
+});
+
+test('summoning requires low HP even when an empty rank already exists',()=>{
+ const b=makeLargeMonsterBattle(19),boss=get(b,'boss');
+ get(b,'e4').dead=true;
+ b.queue=['boss','boss','h1'];
+ assert.deepEqual(availableTargets(b,'boss','emperor_call'),[],'commanding phase must not allow a manual summon');
+ assert.throws(()=>takeTurn(b,'boss','emperor_call','boss',()=>.2),/Illegal target or rank/);
+ assert.equal(boss.usedSkills.emperor_call,undefined);
+ assert.equal(b.units.some(u=>u.id.startsWith('reinforcement_')),false);
+ boss.hp=49;assert.deepEqual(availableTargets(b,'boss','emperor_call'),[]);
+ boss.hp=48;assert.deepEqual(availableTargets(b,'boss','emperor_call'),['boss']);
+});
+
+test('natural corpse expiration opens a rank for summoning without changing turn slots',()=>{
+ const b=makeLargeMonsterBattle(22),boss=get(b,'boss'),mage=get(b,'e4');
+ boss.hp=48;
+ mage.hp=0;corpseFromEnemy(mage,b.round);
+ assert.deepEqual(availableTargets(b,'boss','emperor_call'),[]);
+ b.round=3;
+ startRound(b,rng(22)); // round 4: the corpse expires and is marked dead
+ assert.equal(mage.dead,true);
+ assert.deepEqual(formationSlots(b,'enemy').map(u=>u?.id),['boss','boss','boss',undefined]);
+ assert.deepEqual(availableTargets(b,'boss','emperor_call'),['boss']);
+ const existingBossTurns=b.queue.filter(id=>id==='boss').length;
+ b.queue=['boss','boss','h1'];
+ takeTurn(b,'boss','emperor_call','boss',()=>.5);
+ assert.equal(existingBossTurns,2);
+ assert.equal(b.queue.filter(id=>id==='reinforcement_1').length,0);
+ assert.deepEqual(formationSlots(b,'enemy').map(u=>u?.id),['boss','boss','boss','reinforcement_1']);
+});
+
+test('whole-unit boss displacement and rear corpse removal do not split ranks or duplicate summons',()=>{
+ const b=makeLargeMonsterBattle(23),boss=get(b,'boss'),mage=get(b,'e4');
+ boss.hp=48;
+ assert.equal(moveWithinFormation(b,'boss',1),1);
+ assert.deepEqual(formationSlots(b,'enemy').map(u=>u?.id),['e4','boss','boss','boss']);
+ mage.hp=0;corpseFromEnemy(mage,b.round);
+ assert.deepEqual(availableTargets(b,'boss','emperor_call'),[]);
+ mage.dead=true;
+ assert.deepEqual(formationSlots(b,'enemy').map(u=>u?.id),['boss','boss','boss',undefined]);
+ assert.deepEqual(availableTargets(b,'boss','emperor_call'),['boss']);
+ b.queue=['boss','boss','h1'];
+ takeTurn(b,'boss','emperor_call','boss',()=>.5);
+ assert.deepEqual(formationSlots(b,'enemy').map(u=>u?.id),['boss','boss','boss','reinforcement_1']);
+ assert.equal(b.units.filter(u=>u.id==='reinforcement_1').length,1);
 });
