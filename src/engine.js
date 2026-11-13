@@ -413,6 +413,19 @@ export function makeFourthClassBattle(seed=1){
  b.log.unshift('Dark Knight, Beastmaster and Bard combat laboratory');
  return b;
 }
+export function makeThirdProgressionBattle(seed=1){
+ const b=makeThirdClassBattle(seed);
+ const knight=b.units.find(x=>x.id==='h4');
+ knight.name='Dark Knight';knight.classId='dark_knight';
+ knight.hp=23;knight.maxHp=23;knight.spd=5;knight.dmgMin=5;knight.dmgMax=10;
+ for(const [id,skillClass] of [['h1','berserker'],['h3','monster_slayer'],['h4','dark_knight']]){
+  for(const [key,skill] of Object.entries(ABILITIES)){
+   if(skill.classId===skillClass)setActorSkillLevel(b,id,key,5);
+  }
+ }
+ b.log.unshift('Level-five Monster Slayer, Berserker and Dark Knight laboratory');
+ return b;
+}
 export function makeThirdClassBattle(seed=1){
  const b=makeBattle(seed);
  b.units=[
