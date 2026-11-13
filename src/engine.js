@@ -54,7 +54,9 @@ if(sk.classId&&a.classId!==sk.classId)return [];
 if(sk.form&&sk.form!=='either'&&a.form!==sk.form)return [];
 if(sk.kind==='transform'&&(a.form!=='human'&&a.form!=='beast'||a.transformUsedThisTurn))return [];if(sk.maxUses&&(a.usedSkills?.[key]??0)>=sk.maxUses)return [];
  if(sk.kind==='summon'){
-   if(a.side!=='enemy'||formationSlots(state,a.side).every(Boolean))return [];
+   // A summoning skill is unusable outside its own HP phase, regardless
+   // of who controls the actor or how many formation slots are vacant.
+   if(a.side!=='enemy'||(sk.maxHpFraction!=null&&a.hp/a.maxHp>sk.maxHpFraction)||formationSlots(state,a.side).every(Boolean))return [];
    return [a.id];
  }
 const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare','stealth','partyStressChance','selfHeal','stressOnly','variableHeal','selfHealStress','reverseGuard','transform'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth','selfHeal','selfHealStress','transform'].includes(sk.kind)||x.id===a.id)&& (sk.kind!=='reverseGuard'||x.id!==a.id));const selectable=candidates.filter(x=>side===a.side||isSelectable(x,sk,side));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?selectable.slice(0,1):selectable).map(x=>x.id);}
