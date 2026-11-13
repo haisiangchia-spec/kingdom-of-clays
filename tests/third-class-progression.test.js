@@ -10,17 +10,17 @@ import {effectModifier} from '../src/status.js';
 const keys=[...THIRD_CLASS_KEYS.monster_slayer,...THIRD_CLASS_KEYS.berserker,...FOURTH_CLASS_KEYS.dark_knight];
 const level=(key,level=5)=>({...ABILITIES[key],...THIRD_PROGRESSION_UPGRADES[key]?.[level]});
 const demo=()=>makeThirdProgressionBattle(17);
-test('all 21 additional skill tracks have exactly 84 patches; 63 total tracks complete',()=>{
+test('all 21 additional skill tracks have exactly 84 patches; 84 total tracks complete',()=>{
  assert.equal(keys.length,21);
  assert.equal(Object.keys(THIRD_PROGRESSION_UPGRADES).length,21);
- assert.equal(Object.keys(SKILL_UPGRADES).length,63);
- assert.equal(SKILL_CATALOG.filter(x=>x.verifiedLevels.length===5).length,63);
+ assert.equal(Object.keys(SKILL_UPGRADES).length,84);
+ assert.equal(SKILL_CATALOG.filter(x=>x.verifiedLevels.length===5).length,84);
  for(const key of keys){
   assert.deepEqual(availableVerifiedLevels(key),[1,2,3,4,5]);
   assert.deepEqual(Object.keys(THIRD_PROGRESSION_UPGRADES[key]).sort(),['2','3','4','5']);
   assert.equal(ABILITIES[key].classId,level(key).classId);
  }
- assert.deepEqual(availableVerifiedLevels('wolfs_assault'),[1]);
+ assert.deepEqual(availableVerifiedLevels('ritual_dagger'),[1]);
 });
 test('Monster Slayer Collect Bounty preserves +90 marked and grows human damage to +35%',()=>{
  for(let i=1;i<=5;i++){
