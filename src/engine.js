@@ -15,7 +15,7 @@ import {resolveSkillDefinition,equipVerifiedSkillLevel} from './skill-progressio
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
 export const randInt=(r,lo,hi)=>lo+Math.floor(r()*(hi-lo+1));
-export function unit(id,name,side,stats={}){return {id,name,side,classId:stats.classId??(side==='hero'?name.toLowerCase().replace(/[^a-z0-9]+/g,'_'):null),size:stats.size??1,types:stats.types??[],hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0,debuff:stats.debuffResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathDoorRecovery:false,heartAttackRecovery:false,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false,usedSkills:{},skillLevels:{...stats.skillLevels},form:stats.form??null,transformsUsed:0,transformUsedThisTurn:false};}
+export function unit(id,name,side,stats={}){return {id,name,side,classId:stats.classId??(side==='hero'?name.toLowerCase().replace(/[^a-z0-9]+/g,'_'):null),size:stats.size??1,types:stats.types??[],hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0,debuff:stats.debuffResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathDoorRecovery:false,heartAttackRecovery:false,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false,actionsPerRound:Math.max(1,Math.min(4,Number.isInteger(stats.actionsPerRound)?stats.actionsPerRound:1)),actionsRemaining:Math.max(1,Math.min(4,Number.isInteger(stats.actionsPerRound)?stats.actionsPerRound:1)),usedSkills:{},skillLevels:{...stats.skillLevels},form:stats.form??null,transformsUsed:0,transformUsedThisTurn:false};}
 export const ABILITIES={
  heavy_slash:{name:'Heavy Slash',from:[0,1],to:[0,1],acc:85,crit:2,mod:0},
  guardian_parry:{name:"Guardian's Parry",from:[0,1,2,3],to:[0,1,2,3],kind:'guard'},
@@ -54,7 +54,31 @@ if(sk.classId&&a.classId!==sk.classId)return [];
 if(sk.form&&sk.form!=='either'&&a.form!==sk.form)return [];
 if(sk.kind==='transform'&&(a.form!=='human'&&a.form!=='beast'||a.transformUsedThisTurn))return [];if(sk.maxUses&&(a.usedSkills?.[key]??0)>=sk.maxUses)return [];
 const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare','stealth','partyStressChance','selfHeal','stressOnly','variableHeal','selfHealStress','reverseGuard','transform'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth','selfHeal','selfHealStress','transform'].includes(sk.kind)||x.id===a.id)&& (sk.kind!=='reverseGuard'||x.id!==a.id));const selectable=candidates.filter(x=>side===a.side||isSelectable(x,sk,side));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?selectable.slice(0,1):selectable).map(x=>x.id);}
-export function startRound(state,r){state.round++;clearExpiredCorpses(state);state.queue=state.units.filter(x=>!x.dead&&!x.corpse).map(x=>({id:x.id,score:initiativeScore({...x,spd:x.spd+effectModifier(x,'speed')},r)})).sort((a,b)=>b.score-a.score||(state.units.find(x=>x.id===a.id).side==='hero'?-1:1)||rank(state,a.id)-rank(state,b.id)).map(x=>x.id);state.units.forEach(u=>u.acted=false);state.log.push(`Round ${state.round} begins`);return state;}
+export function startRound(state,r){
+ state.round++;
+ clearExpiredCorpses(state);
+ // One initiative roll per combatant. Multi-action monsters take their slots
+ // consecutively and process start/end-of-turn effects just once per round.
+ state.units.forEach(u=>{u.acted=false;u.actionsRemaining=u.actionsPerRound??1;});
+ state.queue=state.units.filter(x=>!x.dead&&!x.corpse)
+  .map(x=>({id:x.id,score:initiativeScore({...x,spd:x.spd+effectModifier(x,'speed')},r)}))
+  .sort((a,b)=>b.score-a.score||(state.units.find(x=>x.id===a.id).side==='hero'?-1:1)||rank(state,a.id)-rank(state,b.id))
+  .flatMap(x=>Array(state.units.find(u=>u.id===x.id).actionsPerRound??1).fill(x.id));
+ state.log.push(`Round ${state.round} begins`);
+ return state;
+}
+function finishActionSlot(state,actor,skipRemaining=false){
+ actor.actionsRemaining=Math.max(0,(actor.actionsRemaining??actor.actionsPerRound??1)-1);
+ state.queue.shift();
+ if(skipRemaining){
+   while(state.queue[0]===actor.id)state.queue.shift();
+   actor.actionsRemaining=0;
+ }
+ if(actor.actionsRemaining===0){
+   finishActorTurn(actor);
+   actor.acted=true;
+ }
+}
 export function currentActor(s){while(s.queue.length){const u=s.units.find(x=>x.id===s.queue[0]);if(u&&!u.dead&&!u.acted)return u;s.queue.shift();}return null;}
 export function stress(state,u,amount,r){
  if(u.dead||amount<=0)return;
@@ -112,9 +136,7 @@ export function takeTurn(state,actorId,key,targetId,r){
   }
   if(a.stun>0){
     consumeStun(a);
-    finishActorTurn(a);
-    a.acted=true;
-    state.queue.shift();
+    finishActionSlot(state,a,true);
     state.log.push(`${a.name} loses a turn to stun`);
     return state; // Do not apply movement, marks, riposte or any post-skill effects.
   }
@@ -367,7 +389,7 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(sk.riposte){a.riposte=sk.riposteDuration??3;a.riposteAcc=sk.riposteAcc??90;a.riposteMod=sk.riposteMod??-.4;a.riposteCrit=sk.riposteCrit??0;}
   if(!wasStunned&&!sk.freeAction)completeUnstunnedTurn(a);
   if(a.stealthed&&sk.kind!=='stealth')a.stealthed=0;
-  if(!sk.freeAction){finishActorTurn(a);a.acted=true;state.queue.shift();}
+  if(!sk.freeAction)finishActionSlot(state,a);
   return state;
 }
 function executeRiposte(state,defender,attacker,r){
@@ -385,17 +407,16 @@ function executeRiposte(state,defender,attacker,r){
 export function prepareActorTurn(state,id,r){
  const actor=currentActor(state);
  if(!actor||actor.id!==id)throw Error('Not this actor’s turn');
- beginTurn(state,id,r);
+ if((actor.actionsRemaining??actor.actionsPerRound??1)===(actor.actionsPerRound??1))beginTurn(state,id,r);
  if(actor.dead||actor.corpse){
    actor.acted=true;
-   state.queue.shift();
+   actor.actionsRemaining=0;
+   while(state.queue[0]===actor.id)state.queue.shift();
    return 'dead';
  }
  if(actor.stun>0){
    consumeStun(actor);
-   finishActorTurn(actor);
-   actor.acted=true;
-   state.queue.shift();
+   finishActionSlot(state,actor,true);
    state.log.push(`${actor.name} loses a turn to stun`);
    return 'stunned';
  }
