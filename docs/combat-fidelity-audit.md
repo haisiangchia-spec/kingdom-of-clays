@@ -284,3 +284,11 @@ Expand verified level 2–5 skill tables systematically, starting with the remai
 The engine also applies the target's `healingReceived` modifier to variable healing, consistent with existing fixed healing paths. A zero-point critical heal does not exit Death's Door, but may still cause bleed; positive healing clears Death's Door through the existing recovery path.
 
 **References:** [DD1 Critical Hit — Critical Heals](https://darkestdungeon.wiki.gg/wiki/Critical_Hit_%28Darkest_Dungeon%29); [DD1 Occultist](https://darkestdungeon.wiki.gg/wiki/Occultist). Deterministic regression tests cover double healing, stress relief, zero critical healing/bleed, and received-healing modifiers. This is not a blanket certification of all healing and mortality interactions.
+
+## Pass 14 — Healing modifiers cannot inflict damage (2026-11-14)
+
+**Boundary case corrected.** The ordinary `heal` and `groupHeal` handlers previously added the rounded healing amount without enforcing a nonnegative floor. When a target had a cumulative `healingReceived` modifier lower than -100%, a supportive spell could subtract HP, potentially driving the target below zero without a legitimate damage or Death's Door event. Both paths now clamp the *effective healing amount* to zero before adding it to current HP, matching the guard already present on the `variableHeal` path.
+
+**Tests:** `tests/hero-baseline-parity.test.js` now includes negative-modifier cases for a single-target heal and a party heal, including an ally already at Death's Door. This fixes a defensive engine invariant; it does not claim that an arbitrary -200% modifier is obtainable under standard DD1 equipment or abilities.
+
+**Outstanding:** The broader healing pipeline still needs validation against live-game rounding order, critical modifiers and battle affliction edge cases. The enemy roster and tactical AI remain major next milestones.
