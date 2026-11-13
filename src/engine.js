@@ -274,7 +274,7 @@ export function takeTurn(state,actorId,key,targetId,r){
     for(const u of ranks(state,a.side)){
       const crit=r()<.05;
       const v=randInt(r,sk.min,sk.max)*(crit?2:1);
-      u.hp=Math.min(u.maxHp,u.hp+Math.round(v*(1+effectModifier(u,'healingReceived')/100)));
+      u.hp=Math.min(u.maxHp,u.hp+Math.max(0,Math.round(v*(1+effectModifier(u,'healingReceived')/100))));
       if(crit){u.stress=clamp(u.stress-4,0,200);state.log.push(`${u.name} receives a critical heal`);}
       if(u.hp>0&&u.deathDoor){u.deathDoor=false;u.mortality=u.mortality??'deathDoorRecovery';}
     }
@@ -283,7 +283,7 @@ export function takeTurn(state,actorId,key,targetId,r){
   else if(sk.kind==='heal'){
     const crit=r()<.12;
     const v=randInt(r,sk.min,sk.max)*(crit?2:1);
-    target.hp=Math.min(target.maxHp,target.hp+Math.round(v*(1+effectModifier(target,'healingReceived')/100)));
+    target.hp=Math.min(target.maxHp,target.hp+Math.max(0,Math.round(v*(1+effectModifier(target,'healingReceived')/100))));
     if(sk.afterHealBuff)addTimedEffect(target,{...sk.afterHealBuff,kind:'buff'});
     if(crit){target.stress=clamp(target.stress-4,0,200);state.log.push(`${target.name} receives a critical heal`);}
     if(target.hp>0&&target.deathDoor){target.deathDoor=false;target.mortality=target.mortality??'deathDoorRecovery';}
