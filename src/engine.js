@@ -9,6 +9,7 @@ import {THIRD_CLASS_SKILLS} from './class-skills-batch3.js';
 import {FOURTH_CLASS_SKILLS} from './class-skills-batch4.js';
 import {FIFTH_CLASS_SKILLS} from './class-skills-batch5.js';
 import {SPIRITBOUND_SKILLS} from './class-skills-spiritbound.js';
+import {ENEMY_SKILLS} from './enemy-skills.js';
 import {resolveSkillDefinition,equipVerifiedSkillLevel} from './skill-progression.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
@@ -37,7 +38,7 @@ export const ABILITIES={
  enemy_strike:{name:'Strike',from:[0,1,2,3],to:[0,1,2,3],acc:85},
  enemy_stress:{name:'Dark Whisper',from:[0,1,2,3],to:[0,1,2,3],kind:'stress',amount:15,acc:95}
 };
-Object.assign(ABILITIES,STARTER_CLASS_SKILLS,SECOND_CLASS_SKILLS,THIRD_CLASS_SKILLS,FOURTH_CLASS_SKILLS,FIFTH_CLASS_SKILLS,SPIRITBOUND_SKILLS);
+Object.assign(ABILITIES,STARTER_CLASS_SKILLS,SECOND_CLASS_SKILLS,THIRD_CLASS_SKILLS,FOURTH_CLASS_SKILLS,FIFTH_CLASS_SKILLS,SPIRITBOUND_SKILLS,ENEMY_SKILLS);
 export function getActorSkill(actor,key){return resolveSkillDefinition(ABILITIES,key,actor.skillLevels?.[key]??1);}
 export function setActorSkillLevel(state,actorId,key,level){
  const actor=state.units.find(u=>u.id===actorId);
