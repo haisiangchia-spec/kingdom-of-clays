@@ -7,6 +7,7 @@
 // https://darkestdungeon.wiki.gg/wiki/Vestal
 import {THIRD_PROGRESSION_UPGRADES} from './skill-upgrades-batch3.js';
 import {FOURTH_PROGRESSION_UPGRADES} from './skill-upgrades-batch4.js';
+import {FINAL_PROGRESSION_UPGRADES} from './skill-upgrades-batch5.js';
 export const SKILL_UPGRADES = Object.freeze({
   heavy_slash: {
     2:{acc:90,crit:6},3:{acc:95,crit:7},4:{acc:100,crit:8},5:{acc:105,crit:9}
@@ -246,7 +247,8 @@ export const SKILL_UPGRADES = Object.freeze({
     5:{acc:115,status:{chance:140},moveTarget:{chance:140}}
   },
   ...THIRD_PROGRESSION_UPGRADES,
-  ...FOURTH_PROGRESSION_UPGRADES
+  ...FOURTH_PROGRESSION_UPGRADES,
+  ...FINAL_PROGRESSION_UPGRADES
 });
 
 export const MAX_SKILL_LEVEL=5;
