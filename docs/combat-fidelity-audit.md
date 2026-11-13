@@ -161,3 +161,20 @@ Expand verified level 2–5 skill tables systematically, starting with the remai
 **Limitations:** Base-game ability levels are verified against published tables, but not every conditional/status effect ordering interaction has been certified against live DD1 runtime. Equipment levels, Resolve XP, gold costs and availability, enemy-specific resistance scaling, character abilities outside the base 15 classes, and all progression for the other twelve classes remain pending.
 
 **Next:** Implement skill 2–5 tables for Hunter, Thief and Mage, then continue through all remaining classes. Keep 105/105 level-one handlers separate from the **21/105 verified level-five tracks** completion metric.
+
+## Pass 7 — Hunter, Thief and Mage skill levels 2–5 (2026-11-14)
+
+**Scope:** Extend the source-backed upgrade registry from 21 to **42 of 105 full five-level hero skill tracks**, adding **84 more level 2–5 upgrade patches** across:
+- Hunter / Arbalest: Sniper Shot, Suppressing Fire, Sniper's Mark, Bola, Blindfire, Battlefield Bandage, Rallying Flare
+- Thief / Grave Robber: Pick to the Face, Lunge, Flashing Daggers, Shadow Fade, Thrown Dagger, Poison Dart, Toxin Trickery
+- Mage / Plague Doctor: Noxious Blast, Plague Grenade, Blinding Gas, Incision, Battlefield Medicine, Emboldening Vapours, Disorienting Blast
+
+**Primary numerical sources:** [Official DD1 Arbalest table](https://darkestdungeon.wiki.gg/wiki/Arbalest), [Official DD1 Grave Robber table](https://darkestdungeon.wiki.gg/wiki/Grave_Robber), [Official DD1 Plague Doctor table](https://darkestdungeon.wiki.gg/wiki/Plague_Doctor). Level patches cover published accuracy, critical modifiers, mark/blight conditional bonuses, DOT values and application chance, stun/movement chance, recovery ranges, self/party buffs, stress relief and torch generation.
+
+**Playable demonstration:** The new **Hunter / Thief / Mage Lv5** encounter upgrades all seven skills for each of the three classes without changing the original Hunter / Thief / Mage level-one combat laboratory.
+
+**Regression tests:** `tests/second-class-progression.test.js` checks all 84 newly added patches, level-1 preservation, nested status/buff data, and actual in-engine level-five healing, blight and stealth. `tests/browser/second-class-progression.spec.js` verifies the scenario and those effects in Chromium. Prior tests now distinguish the 42 fully upgraded paths from 63 level-one-only paths.
+
+**Limitations and next audit:** These are published level-by-level numerical tables applied to the prototype. They do not constitute full skill-fidelity certification: enemy resistances, equipment progression, precise conditional trigger ordering, party stress, level-appropriate enemy AI, and rank-by-rank interactions require further work. The remaining **63 hero skills**, including Monster Slayer, Berserker, Dark Knight, Beastmaster, Bard, Cursed Champion, Hex Mage, Treasure Hunter and Spiritbound, still have no verified higher upgrade levels. Never replace missing levels with estimates.
+
+**Next:** Implement levels 2–5 for Monster Slayer (Bounty Hunter), Berserker (Hellion), and Dark Knight (Highwayman).
