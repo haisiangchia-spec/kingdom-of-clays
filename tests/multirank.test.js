@@ -4,14 +4,14 @@ import {unit,makeBattle,makeLargeMonsterBattle,rank,occupiedRanks,formationSlots
 import {attemptDisplacement,moveWithinFormation,corpseFromEnemy} from '../src/formation.js';
 import {eligibleRanks} from '../src/combat-effects.js';
 
-test('three-rank boss occupies ranks zero through two and acts once',()=>{
+test('three-rank boss occupies ranks zero through two and has two consecutive actions',()=>{
  const b=makeLargeMonsterBattle(7);
  assert.deepEqual(occupiedRanks(b,'boss'),[0,1,2]);
  assert.equal(rank(b,'e4'),3);
  assert.deepEqual(formationSlots(b,'enemy').map(x=>x?.id),['boss','boss','boss','e4']);
  startRound(b,()=>0);
- assert.equal(b.queue.filter(x=>x==='boss').length,1);
- assert.equal(b.queue.length,6);
+ assert.equal(b.queue.filter(x=>x==='boss').length,2);
+ assert.equal(b.queue.length,7);
 });
 test('rear-rank skills can target boss occupying rearward cells, but not a front-only ordinary enemy',()=>{
  const b=makeLargeMonsterBattle();
