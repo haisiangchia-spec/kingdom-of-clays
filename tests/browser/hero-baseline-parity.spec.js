@@ -42,3 +42,20 @@ test('Antiquarian Protect Me marks guardian, grants level-one dodge and limits u
  });
  expect(result).toEqual({dodge:12,prot:30,marked:3,guard:'h1',uses:3,remaining:[]});
 });
+
+test('Vulnerability Hex makes a small physical hit; Sniper Mark does not',async ({page})=>{
+ await page.goto('/');
+ const result=await page.evaluate(async()=>{
+  const {makeFifthClassBattle,makeSecondClassBattle,takeTurn}=await import('./src/engine.js');
+  const first=makeFifthClassBattle(),mage=first.units.find(u=>u.id==='h3'),victim=first.units.find(u=>u.id==='e1');
+  mage.dmgMin=mage.dmgMax=10;mage.crit=0;first.queue=['h3'];
+  const hp=victim.hp;
+  takeTurn(first,'h3','curse_of_exposure','e1',()=>.3);
+  const second=makeSecondClassBattle(),another=second.units.find(u=>u.id==='e1');
+  second.queue=['h4'];const previous=another.hp;
+  takeTurn(second,'h4','hunters_mark','e1',()=>.3);
+  return {hexDamage:hp-victim.hp,hexMarked:victim.marked,
+    hunterDamage:previous-another.hp,hunterMarked:another.marked};
+ });
+ expect(result).toEqual({hexDamage:1,hexMarked:3,hunterDamage:0,hunterMarked:3});
+});
