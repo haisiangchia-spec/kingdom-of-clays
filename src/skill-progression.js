@@ -5,6 +5,7 @@
 // https://darkestdungeon.wiki.gg/wiki/Man-at-Arms
 // https://darkestdungeon.wiki.gg/wiki/Crusader
 // https://darkestdungeon.wiki.gg/wiki/Vestal
+import {THIRD_PROGRESSION_UPGRADES} from './skill-upgrades-batch3.js';
 export const SKILL_UPGRADES = Object.freeze({
   heavy_slash: {
     2:{acc:90,crit:6},3:{acc:95,crit:7},4:{acc:100,crit:8},5:{acc:105,crit:9}
@@ -242,7 +243,8 @@ export const SKILL_UPGRADES = Object.freeze({
     3:{acc:105,status:{chance:120},moveTarget:{chance:120}},
     4:{acc:110,status:{chance:130},moveTarget:{chance:130}},
     5:{acc:115,status:{chance:140},moveTarget:{chance:140}}
-  }
+  },
+  ...THIRD_PROGRESSION_UPGRADES
 });
 
 export const MAX_SKILL_LEVEL=5;
