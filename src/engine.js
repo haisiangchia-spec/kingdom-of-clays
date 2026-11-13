@@ -53,6 +53,10 @@ export function availableTargets(state,actorId,key){const a=state.units.find(x=>
 if(sk.classId&&a.classId!==sk.classId)return [];
 if(sk.form&&sk.form!=='either'&&a.form!==sk.form)return [];
 if(sk.kind==='transform'&&(a.form!=='human'&&a.form!=='beast'||a.transformUsedThisTurn))return [];if(sk.maxUses&&(a.usedSkills?.[key]??0)>=sk.maxUses)return [];
+ if(sk.kind==='summon'){
+   if(a.side!=='enemy'||formationSlots(state,a.side).every(Boolean))return [];
+   return [a.id];
+ }
 const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare','stealth','partyStressChance','selfHeal','stressOnly','variableHeal','selfHealStress','reverseGuard','transform'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth','selfHeal','selfHealStress','transform'].includes(sk.kind)||x.id===a.id)&& (sk.kind!=='reverseGuard'||x.id!==a.id));const selectable=candidates.filter(x=>side===a.side||isSelectable(x,sk,side));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?selectable.slice(0,1):selectable).map(x=>x.id);}
 export function startRound(state,r){
  state.round++;
@@ -159,6 +163,17 @@ export function takeTurn(state,actorId,key,targetId,r){
       state.log.push(`${a.name} returns to human form (-2 ally stress)`);
     }
     a.transformsUsed++;a.transformUsedThisTurn=true;
+  }
+  else if(sk.kind==='summon'){
+    // Reinforcements only arrive in a genuinely empty rank: corpses occupy
+    // formation slots until removed, and summons never erase live combatants.
+    // A newly summoned enemy joins next round's initiative, not this queue.
+    const serial=(state.summonSerial??0)+1;
+    const id='reinforcement_'+serial;
+    const summoned=spawnProfileEnemy(unit,id,sk.summonProfile);
+    state.summonSerial=serial;
+    state.units.push(summoned);
+    state.log.push(`${a.name} summons ${summoned.name} to the rear!`);
   }
   else if(sk.kind==='guard'){applyGuard(state,a,target.id,sk.guardTurns??3);if(sk.protectBuff)addTimedEffect(a,{...sk.protectBuff,kind:'buff'});state.log.push(`${a.name} guards ${target.name}`);}
   else if(sk.kind==='reverseGuard'){
