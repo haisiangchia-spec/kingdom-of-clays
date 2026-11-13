@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {ABILITIES,makeFifthClassBattle,setActorSkillLevel,getActorSkill,availableTargets,takeTurn} from '../src/engine.js';
+import {ABILITIES,makeFifthClassBattle,makeSecondClassBattle,setActorSkillLevel,getActorSkill,availableTargets,takeTurn} from '../src/engine.js';
 import {effectModifier,guardTarget} from '../src/status.js';
 const battle=(actor='h3')=>{const b=makeFifthClassBattle(17);b.queue=[actor];return b;};
 const unit=(b,id)=>b.units.find(x=>x.id===id);
@@ -105,11 +105,10 @@ test('Occultist Vulnerability Hex performs its -90% physical hit before marking'
  assert.equal(effectModifier(target,'dodge'),-15);
 });
 test('pure mark skills with no damage modifier remain non-damaging',()=>{
- const b=battle(),a=unit(b,'h3');
- // Replace the actor's skill with no mod only in a cloned spec to avoid
- // mutating global level-one definitions.
- const {curse_of_exposure}=ABILITIES;
- assert.equal(ABILITIES.hunters_mark.kind,'mark');
+ const b=makeSecondClassBattle(21),foe=unit(b,'e1');
+ b.queue=['h4'];const hp=foe.hp;
  assert.equal(ABILITIES.hunters_mark.mod,undefined);
- assert.equal(curse_of_exposure.mod,-.90);
+ takeTurn(b,'h4','hunters_mark','e1',()=>.3);
+ assert.equal(foe.hp,hp);
+ assert.equal(foe.marked,3);
 });
