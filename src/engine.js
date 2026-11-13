@@ -134,8 +134,17 @@ export function takeTurn(state,actorId,key,targetId,r){
   else if(sk.kind==='mark'){
     const chance=hitChance({accuracy:sk.acc??100,accModifier:effectiveCombatStats(a).accuracy+effectModifier(a,'accuracy'),dodge:target.dodge+effectModifier(target,'dodge'),missStreak:a.misses});
     if(r()*100<chance){
-      target.marked=sk.markTurns??3;
-      if(sk.debuff&&r()*100<resistChance({applicationChance:sk.debuff.chance,resistance:(target.resist.debuff??0)-effectModifier(target,'debuffResist')}))addTimedEffect(target,{...sk.debuff,kind:'debuff'});
+      // Some DD1 marks (e.g. Occultist Vulnerability Hex) are also physical
+      // attacks. Pure utility marks have no damaging multiplier and stay nonlethal.
+      if(Number.isFinite(sk.mod)&&sk.mod>-1){
+        const critical=rollCrit({baseCrit:a.crit+effectModifier(a,'crit')+effectModifier(target,'critReceived'),skillCrit:sk.crit??0},r);
+        const multiplier=combinedAttackMultiplier(sk.mod,[effectModifier(a,'damage')]);
+        const dmg=directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:multiplier*(1+effectModifier(target,'damageTaken')/100),crit:critical,prot:target.prot+effectModifier(target,'prot'),damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
+        hurt(state,target,dmg,r,critical,true);
+        state.log.push(`${a.name} hits ${target.name} with ${sk.name}: ${dmg}${critical?' CRIT':''}`);
+      }
+      if(!target.dead&&!target.corpse)target.marked=sk.markTurns??3;
+      if(!target.dead&&!target.corpse&&sk.debuff&&r()*100<resistChance({applicationChance:sk.debuff.chance,resistance:(target.resist.debuff??0)-effectModifier(target,'debuffResist')}))addTimedEffect(target,{...sk.debuff,kind:'debuff'});
       if(sk.selfBuff)addTimedEffect(a,{...sk.selfBuff,kind:'buff'});
       state.log.push(`${a.name} marks ${target.name}`);
     }else state.log.push(`${a.name} fails to mark ${target.name}`);
