@@ -222,3 +222,25 @@ Expand verified level 2–5 skill tables systematically, starting with the remai
 **Unresolved parity caveats:** The original level-one prototypes still have some numerical and behaviour differences from the modern DD1 single-player tables (e.g. Leper's original Purge/Revenge descriptors); this pass updates the level 2–5 data but does **not** claim to correct all level-one mismatches or advanced interactions. The Leper Withstand mark and Revenge vulnerability ordering, Hound stress targeting, Jester Finale stack timing, enemy resistances and several effect-stat names require a full comparison in their own audit. Passing tests prove encoded behaviours, not game-wide fidelity.
 
 **Next:** complete all skill levels for Hex Mage, Treasure Hunter and Spiritbound, then return to the mechanics parity audit and enemy/boss implementation before dungeon exploration.
+
+## Pass 10 — All 105 hero skills have five-level upgrade tables (2026-11-14)
+
+**Scope and milestone outcome.** Completed the remaining 21 level 2–5 tracks (84 upgrade entries), bringing the DD1 base-game hero catalog to **105/105 skills with level 1–5 entries**, spanning 15 classes. The implementation now has five separate level-five testing parties.
+
+**Primary published single-player DD1 skill tables:**
+- [Occultist](https://darkestdungeon.wiki.gg/wiki/Occultist) — Sacrificial Stab, Abyssal Artillery, Weakening Curse, Wyrd Reconstruction, Vulnerability Hex, Hands from the Abyss, Daemon's Pull.
+- [Antiquarian](https://darkestdungeon.wiki.gg/wiki/Antiquarian) — Nervous Stab, Festering Vapours, Get Down!, Flashpowder, Fortifying Vapours, Invigorating Vapours, Protect Me.
+- [Abomination](https://darkestdungeon.wiki.gg/wiki/Abomination) — Transform, Manacles, Beast's Bile, Absolution, Rake, Rage, Slam.
+
+**Implementation details:**
+- `src/skill-upgrades-batch5.js` supplies 84 additional level 2–5 upgrade entries and is merged by `src/skill-progression.js`.
+- Spiritbound's shared Transform has **form-specific level data**: the level-five human-to-beast transformation heals 10 HP, increases SPD by 5, Blight Resist by 30% and DMG by 25%; beast-to-human reversion at level five applies no speed penalty. The engine now uses these values directly.
+- Hex Mage's Wyrd Reconstruction progresses up to 0–22 HP and 85% bleed application; Hands from the Abyss reaches 150% stun chance. The existing random-heal/bleed implementation takes the per-level values.
+- Treasure Hunter's Festering Vapours reaches 4 damage blight and -36% Blight Resist; Invigorating Vapours grants +10 party DODGE; Protect Me grants +20 PROT and +8 DODGE to its forced guardian and marks the guardian at levels 2–5.
+- A new **Spiritbound / Hex Mage / Treasure Hunter Lv5** playable party equips all seven level-five skills for each new class, alongside a level-one Warrior.
+
+**Verification:** `tests/final-class-progression.test.js` covers the final skill tables, actor isolation and live healing, guard, status effects, and both directions of upgraded Transform; `tests/browser/final-class-progression.spec.js` covers the final party and level-five combat in Chromium. All previously completed class test cases still run against the combined 105-skill catalog.
+
+**Important fidelity limits:** Passing the complete progression registry does not establish exact reproduction of original DD1 combat. Several **level-one prototype definitions are known to differ from the published base tables** (examples: Hex Mage's base Weakening Curse/bleed values, and Treasure Hunter's Protect Me mark/protection and limited-use rules); retaining those definitions avoids silently breaking the original milestone's tests. Some higher-level patches now match the DD1 reference despite inherited inaccuracies at level one. Skill accuracy/critical/resistance evaluation and effect ordering require case-by-case review, along with Spiritbound transform-turn status progression, real enemy stats, gear and Guild progression, trinkets and battle AI. The next pass must explicitly correct incorrect base data and update tests to actual DD1 fixtures rather than declaring full fidelity.
+
+**Next major milestones:** (1) hero-skill baseline/parity audit with original DD1 fixture comparisons and critical interaction tests; (2) enemy rosters, resistance profiles, tactical AI, bosses and stalling; (3) dungeon exploration; (4) the agreed Kingdom of Clays sandbox/settlement systems.
