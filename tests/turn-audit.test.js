@@ -71,3 +71,13 @@ test('direct stunned-turn fallback does not spend torch on an unexecuted attack'
  assert.equal(b.torch,75);
  assert.equal(actor.stun,0);
 });
+
+test('stunned direct action cannot apply post-skill self-mark or buffs',()=>{
+ const b=makeFifthClassBattle(17),actor=b.units.find(x=>x.id==='h1');
+ b.queue=['h1'];actor.stun=1;
+ takeTurn(b,'h1','unyielding_body','h1',()=>.5);
+ assert.equal(actor.marked??0,0);
+ assert.equal(actor.effects.length,0);
+ assert.equal(actor.usedSkills.unyielding_body,undefined);
+ assert.equal(actor.acted,true);
+});
