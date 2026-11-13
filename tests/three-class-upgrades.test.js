@@ -12,13 +12,13 @@ const tracks={
 test('all 21 skills have levels 1–5; the 84 upgrade patches are present',()=>{
  const keys=Object.values(tracks).flat();
  assert.equal(keys.length,21);
- assert.equal(Object.keys(SKILL_UPGRADES).length,42);
+ assert.equal(Object.keys(SKILL_UPGRADES).length,63);
  for(const key of keys){
   assert.deepEqual(availableVerifiedLevels(key),[1,2,3,4,5]);
   for(const level of [2,3,4,5])assert.ok(SKILL_UPGRADES[key]?.[level],key+' '+level);
  }
  assert.equal(keys.reduce((count,key)=>count+Object.keys(SKILL_UPGRADES[key]).length,0),84);
- assert.deepEqual(availableVerifiedLevels('hunters_execution'),[1]);
+ assert.deepEqual(availableVerifiedLevels('wolfs_assault'),[1]);
 });
 test('Swordsman Bellow accuracy, debuff and application chance match all five levels',()=>{
  const expected=[
