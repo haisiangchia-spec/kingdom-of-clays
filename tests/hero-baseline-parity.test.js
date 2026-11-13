@@ -151,3 +151,32 @@ test('a guardian dodge miss prevents both physical damage and status application
  assert.equal(protector.marked??0,0);
  assert.equal(effectModifier(protector,'dodge'),0);
 });
+
+test('Wyrd Reconstruction critical heal doubles its rolled amount and reduces 4 stress',()=>{
+ const b=battle(),target=unit(b,'h1');
+ target.hp=1;target.stress=20;target.resist.bleed=100;
+ const rolls=[.01,.5,.5];let i=0;
+ takeTurn(b,'h3','forbidden_restoration','h1',()=>rolls[i++]);
+ assert.equal(target.hp,15,'roll 7 from 0..13 becomes 14 HP on critical heal');
+ assert.equal(target.stress,16);
+ assert.equal(target.dot.length,0);
+ assert.ok(b.log.some(s=>s.includes('critical heal')));
+});
+test('Wyrd Reconstruction critical zero remains zero and can still inflict bleed at Death Door',()=>{
+ const b=battle(),target=unit(b,'h1');
+ target.hp=0;target.deathDoor=true;target.stress=10;target.resist.bleed=0;
+ const rolls=[0,0,0];let i=0;
+ takeTurn(b,'h3','forbidden_restoration','h1',()=>rolls[i++]);
+ assert.equal(target.hp,0);
+ assert.equal(target.deathDoor,true);
+ assert.equal(target.stress,6);
+ assert.deepEqual(target.dot,[{type:'bleed',value:1,turns:3}]);
+});
+test('Wyrd Reconstruction healing-received modifier scales the rolled heal',()=>{
+ const b=battle(),target=unit(b,'h1');
+ target.hp=1;target.resist.bleed=100;
+ target.effects.push({kind:'buff',turns:3,modifiers:{healingReceived:50}});
+ const rolls=[.5,.5,.5];let i=0;
+ takeTurn(b,'h3','forbidden_restoration','h1',()=>rolls[i++]);
+ assert.equal(target.hp,12,'7 raw healing multiplied by 1.5 rounds to 11');
+});
