@@ -195,7 +195,7 @@ export function takeTurn(state,actorId,key,targetId,r){
     const amount=randInt(r,sk.min,sk.max);
     target.hp=Math.min(target.maxHp,target.hp+amount);
     if(target.hp>0&&target.deathDoor){target.deathDoor=false;target.mortality??='deathDoorRecovery';}
-    if(r()*100<(sk.bleedChance??0)&&r()*100<resistChance({applicationChance:100,resistance:(target.resist.bleed??0)+effectModifier(target,'bleedResist')})){
+    if(r()*100<resistChance({applicationChance:sk.bleedChance??0,resistance:(target.resist.bleed??0)+effectModifier(target,'bleedResist')})){
       target.dot.push({type:'bleed',value:sk.bleedValue??3,turns:sk.bleedTurns??3});
       state.log.push(`${target.name} bleeds after ${sk.name}`);
     }
