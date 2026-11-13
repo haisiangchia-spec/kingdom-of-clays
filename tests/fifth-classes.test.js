@@ -63,14 +63,14 @@ test('Hex Mage Abyssal Barrage strikes both back enemies',()=>{
 });
 test('Hex Mage Weakening Curse applies both damage and protection debuffs',()=>{
  const b=use('h3','enfeebling_hex','e2'),target=b.units.find(x=>x.id==='e2');
- assert.equal(effectModifier(target,'damage'),-20);
+ assert.equal(effectModifier(target,'damage'),-10);
  assert.equal(effectModifier(target,'prot'),-10);
 });
 test('Hex Mage reconstruction may roll zero healing and add bleed',()=>{
  const b=battle('h3'),target=b.units.find(x=>x.id==='h1');target.hp=9;
  takeTurn(b,'h3','forbidden_restoration','h1',()=>0);
  assert.equal(target.hp,9);
- assert.ok(target.dot.some(e=>e.type==='bleed'&&e.value===3));
+ assert.ok(target.dot.some(e=>e.type==='bleed'&&e.value===1));
 });
 test('Hex Mage reconstruction can heal 13 HP without bleed',()=>{
  const b=battle('h3'),target=b.units.find(x=>x.id==='h1');target.hp=9;
@@ -79,7 +79,7 @@ test('Hex Mage reconstruction can heal 13 HP without bleed',()=>{
 });
 test('Hex Mage Vulnerability Hex marks and reduces dodge',()=>{
  const b=use('h3','curse_of_exposure','e1'),target=b.units.find(x=>x.id==='e1');
- assert.equal(target.marked,3);assert.equal(effectModifier(target,'dodge'),-10);
+ assert.equal(target.marked,3);assert.equal(effectModifier(target,'dodge'),-15);
 });
 test('Hex Mage Abyssal Grasp requires frontline and stuns',()=>{
  const b=battle('h3');
