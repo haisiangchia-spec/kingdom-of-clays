@@ -4,7 +4,7 @@
 // four-target skills four times the selection chance of single-target skills.
 const PROFILES=Object.freeze({
   'Skeleton Archer':Object.freeze({targetPreference:'rear'}),
-  'Skeleton Court Mage':Object.freeze({skillWeights:Object.freeze({enemy_stress:3,enemy_strike:1}),targetPreference:'stressed'})
+  'Skeleton Court Mage':Object.freeze({skillWeights:Object.freeze({court_curse:3,court_blight:1,enemy_stress:3,enemy_strike:1}),targetPreference:'stressed'})
 });
 export const ENEMY_TACTICS=PROFILES;
 
