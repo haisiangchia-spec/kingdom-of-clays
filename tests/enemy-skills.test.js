@@ -51,7 +51,8 @@ test('Court Mage stress spell is favoured over blight by provisional weights',()
 });
 test('three-rank Goblin Emperor has usable slam and stress roar',()=>{
  const b=makeLargeMonsterBattle(31);
- for(const key of ENCOUNTER_SKILLS.boss)assert.ok(availableTargets(b,'boss',key).length>0,key);
+ for(const key of ['emperor_slam','emperor_roar'])assert.ok(availableTargets(b,'boss',key).length>0,key);
+ assert.deepEqual(availableTargets(b,'boss','emperor_call'),[],'summon is blocked while every rank is occupied');
  b.queue=['boss'];
  const hero=actor(b,'h1'),hp=hero.hp;
  takeTurn(b,'boss','emperor_slam','h1',()=>.2);
