@@ -8,7 +8,7 @@ test('Goblin Emperor summons only after rear-rank corpse clears',async ({page})=
   const b=makeLargeMonsterBattle(31),boss=b.units.find(u=>u.id==='boss'),mage=b.units.find(u=>u.id==='e4');
   mage.hp=0;corpseFromEnemy(mage,b.round);
   const blocked=availableTargets(b,'boss','emperor_call').length===0;
-  mage.dead=true;
+  mage.dead=true;boss.hp=48;
   b.queue=['boss','boss','h1'];
   takeTurn(b,'boss','emperor_call','boss',()=>.5);
   const summoned=b.units.find(u=>u.id==='reinforcement_1');
