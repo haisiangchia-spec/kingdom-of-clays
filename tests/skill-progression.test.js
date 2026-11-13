@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import {ABILITIES,makeBattle,makeProgressionBattle,makeThirdClassBattle,setActorSkillLevel,getActorSkill,takeTurn,availableTargets,unit} from '../src/engine.js';
 import {SKILL_UPGRADES,resolveSkillDefinition,availableVerifiedLevels,equipVerifiedSkillLevel} from '../src/skill-progression.js';
 
-test('verified upgrade registry covers eighty-four skills across twelve classes',()=>{
- const classSkills=Object.entries(ABILITIES).filter(([,sk])=>['swordsman','warrior','priest','hunter','thief','mage','monster_slayer','berserker','dark_knight','beastmaster','bard','cursed_champion'].includes(sk.classId)).map(([key])=>key);
- assert.equal(classSkills.length,84);
+test('verified upgrade registry covers all one-hundred-and-five skills across fifteen classes',()=>{
+ const classSkills=Object.entries(ABILITIES).filter(([,sk])=>['swordsman','warrior','priest','hunter','thief','mage','monster_slayer','berserker','dark_knight','beastmaster','bard','cursed_champion','hex_mage','treasure_hunter','spiritbound'].includes(sk.classId)).map(([key])=>key);
+ assert.equal(classSkills.length,105);
  assert.deepEqual(Object.keys(SKILL_UPGRADES).sort(),classSkills.sort());
  for(const id of Object.keys(SKILL_UPGRADES))assert.deepEqual(availableVerifiedLevels(id),[1,2,3,4,5]);
- assert.deepEqual(availableVerifiedLevels('ritual_dagger'),[1]);
+ assert.deepEqual(availableVerifiedLevels('ritual_dagger'),[1,2,3,4,5]);
 });
 test('level-one definitions remain stable, untouched by upgrade patches',()=>{
  const base=ABILITIES.countering_advance;
@@ -62,7 +62,7 @@ test('invalid progression levels and unknown upgrade values are rejected, never 
  for(const level of [0,6,-1,1.5,NaN,'5',null]){
   assert.throws(()=>resolveSkillDefinition(ABILITIES,'heavy_slash',level),RangeError);
  }
- assert.throws(()=>resolveSkillDefinition(ABILITIES,'ritual_dagger',2),/Unverified skill upgrade/);
+ assert.equal(resolveSkillDefinition(ABILITIES,'ritual_dagger',2).acc,85);
  assert.throws(()=>resolveSkillDefinition(ABILITIES,'nonexistent',1),/Unknown skill/);
 });
 test('only matching hero class can equip a researched upgrade',()=>{
