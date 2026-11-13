@@ -3,7 +3,7 @@ import {test,expect} from '@playwright/test';
 test('Hunter / Thief / Mage combat laboratory loads as a playable party',async ({page})=>{
  const errors=[];page.on('pageerror',err=>errors.push(err.message));
  await page.goto('/');
- await page.getByRole('button',{name:'Hunter / Thief / Mage'}).click();
+ await page.getByRole('button',{name:'Hunter / Thief / Mage',exact:true}).click();
  await expect(page.locator('#hero .unit')).toHaveCount(4);
  await expect(page.locator('#enemy .unit')).toHaveCount(4);
  for(const name of ['Warrior','Thief','Mage','Hunter'])
