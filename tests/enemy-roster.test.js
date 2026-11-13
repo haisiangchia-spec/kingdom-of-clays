@@ -42,7 +42,7 @@ test('boss retains three-rank footprint and its independent resistances',()=>{
  const b=makeLargeMonsterBattle(45),boss=b.units.find(u=>u.id==='boss');
  assert.equal(boss.size,3);
  assert.equal(boss.resist.move,ENEMY_PROFILES.emperor.stats.moveResist);
- assert.deepEqual(boss.enemySkills,['emperor_slam','emperor_roar']);
+ assert.deepEqual(boss.enemySkills,['emperor_slam','emperor_roar','emperor_call']);
  assert.deepEqual([0,1,2].map(i=>rank(b,boss.id)+i),[0,1,2]);
 });
 test('unknown profiles and presets fail explicitly rather than silently substituting monsters',()=>{
