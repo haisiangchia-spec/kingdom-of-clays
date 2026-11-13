@@ -1,4 +1,4 @@
-import {chooseEnemyAction} from './enemy-ai.js';
+import {chooseEnemyAction,bossPhase} from './enemy-ai.js';
 import {ENCOUNTER_SKILLS} from './enemy-skills.js';
 import {makeBattle,makeUndeadEncounter,makeLargeMonsterBattle,makeSecondClassBattle,makeThirdClassBattle,makeFourthClassBattle,makeFifthClassBattle,makeSpiritboundBattle,makeProgressionBattle,makeSecondProgressionBattle,makeThirdProgressionBattle,makeFourthProgressionBattle,makeFinalProgressionBattle,getActorSkill,rng,startRound,currentActor,rank,ranks,availableTargets,takeTurn,prepareActorTurn,status,ABILITIES} from './engine.js';
 let seed=(Date.now()>>>0)||1,random=rng(seed),battle=makeBattle(seed),selected=null,preparedActorId=null,mode='normal';
@@ -13,7 +13,7 @@ const fourthProgressionSkills={h1:fifthLabSkills.h1,h2:fourthLabSkills.h2,h3:fou
 const finalProgressionSkills={h1:spiritLabSkills.h2,h2:fifthLabSkills.h2,h3:fifthLabSkills.h3,h4:fifthLabSkills.h4};
 const skillsFor=id=>battle.units.find(u=>u.id===id)?.side==='enemy'&&battle.units.find(u=>u.id===id)?.enemySkills?battle.units.find(u=>u.id===id).enemySkills:mode==='progressionLab5'&&finalProgressionSkills[id]?finalProgressionSkills[id]:mode==='progressionLab4'&&fourthProgressionSkills[id]?fourthProgressionSkills[id]:mode==='progressionLab3'&&thirdProgressionSkills[id]?thirdProgressionSkills[id]:mode==='spiritLab'&&spiritLabSkills[id]?spiritLabSkills[id]:mode==='fifthLab'&&fifthLabSkills[id]?fifthLabSkills[id]:mode==='fourthLab'&&fourthLabSkills[id]?fourthLabSkills[id]:mode==='thirdLab'&&thirdLabSkills[id]?thirdLabSkills[id]:mode==='classLab'&&classLabSkills[id]?classLabSkills[id]:skills[id]??[];
 const $=id=>document.getElementById(id);
-const label=u=>`${u.name}${u.form?' · '+u.form.toUpperCase()+' FORM':''} · ${u.hp}/${u.maxHp} HP${u.deathDoor?' · DEATH’S DOOR':''}${u.stun?' · STUN':''}${u.marked?' · MARKED':''}`;
+const label=u=>`${u.name}${bossPhase(u)?' · '+bossPhase(u).toUpperCase()+' PHASE':''}${u.form?' · '+u.form.toUpperCase()+' FORM':''} · ${u.hp}/${u.maxHp} HP${u.deathDoor?' · DEATH’S DOOR':''}${u.stun?' · STUN':''}${u.marked?' · MARKED':''}`;
 function ai(){let guard=0;while(status(battle)==='ongoing'&&currentActor(battle)?.side==='enemy'&&guard++<20){const a=currentActor(battle);if(prepareActorTurn(battle,a.id,random)!=='ready')continue;const choice=chooseEnemyAction(battle,a.id,skillsFor(a.id),random,ABILITIES,availableTargets);if(!choice){a.acted=true;battle.queue.shift();battle.log.push(`${a.name} passes`);continue;}takeTurn(battle,a.id,choice.key,choice.targetId,random);}}
 function ensure(){
  let iterations=0;
