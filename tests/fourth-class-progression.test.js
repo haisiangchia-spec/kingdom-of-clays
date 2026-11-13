@@ -10,14 +10,14 @@ import {effectModifier} from '../src/status.js';
 const keys=[...FOURTH_CLASS_KEYS.beastmaster,...FOURTH_CLASS_KEYS.bard,...FIFTH_CLASS_KEYS.cursed_champion];
 const hero=(state,id)=>state.units.find(u=>u.id===id);
 test('84 total hero tracks with 21 new tracks and 84 extra level patches',()=>{
- assert.equal(Object.keys(SKILL_UPGRADES).length,84);
- assert.equal(SKILL_CATALOG.filter(s=>s.verifiedLevels.length===5).length,84);
+ assert.equal(Object.keys(SKILL_UPGRADES).length,105);
+ assert.equal(SKILL_CATALOG.filter(s=>s.verifiedLevels.length===5).length,105);
  assert.equal(keys.length,21);assert.equal(Object.keys(FOURTH_PROGRESSION_UPGRADES).length,21);
  for(const id of keys){
   assert.deepEqual(availableVerifiedLevels(id),[1,2,3,4,5]);
   assert.equal(Object.keys(FOURTH_PROGRESSION_UPGRADES[id]).length,4);
  }
- assert.deepEqual(availableVerifiedLevels('ritual_dagger'),[1]);
+ assert.deepEqual(availableVerifiedLevels('ritual_dagger'),[1,2,3,4,5]);
 });
 test('level-five lab equips seven skills each for three classes without upgrading Priest',()=>{
  const b=makeFourthProgressionBattle(8);
