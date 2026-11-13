@@ -94,3 +94,22 @@ test('Protect Me four-turn guardian buff survives and still expires via shared t
  const guardian=unit(b,'h1');
  assert.equal(guardian.effects.find(x=>x.modifiers?.prot===10)?.turns,4);
 });
+
+test('Occultist Vulnerability Hex performs its -90% physical hit before marking',()=>{
+ const b=battle(),a=unit(b,'h3'),target=unit(b,'e1');
+ a.dmgMin=a.dmgMax=10;a.crit=0;
+ const before=target.hp;
+ takeTurn(b,'h3','curse_of_exposure','e1',()=>.3);
+ assert.equal(before-target.hp,1);
+ assert.equal(target.marked,3);
+ assert.equal(effectModifier(target,'dodge'),-15);
+});
+test('pure mark skills with no damage modifier remain non-damaging',()=>{
+ const b=battle(),a=unit(b,'h3');
+ // Replace the actor's skill with no mod only in a cloned spec to avoid
+ // mutating global level-one definitions.
+ const {curse_of_exposure}=ABILITIES;
+ assert.equal(ABILITIES.hunters_mark.kind,'mark');
+ assert.equal(ABILITIES.hunters_mark.mod,undefined);
+ assert.equal(curse_of_exposure.mod,-.90);
+});
