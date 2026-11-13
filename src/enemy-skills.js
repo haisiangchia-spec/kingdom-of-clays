@@ -13,7 +13,8 @@ export const ENEMY_SKILLS=Object.freeze({
   court_blight:{name:'Withering Sigil',from:[2,3],to:[1,2,3],acc:90,crit:0,mod:-.8,
     status:{type:'blight',chance:105,value:2,turns:3}},
   emperor_slam:{name:'Imperial Slam',from:[0,1,2],to:[0,1],acc:85,crit:2,mod:.1},
-  emperor_roar:{name:'Tyrant Roar',from:[0,1,2],to:[0,1,2,3],kind:'stress',amount:20,acc:90}
+  emperor_roar:{name:'Tyrant Roar',from:[0,1,2],to:[0,1,2,3],kind:'stress',amount:20,acc:90},
+  emperor_call:{name:'Summon Boneguard',from:[0,1,2,3],to:[0,1,2,3],kind:'summon',summonProfile:'swordsman',maxUses:1}
 });
 
 export const ENCOUNTER_SKILLS=Object.freeze({
@@ -21,5 +22,5 @@ export const ENCOUNTER_SKILLS=Object.freeze({
   e2:Object.freeze(['skeleton_cleaver','skeleton_guard_break']),
   e3:Object.freeze(['skeleton_bone_arrow','skeleton_pin_arrow']),
   e4:Object.freeze(['court_curse','court_blight']),
-  boss:Object.freeze(['emperor_slam','emperor_roar'])
+  boss:Object.freeze(['emperor_slam','emperor_roar','emperor_call'])
 });
