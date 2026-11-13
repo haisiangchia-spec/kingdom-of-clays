@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {ABILITIES,makeFifthClassBattle,makeSecondClassBattle,setActorSkillLevel,getActorSkill,availableTargets,takeTurn} from '../src/engine.js';
+import {ABILITIES,makeFifthClassBattle,makeSecondClassBattle,makeSpiritboundBattle,setActorSkillLevel,getActorSkill,availableTargets,takeTurn} from '../src/engine.js';
 import {effectModifier,guardTarget,applyGuard} from '../src/status.js';
 const battle=(actor='h3')=>{const b=makeFifthClassBattle(17);b.queue=[actor];return b;};
 const unit=(b,id)=>b.units.find(x=>x.id===id);
@@ -179,4 +179,23 @@ test('Wyrd Reconstruction healing-received modifier scales the rolled heal',()=>
  const rolls=[.5,.5,.5];let i=0;
  takeTurn(b,'h3','forbidden_restoration','h1',()=>rolls[i++]);
  assert.equal(target.hp,12,'7 raw healing multiplied by 1.5 rounds to 11');
+});
+
+test('single-target heals cannot damage recipients with severe negative healing received',()=>{
+ const b=makeSpiritboundBattle(31),target=unit(b,'h1');
+ b.queue=['h3'];target.hp=10;
+ target.effects.push({kind:'debuff',turns:3,modifiers:{healingReceived:-200}});
+ takeTurn(b,'h3','greater_heal','h1',()=>.5);
+ assert.equal(target.hp,10);
+ assert.equal(target.dead,false);
+});
+test('party heals cannot damage members or force a Death Door transition from negative healing',()=>{
+ const b=makeSpiritboundBattle(32),front=unit(b,'h1'),rear=unit(b,'h4');
+ b.queue=['h3'];front.hp=10;rear.hp=0;rear.deathDoor=true;
+ for(const u of [front,rear])u.effects.push({kind:'debuff',turns:3,modifiers:{healingReceived:-200}});
+ takeTurn(b,'h3','group_healing','h3',()=>.5);
+ assert.equal(front.hp,10);
+ assert.equal(rear.hp,0);
+ assert.equal(rear.deathDoor,true);
+ assert.equal(front.dead,false);
 });
