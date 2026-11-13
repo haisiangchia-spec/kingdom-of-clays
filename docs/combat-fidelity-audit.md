@@ -244,3 +244,27 @@ Expand verified level 2–5 skill tables systematically, starting with the remai
 **Important fidelity limits:** Passing the complete progression registry does not establish exact reproduction of original DD1 combat. Several **level-one prototype definitions are known to differ from the published base tables** (examples: Hex Mage's base Weakening Curse/bleed values, and Treasure Hunter's Protect Me mark/protection and limited-use rules); retaining those definitions avoids silently breaking the original milestone's tests. Some higher-level patches now match the DD1 reference despite inherited inaccuracies at level one. Skill accuracy/critical/resistance evaluation and effect ordering require case-by-case review, along with Spiritbound transform-turn status progression, real enemy stats, gear and Guild progression, trinkets and battle AI. The next pass must explicitly correct incorrect base data and update tests to actual DD1 fixtures rather than declaring full fidelity.
 
 **Next major milestones:** (1) hero-skill baseline/parity audit with original DD1 fixture comparisons and critical interaction tests; (2) enemy rosters, resistance profiles, tactical AI, bosses and stalling; (3) dungeon exploration; (4) the agreed Kingdom of Clays sandbox/settlement systems.
+
+## Pass 11 — Base skill parity: Occultist, Antiquarian and mark/heal engine rules (2026-11-14)
+
+**Scope:** Begin the hero-class parity pass using primary single-player DD1 published skill tables, focusing on demonstrably incorrect level-one values in Hex Mage (Occultist) and Treasure Hunter (Antiquarian), and two shared-engine application rules. This is an initial **targeted pass**, not certification of 105 skills.
+
+**References**
+- [Occultist original DD1 skill tables](https://darkestdungeon.wiki.gg/wiki/Occultist)
+- [Antiquarian original DD1 skill tables](https://darkestdungeon.wiki.gg/wiki/Antiquarian)
+- [Official DD1 combat mechanics](https://darkestdungeon.wiki.gg/wiki/Combat_Mechanics_(Darkest_Dungeon))
+
+**Corrections**
+1. Weakening Curse, level one: -75% direct damage modifier, +5% CRIT, **-10% DMG and -10% PROT** (100% debuff base, three rounds). Previously -90% and -20% DMG were incorrect.
+2. Wyrd Reconstruction, level one: **0–13 HP**, **60% bleed application** at **1 damage/turn over three turns**. The previous level-one bleed value of 3 was erroneously level-five strength.
+3. Wyrd Reconstruction's bleed application now uses a **single roll against (skill application chance − effective target Bleed Resist)**, matching DD1 status application and preventing the previous mathematically incorrect two independent-roll multiplication. Its level-five bleed remains 85% base and 3 per turn.
+4. Vulnerability Hex, level one: +5% CRIT, -90% damage modifier and **-15 DODGE** debuff, with three-turn mark. The shared mark handler now deals the skill's physical damage **only when a damaging modifier is explicitly supplied**. Purely non-damaging marks such as Arbalest's Sniper's Mark still cause zero physical damage.
+5. Hands from the Abyss and Daemon's Pull level-one critical modifiers corrected to +9% and +5% respectively.
+6. Get Down! level one now additionally provides +1 SPD (four-turn buff), alongside existing +15 DODGE and +10% Blight Skill Chance.
+7. Protect Me level one: target guardian now receives **+10% PROT, +4 DODGE** for four turns, **Mark (three turns)**, and forced guard (two turns). Its usage limit is now **3 per battle** at level one, matching levels two through five. These buffs stack through the existing common status engine and guard timing.
+
+**Automated evidence:** `tests/hero-baseline-parity.test.js` and `tests/browser/hero-baseline-parity.spec.js` provide independent deterministic and Chromium fixtures, including 5%/20% resistance-boundary roll cases, damage-bearing vs damage-free marks, reverse guard, and max-use enforcement. The previous level-one prototype test assertions were updated to match the original published DD1 values.
+
+**Explicit unresolved issues:** Damage-bearing mark skills currently use a simplified critical/miss pipeline and must be checked against the full DD1 critical response, guarding redirection and accuracy streaks. Occultist heals can critically heal in the source game; current healing implementation and bleed interactions require that dedicated audit. The base Antiquarian and other fourteen-class stats, equipment/Resolve scaling, healing interactions, blight chance buffs, skill-specific round-duration exceptions and all monster/boss action rules require source comparisons. Passing the tests demonstrates the encoded rules for these fixtures, not complete original-game fidelity.
+
+**Next suggested pass:** extend baseline parity to remaining Leper, Abomination and the other class-specific status/mark/heal interactions, then tackle enemy stat and AI fixtures.
