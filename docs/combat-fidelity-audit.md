@@ -178,3 +178,25 @@ Expand verified level 2–5 skill tables systematically, starting with the remai
 **Limitations and next audit:** These are published level-by-level numerical tables applied to the prototype. They do not constitute full skill-fidelity certification: enemy resistances, equipment progression, precise conditional trigger ordering, party stress, level-appropriate enemy AI, and rank-by-rank interactions require further work. The remaining **63 hero skills**, including Monster Slayer, Berserker, Dark Knight, Beastmaster, Bard, Cursed Champion, Hex Mage, Treasure Hunter and Spiritbound, still have no verified higher upgrade levels. Never replace missing levels with estimates.
 
 **Next:** Implement levels 2–5 for Monster Slayer (Bounty Hunter), Berserker (Hellion), and Dark Knight (Highwayman).
+
+## Pass 8 — Monster Slayer, Berserker and Dark Knight skill upgrades (2026-11-14)
+
+**Scope:** Extend five-level skill progression from **42/105** to **63/105** across nine original DD1 hero classes. Added 21 full level-1-to-5 tracks and **84 source-checked level 2–5 patches**. Other **42** hero skills remain level-one-only.
+
+**Primary sources and version:** Original single-player Darkest Dungeon 1 skill tables, not Butcher's Circus or DD2:
+- [Bounty Hunter (official wiki)](https://darkestdungeon.wiki.gg/wiki/Bounty_Hunter)
+- [Hellion (official wiki)](https://darkestdungeon.wiki.gg/wiki/Hellion)
+- [Highwayman (official wiki)](https://darkestdungeon.wiki.gg/wiki/Highwayman)
+
+**Implemented tracks**
+- **Monster Slayer (Bounty Hunter):** Collect Bounty, Mark for Death, Come Hither, Uppercut, Flashbang, Finish Him and Caltrops. Includes base accuracy/critical scaling, human damage, PROT and speed debuffs, marked-target and stunned-target damage, stun/pull/shuffle probabilities, bleed damage and enemy damage-taken modifiers.
+- **Berserker (Hellion):** Wicked Hack, Iron Swan, Barbaric YAWP!, If It Bleeds, Breakthrough, Adrenaline Rush and Bleed Out. Includes accuracy/critical scaling, stun and bleed application/damage, healing amount, combat buffs and preserved self-exhaustion penalties.
+- **Dark Knight (Highwayman):** Wicked Slice, Pistol Shot, Point Blank Shot, Grapeshot Blast, Tracking Shot, Duelist's Advance and Open Vein. Includes accuracy/critical scaling, marked damage, push chance, critical-vulnerability debuff, permanent once-per-battle Tracking Shot bonuses, riposte damage and critical progression, bleed and speed penalties.
+
+**Implementation:** `src/skill-upgrades-batch3.js` contains the level 2–5 patches, merged by `src/skill-progression.js`. `makeThirdProgressionBattle` and the browser's **Slayer / Berserker / Dark Knight Lv5** button provide a 21-upgrade playable example. The un-upgraded Warrior remains a control hero.
+
+**Test coverage:** `tests/third-class-progression.test.js` verifies all 84 new patches and runtime effects including buffs, bleed, mark, PROT, riposte and speed; `tests/browser/third-class-progression.spec.js` covers equivalent scenarios in Chromium. Cumulative older tests use 63 instead of 42; they continue to assert class-specific numbers independently.
+
+**Remaining limitations:** Original class level-one data still requires a separate parity check in places, and some exact status timing, active recovery, crit multipliers and edge-case interactions remain incomplete despite matching published numerical upgrade tables. Guild costs, resolve gates, weapon/armor scaling, enemy AI and bestiary are also out of scope. Passing tests validate the encoded combat model, not full runtime equivalence.
+
+**Next:** verify and implement all seven levels 2–5 skills for Beastmaster (Houndmaster), Bard (Jester), Cursed Champion (Leper), raising complete upgrade tracks to 84/105.
