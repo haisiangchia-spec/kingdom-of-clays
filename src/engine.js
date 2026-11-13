@@ -10,6 +10,7 @@ import {FOURTH_CLASS_SKILLS} from './class-skills-batch4.js';
 import {FIFTH_CLASS_SKILLS} from './class-skills-batch5.js';
 import {SPIRITBOUND_SKILLS} from './class-skills-spiritbound.js';
 import {ENEMY_SKILLS} from './enemy-skills.js';
+import {spawnProfileEnemy,makeEnemyFormation} from './enemy-roster.js';
 import {resolveSkillDefinition,equipVerifiedSkillLevel} from './skill-progression.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
@@ -524,7 +525,7 @@ export function makeSecondClassBattle(seed=1){
 export function makeLargeMonsterBattle(seed=1){
  const state=makeBattle(seed);
  state.units=state.units.filter(u=>u.id!=='e1'&&u.id!=='e2'&&u.id!=='e3');
- state.units.splice(4,0,unit('boss','Goblin Emperor','enemy',{size:3,hp:96,spd:2,dodge:3,prot:15,moveResist:80,dmgMin:7,dmgMax:13}));
+ state.units.splice(4,0,spawnProfileEnemy(unit,'boss','emperor'));
  state.log=['A giant foe occupies three ranks!',...state.log];
  return state;
 }
@@ -538,4 +539,18 @@ export function makeProgressionBattle(seed=1){
  state.log.unshift('Verified level-five skill progression laboratory (21 upgraded skills)');
  return state;
 }
-export function makeBattle(seed=1){const units=[unit('h1','Swordsman','hero',{hp:33,spd:3,prot:10}),unit('h2','Warrior','hero',{hp:33,spd:1}),unit('h3','Hunter','hero',{hp:25,spd:3}),unit('h4','Priest','hero',{hp:24,spd:4}),unit('e1','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5,types:['unholy']}),unit('e2','Skeleton Swordsman','enemy',{hp:16,spd:2,dodge:5,types:['unholy']}),unit('e3','Skeleton Archer','enemy',{hp:14,spd:4,dodge:8,types:['unholy']}),unit('e4','Skeleton Court Mage','enemy',{hp:13,spd:5,dodge:9,types:['unholy']})];return {seed,round:0,torch:75,units,queue:[],log:['Combat begins!']};}
+export function makeUndeadEncounter(seed=1,preset='rearguard'){
+ const state=makeBattle(seed);
+ state.units=[...state.units.filter(u=>u.side==='hero'),...makeEnemyFormation(unit,preset)];
+ state.log.unshift('Undead encounter: '+preset);
+ return state;
+}
+export function makeBattle(seed=1){
+ const heroes=[
+  unit('h1','Swordsman','hero',{hp:33,spd:3,prot:10}),
+  unit('h2','Warrior','hero',{hp:33,spd:1}),
+  unit('h3','Hunter','hero',{hp:25,spd:3}),
+  unit('h4','Priest','hero',{hp:24,spd:4})
+ ];
+ return {seed,round:0,torch:75,units:[...heroes,...makeEnemyFormation(unit,'standard')],queue:[],log:['Combat begins!']};
+}
