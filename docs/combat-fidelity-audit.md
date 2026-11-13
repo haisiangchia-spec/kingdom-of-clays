@@ -200,3 +200,25 @@ Expand verified level 2–5 skill tables systematically, starting with the remai
 **Remaining limitations:** Original class level-one data still requires a separate parity check in places, and some exact status timing, active recovery, crit multipliers and edge-case interactions remain incomplete despite matching published numerical upgrade tables. Guild costs, resolve gates, weapon/armor scaling, enemy AI and bestiary are also out of scope. Passing tests validate the encoded combat model, not full runtime equivalence.
 
 **Next:** verify and implement all seven levels 2–5 skills for Beastmaster (Houndmaster), Bard (Jester), Cursed Champion (Leper), raising complete upgrade tracks to 84/105.
+
+## Pass 9 — Beastmaster, Bard and Cursed Champion level 2–5 (2026-11-14)
+
+**Scope:** Expanded upgraded skill coverage from **63/105** to **84/105** (12 of the 15 base DD1 classes). Added 21 complete class-specific upgrade tracks, comprising 84 new level 2–5 progression patches. The other 21 skills, belonging to Hex Mage (Occultist), Treasure Hunter (Antiquarian) and Spiritbound (Abomination), remain level-one only.
+
+**Original DD1 source tables (single-player, not Butcher's Circus):**
+- [Houndmaster](https://darkestdungeon.wiki.gg/wiki/Houndmaster) — Hound's Rush, Hound's Harry, Target Whistle, Cry Havoc, Guard Dog, Lick Wounds and Blackjack.
+- [Jester](https://darkestdungeon.wiki.gg/wiki/Jester_%28Darkest_Dungeon%29) — Dirk Stab, Harvest, Finale, Solo, Slice Off, Battle Ballad and Inspiring Tune.
+- [Leper](https://darkestdungeon.wiki.gg/wiki/Leper) — Chop, Hew, Purge, Revenge, Withstand, Solemnity and Intimidate.
+
+**Implemented:** `src/skill-upgrades-batch4.js` contains the level 2–5 patches and the shared progression resolver automatically makes them actor-specific. New `makeFourthProgressionBattle` and **Champion / Beastmaster / Bard Lv5** button provide a 21-upgrade playable encounter while Priest remains level one.
+
+**Representative verified numeric changes:**
+- Houndmaster's Hound's Rush reaches ACC 105, CRIT +9%, +100% damage vs Marked and Bleed 2 per round; Hound's Harry reaches Bleed 3 per round at 150% application; Target Whistle applies -30% PROT at 170% base; Cry Havoc reaches 6 stress healed at 74% chance; Guard Dog reaches +20 dodge.
+- Jester's Finale reaches ACC 160, CRIT +9%; Solo reaches ACC 145 and +30 dodge; Harvest and Slice Off bleed increase to 4 and 5 respectively; Battle Ballad reaches +10 ACC, +6% CRIT and +4 SPD; Inspiring Tune reaches 12 stress heal and 20% stress reduction.
+- Leper's Chop/Hew reach 95 ACC; Revenge reaches +15 ACC, +35% damage and +11% CRIT while receiving +25% damage; Withstand reaches +30% PROT; Solemnity heals 10 HP and 7 stress; Intimidate reaches 115 ACC, -33% enemy damage and -5 enemy SPD.
+
+**Regression tests:** `tests/fourth-class-progression.test.js` covers the new 84 patches and live combat status effects. `tests/browser/fourth-class-progression.spec.js` covers UI playability, self-buff/heal, Hound bleed and Jester Finale in Chromium. Prior cumulative coverage checks now expect 84.
+
+**Unresolved parity caveats:** The original level-one prototypes still have some numerical and behaviour differences from the modern DD1 single-player tables (e.g. Leper's original Purge/Revenge descriptors); this pass updates the level 2–5 data but does **not** claim to correct all level-one mismatches or advanced interactions. The Leper Withstand mark and Revenge vulnerability ordering, Hound stress targeting, Jester Finale stack timing, enemy resistances and several effect-stat names require a full comparison in their own audit. Passing tests prove encoded behaviours, not game-wide fidelity.
+
+**Next:** complete all skill levels for Hex Mage, Treasure Hunter and Spiritbound, then return to the mechanics parity audit and enemy/boss implementation before dungeon exploration.
