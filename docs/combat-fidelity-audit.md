@@ -276,3 +276,11 @@ Expand verified level 2–5 skill tables systematically, starting with the remai
 **Guard interception.** The dedicated single-target `kind: 'mark'` handler previously bypassed guard, while ordinary attacks already resolved the guardian. Now direct marks (including the physical Occultist Vulnerability Hex and nondamaging marks) resolve the guardian before the hit/dodge roll, physical damage, marking and associated debuff. Exceptions can explicitly set `bypassGuard`. The original target is unaffected if intercepted. The caster's miss streak is also updated on mark hits/misses. Three new deterministic tests verify physical mark interception, nonphysical mark interception, and a guardian's successful dodge.
 
 **Sources:** [DD1 Guard](https://darkestdungeon.wiki.gg/wiki/Guard_%28Darkest_Dungeon%29), [DD1 Mark](https://darkestdungeon.wiki.gg/wiki/Mark). This is a targeted interaction fix; other class skill numbers, enemy AI and full bestiary remain unverified.
+
+## Pass 13 — Occultist critical variable healing (2026-11-14)
+
+**Correction:** `variableHeal` previously rolled Wyrd Reconstruction's 0–13 (or upgraded) HP and applied bleed but had no critical heal path. DD1 single-target heals have a fixed **12% critical-heal chance**; critical healing doubles the rolled amount and relieves 4 stress from the recipient, even when the rolled heal is zero. Wyrd Reconstruction's bleed application remains independent of the critical-heal roll and uses skill application minus target Bleed Resist.
+
+The engine also applies the target's `healingReceived` modifier to variable healing, consistent with existing fixed healing paths. A zero-point critical heal does not exit Death's Door, but may still cause bleed; positive healing clears Death's Door through the existing recovery path.
+
+**References:** [DD1 Critical Hit — Critical Heals](https://darkestdungeon.wiki.gg/wiki/Critical_Hit_%28Darkest_Dungeon%29); [DD1 Occultist](https://darkestdungeon.wiki.gg/wiki/Occultist). Deterministic regression tests cover double healing, stress relief, zero critical healing/bleed, and received-healing modifiers. This is not a blanket certification of all healing and mortality interactions.
