@@ -15,7 +15,7 @@ test('21 verified level-five skill tracks appear in progression combat laborator
      swordsmanRiposte:getActorSkill(heroes.find(x=>x.classId==='swordsman'),'riposte_stance').riposteCrit
    };
  });
- expect(result).toEqual({upgraded:21,catalog:84,warriorHeal:5,priestReveal:-30,swordsmanRiposte:4});
+ expect(result).toEqual({upgraded:21,catalog:105,warriorHeal:5,priestReveal:-30,swordsmanRiposte:4});
 });
 test('level-five Retribution activates bonus riposte critical chance',async ({page})=>{
  await page.goto('/');
