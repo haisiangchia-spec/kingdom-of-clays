@@ -30,7 +30,7 @@ test('level-five healing uses exact reference numbers in Chromium',async ({page}
  });
  expect(result).toEqual({hp:13,skillLevel:5});
 });
-test('unverified skill upgrade is blocked without changing actor state',async ({page})=>{
+test('wrong-class skill upgrade is blocked without changing actor state',async ({page})=>{
  await page.goto('/');
  const result=await page.evaluate(async ()=>{
   const {makeBattle,setActorSkillLevel,ABILITIES}=await import('./src/engine.js');
@@ -39,7 +39,7 @@ test('unverified skill upgrade is blocked without changing actor state',async ({
   try{setActorSkillLevel(b,'h2','ritual_dagger',5);}catch(e){error=e.message;}
   return {error,levels:u.skillLevels,base:ABILITIES.ritual_dagger.mod};
  });
- expect(result.error).toContain('Unverified skill upgrade');
+ expect(result.error).toContain('does not belong');
  expect(result.levels).toEqual({});
  expect(result.base).toBe(0);
 });
