@@ -14,7 +14,7 @@ export const ENEMY_SKILLS=Object.freeze({
     status:{type:'blight',chance:105,value:2,turns:3}},
   emperor_slam:{name:'Imperial Slam',from:[0,1,2],to:[0,1],acc:85,crit:2,mod:.1},
   emperor_roar:{name:'Tyrant Roar',from:[0,1,2],to:[0,1,2,3],kind:'stress',amount:20,acc:90},
-  emperor_call:{name:'Summon Boneguard',from:[0,1,2,3],to:[0,1,2,3],kind:'summon',summonProfile:'swordsman',maxUses:1}
+  emperor_call:{name:'Summon Boneguard',from:[0,1,2,3],to:[0,1,2,3],kind:'summon',summonProfile:'swordsman',maxUses:1,maxHpFraction:0.5}
 });
 
 export const ENCOUNTER_SKILLS=Object.freeze({
