@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeBattle,makeSpiritboundBattle,makeFifthClassBattle,takeTurn,prepareActorTurn,currentActor} from '../src/engine.js';
 import {stunResistance} from '../src/status.js';
+import {moveWithinFormation} from '../src/formation.js';
 
 test('enemy stun skips enemy action and advances queue',()=>{
  const b=makeBattle(),e=b.units.find(x=>x.id==='e1'),next=b.units.find(x=>x.id==='h1');
@@ -64,6 +65,7 @@ test('direct stunned-turn fallback does not consume limited-use Protect Me',()=>
 });
 test('direct stunned-turn fallback does not spend torch on an unexecuted attack',()=>{
  const b=makeFifthClassBattle(17),actor=b.units.find(x=>x.id==='h3');
+ moveWithinFormation(b,'h3',-2);
  b.queue=['h3'];actor.stun=1;b.torch=75;
  takeTurn(b,'h3','abyssal_grasp','e1',()=>.5);
  assert.equal(b.torch,75);
