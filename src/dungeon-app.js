@@ -62,8 +62,8 @@ function startExpedition(){
  catch(e){if(expedition){expedition.log.push(e.message);render();}return;}
  const region=$('dungeon-region').value;
  const tier=$('dungeon-tier').value;
- if(tier==='champion'&&region!=='plague'){
-  if(expedition){expedition.log.push('Champion expeditions are currently available only in Blighted Warrens');render();}
+ if(tier!=='apprentice'&&region!=='plague'){
+  if(expedition){expedition.log.push('Veteran and Champion expeditions are currently available only in Blighted Warrens');render();}
   return;
  }
  const seed=(Math.floor(Math.random()*0xffffffff)>>>0)||1;
