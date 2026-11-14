@@ -165,3 +165,13 @@ test('all Warrens generated encounters have legal first-turn enemy actions acros
   }
  }
 });
+
+test('Apprentice Blight Hookstalker matches source-verified Swine Slasher stats and attack',()=>{
+ const p=ENEMY_PROFILES.plagueSlasher,s=ABILITIES.plague_hook_slash;
+ assert.deepEqual([p.stats.hp,p.stats.dodge,p.stats.prot,p.stats.spd],[8,7.5,25,5]);
+ assert.deepEqual([p.stats.stunResist,p.stats.bleedResist,p.stats.blightResist,p.stats.moveResist,p.stats.debuffResist],[10,40,40,25,15]);
+ assert.deepEqual(s.from,[0,1,2,3]);
+ assert.deepEqual(s.to,[0,1,2]);
+ assert.deepEqual([s.acc,s.crit,s.damageMin,s.damageMax,s.selfBack],[82.5,16,3,7,1]);
+ assert.ok(Object.values(PLAGUE_TEMPLATES).some(ids=>ids.includes('plagueSlasher')));
+});
