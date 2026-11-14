@@ -196,7 +196,7 @@ export function beginCorridor(dungeon,to){
 }
 function startBattle(dungeon,source,difficulty){
  const seed=encounterSeed(dungeon.seed,source+'|'+dungeon.battleSerial++);
- const battle=dungeon.region==='plague'?makeGeneratedEncounter(seed,difficulty,'plague',dungeon.tier??'apprentice'):(source='room:vault'?makeUndeadEncounter(seed,'blightWretch'):makeGeneratedEncounter(seed,difficulty));
+ const battle=dungeon.region==='plague'?makeGeneratedEncounter(seed,difficulty,'plague',dungeon.tier??'apprentice'):(source==='room:vault'?makeUndeadEncounter(seed,'blightWretch'):makeGeneratedEncounter(seed,difficulty));
  battle.expeditionEncounter=true; // guards extra disease rolls outside the combat lab
  const enemyUnits=battle.units.filter(u=>u.side==='enemy');
  battle.units=[...dungeon.party.map(copy),...enemyUnits];
