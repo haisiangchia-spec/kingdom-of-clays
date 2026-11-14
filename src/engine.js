@@ -15,7 +15,7 @@ import {resolveSkillDefinition,equipVerifiedSkillLevel} from './skill-progressio
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
 export const randInt=(r,lo,hi)=>lo+Math.floor(r()*(hi-lo+1));
-export function unit(id,name,side,stats={}){return {id,name,side,classId:stats.classId??(side==='hero'?name.toLowerCase().replace(/[^a-z0-9]+/g,'_'):null),size:stats.size??1,types:stats.types??[],hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0,debuff:stats.debuffResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathDoorRecovery:false,heartAttackRecovery:false,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false,actionsPerRound:Math.max(1,Math.min(4,Number.isInteger(stats.actionsPerRound)?stats.actionsPerRound:1)),actionsRemaining:Math.max(1,Math.min(4,Number.isInteger(stats.actionsPerRound)?stats.actionsPerRound:1)),usedSkills:{},skillLevels:{...stats.skillLevels},form:stats.form??null,transformsUsed:0,transformUsedThisTurn:false};}
+export function unit(id,name,side,stats={}){return {id,name,side,classId:stats.classId??(side==='hero'?name.toLowerCase().replace(/[^a-z0-9]+/g,'_'):null),size:stats.size??1,types:stats.types??[],hp:stats.hp??26,maxHp:stats.hp??26,spd:stats.spd??4,dodge:stats.dodge??5,prot:stats.prot??0,accMod:stats.accMod??0,crit:stats.crit??0,dmgMin:stats.dmgMin??4,dmgMax:stats.dmgMax??8,stress:0,resist:{stun:stats.stunResist??20,bleed:stats.bleedResist??20,blight:stats.blightResist??20,move:stats.moveResist??0,debuff:stats.debuffResist??20},dot:[],restoration:[],effects:[],stunRecoveryStacks:0,stun:0,deathDoor:false,mortality:null,deathDoorRecovery:false,heartAttackRecovery:false,deathResist:stats.deathResist??67,dead:false,misses:0,guard:null,stunnedThisTurn:false,affliction:null,virtue:null,acted:false,actionsTaken:0,actionsPerRound:Math.max(1,Math.min(4,Number.isInteger(stats.actionsPerRound)?stats.actionsPerRound:1)),actionsRemaining:Math.max(1,Math.min(4,Number.isInteger(stats.actionsPerRound)?stats.actionsPerRound:1)),usedSkills:{},skillLevels:{...stats.skillLevels},form:stats.form??null,transformsUsed:0,transformUsedThisTurn:false};}
 export const ABILITIES={
  heavy_slash:{name:'Heavy Slash',from:[0,1],to:[0,1],acc:85,crit:2,mod:0},
  guardian_parry:{name:"Guardian's Parry",from:[0,1,2,3],to:[0,1,2,3],kind:'guard'},
@@ -433,7 +433,10 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(sk.riposte){a.riposte=sk.riposteDuration??3;a.riposteAcc=sk.riposteAcc??90;a.riposteMod=sk.riposteMod??-.4;a.riposteCrit=sk.riposteCrit??0;}
   if(!wasStunned&&!sk.freeAction)completeUnstunnedTurn(a);
   if(a.stealthed&&sk.kind!=='stealth')a.stealthed=0;
-  if(!sk.freeAction)finishActionSlot(state,a);
+  if(!sk.freeAction){
+    a.actionsTaken=(a.actionsTaken??0)+1;
+    finishActionSlot(state,a);
+  }
   return state;
 }
 function executeRiposte(state,defender,attacker,r){
