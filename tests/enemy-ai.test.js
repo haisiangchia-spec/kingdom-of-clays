@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chooseEnemyAction,bossPhase} from '../src/enemy-ai.js';
-import {makeBattle,makeLargeMonsterBattle,ABILITIES,availableTargets,rng} from '../src/engine.js';
+import {makeBattle,makeLargeMonsterBattle,makeGeneratedEncounter,rank,ABILITIES,availableTargets,rng} from '../src/engine.js';
 
 test('enemy decision selects skill uniformly before target, not over all skill-target pairs',()=>{
  const state={};
@@ -99,4 +99,27 @@ test('boss phase selection re-evaluates dynamically between two action slots',()
  assert.equal(before.key,'emperor_roar');
  assert.equal(after.key,'emperor_slam');
  assert.deepEqual(b.queue,['boss','boss']);
+});
+
+test('Javelineer AI chooses only legal rank-dependent attacks',()=>{
+ const battle=makeGeneratedEncounter(1000003,'patrol','plague','champion');
+ const foe=battle.units.find(u=>u.enemyProfile==='plagueSkiver');
+ assert.ok(foe);
+ // In the back, Goring Retreat is illegal; only javelin or volley may fire.
+ for(let n=0;n<20;n++){
+  const picked=chooseEnemyAction(battle,foe.id,foe.enemySkills,()=>n/20,ABILITIES,availableTargets);
+  assert.ok(picked);
+  assert.notEqual(picked.key,'plague_skiver_flight');
+  assert.ok(availableTargets(battle,foe.id,picked.key).includes(picked.targetId));
+ }
+ // Move Javelineer to the front: ranged attacks are no longer legal.
+ const first=battle.units.findIndex(u=>u.side==='enemy');
+ const old=battle.units.indexOf(foe);
+ [battle.units[first],battle.units[old]]=[battle.units[old],battle.units[first]];
+ assert.equal(rank(battle,foe.id),0);
+ for(let n=0;n<20;n++){
+  const picked=chooseEnemyAction(battle,foe.id,foe.enemySkills,()=>n/20,ABILITIES,availableTargets);
+  assert.equal(picked.key,'plague_skiver_flight');
+  assert.ok(availableTargets(battle,foe.id,picked.key).includes(picked.targetId));
+ }
 });
