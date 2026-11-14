@@ -2,6 +2,7 @@
 // travel costs are original fixtures: not yet verified DD1 dungeon rules.
 import {makeGeneratedEncounter,makeUndeadEncounter,rng,status} from './engine.js';
 import {offerLoot,collectLoot,leaveLoot} from './inventory.js';
+import {regionCurio,regionRoomName} from './dungeon-regions.js';
 
 export const DUNGEON_ROOMS=Object.freeze({
  entrance:Object.freeze({name:'Crypt Entrance',x:0,y:1,encounter:false}),
@@ -135,7 +136,7 @@ export const DUNGEON_CURIOS=Object.freeze({
 });
 export function interactCurio(dungeon,choice){
  if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingHunger||dungeon.pendingLoot)throw Error('Cannot inspect curio now');
- const curio=DUNGEON_CURIOS[dungeon.room];
+ const curio=regionCurio(dungeon.region??'crypt',dungeon.room);
  if(!curio||dungeon.curiosUsed.includes(dungeon.room))throw Error('No untouched curio in this room');
  if(!['leave','touch','purify'].includes(choice))throw Error('Unknown curio choice');
  if(choice==='purify'){
@@ -175,7 +176,7 @@ export function createDungeon(seed=1,{difficulty='scout',region='crypt',interact
  const bonusFood=Math.max(0,Math.min(6,Math.trunc(bonuses.food??0)));
  const hungerStressReduction=Math.max(0,Math.min(6,Math.trunc(bonuses.hungerStressReduction??0)));
  return {seed,difficulty,region,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood},hungerStressReduction,
-  pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,inventory:[],pendingLoot:null,battleSerial:0,phase:'explore',log:['Entered the Crypt Entrance']};
+  pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,inventory:[],pendingLoot:null,battleSerial:0,phase:'explore',log:['Entered '+regionRoomName(region,'entrance')]};
 }
 export function adjacentRooms(dungeon){
  if(dungeon.phase!=='explore'||dungeon.pendingTravel)return [];
