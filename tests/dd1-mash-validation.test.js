@@ -18,3 +18,14 @@ test('DD1 mash audit blocks missing provenance and unmapped monster IDs',()=>{
  assert.throws(()=>requireCompleteMashAudit(result),/incomplete/);
  assert.throws(()=>auditMashSource('',provenance),/no encounter entries/);
 });
+
+test('DD1 mash audit blocks fully mapped but illegal Clays formations',()=>{
+ const result=auditMashSource('hall: .chance 1 .types a b c d e',{
+  ...provenance,monsterMap:{a:'plagueChopper',b:'plagueChopper',c:'plagueWretch',d:'plagueDrummer',e:'plagueWretch'}
+ });
+ assert.equal(result.ready,false);
+ assert.deepEqual(result.unresolved,[]);
+ assert.equal(result.invalidFormations.length,1);
+ assert.equal(result.invalidFormations[0].line,1);
+ assert.throws(()=>requireCompleteMashAudit(result),/invalid formations/);
+});
