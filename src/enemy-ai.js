@@ -10,7 +10,13 @@ const PROFILES=Object.freeze({
       1:Object.freeze({duelist_sweep:7,duelist_uppercut:1,duelist_shank:2,duelist_poke:1}),
       2:Object.freeze({duelist_sweep:2,duelist_uppercut:1,duelist_shank:6,duelist_poke:1}),
       later:Object.freeze({duelist_sweep:2,duelist_uppercut:1,duelist_shank:2,duelist_poke:1})
-    })
+    }),
+    // Veteran Cutthroat Shank: +100% targeting weight to minimum Bleed
+    // resistance, +300% to marked hero. Add bonuses to base weight 1.
+    additiveTargetDesires:Object.freeze([
+      Object.freeze({type:'lowest_resistance',stat:'bleed',bonus:1,skills:['duelist_shank']}),
+      Object.freeze({type:'marked',bonus:3,skills:['duelist_shank']})
+    ])
   }),
   'Skeleton Swordsman':Object.freeze({targetDesires:Object.freeze([{type:'marked',weight:4}]),skillDesires:Object.freeze([{type:'ally_dead',skill:'skeleton_guard_break',allyProfile:'mage',weight:3}])}),
   'Skeleton Archer':Object.freeze({targetPreference:'rear',targetDesires:Object.freeze([{type:'resistance',stat:'debuff',direction:'low',weight:2,skills:['skeleton_pin_arrow']}])}),
@@ -80,6 +86,25 @@ export function skillDesireWeight(state,actor,skillKey,legalTargets,desires=[]){
  return weight;
 }
 
+// Source-backed DD1 relative targeting bonuses: +100% means a base-1
+// target has weight 2, not a guarantee. Multiple bonuses ADD to base 1.
+export function additiveTargetWeight(state,unit,skillKey,eligibleIds,desires=[]){
+ let weight=1;
+ const eligible=(eligibleIds??[]).map(id=>state?.units?.find(u=>u.id===id))
+  .filter(u=>u&&!u.dead&&!u.corpse);
+ for(const desire of desires??[]){
+   if(desire.skills&&!desire.skills.includes(skillKey))continue;
+   if(!Number.isFinite(desire.bonus)||desire.bonus<=0)continue;
+   if(desire.type==='marked'&&unit.marked>0)weight+=desire.bonus;
+   if(desire.type==='lowest_resistance'){
+     const values=eligible.map(u=>u.resist?.[desire.stat]).filter(Number.isFinite);
+     const current=unit.resist?.[desire.stat];
+     if(values.length&&Number.isFinite(current)&&current===Math.min(...values))weight+=desire.bonus;
+   }
+ }
+ return weight;
+}
+
 function weightedChoice(items,weightFor,random){
   const weighted=items.map(item=>({item,weight:weightFor(item)}))
     .filter(x=>Number.isFinite(x.weight)&&x.weight>0);
@@ -112,6 +137,7 @@ export function chooseEnemyAction(state,actorId,skillIds,random,abilities,availa
     const unit=state.units.find(u=>u.id===id);
     if(!unit||unit.dead||unit.corpse)return 0;
     let weight=targetDesireWeight(unit,picked.key,profile.targetDesires);
+    weight*=additiveTargetWeight(state,unit,picked.key,picked.targets,profile.additiveTargetDesires);
     if(profile.targetPreference==='rear'){
       const allies=state.units.filter(u=>u.side===unit.side&&!u.dead&&!u.corpse);
       weight*=1+allies.indexOf(unit); // current formation, not initial rank
