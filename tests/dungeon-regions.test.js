@@ -728,3 +728,39 @@ test('Veteran Drummer Weakening Rhythm marks and lowers Dodge',()=>{
  assert.ok(hero.marked>0);
  assert.ok(hero.effects.some(e=>e.modifiers?.dodge===-15));
 });
+
+
+test('Veteran Butcher Spiked Chain stuns and pushes its target',()=>{
+ let battle,butcher;
+ for(let seed=1;seed<=200;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague','veteran');
+  const foe=b.units.find(u=>u.enemyProfile==='plagueChopper');
+  if(foe&&availableTargets(b,foe.id,'plague_veteran_ball_chain').length){battle=b;butcher=foe;break;}
+ }
+ assert.ok(butcher);
+ const targetId=availableTargets(battle,butcher.id,'plague_veteran_ball_chain')[0];
+ const victim=battle.units.find(u=>u.id===targetId);
+ const before=victim.hp;
+ battle.queue=[butcher.id];
+ takeTurn(battle,butcher.id,'plague_veteran_ball_chain',targetId,()=>0);
+ assert.ok(victim.hp<before);
+ assert.ok(victim.stun>0||battle.log.some(line=>line.includes(victim.name)&&line.includes('stun')));
+ assert.ok(battle.log.some(line=>line.includes(victim.name)&&line.includes('rank')));
+});
+
+test('Veteran Drummer Doombeat hits multiple heroes and inflicts stress',()=>{
+ let battle,drummer;
+ for(let seed=1;seed<=200;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague','veteran');
+  const foe=b.units.find(u=>u.enemyProfile==='plagueDrummer');
+  if(foe&&availableTargets(b,foe.id,'plague_veteran_drum_doom').length){battle=b;drummer=foe;break;}
+ }
+ assert.ok(drummer);
+ const heroes=battle.units.filter(u=>u.side==='hero');
+ const before=heroes.map(u=>({hp:u.hp,stress:u.stress}));
+ const targetId=availableTargets(battle,drummer.id,'plague_veteran_drum_doom')[0];
+ battle.queue=[drummer.id];
+ takeTurn(battle,drummer.id,'plague_veteran_drum_doom',targetId,()=>0);
+ assert.ok(heroes.filter((u,i)=>u.hp<before[i].hp).length>=2);
+ assert.ok(heroes.some((u,i)=>u.stress>before[i].stress));
+});
