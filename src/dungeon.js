@@ -1,6 +1,7 @@
 // Initial Clays dungeon traversal scaffold. Room layout, event odds, and
 // travel costs are original fixtures: not yet verified DD1 dungeon rules.
 import {makeGeneratedEncounter,rng,status} from './engine.js';
+import {offerLoot,collectLoot,leaveLoot} from './inventory.js';
 
 export const DUNGEON_ROOMS=Object.freeze({
  entrance:Object.freeze({name:'Crypt Entrance',x:0,y:1,encounter:false}),
@@ -133,7 +134,7 @@ export const DUNGEON_CURIOS=Object.freeze({
  vault:Object.freeze({name:'Sealed Urn'})
 });
 export function interactCurio(dungeon,choice){
- if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingHunger)throw Error('Cannot inspect curio now');
+ if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingHunger||dungeon.pendingLoot)throw Error('Cannot inspect curio now');
  const curio=DUNGEON_CURIOS[dungeon.room];
  if(!curio||dungeon.curiosUsed.includes(dungeon.room))throw Error('No untouched curio in this room');
  if(!['leave','touch','purify'].includes(choice))throw Error('Unknown curio choice');
@@ -144,7 +145,12 @@ export function interactCurio(dungeon,choice){
  dungeon.curiosUsed.push(dungeon.room);
  if(choice==='leave'){dungeon.log.push('The party leaves '+curio.name+' untouched');return dungeon;}
  const safe=choice==='purify'||rng(encounterSeed(dungeon.seed,'curio:'+dungeon.room))()<.50;
- if(safe){dungeon.loot+=choice==='purify'?175:100;dungeon.log.push(curio.name+' yields treasure');}
+ if(safe){
+   const amount=choice==='purify'?175:100;
+   offerLoot(dungeon,'gold',amount);
+   if(!dungeon.interactiveEvents)collectLoot(dungeon); // keep test/API compatibility
+   dungeon.log.push(curio.name+' yields treasure');
+ }
  else{
    const hero=dungeon.party.find(u=>!u.dead);
    if(hero){hero.stress=Math.min(200,hero.stress+12);dungeon.log.push(curio.name+' causes '+hero.name+' distress (+12 stress)');}
@@ -162,7 +168,7 @@ export function createDungeon(seed=1,{difficulty='scout',interactiveEvents=false
  if(!['scout','patrol','gauntlet'].includes(difficulty))throw Error('Unknown dungeon difficulty');
  const party=makeGeneratedEncounter(seed,difficulty).units.filter(u=>u.side==='hero').map(copy);
  return {seed,difficulty,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8},
-  pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,battleSerial:0,phase:'explore',log:['Entered the Crypt Entrance']};
+  pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,inventory:[],pendingLoot:null,battleSerial:0,phase:'explore',log:['Entered the Crypt Entrance']};
 }
 export function adjacentRooms(dungeon){
  if(dungeon.phase!=='explore'||dungeon.pendingTravel)return [];
@@ -170,7 +176,7 @@ export function adjacentRooms(dungeon){
   .map(e=>({room:keyFor(e,dungeon.room),corridor:e.id}));
 }
 export function beginCorridor(dungeon,to){
- if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingHunger)throw Error('Exploration is blocked');
+ if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingHunger||dungeon.pendingLoot)throw Error('Exploration is blocked');
  const edge=DUNGEON_CORRIDORS.find(e=>(e.from===dungeon.room&&e.to===to)||(e.to===dungeon.room&&e.from===to));
  if(!edge)throw Error('Destination is not adjacent');
  dungeon.pendingTravel={from:dungeon.room,to,corridor:edge.id,progress:0,steps:edge.steps};
@@ -192,6 +198,7 @@ function startBattle(dungeon,source,difficulty){
 export function advanceCorridor(dungeon){
  if(dungeon.phase!=='explore'||!dungeon.pendingTravel)throw Error('No traversable corridor');
  if(dungeon.pendingHunger)throw Error('Resolve hunger before advancing');
+ if(dungeon.pendingLoot)throw Error('Resolve loot before advancing');
  if(dungeon.interactiveEvents&&dungeon.stepsTaken>0&&dungeon.stepsTaken%4===0&&dungeon.lastHungerStep!==dungeon.stepsTaken){
    dungeon.pendingHunger=true;dungeon.lastHungerStep=dungeon.stepsTaken;
    dungeon.log.push('Hunger: eat four food or risk the consequences');
