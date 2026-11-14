@@ -634,3 +634,23 @@ test('Champion Drummer Doombeat damages multiple heroes and applies stress',()=>
  assert.ok(damaged.length>=2,'Doombeat should damage multiple heroes');
  assert.ok(stressed.length>=2,'Doombeat should stress multiple heroes');
 });
+
+
+test('Champion Hookstalker retreat moves back when a rear slot is available',()=>{
+ let exercised=0;
+ for(let seed=1;seed<=500;seed++){
+  const battle=makeGeneratedEncounter(seed*1000003,'gauntlet','plague','champion');
+  const foe=battle.units.find(u=>u.enemyProfile==='plagueSlasher');
+  if(!foe)continue;
+  const before=rank(battle,foe.id);
+  const targets=availableTargets(battle,foe.id,'plague_champion_hook_slash');
+  if(before>=3||!targets.length)continue;
+  const targetId=targets[0];
+  battle.queue=[foe.id];
+  takeTurn(battle,foe.id,'plague_champion_hook_slash',targetId,()=>0);
+  const after=rank(battle,foe.id);
+  assert.ok(after>=before,'Hookstalker must not move forward on retreat');
+  if(after>before)exercised++;
+ }
+ assert.ok(exercised>0,'At least one seeded formation must permit a real Hookstalker retreat');
+});
