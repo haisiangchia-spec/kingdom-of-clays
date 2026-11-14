@@ -60,3 +60,14 @@ export function regionCurio(region,roomId){
  if(!curios)throw Error('Unknown dungeon region: '+region);
  return curios[roomId]??null;
 }
+
+// Original Clays exploration modifiers, not verified DD1 trap statistics.
+export const REGION_HAZARDS=Object.freeze({
+ crypt:Object.freeze({name:'Hidden Trap',damage:2,stress:5}),
+ plague:Object.freeze({name:'Spore Snare',damage:2,stress:7})
+});
+export function regionHazard(region){
+ const hazard=REGION_HAZARDS[region];
+ if(!hazard)throw Error('Unknown dungeon region: '+region);
+ return hazard;
+}
