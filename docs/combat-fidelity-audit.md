@@ -416,3 +416,21 @@ The engine's previously audited global hidden +5 accuracy calculation still appl
 **Fidelity boundaries:** The attack data, Apprentice profile, skill-selection ratios, forced fallback and target preference values have direct published references. Mixed encounter composition and specific reskinned character names are original Clays choices. Exact combined Stun/knockback sequencing and all non-reference enemies still need deeper validation; a particular chance roll can resist either effect independently.
 
 **Tests:** `tests/crypt-shieldbearer-reference.test.js` and `tests/browser/crypt-shieldbearer-reference.spec.js` cover baseline stats, duplicated units, 4:1/1:1 choices, stun exclusions, marked/Move-resist preferences, forced fallback, Stun and knockback.
+
+## Pass 23 — Seeded reference-enemy dungeon encounter generation (2026-11-14)
+
+**Scope:** `src/encounter-generator.js` introduces reusable, **seeded and weighted** compositions made exclusively from the already audited DD1 reference-enemy reskins (`cryptDefender` / Bone Defender, `cryptArbalist` / Bone Arbalist and `duelist` / Veteran Cutthroat). `makeGeneratedEncounter(seed,difficulty)` creates a normal combat-engine battle with four existing playable heroes and an `encounterPlan` record. The new Scout, Patrol and Gauntlet buttons in the combat lab launch independently reseeded battles.
+
+**Difficulty is a Clays prototype concept, NOT a DD1 dungeon level or its source encounter table.** The weighting tables and threat points are authored for Kingdom of Clays; no claim is made that they reproduce DD1's actual spawn probabilities, hallway/room encounter lists, rarity or region-specific distributions.
+
+| Difficulty | Candidate compositions | Relative weights |
+| --- | --- | --- |
+| Scout | Shieldline (Defender, Defender, Arbalist); Cutthroat Raid (Duelist, Defender, Arbalist); Ambush (Defender, Duelist, Arbalist) | 5:3:2 |
+| Patrol | Shieldline; Cutthroat Raid; Shieldwall (Defender, Defender, Arbalist, Arbalist); Mixed Raid (Duelist, Defender, Arbalist, Arbalist); Vanguard (Defender, Duelist, Arbalist, Arbalist) | 1:1:4:3:2 |
+| Gauntlet | Shieldwall; Mixed Raid; Vanguard; Cutthroat Pair (Duelist, Duelist, Arbalist, Arbalist) | 2:4:3:1 |
+
+**Invariants:** Four occupied ranks maximum; each independently instantiated monster receives a unique ID, per-instance HP/status/loadout, and at least one legal skill from its starting position. The same seed and difficulty produce the same template and enemies; source-verified enemy stats are not silently scaled. This layer is deliberately independent of exploration, loot and quest mechanics, so dungeon rooms and corridors can later request the same generator.
+
+**Tests:** `tests/encounter-generator.test.js` verifies probability interval boundaries, deterministic seeds, hundreds of generated formations, duplicate isolation, difficulty progression and AI/skill legality. `tests/browser/encounter-generator.spec.js` verifies UI modes and legal seeded combatants in Chromium.
+
+**Remaining:** Source-audit DD1 encounter weights by dungeon region, quest difficulty and room/hallway context, then add region-specific tables and journey state before implementing the dungeon map. The new threat points are only relative composition indicators.
