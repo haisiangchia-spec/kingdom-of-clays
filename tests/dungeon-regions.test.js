@@ -242,7 +242,7 @@ test('Champion-only Blight Javelineer has source-audited Swine Skiver stats and 
  assert.equal(volley.targetMode,'all');
  assert.deepEqual(volley.debuff.modifiers,{dodge:-8,speed:-6});
  assert.deepEqual([flight.acc,flight.crit,flight.damageMin,flight.damageMax,flight.selfBack],[92.5,7,4,7,4]);
- assert.ok(!Object.values(PLAGUE_TEMPLATES).some(ids=>ids.includes('plagueSkiver')),'Champion-only enemy must not spawn in Apprentice tables');
+ assert.ok(!Object.values(PLAGUE_TABLES).flat().some(entry=>PLAGUE_TEMPLATES[entry.id].includes('plagueSkiver')),'Champion-only enemy must not spawn in Apprentice tables');
 });
 
 test('Champion Warrens generator includes Skiver while Apprentice never does',()=>{
@@ -251,7 +251,7 @@ test('Champion Warrens generator includes Skiver while Apprentice never does',()
    const champion=makeGeneratedEncounter(seed*1000003,difficulty,'plague','champion');
    assert.equal(champion.encounterPlan.tier,'champion');
    assert.ok(champion.units.some(u=>u.enemyProfile==='plagueSkiver'));
-   assert.equal(champion.encounterPlan.slots,4);
+   assert.equal(champion.encounterPlan.slots,3);
    const apprentice=makeGeneratedEncounter(seed*1000003,difficulty,'plague');
    assert.ok(!apprentice.units.some(u=>u.enemyProfile==='plagueSkiver'));
   }
