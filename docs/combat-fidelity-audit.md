@@ -311,3 +311,11 @@ The engine also applies the target's `healingReceived` modifier to variable heal
 | Enemy HP, resistances and abilities | Distinct working sample roster | **Provisional** | Record monster-by-monster source evidence before marking verified |
 
 **Tests:** `tests/corpse-fidelity.test.js` and `tests/browser/corpse-fidelity.spec.js` cover the two corrected corpse mechanics and ensure corpses never receive initiative slots. Other systems remain intentionally flagged as provisional.
+
+## Pass 16 — Corpse Bleed/Blight application and timing scaffold (2026-11-14)
+
+The [DD1 Corpse reference](https://darkestdungeon.wiki.gg/wiki/Corpse) confirms corpses have 0% resistance to Bleed and Blight despite having no combat turns; the [combat mechanics reference](https://darkestdungeon.wiki.gg/wiki/Combat_Mechanics_%28Darkest_Dungeon%29) confirms corpses never receive initiative slots. The prototype previously blocked **all** secondary statuses on corpses, making their 0% Bleed/Blight resistance irrelevant. It now permits both DOT statuses while keeping stun and debuff applications excluded.
+
+**Timing caveat:** Since no initiative turn belongs to corpses, the engine now ticks existing corpse Bleed/Blight stacks once when the next round starts, before clearing expired corpses and rolling initiative. This is an explicit **Kingdom of Clays scheduling approximation, not yet source-verified exact DD1 timing**. A tick can destroy a corpse and free the formation space without producing another corpse. Each stack's duration counts down independently. An already-dead corpse cannot receive future initiative slots.
+
+**Automated coverage:** `tests/corpse-dot.test.js` and `tests/browser/corpse-dot.spec.js` cover application, duration countdown, destruction and absent initiative slots. Further research should establish the precise in-game corpse DOT trigger before calling this section fully DD1-faithful.
