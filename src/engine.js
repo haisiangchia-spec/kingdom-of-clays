@@ -227,7 +227,7 @@ export function takeTurn(state,actorId,key,targetId,r){
         state.log.push(`${a.name} hits ${actual.name} with ${sk.name}: ${dmg}${critical?' CRIT':''}`);
       }
       if(!actual.dead&&!actual.corpse)actual.marked=sk.markTurns??3;
-      if(!actual.dead&&!actual.corpse&&sk.debuff&&r()*100<resistChance({applicationChance:sk.debuff.chance,resistance:(actual.resist.debuff??0)-effectModifier(actual,'debuffResist')}))addTimedEffect(actual,{...sk.debuff,kind:'debuff'});
+      if(!actual.dead&&!actual.corpse&&sk.debuff&&r()*100<resistChance({applicationChance:sk.debuff.chance,resistance:(actual.resist.debuff??0)+effectModifier(actual,'debuffResist')}))addTimedEffect(actual,{...sk.debuff,kind:'debuff'});
       if(sk.selfBuff)addTimedEffect(a,{...sk.selfBuff,kind:'buff'});
       state.log.push(`${a.name} marks ${actual.name}`);
     }else{a.misses++;state.log.push(`${a.name} fails to mark ${actual.name}`);}
@@ -401,7 +401,7 @@ export function takeTurn(state,actorId,key,targetId,r){
           }
         }
         if(sk.status&&!actual.dead&&(!actual.corpse||['bleed','blight'].includes(sk.status.type)))pendingStatus={...sk.status,crit};
-        if(sk.debuff&&!actual.dead&&!actual.corpse&&r()*100<resistChance({applicationChance:sk.debuff.chance,resistance:(actual.resist.debuff??0)-effectModifier(actual,'debuffResist'),crit})){
+        if(sk.debuff&&!actual.dead&&!actual.corpse&&r()*100<resistChance({applicationChance:sk.debuff.chance,resistance:(actual.resist.debuff??0)+effectModifier(actual,'debuffResist'),crit})){
           addTimedEffect(actual,{...sk.debuff,kind:'debuff'});
           state.log.push(`${actual.name} is debuffed by ${sk.name}`);
         }
@@ -413,7 +413,7 @@ export function takeTurn(state,actorId,key,targetId,r){
     // Riposte happens before secondary effects: killing the attacker prevents its DOT or debuff.
     if(pendingStatus&&!a.dead&&!actual.dead){
       const st=pendingStatus;
-      if(r()*100<resistChance({applicationChance:st.chance,resistance:st.type==='stun'?stunResistance(actual):(actual.resist[st.type]??0)-effectModifier(actual,st.type+'Resist'),crit:st.crit})){
+      if(r()*100<resistChance({applicationChance:st.chance,resistance:st.type==='stun'?stunResistance(actual):(actual.resist[st.type]??0)+effectModifier(actual,st.type+'Resist'),crit:st.crit})){
         if(st.type==='stun')inflictStun(actual);
         else actual.dot.push({type:st.type,value:st.value,turns:dotDuration(st.turns,st.crit)});
         state.log.push(`${actual.name} gains ${st.type}`);
