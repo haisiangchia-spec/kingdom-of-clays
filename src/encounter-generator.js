@@ -70,17 +70,23 @@ export function spawnEncounterPlan(unitFactory,plan){
     plagueWretch:{hp:25,spd:10,dodge:35,prot:0,stunResist:55,blightResist:85,bleedResist:55,debuffResist:60,moveResist:45},
     plagueSlasher:{hp:16,spd:7,dodge:30,prot:40,stunResist:55,blightResist:85,bleedResist:85,debuffResist:60,moveResist:70}
    };
+   // Post-2018 DD1 Veteran Swine Reaver/Marcher profiles (wiki.gg).
+   const veteranStats={
+    plagueChopper:{hp:29,spd:4,dodge:8.75,prot:33,stunResist:45,blightResist:80,bleedResist:40,debuffResist:35,moveResist:70},
+    plagueDrummer:{hp:21,spd:8,dodge:8.75,prot:0,stunResist:30,blightResist:60,bleedResist:40,debuffResist:35,moveResist:45}
+   };
    const veteranSupport=plan.region==='plague'&&plan.tier==='veteran';
+   const verifiedVeteran=veteranSupport&&Object.hasOwn(veteranStats,profileId);
    const verifiedChampion=plan.region==='plague'&&plan.tier==='champion'&&Object.hasOwn(championStats,profileId);
    // Explicitly provisional Veteran scaling until source-audited tier profiles exist.
-   const stats=verifiedChampion?{...profile.stats,...championStats[profileId]}:veteranSupport?{
+   const stats=verifiedChampion?{...profile.stats,...championStats[profileId]}:verifiedVeteran?{...profile.stats,...veteranStats[profileId]}:veteranSupport?{
     ...profile.stats,hp:Math.ceil(profile.stats.hp*1.3),
     dodge:profile.stats.dodge+5,stunResist:profile.stats.stunResist+10,
     bleedResist:profile.stats.bleedResist+10,blightResist:profile.stats.blightResist+10
    }:profile.stats;
    const enemy=unitFactory('e'+(i+1),profile.name,'enemy',stats);
    if(verifiedChampion)enemy.tierScaling='dd1-verified-champion-stats';
-   if(veteranSupport)enemy.tierScaling='clays-provisional-veteran';
+   if(veteranSupport)enemy.tierScaling=verifiedVeteran?'dd1-verified-veteran-stats':'clays-provisional-veteran';
    enemy.enemyProfile=profileId;
    const championSkills={
     plagueChopper:['plague_champion_butcher_cut','plague_champion_ball_chain'],
