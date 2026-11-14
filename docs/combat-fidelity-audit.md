@@ -319,3 +319,13 @@ The [DD1 Corpse reference](https://darkestdungeon.wiki.gg/wiki/Corpse) confirms 
 **Timing caveat:** Since no initiative turn belongs to corpses, the engine now ticks existing corpse Bleed/Blight stacks once when the next round starts, before clearing expired corpses and rolling initiative. This is an explicit **Kingdom of Clays scheduling approximation, not yet source-verified exact DD1 timing**. A tick can destroy a corpse and free the formation space without producing another corpse. Each stack's duration counts down independently. An already-dead corpse cannot receive future initiative slots.
 
 **Automated coverage:** `tests/corpse-dot.test.js` and `tests/browser/corpse-dot.spec.js` cover application, duration countdown, destruction and absent initiative slots. Further research should establish the precise in-game corpse DOT trigger before calling this section fully DD1-faithful.
+
+## Pass 17 — Conditional monster target desires (2026-11-14)
+
+The [official DD1 modding guide](https://steamcommunity.com/sharedfiles/filedetails/?id=819597757) describes `marked_target`, `resistance_target`, `health_target`, `stress_target`, and `rank_target` among monster-brain targeting desires. These are part of the official data-driven AI vocabulary; their exact per-monster weights require inspection of actual monster-brain source files.
+
+**Implemented architecture:** `src/enemy-ai.js` now accepts declarative per-monster target desires with optional skill restrictions. Marked heroes receive an additional preference weight, and skills such as the Skeleton Archer's Pinning Arrow can favour lower resistance. It chooses from **legal target IDs returned by the engine**, so target desires cannot override ability ranks, stealth or blocked targets. Unmarked and profile-free monsters retain deterministic fallback choices; the existing Court Mage stress preference, Archer rear preference and Emperor phase preferences are preserved.
+
+**Fidelity distinction:** These are **Kingdom of Clays provisional weights**, not copied vanilla DD1 monster-brain probabilities. The official guide establishes the *types* of target desires, not the numerical weights 4× marked or 2× resistance preference used here. Do not present this as complete enemy-AI parity.
+
+**Tests:** `tests/enemy-desires.test.js` and `tests/browser/enemy-desires.spec.js` cover mark changes, resistance effects scoped to specific skills, target legality and deterministic fallback. Future work should extract reference monster-brain entries and implement documented conditional *skill* desires as well as target desires.
