@@ -5,6 +5,7 @@ import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,
 import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
 import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket} from './hero-roster.js';
 import {TREATMENTS,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
+import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits} from './sanitarium.js';
 
 const $=id=>document.getElementById(id);
 const HERO_SKILLS={
@@ -146,6 +147,7 @@ function render(){
  const townAvailable=['victory','defeat'].includes(expedition.phase);
  el('p',`Heroes: ${settlement.roster.length}/${ROSTER_CAPACITY} · Recruitment ${RECRUITMENT_COST} gold · Resurrection ${RESURRECTION_COST} gold (Temple Lv 1)`,roster);
  el('p',`Town Week ${settlement.town.week} · Stage Coach candidates: ${settlement.town.offers.length} · Treatment rooms: ${settlement.town.treatments.length}/2`,roster);
+ el('p',settlement.town.week>=4?'Sanitarium: OPEN · 1 quirk ward, 1 medical ward':'Sanitarium: unlocks in Week 4',roster);
  if(townAvailable){
   for(const offer of settlement.town.offers){
    const btn=el('button','Recruit '+offer.heroClass+' · '+offer.offerId,roster,()=>{
@@ -157,7 +159,8 @@ function render(){
 
  for(const h of settlement.roster){
   const u=h.unit;
-  const row=el('div',`${h.name} [${h.rosterId}] · ${h.heroClass} Lv ${h.level} · ${u.dead?'FALLEN':u.hp+'/'+u.maxHp+' HP'} · ${u.stress} stress${townUnavailable(settlement,h.rosterId)?' · IN TREATMENT':''}${h.equippedTrinket?' · Ward Charm':''}`,roster);
+  ensureTraits(h);
+  const row=el('div',`${h.name} [${h.rosterId}] · ${h.heroClass} Lv ${h.level} · ${u.dead?'FALLEN':u.hp+'/'+u.maxHp+' HP'} · ${u.stress} stress${townUnavailable(settlement,h.rosterId)?' · IN TREATMENT':''} · +${h.quirks.positive.length}/-${h.quirks.negative.length} quirks · ${h.diseases.length} diseases${h.equippedTrinket?' · Ward Charm':''}`,roster);
   row.className='dungeon-unit';
   if(u.dead){
    const revive=el('button','Resurrect '+h.name,row,()=>{
@@ -171,6 +174,27 @@ function render(){
   }else{
    const equip=el('button','Equip charm',row,()=>{try{equipTrinket(settlement,h.rosterId);}catch(e){expedition.log.push(e.message);}render();});
    equip.disabled=!townAvailable||townUnavailable(settlement,h.rosterId)||!settlement.trinkets.includes('ward-charm');
+  }
+  if(townAvailable&&settlement.town.week>=4&&!u.dead&&!townUnavailable(settlement,h.rosterId)){
+   for(const q of h.quirks.negative){
+    const cost=q.locked?SANITARIUM_COSTS.lockedNegative:SANITARIUM_COSTS.negative;
+    const b=el('button','Remove '+QUIRKS[q.id].name+' · '+cost+' gold',row,()=>{
+     try{bookSanitarium(settlement,h.rosterId,'negative',q.id);}catch(e){expedition.log.push(e.message);}render();
+    });
+    b.disabled=settlement.gold<cost||!!settlement.sanitarium.quirkWard;
+   }
+   for(const q of h.quirks.positive.filter(x=>!x.locked)){
+    const b=el('button','Lock '+QUIRKS[q.id].name+' · '+SANITARIUM_COSTS.lockPositive+' gold',row,()=>{
+     try{bookSanitarium(settlement,h.rosterId,'lockPositive',q.id);}catch(e){expedition.log.push(e.message);}render();
+    });
+    b.disabled=settlement.gold<SANITARIUM_COSTS.lockPositive||!!settlement.sanitarium.quirkWard;
+   }
+   for(const disease of h.diseases){
+    const b=el('button','Cure '+DISEASES[disease].name+' · '+SANITARIUM_COSTS.disease+' gold',row,()=>{
+     try{bookSanitarium(settlement,h.rosterId,'disease',disease);}catch(e){expedition.log.push(e.message);}render();
+    });
+    b.disabled=settlement.gold<SANITARIUM_COSTS.disease||!!settlement.sanitarium.medicalWard;
+   }
   }
   if(townAvailable){
    const dismiss=el('button','Dismiss permanently '+h.name,row,()=>{
@@ -196,7 +220,7 @@ function render(){
    const row=el('div','Rank '+(i+1)+': ',roster);row.className='dungeon-unit';
    const select=el('select',null,row);
    if(settlement.squad[rank]===null){const empty=el('option','Select an available hero',select);empty.value='';}
-   for(const h of settlement.roster.filter(h=>!h.unit.dead&&!townUnavailable(settlement,h.rosterId)&&(settlement.squad[rank]===h.rosterId||!settlement.squad.includes(h.rosterId)))){
+   for(const h of settlement.roster.filter(h=>!h.unit.dead&&!townUnavailable(settlement,h.rosterId)&&!sanitariumUnavailable(settlement,h.rosterId)&&(settlement.squad[rank]===h.rosterId||!settlement.squad.includes(h.rosterId)))){
     const option=el('option',h.name+' ('+h.heroClass+')',select);
     option.value=h.rosterId;
    }
