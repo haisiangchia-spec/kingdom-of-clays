@@ -4,9 +4,9 @@
 // user-approved departure from ordinary DD1 permadeath.
 import {makeBattle} from './engine.js';
 
-export const ROSTER_CAPACITY=12;
-export const RECRUITMENT_COST=75;
-export const RESURRECTION_COST=250;
+export const ROSTER_CAPACITY=8;
+export const RECRUITMENT_COST=0; // DD1 base Stage Coach recruits are free
+export const RESURRECTION_COST=250; // user-authorized temple exception
 export const HERO_CLASSES=Object.freeze(['Swordsman','Warrior','Hunter','Priest']);
 const slots=Object.freeze(['h1','h2','h3','h4']);
 const copy=value=>structuredClone(value);
@@ -116,8 +116,9 @@ export function returnPartyToRoster(settlement,expedition){
   copyUnit.actionsTaken=0;copyUnit.actionsRemaining=copyUnit.actionsPerRound??1;
   hero.unit=copyUnit;
   if(!hero.unit.dead&&expedition.phase==='victory'){
-   hero.xp++;
-   hero.level=Math.min(6,Math.floor(hero.xp/2));
+   hero.xp+=2; // Apprentice short mission: 2 Resolve XP (DD1)
+   const thresholds=[0,2,8,14,24,36,48];
+   hero.level=thresholds.reduce((lvl,required,i)=>hero.xp>=required?i:lvl,0);
   }
  }
  expedition.rosterReturned=true;
