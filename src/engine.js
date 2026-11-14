@@ -382,7 +382,7 @@ export function takeTurn(state,actorId,key,targetId,r){
           sk.consumeFinale?effectModifier(a,'finaleDamage'):0
         ];
         const attackMultiplier=combinedAttackMultiplier(sk.mod??0,bonusPoints);
-        const dmg=attackMultiplier===0?0:directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:attackMultiplier*(1+targetDamageTaken/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
+        const dmg=attackMultiplier===0?0:directDamage({minDamage:sk.damageMin??a.dmgMin,maxDamage:sk.damageMax??a.dmgMax,skillMultiplier:attackMultiplier*(1+targetDamageTaken/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
         hurt(state,actual,dmg,r,crit,(sk.mod??0)>-1||sk.physicalHit===true);
         if(sk.selfHealOnHit&&dmg>0){a.hp=Math.min(a.maxHp,a.hp+sk.selfHealOnHit);if(a.hp>0&&a.deathDoor){a.deathDoor=false;a.mortality??='deathDoorRecovery';}}
         if(sk.markOnHit&&!actual.dead&&!actual.corpse)actual.marked=sk.markOnHit;
@@ -431,6 +431,7 @@ export function takeTurn(state,actorId,key,targetId,r){
   if(sk.advance)moveWithinFormation(state,a.id,-sk.advance);
   if(sk.selfBack)moveWithinFormation(state,a.id,sk.selfBack);
   if(sk.riposte){a.riposte=sk.riposteDuration??3;a.riposteAcc=sk.riposteAcc??90;a.riposteMod=sk.riposteMod??-.4;a.riposteCrit=sk.riposteCrit??0;}
+  if(sk.onUseBuff)addTimedEffect(a,{...sk.onUseBuff,kind:'buff'});
   if(!wasStunned&&!sk.freeAction)completeUnstunnedTurn(a);
   if(a.stealthed&&sk.kind!=='stealth')a.stealthed=0;
   if(!sk.freeAction){
