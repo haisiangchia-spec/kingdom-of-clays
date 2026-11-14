@@ -525,3 +525,22 @@ test('All Champion Warrens support monsters use separate legal skill IDs',()=>{
  }
  assert.deepEqual([...seen].sort(),Object.keys(championSkills).sort());
 });
+
+
+test('Champion Warrens support attack tables match official wiki values',()=>{
+ const expected={
+  plague_champion_vomit:[102.5,17,1,3],
+  plague_champion_drum_doom:[102.5,7,2,2],
+  plague_champion_drum_debilitation:[102.5,12,2,2],
+  plague_champion_hook_slash:[102.5,22,7,13]
+ };
+ for(const [id,values] of Object.entries(expected)){
+  const skill=ABILITIES[id];
+  assert.ok(skill,id+' missing');
+  assert.deepEqual([skill.acc,skill.crit,skill.damageMin,skill.damageMax],values);
+ }
+ assert.equal(ABILITIES.plague_champion_vomit.debuff.modifiers.dodge,-10);
+ assert.equal(ABILITIES.plague_champion_drum_debilitation.debuff.modifiers.dodge,-20);
+ assert.equal(ABILITIES.plague_champion_hook_slash.debuff.modifiers.bleedResist,-30);
+ assert.equal(ABILITIES.plague_champion_hook_slash.debuff.modifiers.diseaseResist,-15);
+});
