@@ -35,6 +35,13 @@ export const ENEMY_PROFILES=Object.freeze({
     stunResist:10,bleedResist:40,blightResist:40,moveResist:25,debuffResist:15,
     types:['human','beast']
   }),skills:['plague_hook_slash']}),
+  // Champion-only DD1 Swine Skiver (wiki.gg); deliberately excluded from
+  // Apprentice Warrens spawn tables until difficulty tiers are implemented.
+  plagueSkiver:Object.freeze({name:'Blight Javelineer',stats:Object.freeze({
+    hp:49,spd:9,dodge:31.25,prot:15,dmgMin:12,dmgMax:18,
+    stunResist:85,bleedResist:60,blightResist:100,moveResist:65,debuffResist:70,
+    types:['human','beast']
+  }),skills:['plague_skiver_roast','plague_skiver_cripple','plague_skiver_flight']}),
   // Apprentice DD1 Swine Wretch source: 12 HP, 12.5 DODGE, 8 SPD.
   // Disease/stress attack is source-audited; appearance/name are Clays.
   plagueWretch:Object.freeze({name:'Blight Wretch',stats:Object.freeze({
