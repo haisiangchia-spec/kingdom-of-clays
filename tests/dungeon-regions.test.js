@@ -687,7 +687,10 @@ test('Veteran Warrens generation is seeded, isolated and explicitly provisional'
    const verified=['plagueChopper','plagueDrummer'].includes(v[i].enemyProfile);
    assert.equal(v[i].tierScaling,verified?'dd1-verified-veteran-stats':'clays-provisional-veteran');
    assert.equal(v[i].maxHp,verified?(v[i].enemyProfile==='plagueChopper'?29:21):Math.ceil(a[i].maxHp*1.3));
-   assert.deepEqual(v[i].enemySkills,a[i].enemySkills);
+   if(verified){
+    assert.ok(v[i].enemySkills.every(id=>id.startsWith('plague_veteran_')));
+    assert.notDeepEqual(v[i].enemySkills,a[i].enemySkills);
+   }else assert.deepEqual(v[i].enemySkills,a[i].enemySkills);
    assert.equal(a[i].tierScaling,undefined);
   }
  }
