@@ -32,3 +32,24 @@ export function requireCompleteMashAudit(audit){
  if(!audit?.ready||!audit.entries?.length)throw Error('Mash audit incomplete: unresolved monsters, invalid formations or missing entries');
  return audit;
 }
+
+
+// Produce a separately grouped, provenance-carrying import candidate.
+// Caller must explicitly choose a DD1 context; never remap to Clays
+// scout/patrol/gauntlet categories or silently normalize across contexts.
+export function buildMashEncounterCandidate(audit,monsterMap){
+ requireCompleteMashAudit(audit);
+ if(!monsterMap||typeof monsterMap!=='object')throw TypeError('Monster map required');
+ const groups={};
+ for(const entry of audit.entries){
+  const profiles=entry.monsterIds.map(id=>{
+   if(!Object.hasOwn(monsterMap,id)||!monsterMap[id])throw Error('Missing monster mapping: '+id);
+   return monsterMap[id];
+  });
+  validatePlagueFormation(profiles);
+  const group=groups[entry.kind]??(groups[entry.kind]=[]);
+  group.push(Object.freeze({weight:entry.weight,profiles:Object.freeze(profiles),line:entry.line}));
+ }
+ return Object.freeze({sourceId:audit.sourceId,gameVersion:audit.gameVersion,
+  groups:Object.freeze(Object.fromEntries(Object.entries(groups).map(([kind,entries])=>[kind,Object.freeze(entries)])))});
+}
