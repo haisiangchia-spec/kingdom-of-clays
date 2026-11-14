@@ -72,15 +72,9 @@ export function spawnEncounterPlan(unitFactory,plan){
    };
    const verifiedChampion=plan.region==='plague'&&plan.tier==='champion'&&Object.hasOwn(championStats,profileId);
    const verifiedChampionChopper=verifiedChampion&&profileId==='plagueChopper';
-   const championSupport=false;
    const stats=verifiedChampion?{...profile.stats,...championStats[profileId]}:profile.stats;
    const enemy=unitFactory('e'+(i+1),profile.name,'enemy',stats);
    if(verifiedChampion)enemy.tierScaling='dd1-verified-champion-stats';
-   if(championSupport){
-    enemy.tierScaling='clays-provisional-champion-support';
-    // Explicit skill damage ranges bypass actor base DMG in the combat engine.
-    enemy.skillDamageBonus=2;
-   }
    enemy.enemyProfile=profileId;
    enemy.enemySkills=verifiedChampionChopper?['plague_champion_butcher_cut','plague_champion_ball_chain']:[...profile.skills];
    return enemy;
