@@ -25,7 +25,8 @@ test('real Vomit attack deals one damage, 10 stress and can transmit one disease
  const hero=b.units.find(u=>u.id==='h1');
  b.queue=[wretch.id];
  const before=hero.hp;
- takeTurn(b,wretch.id,'plague_vomit','h1',()=>0);
+ const rolls=[0,.99,0,0,0];let i=0;
+ takeTurn(b,wretch.id,'plague_vomit','h1',()=>rolls[i++]??0);
  assert.equal(hero.hp,before-1);
  assert.equal(hero.stress,10);
  assert.deepEqual(hero.diseases,['creepingCough']);
