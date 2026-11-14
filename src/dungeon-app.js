@@ -5,7 +5,8 @@ import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,
 import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
 import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket} from './hero-roster.js';
 import {TREATMENTS,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
-import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits} from './sanitarium.js';
+import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits,sanitariumTreatmentCost,sanitariumWardBookings} from './sanitarium.js';
+import {SANITARIUM_UPGRADE_TREES,sanitariumUpgradeLevels,nextSanitariumUpgradeCost,upgradeSanitarium,sanitariumWardCapacity} from './sanitarium-upgrades.js';
 
 const $=id=>document.getElementById(id);
 const HERO_SKILLS={
@@ -128,7 +129,7 @@ function render(){
    if(expedition.cleared.includes(id))marker.textContent+=' ✓';
  }
  const settlementPanel=$('settlement-panel');settlementPanel.replaceChildren();
- el('p',`Treasury: ${settlement.gold} gold · ${settlement.crests} crests · ${settlement.deeds} deeds · ${settlement.trinkets.length} trinkets · ${settlement.completedExpeditions} completed`,settlementPanel);
+ el('p',`Treasury: ${settlement.gold} gold · ${settlement.crests} crests · ${settlement.deeds} deeds · ${settlement.trinkets.length} trinkets · ${settlement.completedExpeditions} completed · ${settlement.busts??0} busts`,settlementPanel);
  for(const [id,facility] of Object.entries(SETTLEMENT_FACILITIES)){
   const level=settlement.facilities[id];
   const row=el('div',`${facility.name} Lv ${level}/${facility.maxLevel}: ${facility.description}`,settlementPanel);
@@ -143,11 +144,27 @@ function render(){
    upgrade.disabled=!['victory','defeat'].includes(expedition.phase)||Object.entries(cost).some(([key,amount])=>settlement[key]<amount);
   }
  }
+ if(settlement.town.week>=4){
+  const levels=sanitariumUpgradeLevels(settlement);
+  el('h3','Sanitarium Upgrades',settlementPanel);
+  for(const [id,rule] of Object.entries(SANITARIUM_UPGRADE_TREES)){
+    const level=levels[id];
+    const row=el('div',rule.name+' Lv '+level+'/'+rule.maxLevel,settlementPanel);
+    row.className='dungeon-unit';
+    const cost=nextSanitariumUpgradeCost(settlement,id);
+    if(cost){
+      const button=el('button','Upgrade '+rule.name+' ('+cost.busts+' busts, '+cost.crests+' crests)',row,()=>{
+        try{upgradeSanitarium(settlement,id);}catch(e){expedition.log.push(e.message);}render();
+      });
+      button.disabled=!['victory','defeat'].includes(expedition.phase)||settlement.busts<cost.busts||settlement.crests<cost.crests;
+    }
+  }
+ }
  const roster=$('hero-roster');roster.replaceChildren();
  const townAvailable=['victory','defeat'].includes(expedition.phase);
  el('p',`Heroes: ${settlement.roster.length}/${ROSTER_CAPACITY} · Recruitment ${RECRUITMENT_COST} gold · Resurrection ${RESURRECTION_COST} gold (Temple Lv 1)`,roster);
  el('p',`Town Week ${settlement.town.week} · Stage Coach candidates: ${settlement.town.offers.length} · Treatment rooms: ${settlement.town.treatments.length}/2`,roster);
- el('p',settlement.town.week>=4?'Sanitarium: OPEN · 1 quirk ward, 1 medical ward':'Sanitarium: unlocks in Week 4',roster);
+ el('p',settlement.town.week>=4?`Sanitarium: OPEN · ${sanitariumWardBookings(settlement,'quirkWard').length}/${sanitariumWardCapacity(settlement,'quirkWard')} quirk wards, ${sanitariumWardBookings(settlement,'medicalWard').length}/${sanitariumWardCapacity(settlement,'medicalWard')} medical wards`:'Sanitarium: unlocks in Week 4',roster);
  if(townAvailable){
   for(const offer of settlement.town.offers){
    const btn=el('button','Recruit '+offer.heroClass+' · '+offer.offerId,roster,()=>{
@@ -177,23 +194,25 @@ function render(){
   }
   if(townAvailable&&settlement.town.week>=4&&!u.dead&&!townUnavailable(settlement,h.rosterId)){
    for(const q of h.quirks.negative){
-    const cost=q.locked?SANITARIUM_COSTS.lockedNegative:SANITARIUM_COSTS.negative;
+    const cost=sanitariumTreatmentCost(settlement,h,'negative',q.id);
     const b=el('button','Remove '+QUIRKS[q.id].name+' · '+cost+' gold',row,()=>{
      try{bookSanitarium(settlement,h.rosterId,'negative',q.id);}catch(e){expedition.log.push(e.message);}render();
     });
-    b.disabled=settlement.gold<cost||!!settlement.sanitarium.quirkWard;
+    b.disabled=settlement.gold<cost||sanitariumWardBookings(settlement,'quirkWard').length>=sanitariumWardCapacity(settlement,'quirkWard');
    }
    for(const q of h.quirks.positive.filter(x=>!x.locked)){
-    const b=el('button','Lock '+QUIRKS[q.id].name+' · '+SANITARIUM_COSTS.lockPositive+' gold',row,()=>{
+    const cost=sanitariumTreatmentCost(settlement,h,'lockPositive',q.id);
+    const b=el('button','Lock '+QUIRKS[q.id].name+' · '+cost+' gold',row,()=>{
      try{bookSanitarium(settlement,h.rosterId,'lockPositive',q.id);}catch(e){expedition.log.push(e.message);}render();
     });
-    b.disabled=settlement.gold<SANITARIUM_COSTS.lockPositive||!!settlement.sanitarium.quirkWard;
+    b.disabled=settlement.gold<cost||sanitariumWardBookings(settlement,'quirkWard').length>=sanitariumWardCapacity(settlement,'quirkWard');
    }
    for(const disease of h.diseases){
-    const b=el('button','Cure '+DISEASES[disease].name+' · '+SANITARIUM_COSTS.disease+' gold',row,()=>{
+    const cost=sanitariumTreatmentCost(settlement,h,'disease',disease);
+    const b=el('button','Cure '+DISEASES[disease].name+' · '+cost+' gold',row,()=>{
      try{bookSanitarium(settlement,h.rosterId,'disease',disease);}catch(e){expedition.log.push(e.message);}render();
     });
-    b.disabled=settlement.gold<SANITARIUM_COSTS.disease||!!settlement.sanitarium.medicalWard;
+    b.disabled=settlement.gold<cost||sanitariumWardBookings(settlement,'medicalWard').length>=sanitariumWardCapacity(settlement,'medicalWard');
    }
   }
   if(townAvailable){
