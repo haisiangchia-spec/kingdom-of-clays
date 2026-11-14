@@ -63,6 +63,7 @@ export function dismissHero(settlement,rosterId){
  checkRoster(settlement);
  const index=settlement.roster.findIndex(h=>h.rosterId===rosterId);
  if(index<0)throw Error('Unknown hero');
+ if(settlement.town?.treatments?.some(t=>t.rosterId===rosterId))throw Error('Hero is receiving treatment');
  const [hero]=settlement.roster.splice(index,1);
  for(let i=0;i<settlement.squad.length;i++)if(settlement.squad[i]===rosterId)settlement.squad[i]=null;
  settlement.graveyard??=[];
@@ -76,7 +77,7 @@ export function selectHero(settlement,position,rosterId){
  checkRoster(settlement);
  if(!integer(position)||position>3)throw Error('Invalid party rank');
  const hero=settlement.roster.find(h=>h.rosterId===rosterId);
- if(!hero||hero.unit.dead)throw Error('Hero is unavailable');
+ if(!hero||hero.unit.dead||settlement.town?.treatments?.some(t=>t.rosterId===rosterId))throw Error('Hero is unavailable');
  const existing=settlement.squad.indexOf(rosterId);
  if(existing>=0&&existing!==position)throw Error('Hero is already selected');
  settlement.squad[position]=rosterId;
@@ -87,6 +88,7 @@ export function availableParty(settlement){
  checkRoster(settlement);
  const squad=settlement.squad.map(id=>settlement.roster.find(h=>h.rosterId===id));
  if(squad.some(h=>!h||h.unit.dead))throw Error('Replace dead heroes before starting expedition');
+ if(squad.some(h=>settlement.town?.treatments?.some(t=>t.rosterId===h.rosterId)))throw Error('Hero receiving stress treatment cannot embark');
  return squad;
 }
 export function prepareRosterParty(settlement,bonuses={}){
