@@ -18,6 +18,7 @@ export const PLAGUE_TEMPLATES=Object.freeze({
  plagueChampionEscort:Object.freeze(['plagueDrummer','plagueChopper','plagueSkiver']),
  // Four-slot Champion variant; Clays-provisional composition, not a DD1 spawn weight.
  plagueChampionFullPatrol:Object.freeze(['plagueChopper','plagueSlasher','plagueWretch','plagueSkiver']),
+ plagueChampionDrumGuard:Object.freeze(['plagueChopper','plagueSlasher','plagueDrummer','plagueSkiver']),
  plagueAmbush:Object.freeze(['plagueChopper','plagueWretch','plagueWretch','plagueDrummer'])
 });
 export const PLAGUE_TABLES=Object.freeze({
@@ -27,8 +28,8 @@ export const PLAGUE_TABLES=Object.freeze({
 });
 export const PLAGUE_CHAMPION_TABLES=Object.freeze({
  scout:Object.freeze([{id:'plagueChampionSkirmish',weight:3},{id:'plagueChampionGuard',weight:2},{id:'plagueChampionEscort',weight:1},{id:'plagueChampionFullPatrol',weight:1}]),
- patrol:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:3},{id:'plagueChampionEscort',weight:2},{id:'plagueChampionAmbush',weight:1},{id:'plagueChampionFullPatrol',weight:2}]),
- gauntlet:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:4},{id:'plagueChampionAmbush',weight:3},{id:'plagueChampionEscort',weight:2},{id:'plagueChampionFullPatrol',weight:3}])
+ patrol:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:3},{id:'plagueChampionEscort',weight:2},{id:'plagueChampionAmbush',weight:1},{id:'plagueChampionFullPatrol',weight:2},{id:'plagueChampionDrumGuard',weight:1}]),
+ gauntlet:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:4},{id:'plagueChampionAmbush',weight:3},{id:'plagueChampionEscort',weight:2},{id:'plagueChampionFullPatrol',weight:3},{id:'plagueChampionDrumGuard',weight:2}])
 });
 export const PLAGUE_THREAT=Object.freeze({plagueChopper:3,plagueWretch:2,plagueDrummer:2,plagueSlasher:2,plagueSkiver:5});
 export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random,tier='apprentice'){
