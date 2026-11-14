@@ -44,7 +44,7 @@ export function reverseTraitBonus(unit){
 }
 export function exposeHeroToDisease(state,attacker,hero,random,skillKey=null){
  if(!state.expeditionEncounter||attacker.side!=='enemy'||hero.side!=='hero'||!hero.rosterId||hero.dead)return false;
- const sourceWretch=attacker.enemyProfile==='plagueWretch'&&skillKey==='plague_vomit';
+ const sourceWretch=attacker.enemyProfile==='plagueWretch'&&['plague_vomit','plague_champion_vomit'].includes(skillKey);
  if(!sourceWretch)return false;
  // The real DD1 Swine Wretch Vomit has a 33% chance to cause disease.
  // No generic disease proc is added to unlisted enemy attacks.
