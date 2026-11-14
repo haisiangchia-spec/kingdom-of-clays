@@ -36,6 +36,18 @@ export const ENEMY_PROFILES=Object.freeze({
     stunResist:10,bleedResist:10,blightResist:40,moveResist:0,debuffResist:15,
     types:['beast']
   }),skills:['plague_vomit']}),
+  // Apprentice DD1 Swine Drummer; Clays region reskin. Verified HP/DODGE/SPD/resistances.
+  plagueDrummer:Object.freeze({name:'Plague War Drummer',stats:Object.freeze({
+    hp:15,spd:7,dodge:0,prot:0,dmgMin:1,dmgMax:1,
+    stunResist:10,bleedResist:20,blightResist:40,moveResist:25,debuffResist:15,
+    types:['human','beast']
+  }),skills:['plague_drum_doom','plague_drum_debilitation']}),
+  // Apprentice DD1 Swine Chopper; frontline bleeding and knockback monster.
+  plagueChopper:Object.freeze({name:'Plague Butcher',stats:Object.freeze({
+    hp:21,spd:3,dodge:0,prot:15,dmgMin:3,dmgMax:7,
+    stunResist:25,bleedResist:20,blightResist:60,moveResist:50,debuffResist:15,
+    types:['human','beast']
+  }),skills:['plague_butcher_cut','plague_ball_chain']}),
   // Outlaw Duelist is a Kingdom of Clays reskin of the DD1 Veteran
   // Brigand Cutthroat for a source-grounded enemy-AI reference encounter.
   duelist:Object.freeze({name:'Outlaw Duelist',stats:Object.freeze({
@@ -57,7 +69,8 @@ export const ENCOUNTER_PRESETS=Object.freeze({
   outlawPatrol:Object.freeze(['duelist','swordsman','archer','mage']),
   cryptVolley:Object.freeze(['swordsman','swordsman','cryptArbalist','cryptArbalist']),
   shieldwallVolley:Object.freeze(['cryptDefender','cryptDefender','cryptArbalist','cryptArbalist']),
-  blightWretch:Object.freeze(['cryptDefender','cryptDefender','plagueWretch','cryptArbalist'])
+  blightWretch:Object.freeze(['cryptDefender','cryptDefender','plagueWretch','cryptArbalist']),
+  plagueRaidingParty:Object.freeze(['plagueChopper','plagueChopper','plagueWretch','plagueDrummer'])
 });
 
 export function spawnProfileEnemy(unitFactory,id,profileId){
