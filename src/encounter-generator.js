@@ -85,7 +85,7 @@ export function spawnEncounterPlan(unitFactory,plan){
     enemy.skillDamageBonus=2;
    }
    enemy.enemyProfile=profileId;
-   enemy.enemySkills=[...profile.skills];
+   enemy.enemySkills=verifiedChampionChopper?['plague_champion_butcher_cut','plague_champion_ball_chain']:[...profile.skills];
    return enemy;
  });
 }
