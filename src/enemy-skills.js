@@ -32,6 +32,20 @@ export const ENEMY_SKILLS=Object.freeze({
   // ACC 82.5, CRIT 12, 1 damage, +10 stress and 33% disease.
   plague_vomit:{name:'Blight Vomit',from:[0,1,2,3],to:[0,1,2,3],
     acc:82.5,crit:12,damageMin:1,damageMax:1,onHitStress:10,diseaseChance:33},
+  // Source-checked Apprentice Swine Drummer (DD1).
+  plague_drum_doom:{name:'Doombeat',from:[0,1,2,3],to:[0,1,2,3],targetMode:'all',
+    acc:82.5,crit:2,damageMin:1,damageMax:1,onHitStress:5,onHitStressChance:70},
+  plague_drum_debilitation:{name:'Weakening Rhythm',from:[0,1,2,3],to:[0,1,2,3],
+    kind:'mark',acc:82.5,crit:6,damageMin:1,damageMax:1,mod:0,markTurns:3,
+    debuff:{chance:100,turns:3,modifiers:{dodge:-10}}},
+  // Source-checked Apprentice Swine Chopper (DD1).
+  plague_butcher_cut:{name:'Butcher's Cleave',from:[0,1],to:[0,1,2],
+    acc:82.5,crit:12,damageMin:3,damageMax:7,
+    status:{type:'bleed',chance:100,value:2,turns:3}},
+  plague_ball_chain:{name:'Spiked Chain',from:[0,1,2,3],to:[2,3],
+    acc:82.5,crit:12,damageMin:2,damageMax:4,
+    status:{type:'stun',chance:100},
+    moveTarget:{type:'push',distance:1,chance:100}},
   // DD1 VETERAN Brigand Cutthroat ability data (wiki.gg).
   // Accuracy shown in DD1 tables is reproduced as skill ACC here, with
   // the combat engine's documented +5 hidden hit correction applied separately.
