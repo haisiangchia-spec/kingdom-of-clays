@@ -329,3 +329,15 @@ The [official DD1 modding guide](https://steamcommunity.com/sharedfiles/filedeta
 **Fidelity distinction:** These are **Kingdom of Clays provisional weights**, not copied vanilla DD1 monster-brain probabilities. The official guide establishes the *types* of target desires, not the numerical weights 4× marked or 2× resistance preference used here. Do not present this as complete enemy-AI parity.
 
 **Tests:** `tests/enemy-desires.test.js` and `tests/browser/enemy-desires.spec.js` cover mark changes, resistance effects scoped to specific skills, target legality and deterministic fallback. Future work should extract reference monster-brain entries and implement documented conditional *skill* desires as well as target desires.
+
+## Pass 18 — Conditional enemy skill desires (2026-11-14)
+
+The [official DD1 modding guide](https://steamcommunity.com/sharedfiles/filedetails/?id=819597757) identifies several `monster_brain` skill-selection desires: `specific_skill`, `heal_skill`, `effect_key_status_skill`, `ally_alive_skill`, `ally_dead_skill` and `performing_turn_skill`. The latter refers to the **monster's performing initiative**, not the battle's round number. These source-verified categories motivate, but do not fully define, the following implementation.
+
+**Engine extension:** `src/enemy-ai.js` supports composable, optional conditional skill weights for living or defeated allied monster profiles, status-bearing legal targets (marked, stunned, Bleed or Blight) and a monster's next completed action count. Multipliers adjust the chance of selecting a skill only **after** `availableTargets` has found legal targets; they cannot bypass rank, phase or limited-use rules. `src/engine.js` tracks `actionsTaken` across rounds for non-free successfully executed skills. Stunned turns and passes do not advance the counter.
+
+**Encounter examples:** Skeleton Swordsmen favour Shieldbreaker Bash after the Court Mage is defeated; Court Mages favour Courtly Dread when an eligible hero is blighted; the Goblin Emperor can modestly favour Imperial Slam on its second executed action. Existing HP-phase weights and legal target checks remain.
+
+**Fidelity qualification:** Condition *types* reflect official DD1 modding concepts. These specific enemy profiles, multiplier numbers (3×, 2× and 1.5×) and counter semantics are provisional Kingdom of Clays implementation choices. They are **not claims of exact vanilla DD1 monster-brain probabilities**. Actual reference monster-brain files are needed before certifying monster-by-monster AI parity.
+
+**Tests:** `tests/enemy-skill-desires.test.js` and `tests/browser/enemy-skill-desires.spec.js` cover ally and target conditions, legal target restrictions, action-count versus round behaviour, stun, and determinism.
