@@ -159,7 +159,7 @@ test('all Warrens generated encounters have legal first-turn enemy actions acros
    for(const foe of foes){
     const legal=foe.enemySkills.filter(id=>availableTargets(battle,foe.id,id).length>0);
     assert.ok(legal.length>0,difficulty+' seed '+seed+' stranded '+foe.enemyProfile);
-    const choice=chooseEnemyAction(battle,foe.id);
+    const choice=chooseEnemyAction(battle,foe.id,foe.enemySkills,()=>0.37,ABILITIES,availableTargets);
     assert.ok(choice,difficulty+' seed '+seed+' AI failed for '+foe.enemyProfile);
    }
   }
