@@ -73,7 +73,9 @@ export function spawnEncounterPlan(unitFactory,plan){
    // Post-2018 DD1 Veteran Swine Reaver/Marcher profiles (wiki.gg).
    const veteranStats={
     plagueChopper:{hp:29,spd:4,dodge:8.75,prot:33,stunResist:45,blightResist:80,bleedResist:40,debuffResist:35,moveResist:70},
-    plagueDrummer:{hp:21,spd:8,dodge:8.75,prot:0,stunResist:30,blightResist:60,bleedResist:40,debuffResist:35,moveResist:45}
+    plagueDrummer:{hp:21,spd:8,dodge:8.75,prot:0,stunResist:30,blightResist:60,bleedResist:40,debuffResist:35,moveResist:45},
+    plagueWretch:{hp:17,spd:9,dodge:21.25,prot:0,stunResist:30,blightResist:60,bleedResist:30,debuffResist:35,moveResist:20},
+    plagueSlasher:{hp:12,spd:6,dodge:16.25,prot:40,stunResist:30,blightResist:60,bleedResist:60,debuffResist:35,moveResist:45}
    };
    const veteranSupport=plan.region==='plague'&&plan.tier==='veteran';
    const verifiedVeteran=veteranSupport&&Object.hasOwn(veteranStats,profileId);
@@ -96,7 +98,9 @@ export function spawnEncounterPlan(unitFactory,plan){
    };
    const veteranSkills={
     plagueChopper:['plague_veteran_butcher_cut','plague_veteran_ball_chain'],
-    plagueDrummer:['plague_veteran_drum_doom','plague_veteran_drum_debilitation']
+    plagueDrummer:['plague_veteran_drum_doom','plague_veteran_drum_debilitation'],
+    plagueWretch:['plague_veteran_vomit'],
+    plagueSlasher:['plague_veteran_hook_slash']
    };
    enemy.enemySkills=verifiedChampion?[...championSkills[profileId]]:verifiedVeteran?[...veteranSkills[profileId]]:[...profile.skills];
    return enemy;
