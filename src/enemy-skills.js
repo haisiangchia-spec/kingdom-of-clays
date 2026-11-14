@@ -78,6 +78,13 @@ export const ENEMY_SKILLS=Object.freeze({
   // Champion Swine Slayer analogue. ACC/CRIT/status from wiki.gg;
   // damage ranges follow the official June 2018 balance patch (6-13 / 4-7).
   // Veteran-specific attack tuning is provisional pending independent DD1 skill-table verification.
+  // DD1 Veteran Swine Wretch / Slasher ability tables: darkestdungeon.wiki.gg.
+  plague_veteran_vomit:{name:'Blight Vomit',from:[0,1,2,3],to:[0,1,2,3],
+    acc:88.75,crit:16,damageMin:1,damageMax:2,onHitStress:10,diseaseChance:33,
+    debuff:{chance:120,turns:3,modifiers:{dodge:-7}}},
+  plague_veteran_hook_slash:{name:'Hookstalker Strike',from:[0,1,2,3],to:[0,1,2],
+    acc:88.75,crit:21,damageMin:4,damageMax:9,selfBack:1,
+    debuff:{chance:120,turns:3,modifiers:{bleedResist:-20,diseaseResist:-10}}},
   plague_veteran_butcher_cut:{name:"Butcher's Cleave",from:[0,1],to:[0,1,2],
     acc:92.5,crit:14,damageMin:4,damageMax:10,
     status:{type:'bleed',chance:120,value:3,turns:3},
