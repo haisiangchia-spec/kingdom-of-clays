@@ -178,8 +178,8 @@ test('Apprentice Blight Hookstalker matches source-verified Swine Slasher stats 
 
 test('Hookstalker Strike executes a legal attack and retreats one rank when space exists',()=>{
  let verified=false;
- for(let seed=1;seed<=150&&!verified;seed++){
-  const b=makeGeneratedEncounter(seed,'patrol','plague');
+ for(let seed=1;seed<=300&&!verified;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague');
   const foe=b.units.find(u=>u.enemyProfile==='plagueSlasher');
   if(!foe||rank(b,foe.id)>=3)continue;
   const targets=availableTargets(b,foe.id,'plague_hook_slash');
