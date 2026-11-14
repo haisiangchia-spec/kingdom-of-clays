@@ -108,6 +108,7 @@ export function prepareRosterParty(settlement,bonuses={}){
   u.maxHp+=bonus;u.hp=Math.min(u.maxHp,u.hp+bonus);
   applyTraitBonus(u,traitBonus(hero));
   u.diseases=[...(hero.diseases??[])];
+  u.quirks=copy(hero.quirks??{positive:[],negative:[]});
   // No lingering short-lived combat effects or statuses across quests.
   u.dot=[];u.restoration=[];u.effects=[];u.stun=0;u.acted=false;
   u.actionsTaken=0;u.actionsRemaining=u.actionsPerRound??1;
