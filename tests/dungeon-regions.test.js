@@ -319,3 +319,18 @@ test('all four Champion Warrens templates are reachable with legal enemy actions
   'plagueChampionAmbush','plagueChampionEscort','plagueChampionGuard','plagueChampionSkirmish'
  ]);
 });
+
+test('Champion Impaling Javelin attempts stun and knockback on a hit',()=>{
+ const battle=makeGeneratedEncounter(3000009,'patrol','plague','champion');
+ const foe=battle.units.find(u=>u.enemyProfile==='plagueSkiver');
+ assert.ok(foe);
+ const targets=availableTargets(battle,foe.id,'plague_skiver_roast');
+ assert.ok(targets.length);
+ const victim=battle.units.find(u=>u.id===targets[0]);
+ const hp=victim.hp;
+ battle.queue=[foe.id];
+ takeTurn(battle,foe.id,'plague_skiver_roast',victim.id,()=>0);
+ assert.ok(victim.hp<hp,'javelin should deal damage');
+ assert.ok(victim.stun>0||battle.log.some(line=>line.includes(victim.name)&&line.includes('stun')),'javelin should apply or log stun');
+ assert.ok(battle.log.some(line=>line.includes(victim.name)&&line.includes('rank')),'javelin should log target displacement');
+});
