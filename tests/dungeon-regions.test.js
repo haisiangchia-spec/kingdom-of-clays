@@ -710,7 +710,7 @@ test('Veteran Butcher Cleave applies bleed and healing penalty in combat',()=>{
  battle.queue=[butcher.id];
  takeTurn(battle,butcher.id,'plague_veteran_butcher_cut',targetId,()=>0);
  assert.ok(hero.effects.some(e=>e.modifiers?.healingReceived===-40));
- assert.ok(hero.effects.some(e=>e.type==='bleed')||hero.status?.bleed>0||hero.dot?.bleed>0,'Cleave should inflict bleed');
+ assert.ok(hero.dot.some(d=>d.type==='bleed'&&d.value===3),'Cleave should inflict Veteran bleed');
 });
 
 test('Veteran Drummer Weakening Rhythm marks and lowers Dodge',()=>{
