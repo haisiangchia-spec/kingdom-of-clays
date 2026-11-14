@@ -198,3 +198,35 @@ test('Hookstalker Strike executes and retreats exactly one rank from the front',
  }
  assert.ok(verified,'Hookstalker must appear in seeded Warrens encounters');
 });
+
+test('dual-Hookstalker pack is generated at every difficulty and each enemy can act',()=>{
+ for(const difficulty of ['scout','patrol','gauntlet']){
+  const table=PLAGUE_TABLES[difficulty];
+  const total=table.reduce((sum,entry)=>sum+entry.weight,0);
+  let prefix=0;
+  for(const entry of table){
+   if(entry.id==='plagueHookPack')break;
+   prefix+=entry.weight;
+  }
+  const plan=createPlagueEncounterPlan(difficulty,()=> (prefix+.5)/total);
+  assert.equal(plan.template,'plagueHookPack');
+  assert.deepEqual(plan.profiles,['plagueSlasher','plagueSlasher','plagueWretch','plagueDrummer']);
+  assert.equal(plan.slots,4);
+  assert.equal(plan.profiles.filter(id=>id==='plagueSlasher').length,2);
+  let found=false;
+  for(let seed=1;seed<=500&&!found;seed++){
+   const battle=makeGeneratedEncounter(seed*1000003,difficulty,'plague');
+   if(battle.encounterPlan.template!=='plagueHookPack')continue;
+   found=true;
+   const foes=battle.units.filter(u=>u.side==='enemy');
+   assert.equal(foes.filter(u=>u.enemyProfile==='plagueSlasher').length,2);
+   for(const foe of foes){
+    const legal=foe.enemySkills.filter(key=>availableTargets(battle,foe.id,key).length>0);
+    assert.ok(legal.length>0,difficulty+' stranded '+foe.name);
+    const action=chooseEnemyAction(battle,foe.id,foe.enemySkills,()=>.37,ABILITIES,availableTargets);
+    assert.ok(action,difficulty+' AI failed for '+foe.name);
+   }
+  }
+  assert.ok(found,difficulty+' seeded generator never selected Plague Hook Pack');
+ }
+});
