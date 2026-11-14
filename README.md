@@ -2,6 +2,12 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Sanitarium and persistent quirks/diseases (Milestone 32)
+
+Heroes now have permanent, saved positive/negative quirks and diseases. The **Sanitarium** unlocks on town week 4, with **one quirk ward and one medical ward**. For Apprentice heroes the starting DD1-inspired prices are 1,500 gold to remove a negative quirk, 5,000 to remove a locked negative quirk, 7,500 to lock a positive quirk, and 750 to cure a disease. Treatments finish after one expedition week, and booked heroes cannot embark or receive other town treatment. Successfully completed quests trigger a one-time seeded trait acquisition check. The roster and Sanitarium reservations are included in browser-local campaign saves.
+
+The initial trait pool, acquisition odds, and lack of combat modifiers are original Clays prototype restrictions; full DD1 quirk/disease mechanics, additional Sanitarium upgrades, and higher-Resolve pricing are not yet replicated. See `docs/combat-fidelity-audit.md` Pass 32.
+
 ## Weekly Stage Coach and stress recovery (Milestone 31)
 
 Between dungeon expeditions, a **weekly Stage Coach** shows a small number of deterministic recruit candidates. Recruiting one costs no gold but removes the offer until the next week; the player cannot freely pick an unlimited class outside the displayed candidates. Each completed expedition advances the week once, refreshing available recruits. The current eight-hero roster cap still applies.
