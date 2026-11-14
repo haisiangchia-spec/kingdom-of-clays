@@ -672,3 +672,21 @@ test('Champion Javelineer selects only rank-legal attacks after displacement',()
  }
  assert.ok(checked>0);
 });
+
+
+test('Veteran Warrens generation is seeded, isolated and explicitly provisional',()=>{
+ for(let seed=1;seed<=80;seed++){
+  const veteran=makeGeneratedEncounter(seed,'patrol','plague','veteran');
+  const apprentice=makeGeneratedEncounter(seed,'patrol','plague','apprentice');
+  assert.equal(veteran.encounterPlan.tier,'veteran');
+  assert.deepEqual(veteran.encounterPlan.profiles,apprentice.encounterPlan.profiles);
+  const v=veteran.units.filter(u=>u.side==='enemy');
+  const a=apprentice.units.filter(u=>u.side==='enemy');
+  for(let i=0;i<v.length;i++){
+   assert.equal(v[i].tierScaling,'clays-provisional-veteran');
+   assert.equal(v[i].maxHp,Math.ceil(a[i].maxHp*1.3));
+   assert.deepEqual(v[i].enemySkills,a[i].enemySkills);
+   assert.equal(a[i].tierScaling,undefined);
+  }
+ }
+});
