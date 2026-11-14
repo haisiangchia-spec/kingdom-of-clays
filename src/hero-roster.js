@@ -35,7 +35,8 @@ function checkRoster(settlement){
   seen.add(h.rosterId);
  }
  if(!Array.isArray(settlement.squad)||settlement.squad.length!==4||
-    new Set(settlement.squad).size!==4||settlement.squad.some(id=>!seen.has(id)))throw Error('Invalid selected party');
+    new Set(settlement.squad.filter(id=>id!==null)).size!==settlement.squad.filter(id=>id!==null).length||
+    settlement.squad.some(id=>id!==null&&!seen.has(id)))throw Error('Invalid selected party');
  if(!integer(settlement.nextHeroId)||settlement.nextHeroId<=Math.max(0,...settlement.roster.map(h=>Number(h.rosterId.slice(1)))))throw Error('Invalid next hero ID');
 }
 export function setupHeroRoster(settlement){
@@ -56,6 +57,19 @@ export function recruitHero(settlement,className){
  settlement.gold-=RECRUITMENT_COST;
  return hero;
 }
+export function dismissHero(settlement,rosterId){
+ checkRoster(settlement);
+ const index=settlement.roster.findIndex(h=>h.rosterId===rosterId);
+ if(index<0)throw Error('Unknown hero');
+ const [hero]=settlement.roster.splice(index,1);
+ for(let i=0;i<settlement.squad.length;i++)if(settlement.squad[i]===rosterId)settlement.squad[i]=null;
+ settlement.graveyard??=[];
+ if(hero.unit.dead)settlement.graveyard.push({rosterId:hero.rosterId,name:hero.name,level:hero.level});
+ // Any equipped charm is lost with a deceased hero, and returned to storage
+ // when a living hero retires. This is provisional until loot recovery parity.
+ if(!hero.unit.dead&&hero.equippedTrinket)settlement.trinkets.push(hero.equippedTrinket);
+ return hero;
+}
 export function selectHero(settlement,position,rosterId){
  checkRoster(settlement);
  if(!integer(position)||position>3)throw Error('Invalid party rank');
@@ -64,7 +78,7 @@ export function selectHero(settlement,position,rosterId){
  const existing=settlement.squad.indexOf(rosterId);
  if(existing>=0&&existing!==position)throw Error('Hero is already selected');
  settlement.squad[position]=rosterId;
- if(new Set(settlement.squad).size!==4)throw Error('Hero already selected'); // caller should swap with an unused hero
+ if(new Set(settlement.squad.filter(id=>id!==null)).size!==settlement.squad.filter(id=>id!==null).length)throw Error('Hero already selected');
  return settlement;
 }
 export function availableParty(settlement){
