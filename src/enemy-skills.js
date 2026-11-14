@@ -77,6 +77,19 @@ export const ENEMY_SKILLS=Object.freeze({
     debuff:{chance:140,turns:3,modifiers:{bleedResist:-30,diseaseResist:-15}}},
   // Champion Swine Slayer analogue. ACC/CRIT/status from wiki.gg;
   // damage ranges follow the official June 2018 balance patch (6-13 / 4-7).
+  // Veteran-specific attack tuning is provisional pending independent DD1 skill-table verification.
+  plague_veteran_butcher_cut:{name:"Butcher's Cleave",from:[0,1],to:[0,1,2],
+    acc:92.5,crit:14,damageMin:4,damageMax:10,
+    status:{type:'bleed',chance:120,value:3,turns:3},
+    debuff:{chance:120,turns:3,modifiers:{healingReceived:-40}}},
+  plague_veteran_ball_chain:{name:'Spiked Chain',from:[0,1,2,3],to:[2,3],
+    acc:92.5,crit:14,damageMin:3,damageMax:6,
+    status:{type:'stun',chance:120},moveTarget:{type:'push',distance:1,chance:120}},
+  plague_veteran_drum_doom:{name:'Doombeat',from:[0,1,2,3],to:[0,1,2,3],targetMode:'all',
+    acc:92.5,crit:5,damageMin:1,damageMax:2,onHitStress:5,onHitStressChance:70},
+  plague_veteran_drum_debilitation:{name:'Weakening Rhythm',from:[0,1,2,3],to:[0,1,2,3],
+    kind:'mark',acc:92.5,crit:10,damageMin:1,damageMax:2,mod:0,markTurns:3,
+    debuff:{chance:120,turns:3,modifiers:{dodge:-15}}},
   plague_champion_butcher_cut:{name:"Butcher's Cleave",from:[0,1],to:[0,1,2],
     acc:102.5,crit:17,damageMin:6,damageMax:13,
     status:{type:'bleed',chance:140,value:4,turns:3},
