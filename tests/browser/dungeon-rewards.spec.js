@@ -9,7 +9,7 @@ test('browser inventory supports heirlooms, gems and trinkets with atomic overfl
   offerLoot(d,'gem',3);collectLoot(d);
   offerLoot(d,'crest',6);collectLoot(d);
   offerLoot(d,'trinket',2);
-  const refused=!inventoryCanAdd(d,'trinket',1);
+  const refused=!inventoryCanAdd(d,'trinket',2);
   let atomic=false;
   try{collectLoot(d)}catch{atomic=d.pendingLoot?.kind==='trinket';}
   discardInventoryStack(d,'food:0');
