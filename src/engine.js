@@ -374,7 +374,9 @@ export function takeTurn(state,actorId,key,targetId,r){
         if(sk.removeStealth&&actual.stealthed)actual.stealthed=0;
         state.log.push(`${a.name} uses ${sk.name} on ${actual.name}: ${dmg}${crit?' CRIT':''}`);
         if(crit){
-          if(a.side==='hero'){
+          // DD1: hitting a corpse critically grants no stress relief, unless
+          // it is an AoE attack that also happens to strike a corpse.
+          if(a.side==='hero'&&(!actual.corpse||sk.targetMode==='all')){
             a.stress=clamp(a.stress-3,0,200);
             for(const u of ranks(state,'hero'))if(u.id!==a.id&&r()<.25)u.stress=clamp(u.stress-3,0,200);
           }
