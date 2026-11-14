@@ -341,3 +341,24 @@ The [official DD1 modding guide](https://steamcommunity.com/sharedfiles/filedeta
 **Fidelity qualification:** Condition *types* reflect official DD1 modding concepts. These specific enemy profiles, multiplier numbers (3×, 2× and 1.5×) and counter semantics are provisional Kingdom of Clays implementation choices. They are **not claims of exact vanilla DD1 monster-brain probabilities**. Actual reference monster-brain files are needed before certifying monster-by-monster AI parity.
 
 **Tests:** `tests/enemy-skill-desires.test.js` and `tests/browser/enemy-skill-desires.spec.js` cover ally and target conditions, legal target restrictions, action-count versus round behaviour, stun, and determinism.
+
+## Pass 19 — Verified reference monster-brain profile: Veteran Cutthroat (2026-11-14)
+
+**Source:** [Official Darkest Dungeon Wiki — Brigand Cutthroat](https://darkestdungeon.wiki.gg/wiki/Brigand_Cutthroat), sections *Skill Selection* and *Skill Targeting*, cross-checked with [Red Hook's official modding guide](https://steamcommunity.com/sharedfiles/filedetails/?id=819597757) on performing-turn skill desires. The wiki describes **Veteran/Champion** Cutthroat turn-dependent skill selection. This reference should not be confused with the Apprentice difficulty variant, whose skill probabilities are different.
+
+**Playable Clays reskin:** The new **Outlaw Patrol · DD1 AI Reference** combat demo includes an `Outlaw Duelist` mapped to the Veteran Cutthroat's four attacks. Relative weights (prior to removing illegal skills) are:
+
+| Performing action count | Crossblade Sweep | Rising Pommel | Outlaw Stab |
+| --- | ---: | ---: | ---: |
+| First action | **7** | **1** | **2** |
+| Second action | **2** | **1** | **6** |
+| Third and later | **2** | **1** | **2** |
+
+- At rank 3 (zero-based rank 2), Rising Pommel is illegal: normalize remaining weights (7:2; 2:6; then 2:2).
+- At rank 4 (zero-based rank 3), only Retreating Jab is legal, so it is selected with 100% probability and moves the Duelist forward one rank.
+- The **verified scope** is the Veteran Cutthroat's relative AI skill-selection weights, rank-eligibility pattern, and published Veteran baseline HP/DODGE/PROT/SPD/resistances.
+- **Still provisional:** Exact attack damage, hit chance, effects, targeting desire magnitudes, and all other Clays monsters. The Duelist abilities use custom names and approximate effect values, not fully verified DD1 attack numerical parity.
+
+`src/enemy-ai.js` supports an optional per-monster `turnWeights` table keyed to `actionsTaken+1` (with `later` fallback). The legal skill filter occurs before the weighted draw, exactly so disabling one attack automatically renormalizes surviving weights. `tests/outlaw-duelist-reference.test.js` and `tests/browser/outlaw-duelist-reference.spec.js` cover the documented branch cases.
+
+**Outstanding AI parity:** Implement source-verified conditional target desires for Shank and map further monster brains from reference data without assuming all anime reskins share the source creature's behaviour.
