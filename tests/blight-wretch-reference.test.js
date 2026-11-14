@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeUndeadEncounter,takeTurn,availableTargets} from '../src/engine.js';
 import {createCampaignSettlement} from '../src/settlement.js';
-import {prepareRosterParty} from '../src/hero-roster.js';
+import {prepareRosterParty,returnPartyToRoster} from '../src/hero-roster.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle} from '../src/dungeon.js';
 import {exposeHeroToDisease} from '../src/trait-effects.js';
 
@@ -58,7 +58,6 @@ test('Vault room expedition deploys the Blight Wretch and carries diseases to ro
  for(const foe of battle.units.filter(u=>u.side==='enemy'))foe.dead=true;
  resolveDungeonBattle(d);
  d.phase='victory';
- const {returnPartyToRoster}=await import('../src/hero-roster.js');
  returnPartyToRoster(s,d);
  assert.deepEqual(s.roster[0].diseases,['creepingCough']);
 });
