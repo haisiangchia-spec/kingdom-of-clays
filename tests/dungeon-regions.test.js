@@ -230,3 +230,17 @@ test('dual-Hookstalker pack is generated at every difficulty and each enemy can 
   assert.ok(found,difficulty+' seeded generator never selected Plague Hook Pack');
  }
 });
+
+test('Champion-only Blight Javelineer has source-audited Swine Skiver stats and three rank-dependent skills',()=>{
+ const p=ENEMY_PROFILES.plagueSkiver;
+ assert.deepEqual([p.stats.hp,p.stats.dodge,p.stats.prot,p.stats.spd],[49,31.25,15,9]);
+ assert.deepEqual([p.stats.stunResist,p.stats.blightResist,p.stats.bleedResist,p.stats.debuffResist,p.stats.moveResist],[85,100,60,70,65]);
+ const roast=ABILITIES.plague_skiver_roast,volley=ABILITIES.plague_skiver_cripple,flight=ABILITIES.plague_skiver_flight;
+ assert.deepEqual([roast.acc,roast.crit,roast.damageMin,roast.damageMax,roast.advance],[107.5,21,12,18,1]);
+ assert.deepEqual([roast.status.chance,roast.moveTarget.distance,roast.moveTarget.chance],[130,3,120]);
+ assert.deepEqual([volley.acc,volley.crit,volley.damageMin,volley.damageMax],[97.5,9,6,13]);
+ assert.equal(volley.targetMode,'all');
+ assert.deepEqual(volley.debuff.modifiers,{dodge:-8,speed:-6});
+ assert.deepEqual([flight.acc,flight.crit,flight.damageMin,flight.damageMax,flight.selfBack],[92.5,7,4,7,4]);
+ assert.ok(!Object.values(PLAGUE_TEMPLATES).some(ids=>ids.includes('plagueSkiver')),'Champion-only enemy must not spawn in Apprentice tables');
+});
