@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeUndeadEncounter,ABILITIES,availableTargets,takeTurn,rank,formationSlots} from '../src/engine.js';
-import {chooseEnemyAction} from '../src/enemy-ai.js';
+import {chooseEnemyAction,additiveTargetWeight,ENEMY_TACTICS} from '../src/enemy-ai.js';
 import {moveWithinFormation} from '../src/formation.js';
 
 const fixture=()=>makeUndeadEncounter(91,'outlawPatrol');
@@ -64,4 +64,31 @@ test('rank four forces the harmless fallback and moves the duelist forward',()=>
  assert.equal(rank(b,d.id),2);
  assert.equal(d.actionsTaken,1);
  assert.equal(formationSlots(b,'enemy').filter(Boolean).length,4);
+});
+
+test('Veteran Cutthroat Shank uses source-verified additive targeting bonuses',()=>{
+ const b=fixture(),d=duel(b);
+ const ids=availableTargets(b,d.id,'duelist_shank');
+ const desires=ENEMY_TACTICS[d.name].additiveTargetDesires;
+ const heroes=ids.map(id=>b.units.find(u=>u.id===id));
+ heroes.forEach(h=>{h.resist.bleed=40;h.marked=0;});
+ heroes[0].resist.bleed=10;
+ heroes[1].marked=3;
+ assert.deepEqual(heroes.map(h=>additiveTargetWeight(b,h,'duelist_shank',ids,desires)),[2,4,1,1]);
+ heroes[0].marked=2;
+ assert.deepEqual(heroes.map(h=>additiveTargetWeight(b,h,'duelist_shank',ids,desires)),[5,4,1,1]);
+ assert.deepEqual(heroes.map(h=>additiveTargetWeight(b,h,'duelist_sweep',ids,desires)),[1,1,1,1]);
+});
+test('Shank bonus affects probability without guaranteeing the marked hero',()=>{
+ const b=fixture(),d=duel(b);
+ const heroes=b.units.filter(u=>u.side==='hero');
+ heroes.forEach(h=>{h.resist.bleed=40;h.marked=0;});
+ heroes[1].marked=3;
+ // Force Shank with first roll .95, then choose first or marked hero.
+ const choose=(targetRoll)=>{
+   const rolls=[.95,targetRoll];let i=0;
+   return chooseEnemyAction(b,d.id,d.enemySkills,()=>rolls[i++],ABILITIES,availableTargets);
+ };
+ assert.deepEqual(choose(.02),{key:'duelist_shank',targetId:'h1'});
+ assert.deepEqual(choose(.40),{key:'duelist_shank',targetId:'h2'});
 });
