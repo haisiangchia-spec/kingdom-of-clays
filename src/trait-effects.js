@@ -42,11 +42,15 @@ export function reverseTraitBonus(unit){
  delete unit.traitApplied;
  return unit;
 }
-export function exposeHeroToDisease(state,attacker,hero,random){
+export function exposeHeroToDisease(state,attacker,hero,random,skillKey=null){
  if(!state.expeditionEncounter||attacker.side!=='enemy'||hero.side!=='hero'||!hero.rosterId||hero.dead)return false;
- if(!['cryptDefender','cryptArbalist'].includes(attacker.enemyProfile))return false;
- // The combat engine owns this roll, so save/reload uses its RNG cursor.
- if(random()*100>=DISEASE_EXPOSURE_CHANCE)return false;
+ const sourceWretch=attacker.enemyProfile==='plagueWretch'&&skillKey==='plague_vomit';
+ const legacyCrypt=['cryptDefender','cryptArbalist'].includes(attacker.enemyProfile);
+ if(!sourceWretch&&!legacyCrypt)return false;
+ // Wretch Vomit is source-backed at 33%; the earlier Crypt 8% remains
+ // explicitly provisional until the underlying monster roster is revised.
+ const chance=sourceWretch?33:DISEASE_EXPOSURE_CHANCE;
+ if(random()*100>=chance)return false;
  hero.diseases??=[];
  const disease=diseaseChoices[Math.floor(random()*diseaseChoices.length)];
  if(hero.diseases.includes(disease)||hero.diseases.length>=3)return false;
