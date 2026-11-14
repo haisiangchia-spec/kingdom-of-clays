@@ -6,7 +6,7 @@ import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeC
 import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket} from './hero-roster.js';
 import {TREATMENTS,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
 import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits,sanitariumTreatmentCost,sanitariumWardBookings} from './sanitarium.js';
-import {DUNGEON_REGIONS} from './dungeon-regions.js';
+import {DUNGEON_REGIONS,regionRoomName} from './dungeon-regions.js';
 import {SANITARIUM_UPGRADE_TREES,sanitariumUpgradeLevels,nextSanitariumUpgradeCost,upgradeSanitarium,sanitariumWardCapacity} from './sanitarium-upgrades.js';
 
 const $=id=>document.getElementById(id);
@@ -122,11 +122,11 @@ function render(){
  if(['victory','defeat'].includes(expedition.phase)&&expedition.rosterReturned&&!expedition.townWeekProcessed){
   try{advanceTownWeek(settlement,expedition);}catch(e){expedition.log.push('Town week failed: '+e.message);}
  }
- $('dungeon-status').textContent=`${DUNGEON_REGIONS[expedition.region??'crypt'].name} · ${DUNGEON_ROOMS[expedition.room].name} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
+ $('dungeon-status').textContent=`${DUNGEON_REGIONS[expedition.region??'crypt'].name} · ${regionRoomName(expedition.region??'crypt',expedition.room)} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
  $('dungeon-region').disabled=!['victory','defeat'].includes(expedition.phase);
  const map=$('dungeon-rooms');map.replaceChildren();
  for(const [id,room] of Object.entries(DUNGEON_ROOMS)){
-   const marker=el('span',room.name,map);
+   const marker=el('span',regionRoomName(expedition.region??'crypt',id),map);
    marker.className=id===expedition.room?'here':expedition.visited.includes(id)?'seen':'';
    if(expedition.cleared.includes(id))marker.textContent+=' ✓';
  }
@@ -307,7 +307,7 @@ function render(){
  if(expedition.phase==='explore'){
    if(expedition.pendingTravel){
      const trip=expedition.pendingTravel;
-     el('p',`Corridor: ${DUNGEON_ROOMS[trip.to].name}, step ${trip.progress}/${trip.steps}`,travel);
+     el('p',`Corridor: ${regionRoomName(expedition.region??'crypt',trip.to)}, step ${trip.progress}/${trip.steps}`,travel);
      const record=expedition.corridors[trip.corridor];
      if(trip.progress===0&&record?.trapRevealed&&!record.hazardChecked){
        el('p','Scouted trap ahead — choose a hero to disarm it.',decisions);
@@ -322,11 +322,11 @@ function render(){
    }else if(!expedition.pendingHunger&&!expedition.pendingLoot){
      for(const adjacent of adjacentRooms(expedition)){
        const record=expedition.corridors[adjacent.corridor];
-       el('button','Travel to '+DUNGEON_ROOMS[adjacent.room].name,travel,()=>{
+       el('button','Travel to '+regionRoomName(expedition.region??'crypt',adjacent.room),travel,()=>{
          beginCorridor(expedition,adjacent.room);render();
        });
        if(!record?.scouted){
-         el('button','Scout '+DUNGEON_ROOMS[adjacent.room].name,travel,()=>{
+         el('button','Scout '+regionRoomName(expedition.region??'crypt',adjacent.room),travel,()=>{
            try{scoutCorridor(expedition,adjacent.room);}catch(error){expedition.log.push(error.message);}render();
          });
        }else{
