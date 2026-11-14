@@ -16,6 +16,58 @@ export const DUNGEON_CORRIDORS=Object.freeze([
  Object.freeze({id:'watch-sanctum',from:'watch',to:'sanctum',steps:2}),
  Object.freeze({id:'vault-sanctum',from:'vault',to:'sanctum',steps:2})
 ]);
+// Expedition supplies and hazards are Clays scaffolding, NOT DD1 parity data.
+export const EXPEDITION_SUPPLIES=Object.freeze({
+ torch:Object.freeze({start:3,light:25}),
+ food:Object.freeze({start:8,heal:2})
+});
+export function torchBand(value){
+ if(value>=75)return 'radiant';
+ if(value>=50)return 'dim';
+ if(value>=25)return 'dark';
+ return 'pitch-black';
+}
+export function useProvision(dungeon,type,heroId=null){
+ if(dungeon.phase!=='explore')throw Error('Provisions cannot be used during combat');
+ if(!EXPEDITION_SUPPLIES[type])throw Error('Unknown provision');
+ if((dungeon.supplies?.[type]??0)<=0)throw Error('No '+type+' provisions remaining');
+ if(type==='torch'){
+   if(dungeon.torch>=100)throw Error('Torchlight is already full');
+   dungeon.supplies.torch--;
+   dungeon.torch=Math.min(100,dungeon.torch+EXPEDITION_SUPPLIES.torch.light);
+   dungeon.log.push('A torch brightens the path');
+ }else{
+   const hero=dungeon.party.find(u=>u.id===heroId&&!u.dead);
+   if(!hero)throw Error('Choose a living hero');
+   if(hero.hp>=hero.maxHp)throw Error('Hero is already at full health');
+   dungeon.supplies.food--;
+   hero.hp=Math.min(hero.maxHp,hero.hp+EXPEDITION_SUPPLIES.food.heal);
+   dungeon.log.push(hero.name+' eats food and recovers health');
+ }
+ return dungeon;
+}
+function triggerHazard(dungeon,edge){
+ // A single deterministic trap check on the first forward passage through
+ // each late-stage corridor, with darker light raising its probability.
+ if(!['watch-sanctum','vault-sanctum'].includes(edge.id))return;
+ const corridor=dungeon.corridors[edge.id];
+ if(corridor.hazardChecked)return;
+ corridor.hazardChecked=true;
+ const chance=dungeon.torch>=75?.15:dungeon.torch>=25?.30:.50;
+ const roll=rng(encounterSeed(dungeon.seed,'hazard:'+edge.id))();
+ if(roll>=chance){dungeon.log.push('The party safely passes a suspected trap');return;}
+ const victim=dungeon.party.find(u=>!u.dead&&u.hp>0);
+ if(!victim)return;
+ victim.hp=Math.max(0,victim.hp-2);
+ victim.stress=Math.min(200,victim.stress+5);
+ if(victim.hp===0)victim.dead=true;
+ dungeon.log.push('A hidden trap wounds '+victim.name+' (-2 HP, +5 stress)');
+ if(dungeon.party.every(u=>u.dead)){
+   dungeon.phase='defeat';
+   dungeon.pendingTravel=null;
+   dungeon.log.push('The expedition has fallen');
+ }
+}
 const keyFor=(edge,from)=>edge.from===from?edge.to:edge.from;
 const copy=x=>structuredClone(x);
 function encounterSeed(seed,key){
@@ -26,7 +78,7 @@ function encounterSeed(seed,key){
 export function createDungeon(seed=1,{difficulty='scout'}={}){
  if(!['scout','patrol','gauntlet'].includes(difficulty))throw Error('Unknown dungeon difficulty');
  const party=makeGeneratedEncounter(seed,difficulty).units.filter(u=>u.side==='hero').map(copy);
- return {seed,difficulty,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,
+ return {seed,difficulty,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8},
   pendingTravel:null,pendingBattle:null,battleSerial:0,phase:'explore',log:['Entered the Crypt Entrance']};
 }
 export function adjacentRooms(dungeon){
@@ -62,9 +114,12 @@ export function advanceCorridor(dungeon){
  dungeon.torch=Math.max(0,dungeon.torch-1); // provisional travel torch cost
  const visited=dungeon.corridors[edge.id]??{traversals:0,encounterCleared:false};
  dungeon.corridors[edge.id]=visited;
+ if(trip.progress===1)triggerHazard(dungeon,edge);
+ if(dungeon.phase==='defeat')return dungeon;
  if(trip.progress===1&&!visited.encounterCleared){
    const roll=rng(encounterSeed(dungeon.seed,edge.id))();
-   if(edge.forcedEncounter||roll<.35){
+   const danger=dungeon.torch>=75?.30:dungeon.torch>=25?.40:.55;
+   if(edge.forcedEncounter||roll<danger){
      startBattle(dungeon,'corridor:'+edge.id,dungeon.difficulty);
      return dungeon;
    }
