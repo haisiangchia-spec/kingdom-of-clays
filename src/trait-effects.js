@@ -1,3 +1,4 @@
+import {effectModifier} from './status.js';
 // Expedition-only effects for the first Clays quirk/disease subset.
 // Numbers are Clays balancing fixtures, not asserted DD1 quirk statistics.
 // Apply to the combat unit and reverse on return to avoid permanent stat drift.
@@ -48,7 +49,10 @@ export function exposeHeroToDisease(state,attacker,hero,random,skillKey=null){
  if(!sourceWretch)return false;
  // The real DD1 Swine Wretch Vomit has a 33% chance to cause disease.
  // No generic disease proc is added to unlisted enemy attacks.
- const chance=33;
+ // Disease-resistance debuffs modify the infection roll. This remains a
+ // provisional disease model until DD1's full disease system is implemented.
+ const resistance=(hero.resist?.disease??0)+effectModifier(hero,'diseaseResist');
+ const chance=Math.max(0,Math.min(100,33-resistance));
  if(random()*100>=chance)return false;
  hero.diseases??=[];
  const disease=diseaseChoices[Math.floor(random()*diseaseChoices.length)];
