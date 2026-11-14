@@ -62,6 +62,16 @@ export const ENEMY_SKILLS=Object.freeze({
     acc:82.5,crit:12,damageMin:2,damageMax:4,
     status:{type:'stun',chance:100},
     moveTarget:{type:'push',distance:1,chance:100}},
+  // Champion Swine Slayer analogue. ACC/CRIT/status from wiki.gg;
+  // damage ranges follow the official June 2018 balance patch (6-13 / 4-7).
+  plague_champion_butcher_cut:{name:"Butcher's Cleave",from:[0,1],to:[0,1,2],
+    acc:102.5,crit:17,damageMin:6,damageMax:13,
+    status:{type:'bleed',chance:140,value:4,turns:3},
+    debuff:{chance:140,turns:3,modifiers:{healingReceived:-50}}},
+  plague_champion_ball_chain:{name:'Spiked Chain',from:[0,1,2,3],to:[2,3],
+    acc:102.5,crit:17,damageMin:4,damageMax:7,
+    status:{type:'stun',chance:140},
+    moveTarget:{type:'push',distance:1,chance:140}},
   // DD1 VETERAN Brigand Cutthroat ability data (wiki.gg).
   // Accuracy shown in DD1 tables is reproduced as skill ACC here, with
   // the combat engine's documented +5 hidden hit correction applied separately.
