@@ -10,14 +10,15 @@ export const PLAGUE_TEMPLATES=Object.freeze({
  plagueScouts:Object.freeze(['plagueChopper','plagueWretch','plagueDrummer']),
  plagueRaid:Object.freeze(['plagueChopper','plagueChopper','plagueWretch','plagueDrummer']),
  plagueMarch:Object.freeze(['plagueChopper','plagueChopper','plagueDrummer','plagueDrummer']),
+ plagueHookRaid:Object.freeze(['plagueChopper','plagueSlasher','plagueWretch','plagueDrummer']),
  plagueAmbush:Object.freeze(['plagueChopper','plagueWretch','plagueWretch','plagueDrummer'])
 });
 export const PLAGUE_TABLES=Object.freeze({
- scout:Object.freeze([{id:'plagueScouts',weight:5},{id:'plagueRaid',weight:2}]),
- patrol:Object.freeze([{id:'plagueScouts',weight:2},{id:'plagueRaid',weight:5},{id:'plagueMarch',weight:2}]),
- gauntlet:Object.freeze([{id:'plagueRaid',weight:4},{id:'plagueMarch',weight:3},{id:'plagueAmbush',weight:3}])
+ scout:Object.freeze([{id:'plagueScouts',weight:5},{id:'plagueRaid',weight:2},{id:'plagueHookRaid',weight:2}]),
+ patrol:Object.freeze([{id:'plagueScouts',weight:2},{id:'plagueRaid',weight:5},{id:'plagueMarch',weight:2},{id:'plagueHookRaid',weight:2}]),
+ gauntlet:Object.freeze([{id:'plagueRaid',weight:4},{id:'plagueMarch',weight:3},{id:'plagueAmbush',weight:3},{id:'plagueHookRaid',weight:3}])
 });
-export const PLAGUE_THREAT=Object.freeze({plagueChopper:3,plagueWretch:2,plagueDrummer:2});
+export const PLAGUE_THREAT=Object.freeze({plagueChopper:3,plagueWretch:2,plagueDrummer:2,plagueSlasher:2});
 export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random){
  const table=PLAGUE_TABLES[difficulty];
  if(!table)throw Error('Unknown encounter difficulty: '+difficulty);
