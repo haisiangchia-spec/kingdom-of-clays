@@ -46,38 +46,38 @@ test('returning heroes reverses quirk, illness and Guild combat bonuses once wit
  }
  assert.equal(h.unit.hp,base.hp-9);
 });
-test('seeded disease exposure works only in roster-led dungeons and survives roster return',()=>{
+test('source-backed Wretch disease exposure persists on roster, but combat lab is unchanged',()=>{
  const s=createCampaignSettlement();
  const d=createDungeon(411,{party:prepareRosterParty(s),interactiveEvents:true});
- beginCorridor(d,'gallery');advanceCorridor(d);
- const b=dungeonBattle(d),hero=b.units.find(u=>u.id==='h1'),crypt=b.units.find(u=>u.enemyProfile==='cryptDefender');
- assert.ok(crypt);
- assert.equal(b.expeditionEncounter,true);
- assert.equal(exposeHeroToDisease(b,crypt,hero,()=>0),true);
+ d.room='gallery';d.visited.push('gallery');beginCorridor(d,'vault');
+ d.corridors['gallery-vault']={traversals:0,encounterCleared:true};
+ advanceCorridor(d);advanceCorridor(d);
+ const b=dungeonBattle(d),hero=b.units.find(u=>u.id==='h1'),wretch=b.units.find(u=>u.enemyProfile==='plagueWretch');
+ assert.ok(wretch);assert.equal(b.expeditionEncounter,true);
+ assert.equal(exposeHeroToDisease(b,wretch,hero,()=>0,'plague_vomit'),true);
  assert.deepEqual(hero.diseases,['creepingCough']);
  assert.equal(hero.spd,s.roster[0].unit.spd-2);
- assert.equal(exposeHeroToDisease(b,crypt,hero,()=>0),false);
+ assert.equal(exposeHeroToDisease(b,wretch,hero,()=>0,'plague_vomit'),false);
  for(const foe of b.units.filter(u=>u.side==='enemy'))foe.dead=true;
- resolveDungeonBattle(d);d.phase='victory';
- returnPartyToRoster(s,d);
+ resolveDungeonBattle(d);d.phase='victory';returnPartyToRoster(s,d);
  assert.deepEqual(s.roster[0].diseases,['creepingCough']);
  assert.equal(s.roster[0].unit.spd,3);
  assert.equal(prepareRosterParty(s)[0].spd,1);
- const normal=makeGeneratedEncounter(411,'scout');
- const other=normal.units.find(u=>u.id==='h1');
+ const lab=makeGeneratedEncounter(411,'scout'),other=lab.units.find(u=>u.id==='h1');
  other.rosterId='r1';
- assert.equal(exposeHeroToDisease(normal,normal.units.find(u=>u.enemyProfile==='cryptDefender'),other,()=>0),false);
- assert.equal(DISEASE_EXPOSURE_CHANCE,8);
+ assert.equal(exposeHeroToDisease(lab,{side:'enemy',enemyProfile:'plagueWretch'},other,()=>0,'plague_vomit'),false);
+ assert.equal(DISEASE_EXPOSURE_CHANCE,0);
 });
-test('disease exposure rejects non-crypt units, zero-damage surrogate and caps infections',()=>{
+test('disease exposure refuses ordinary crypt skills and caps infections',()=>{
  const s=createCampaignSettlement(),u=prepareRosterParty(s)[0],b={expeditionEncounter:true,log:[]};
  assert.equal(exposeHeroToDisease(b,{side:'enemy',enemyProfile:'duelist'},u,()=>0),false);
- assert.equal(exposeHeroToDisease(b,{side:'hero',enemyProfile:'cryptDefender'},u,()=>0),false);
- const foe={side:'enemy',enemyProfile:'cryptArbalist'};
- assert.equal(exposeHeroToDisease(b,foe,u,()=>.99),false);
+ assert.equal(exposeHeroToDisease(b,{side:'hero',enemyProfile:'plagueWretch'},u,()=>0,'plague_vomit'),false);
+ const foe={side:'enemy',enemyProfile:'plagueWretch'};
+ assert.equal(exposeHeroToDisease(b,{side:'enemy',enemyProfile:'cryptArbalist'},u,()=>0,'crypt_quarrel'),false);
+ assert.equal(exposeHeroToDisease(b,foe,u,()=>.99,'plague_vomit'),false);
  assert.deepEqual(u.diseases,[]);
  u.diseases=['ashenFever'];
- assert.equal(exposeHeroToDisease(b,foe,u,()=>0),true);
+ assert.equal(exposeHeroToDisease(b,foe,u,()=>0,'plague_vomit'),true);
  assert.deepEqual(u.diseases,['ashenFever','creepingCough']);
 });
 test('negative quirk recurrence locks a previously acquired quirk exactly once',()=>{
@@ -101,25 +101,15 @@ test('negative quirk recurrence locks a previously acquired quirk exactly once',
  assert.equal(found,true);
 });
 
-test('actual enemy attack damage triggers disease in expedition but not the unchanged combat lab',()=>{
- const s=createCampaignSettlement();
- const d=createDungeon(912,{party:prepareRosterParty(s)});
+test('ordinary Crypt Defender hits cause damage but never an unsourced disease proc',()=>{
+ const s=createCampaignSettlement(),d=createDungeon(912,{party:prepareRosterParty(s)});
  beginCorridor(d,'gallery');advanceCorridor(d);
- const battle=dungeonBattle(d);
- const defender=battle.units.find(u=>u.enemyProfile==='cryptDefender');
- assert.ok(defender);
+ const battle=dungeonBattle(d),defender=battle.units.find(u=>u.enemyProfile==='cryptDefender');
  battle.queue=[defender.id];
  assert.ok(availableTargets(battle,defender.id,'boneguard_axe').includes('h1'));
  const hero=battle.units.find(u=>u.id==='h1');
  takeTurn(battle,defender.id,'boneguard_axe','h1',()=>0);
  assert.ok(hero.hp<hero.maxHp);
- assert.deepEqual(hero.diseases,['creepingCough']);
- assert.ok(battle.log.some(line=>line.includes('contracts Creeping Cough')));
- const lab=makeGeneratedEncounter(912,'scout');
- const labEnemy=lab.units.find(u=>u.enemyProfile==='cryptDefender');
- const labHero=lab.units.find(u=>u.id==='h1');
- labHero.rosterId='r1';
- lab.queue=[labEnemy.id];
- takeTurn(lab,labEnemy.id,'boneguard_axe','h1',()=>0);
- assert.deepEqual(labHero.diseases??[],[]);
+ assert.deepEqual(hero.diseases??[],[]);
+ assert.ok(!battle.log.some(line=>line.includes('contracts')));
 });
