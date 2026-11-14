@@ -60,8 +60,14 @@ function startExpedition(){
  let party;
  try{party=prepareRosterParty(settlement,expeditionBonuses(settlement));}
  catch(e){if(expedition){expedition.log.push(e.message);render();}return;}
+ const region=$('dungeon-region').value;
+ const tier=$('dungeon-tier').value;
+ if(tier==='champion'&&region!=='plague'){
+  if(expedition){expedition.log.push('Champion expeditions are currently available only in Blighted Warrens');render();}
+  return;
+ }
  const seed=(Math.floor(Math.random()*0xffffffff)>>>0)||1;
- expedition=createDungeon(seed,{difficulty:'scout',region:$('dungeon-region').value,tier:$('dungeon-tier').value,interactiveEvents:true,bonuses:expeditionBonuses(settlement),party});
+ expedition=createDungeon(seed,{difficulty:'scout',region,tier,interactiveEvents:true,bonuses:expeditionBonuses(settlement),party});
  expedition.randomCalls=0;
  bindRandom();
  preparedId=null;chosenSkill=null;
