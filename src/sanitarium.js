@@ -4,7 +4,9 @@
 import {sanitariumUpgradeLevels,nextSanitariumUpgradeCost,upgradeSanitarium,sanitariumWardCapacity,quirkTreatmentDiscount,medicalTreatmentDiscount,multiDiseaseCureChance} from './sanitarium-upgrades.js';
 export const QUIRKS=Object.freeze({
  sturdy:{name:'Sturdy',kind:'positive'},eagleEye:{name:'Eagle Eye',kind:'positive'},
- nervous:{name:'Nervous',kind:'negative'},slowReflexes:{name:'Slow Reflexes',kind:'negative'}
+ earlyRiser:{name:'Early Riser',kind:'positive'},
+ nervous:{name:'Nervous',kind:'negative'},slowReflexes:{name:'Slow Reflexes',kind:'negative'},
+ nocturnal:{name:'Nocturnal',kind:'negative'}
 });
 export const DISEASES=Object.freeze({
  creepingCough:{name:'Creeping Cough'},ashenFever:{name:'Ashen Fever'}
