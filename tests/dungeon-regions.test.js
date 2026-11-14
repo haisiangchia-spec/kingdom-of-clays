@@ -684,9 +684,9 @@ test('Veteran Warrens generation is seeded, isolated and explicitly provisional'
   const v=veteran.units.filter(u=>u.side==='enemy');
   const a=apprentice.units.filter(u=>u.side==='enemy');
   for(let i=0;i<v.length;i++){
-   const verified=['plagueChopper','plagueDrummer'].includes(v[i].enemyProfile);
+   const verified=['plagueChopper','plagueDrummer','plagueWretch','plagueSlasher'].includes(v[i].enemyProfile);
    assert.equal(v[i].tierScaling,verified?'dd1-verified-veteran-stats':'clays-provisional-veteran');
-   assert.equal(v[i].maxHp,verified?(v[i].enemyProfile==='plagueChopper'?29:21):Math.ceil(a[i].maxHp*1.3));
+   assert.equal(v[i].maxHp,verified?({plagueChopper:29,plagueDrummer:21,plagueWretch:17,plagueSlasher:12})[v[i].enemyProfile]:Math.ceil(a[i].maxHp*1.3));
    if(verified){
     assert.ok(v[i].enemySkills.every(id=>id.startsWith('plague_veteran_')));
     assert.notDeepEqual(v[i].enemySkills,a[i].enemySkills);
@@ -766,19 +766,20 @@ test('Veteran Drummer Doombeat hits multiple heroes and inflicts stress',()=>{
 });
 
 
-test('Veteran Wretch and Hookstalker retain explicitly provisional profiles until audited',()=>{
- const ids=['plagueWretch','plagueSlasher'];
- let checked=new Set();
+test('Veteran Wretch and Hookstalker use source-verified stats and attacks',()=>{
+ const expected={plagueWretch:{hp:17,dodge:21.25,spd:9,skill:'plague_veteran_vomit'},plagueSlasher:{hp:12,dodge:16.25,spd:6,skill:'plague_veteran_hook_slash'}};
+ const seen=new Set();
  for(let seed=1;seed<=200;seed++){
   const battle=makeGeneratedEncounter(seed*1000003,'gauntlet','plague','veteran');
-  for(const foe of battle.units.filter(u=>ids.includes(u.enemyProfile))){
-   const original=ENEMY_PROFILES[foe.enemyProfile];
-   assert.equal(foe.tierScaling,'clays-provisional-veteran');
-   assert.equal(foe.maxHp,Math.ceil(original.stats.hp*1.3));
-   assert.deepEqual(foe.enemySkills,original.skills);
-   assert.ok(foe.enemySkills.some(id=>availableTargets(battle,foe.id,id).length),'Veteran support monster must have a legal action');
-   checked.add(foe.enemyProfile);
+  for(const foe of battle.units.filter(u=>Object.hasOwn(expected,u.enemyProfile))){
+   const profile=expected[foe.enemyProfile];
+   assert.equal(foe.tierScaling,'dd1-verified-veteran-stats');
+   assert.equal(foe.maxHp,profile.hp);
+   assert.equal(foe.dodge,profile.dodge);
+   assert.deepEqual(foe.enemySkills,[profile.skill]);
+   assert.ok(availableTargets(battle,foe.id,profile.skill).length);
+   seen.add(foe.enemyProfile);
   }
  }
- assert.deepEqual([...checked].sort(),ids.sort());
+ assert.deepEqual([...seen].sort(),Object.keys(expected).sort());
 });
