@@ -297,3 +297,25 @@ test('Champion Javelineer Crippling Volley applies damage and blight to rear her
   assert.ok(heroes[i].dot.some(d=>d.type==='blight'),'rear hero '+i+' should receive blight');
  }
 });
+
+test('all four Champion Warrens templates are reachable with legal enemy actions',()=>{
+ const seen=new Set();
+ for(const difficulty of ['scout','patrol','gauntlet']){
+  for(let seed=1;seed<=300;seed++){
+   const battle=makeGeneratedEncounter(seed*1000003,difficulty,'plague','champion');
+   const plan=battle.encounterPlan;
+   seen.add(plan.template);
+   assert.equal(plan.tier,'champion');
+   assert.equal(plan.slots,3);
+   assert.ok(plan.profiles.includes('plagueSkiver'));
+   for(const foe of battle.units.filter(u=>u.side==='enemy')){
+    const action=chooseEnemyAction(battle,foe.id,foe.enemySkills,()=>.37,ABILITIES,availableTargets);
+    assert.ok(action,plan.template+' has no legal action for '+foe.name);
+    assert.ok(availableTargets(battle,foe.id,action.key).includes(action.targetId));
+   }
+  }
+ }
+ assert.deepEqual([...seen].sort(),[
+  'plagueChampionAmbush','plagueChampionEscort','plagueChampionGuard','plagueChampionSkirmish'
+ ]);
+});
