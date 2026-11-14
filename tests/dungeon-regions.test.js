@@ -843,3 +843,26 @@ test('Veteran Warrens tables independently define deterministic weighted formati
   assert.equal(offset,total);
  }
 });
+
+
+test('Warrens tier encounter tables have exact interval boundaries and no cross-tier mutation',()=>{
+ const tables={apprentice:PLAGUE_TABLES,veteran:PLAGUE_VETERAN_TABLES,champion:PLAGUE_CHAMPION_TABLES};
+ const snapshots=Object.fromEntries(Object.entries(tables).map(([tier,table])=>[tier,JSON.stringify(table)]));
+ for(const [tier,table] of Object.entries(tables)){
+  for(const [difficulty,entries] of Object.entries(table)){
+   const total=entries.reduce((sum,e)=>sum+e.weight,0);
+   assert.ok(total>0);
+   let boundary=0;
+   for(let i=0;i<entries.length;i++){
+    const entry=entries[i];
+    assert.equal(createPlagueEncounterPlan(difficulty,()=>boundary/total,tier).template,entry.id);
+    boundary+=entry.weight;
+    if(i<entries.length-1){
+     assert.equal(createPlagueEncounterPlan(difficulty,()=>boundary/total,tier).template,entries[i+1].id);
+    }
+   }
+   assert.equal(createPlagueEncounterPlan(difficulty,()=>1-Number.EPSILON,tier).template,entries.at(-1).id);
+  }
+ }
+ for(const [tier,table] of Object.entries(tables))assert.equal(JSON.stringify(table),snapshots[tier]);
+});
