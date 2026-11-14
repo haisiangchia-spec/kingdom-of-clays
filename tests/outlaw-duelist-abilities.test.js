@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeUndeadEncounter,ABILITIES,takeTurn,rank} from '../src/engine.js';
+import {makeUndeadEncounter,ABILITIES,takeTurn,rank,startRound} from '../src/engine.js';
 import {effectModifier} from '../src/status.js';
 import {moveWithinFormation} from '../src/formation.js';
 
@@ -44,6 +44,7 @@ test('lowered Bleed resistance increases subsequent Shank application chance',()
  b.queue=[duel.id];
  takeTurn(b,duel.id,'duelist_sweep','h1',()=>.5);
  assert.equal(effectModifier(front,'bleedResist'),-25);
+ startRound(b,()=>.5);
  b.queue=[duel.id];
  takeTurn(b,duel.id,'duelist_shank','h1',()=>.15);
  assert.deepEqual(front.dot,[{type:'bleed',value:2,turns:3}]);
