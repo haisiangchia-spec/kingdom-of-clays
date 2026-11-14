@@ -224,7 +224,7 @@ export function takeTurn(state,actorId,key,targetId,r){
       if(Number.isFinite(sk.mod)&&sk.mod>-1){
         const critical=rollCrit({baseCrit:a.crit+effectModifier(a,'crit')+effectModifier(actual,'critReceived'),skillCrit:sk.crit??0},r);
         const multiplier=combinedAttackMultiplier(sk.mod,[effectModifier(a,'damage')]);
-        const dmg=directDamage({minDamage:a.dmgMin,maxDamage:a.dmgMax,skillMultiplier:multiplier*(1+effectModifier(actual,'damageTaken')/100),crit:critical,prot:actual.prot+effectModifier(actual,'prot'),damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
+        const dmg=directDamage({minDamage:sk.damageMin??a.dmgMin,maxDamage:sk.damageMax??a.dmgMax,skillMultiplier:multiplier*(1+effectModifier(actual,'damageTaken')/100),crit:critical,prot:actual.prot+effectModifier(actual,'prot'),damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
         hurt(state,actual,dmg,r,critical,true);
         if(dmg>0&&actual.side==='hero'&&!actual.dead)exposeHeroToDisease(state,a,actual,r,key);
         state.log.push(`${a.name} hits ${actual.name} with ${sk.name}: ${dmg}${critical?' CRIT':''}`);
@@ -387,7 +387,7 @@ export function takeTurn(state,actorId,key,targetId,r){
         const attackMultiplier=combinedAttackMultiplier(sk.mod??0,bonusPoints);
         const dmg=attackMultiplier===0?0:directDamage({minDamage:sk.damageMin??a.dmgMin,maxDamage:sk.damageMax??a.dmgMax,skillMultiplier:attackMultiplier*(1+targetDamageTaken/100),crit,prot:actual.prot+effectModifier(actual,'prot'),ignoreProt:sk.ignoreProt??false,damageMultiplier:effectiveCombatStats(a).damageMultiplier},r);
         hurt(state,actual,dmg,r,crit,(sk.mod??0)>-1||sk.physicalHit===true);
-        if(sk.onHitStress&&actual.side==='hero'&&!actual.dead)stress(state,actual,sk.onHitStress,r);
+        if(sk.onHitStress&&actual.side==='hero'&&!actual.dead&&(sk.onHitStressChance==null||r()*100<sk.onHitStressChance))stress(state,actual,sk.onHitStress,r);
         if(dmg>0&&actual.side==='hero'&&!actual.dead)exposeHeroToDisease(state,a,actual,r,key);
         if(sk.selfHealOnHit&&dmg>0){a.hp=Math.min(a.maxHp,a.hp+sk.selfHealOnHit);if(a.hp>0&&a.deathDoor){a.deathDoor=false;a.mortality??='deathDoorRecovery';}}
         if(sk.markOnHit&&!actual.dead&&!actual.corpse)actual.marked=sk.markOnHit;
