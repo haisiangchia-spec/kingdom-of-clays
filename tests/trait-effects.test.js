@@ -5,7 +5,7 @@ import {createDungeon,dungeonBattle,beginCorridor,advanceCorridor,resolveDungeon
 import {prepareRosterParty,returnPartyToRoster} from '../src/hero-roster.js';
 import {traitBonus,applyTraitBonus,reverseTraitBonus,exposeHeroToDisease,DISEASE_EXPOSURE_CHANCE} from '../src/trait-effects.js';
 import {applyQuestTraitRolls} from '../src/sanitarium.js';
-import {makeGeneratedEncounter} from '../src/engine.js';
+import {makeGeneratedEncounter,takeTurn,availableTargets} from '../src/engine.js';
 
 test('four individual quirks and two illnesses produce additive, combat-effective stats',()=>{
  const s=createCampaignSettlement(),h=s.roster[0],base=h.unit;
@@ -99,4 +99,27 @@ test('negative quirk recurrence locks a previously acquired quirk exactly once',
   }
  }
  assert.equal(found,true);
+});
+
+test('actual enemy attack damage triggers disease in expedition but not the unchanged combat lab',()=>{
+ const s=createCampaignSettlement();
+ const d=createDungeon(912,{party:prepareRosterParty(s)});
+ beginCorridor(d,'gallery');advanceCorridor(d);
+ const battle=dungeonBattle(d);
+ const defender=battle.units.find(u=>u.enemyProfile==='cryptDefender');
+ assert.ok(defender);
+ battle.queue=[defender.id];
+ assert.ok(availableTargets(battle,defender.id,'boneguard_axe').includes('h1'));
+ const hero=battle.units.find(u=>u.id==='h1');
+ takeTurn(battle,defender.id,'boneguard_axe','h1',()=>0);
+ assert.ok(hero.hp<hero.maxHp);
+ assert.deepEqual(hero.diseases,['creepingCough']);
+ assert.ok(battle.log.some(line=>line.includes('contracts Creeping Cough')));
+ const lab=makeGeneratedEncounter(912,'scout');
+ const labEnemy=lab.units.find(u=>u.enemyProfile==='cryptDefender');
+ const labHero=lab.units.find(u=>u.id==='h1');
+ labHero.rosterId='r1';
+ lab.queue=[labEnemy.id];
+ takeTurn(lab,labEnemy.id,'boneguard_axe','h1',()=>0);
+ assert.deepEqual(labHero.diseases??[],[]);
 });
