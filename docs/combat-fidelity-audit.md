@@ -696,3 +696,15 @@ The Veteran table is deliberately isolated in `PLAGUE_VETERAN_TABLES` but curren
 | `plagueHookPack` | Hookstalker, Hookstalker, Wretch, Drummer | 1 | 1 | 2 |
 
 Totals: Scout **10**, Patrol **12**, Gauntlet **15** weight units. These are **Clays-designed gameplay distributions**, not authenticated DD1 formation tables. There is currently no cited primary data source in the repository proving DD1's exact Veteran Warrens formations or encounter-selection probabilities. Therefore no weight has been reclassified as verified. A future change must supply a versioned source, identify the corresponding in-game encounter category, and update formation tests and the distribution audit together.
+
+
+## Pass 119: Identified primary DD1 encounter-data source
+
+DD1's encounter composition is stored in dungeon **mash** files, not inferred from general monster statistics. The game uses encounter-specific groups and weighted `.chance` values. For Veteran Warrens, the relevant primary-game file is expected at `DarkestDungeon/dungeons/warrens/warrens.3.mash.darkest` (resolve level 3 = Veteran). Check the installed game's actual file and version before treating this path or any extracted entries as authoritative. Related `warrens.conditional.3.mash.darkest` and additional mash files may introduce other encounters; those must be audited separately.
+
+Sources describing mash layout and difficulty mapping:
+- https://steamcommunity.com/sharedfiles/filedetails/?id=2918752848 (Sherin's Modding Notes; `.1` Apprentice, `.3` Veteran, `.5` Champion; hall/room mash categories; `.chance` is a relative weight)
+- https://darkestdungeon.fandom.com/wiki/Enemies_%28Darkest_Dungeon%29 (encounters are selected from weighted mashes)
+- https://darkestdungeon.wiki.gg/wiki/Expeditions (Veteran corresponds to resolve level 3)
+
+**Required parity work:** obtain and preserve a legally sourced copy or extracted data of the installed vanilla Veteran Warrens mash; record its game version; parse each `hall:` and `room:` entry separately; map original monster identifiers to Clays reskins; support missing enemy species and encounter conditions before replacing the provisional Scout/Patrol/Gauntlet distributions. Current Scout/Patrol/Gauntlet are original Clays encounter categories, not direct DD1 hall/room equivalents. No DD1 encounter probability is claimed verified at this checkpoint.
