@@ -42,6 +42,18 @@ export const ENEMY_SKILLS=Object.freeze({
   // all launch ranks, targets 1–3, ACC 82.5, CRIT 16, DMG 3–7, back 1.
   plague_hook_slash:{name:'Hookstalker Strike',from:[0,1,2,3],to:[0,1,2],
     acc:82.5,crit:16,damageMin:3,damageMax:7,selfBack:1},
+  // Champion DD1 Swine Skiver, wiki.gg. The AoE blight/debuff
+  // attack uses the engine's existing status and targetMode support.
+  plague_skiver_roast:{name:'Impaling Javelin',from:[1,2,3],to:[0,1,2],
+    acc:107.5,crit:21,damageMin:12,damageMax:18,advance:1,
+    status:{type:'stun',chance:130},
+    moveTarget:{type:'push',distance:3,chance:120}},
+  plague_skiver_cripple:{name:'Crippling Volley',from:[1,2,3],to:[1,2,3],
+    targetMode:'all',acc:97.5,crit:9,damageMin:6,damageMax:13,
+    status:{type:'blight',chance:120,value:3,turns:3},
+    debuff:{chance:130,turns:3,modifiers:{dodge:-8,speed:-6}}},
+  plague_skiver_flight:{name:'Goring Retreat',from:[0,1],to:[0,1],
+    acc:92.5,crit:7,damageMin:4,damageMax:7,selfBack:4},
   // Source-checked Apprentice Swine Chopper (DD1).
   plague_butcher_cut:{name:"Butcher's Cleave",from:[0,1],to:[0,1,2],
     acc:82.5,crit:12,damageMin:3,damageMax:7,
