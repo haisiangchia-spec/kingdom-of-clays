@@ -649,3 +649,12 @@ Combat regressions now exercise Butcher bleed/stun/knockback, Drummer mark/dodge
 Confirmed GitHub Actions successes include run 43598489504 (Champion AoE and damage), 43598650626 (Hookstalker retreat), 43598707837 (Javelineer starting-rank legality), and 43598822237 (Javelineer recovery). The latest post-retreat ranged attack availability test, commit f4cd30d, is still awaiting a final CI result at the time of this audit entry.
 
 **Outstanding fidelity gaps:** Champion encounter formations and weights are provisional, as are monster AI skill-selection probabilities. Champion attack data has not undergone a complete independent cross-source verification. Veteran encounters, additional original monsters, Champion quest/reward/progression gating, disease rules and dungeon-layout parity remain incomplete. Passing automated tests demonstrates internal consistency, not DD1 gameplay equivalence.
+
+
+## Passes 98–102: Provisional Veteran Warrens implementation
+
+The Blighted Warrens now offers a Veteran expedition tier in the HTML5 dungeon selector. Veteran encounters reuse Apprentice formations and abilities while applying **original, provisional Clays scaling** (30% more HP, +5 Dodge, and +10 to stun, bleed, and blight resistances). These values are placeholders and **must not be cited as original DD1 Veteran monster statistics**. Apprentice encounters retain their original profile stats; Champion support monsters retain their separate Champion profiles and skills. The Crypt rejects Veteran and Champion expeditions rather than silently downgrading their tier.
+
+Veteran generation, tier isolation, and campaign validation are covered by unit tests. The Veteran Playwright test checks selection, save/reload persistence, entering corridor combat, encounter tier, and monster scaling. GitHub Actions run 43601105785 confirmed the unit suite passed; run 43601211481 confirmed the Veteran browser test passed. Additional browser coverage checks that unsupported Veteran Crypt selection preserves a previously completed expedition, and updates the corresponding Champion message assertion; its CI result is tracked separately.
+
+**Required next step for fidelity:** Replace the placeholder Veteran HP/Dodge/resistance model with independently verified tier-specific profiles and skill data. Review Veteran encounter formations and probabilities against source material rather than assuming Apprentice reuse. Keep Veteran balancing labeled provisional until then.
