@@ -381,3 +381,20 @@ The engine already applies the hidden DD1 +5 ACC correction to the skill's nomin
 **Related bug fixed:** The shared secondary-status resistance path previously **subtracted** effect modifiers from the target's baseline resistance. With a -25 Bleed Resist debuff this mistakenly made the target **more** resistant. The application now uses **baseline resistance + signed modifier**; the same correction applies to debuff resistance. A follow-up Shank regression checks that -25 Bleed Resist increases the chance of Bleed.
 
 **Tests:** `tests/outlaw-duelist-abilities.test.js` and `tests/browser/outlaw-duelist-abilities.spec.js` check damage ranges, AoE hits, status modifiers, knockback, retreat and buff. This is an implementation-level ability parity pass, not a full certification of round-by-round game behaviour or animations.
+
+## Pass 21 — Apprentice Bone Arbalist reference encounter (2026-11-14)
+
+**Reference:** [Official DD1 wiki — Bone Arbalist](https://darkestdungeon.wiki.gg/wiki/Bone_Arbalist). This pass uses **Apprentice** difficulty data only, not Veteran Marksman or Champion Sharpshooter values. Kingdom of Clays names the reskin **Crypt Arbalist** and introduces the **Crypt Volley · DD1 Arbalist Reference** encounter (two swordsmen, two independently spawned Arbalists).
+
+**Source-backed profile:** HP 15, DODGE 5%, PROT 0%, SPD 5, Unholy type, Stun 10%, Blight 10%, Bleed 200%, Debuff 15%, Move 25%. Two abilities:
+
+| Clays reskin | Source skill | User ranks (front=1) | Target ranks | ACC | CRIT | DMG | Special |
+| --- | --- | --- | --- | ---: | ---: | --- | --- |
+| Crypt Quarrel | Quarrel | 3–4 | 2–4 | 82.5% | 12% | 3–7 | +25% damage against marked heroes |
+| Crypt Bayonet | Bayonet Jab | 1–2 | 1–2 | 72.5% | 2% | 2–4 | Self back one rank |
+
+The engine's previously audited global hidden +5 accuracy calculation still applies. Quarrel and Bayonet ranks do not overlap, so the Arbalist is forced to use its weaker Bayonet when moved to the front. Self movement resolves even if Bayonet misses. The status and movement behavior are independently exercised in Node.js and Chromium tests.
+
+**Fidelity boundaries:** The reference establishes the Apprentice stats, attack values and forced rank-dependent selection. It does not establish the behaviour of a mixed Clays encounter or the targeting weights among multiple eligible heroes; those are still prototype defaults. The separate `Skeleton Archer` profile and its provisional abilities remain unchanged. Do not apply this Apprentice reference to Veteran or Champion scaling without independent verification.
+
+**Tests:** `tests/crypt-arbalist-reference.test.js` and `tests/browser/crypt-arbalist-reference.spec.js` check profile fields, legal ranks, marked damage, forced bayonet use, post-attack retreat and duplicate independence.
