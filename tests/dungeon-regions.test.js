@@ -578,3 +578,37 @@ test('Champion Hookstalker disease-resistance debuff changes subsequent Wretch i
  assert.equal(exposeHeroToDisease(state,attacker,debuffed,()=>.20,'plague_champion_vomit'),true);
  assert.equal(debuffed.diseases.length,1);
 });
+
+
+test('Champion Drummer mark applies upgraded dodge debuff in combat',()=>{
+ let battle,foe;
+ for(let seed=1;seed<=200;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague','champion');
+  const drummer=b.units.find(u=>u.enemyProfile==='plagueDrummer');
+  if(drummer&&availableTargets(b,drummer.id,'plague_champion_drum_debilitation').length){battle=b;foe=drummer;break;}
+ }
+ assert.ok(foe);
+ const targetId=availableTargets(battle,foe.id,'plague_champion_drum_debilitation')[0];
+ const hero=battle.units.find(u=>u.id===targetId);
+ battle.queue=[foe.id];
+ takeTurn(battle,foe.id,'plague_champion_drum_debilitation',targetId,()=>0);
+ assert.ok(hero.marked>0,'Champion Drummer must mark its target');
+ assert.ok(hero.effects.some(e=>e.modifiers?.dodge===-20),'Champion Drummer must reduce dodge by 20');
+});
+
+test('Champion Hookstalker applies resistance debuffs and retreats in combat',()=>{
+ let battle,foe;
+ for(let seed=1;seed<=200;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague','champion');
+  const slasher=b.units.find(u=>u.enemyProfile==='plagueSlasher');
+  if(slasher&&availableTargets(b,slasher.id,'plague_champion_hook_slash').length){battle=b;foe=slasher;break;}
+ }
+ assert.ok(foe);
+ const targetId=availableTargets(battle,foe.id,'plague_champion_hook_slash')[0];
+ const hero=battle.units.find(u=>u.id===targetId);
+ const originalRank=rank(battle,foe.id);
+ battle.queue=[foe.id];
+ takeTurn(battle,foe.id,'plague_champion_hook_slash',targetId,()=>0);
+ assert.ok(hero.effects.some(e=>e.modifiers?.bleedResist===-30&&e.modifiers?.diseaseResist===-15));
+ assert.ok(rank(battle,foe.id)>=originalRank,'Hookstalker cannot advance when using retreat skill');
+});
