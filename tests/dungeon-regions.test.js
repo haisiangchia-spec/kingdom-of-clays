@@ -409,6 +409,7 @@ test('Champion Warrens support monsters scale without modifying Apprentice or Ja
   assert.equal(foe.resist.bleed,base.bleedResist+20);
   assert.equal(foe.resist.blight,base.blightResist+20);
   assert.equal(foe.tierScaling,'clays-provisional-champion-support');
+  assert.equal(foe.skillDamageBonus,2);
  }
  const skiver=champion.units.find(u=>u.enemyProfile==='plagueSkiver');
  assert.equal(skiver.maxHp,ENEMY_PROFILES.plagueSkiver.stats.hp);
