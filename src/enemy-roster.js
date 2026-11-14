@@ -29,6 +29,12 @@ export const ENEMY_PROFILES=Object.freeze({
     stunResist:10,bleedResist:200,blightResist:10,moveResist:25,debuffResist:15,
     types:['unholy']
   }),skills:['crypt_quarrel','crypt_bayonet']}),
+  // Source: DD1 wiki.gg Swine Slasher, Apprentice; Clays reskin.
+  plagueSlasher:Object.freeze({name:'Blight Hookstalker',stats:Object.freeze({
+    hp:8,spd:5,dodge:7.5,prot:25,dmgMin:3,dmgMax:7,
+    stunResist:10,bleedResist:40,blightResist:40,moveResist:25,debuffResist:15,
+    types:['human','beast']
+  }),skills:['plague_hook_slash']}),
   // Apprentice DD1 Swine Wretch source: 12 HP, 12.5 DODGE, 8 SPD.
   // Disease/stress attack is source-audited; appearance/name are Clays.
   plagueWretch:Object.freeze({name:'Blight Wretch',stats:Object.freeze({
