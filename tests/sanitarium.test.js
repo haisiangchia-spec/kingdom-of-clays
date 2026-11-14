@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
 import {createDungeon} from '../src/dungeon.js';
-import {prepareRosterParty,returnPartyToRoster} from '../src/hero-roster.js';
+import {prepareRosterParty,returnPartyToRoster,recruitHero,selectHero} from '../src/hero-roster.js';
 import {advanceTownWeek,bookStressTreatment} from '../src/town-week.js';
 import {initSanitarium,validateSanitarium,bookSanitarium,sanitariumUnavailable,completeSanitariumWeek,applyQuestTraitRolls,SANITARIUM_COSTS} from '../src/sanitarium.js';
 
@@ -62,7 +62,6 @@ test('trait rolls resolve once per victory, treatment completion advances with t
  s.roster[0].quirks.negative=[{id:'nervous',locked:false}];
  bookSanitarium(s,'r1','negative','nervous');
  // Booked r1 is unavailable; select replacement first.
- const {recruitHero,selectHero}=await import('../src/hero-roster.js');
  const hero=recruitHero(s,'Hunter');
  selectHero(s,0,hero.rosterId);
  const d=createDungeon(222,{party:prepareRosterParty(s)});
