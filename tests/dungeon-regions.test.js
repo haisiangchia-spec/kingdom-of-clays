@@ -393,3 +393,25 @@ test('Champion Warrens dungeon carries tier into generated corridor encounters',
  assert.throws(()=>createDungeon(1,{region:'crypt',tier:'champion'}),/supported only in Blighted Warrens/);
  assert.throws(()=>createDungeon(1,{region:'plague',tier:'veteran'}),/Unknown dungeon tier/);
 });
+
+
+test('Champion Warrens support monsters scale without modifying Apprentice or Javelineer profiles',()=>{
+ const apprentice=makeGeneratedEncounter(1000003,'patrol','plague','apprentice');
+ const champion=makeGeneratedEncounter(1000003,'patrol','plague','champion');
+ const support=champion.units.filter(u=>u.side==='enemy'&&u.enemyProfile!=='plagueSkiver');
+ assert.ok(support.length>0);
+ for(const foe of support){
+  const base=ENEMY_PROFILES[foe.enemyProfile].stats;
+  assert.equal(foe.maxHp,Math.ceil(base.hp*1.5));
+  assert.equal(foe.dmgMin,base.dmgMin+2);
+  assert.equal(foe.dmgMax,base.dmgMax+2);
+  assert.equal(foe.tierScaling,'clays-provisional-champion-support');
+ }
+ const skiver=champion.units.find(u=>u.enemyProfile==='plagueSkiver');
+ assert.equal(skiver.maxHp,ENEMY_PROFILES.plagueSkiver.stats.hp);
+ assert.equal(skiver.tierScaling,undefined);
+ for(const foe of apprentice.units.filter(u=>u.side==='enemy')){
+  assert.equal(foe.maxHp,ENEMY_PROFILES[foe.enemyProfile].stats.hp);
+  assert.equal(foe.tierScaling,undefined);
+ }
+});
