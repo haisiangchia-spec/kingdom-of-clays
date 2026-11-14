@@ -149,3 +149,19 @@ test('Warrens formation validation counts occupied ranks and rejects foreign ene
  assert.equal(validatePlagueFormation(['plagueDrummer','plagueWretch','plagueChopper']),3);
  for(const entries of Object.values(PLAGUE_TEMPLATES))assert.ok(validatePlagueFormation(entries)<=4);
 });
+
+test('all Warrens generated encounters have legal first-turn enemy actions across seeds and difficulties',()=>{
+ for(const difficulty of ['scout','patrol','gauntlet']){
+  for(let seed=1;seed<=100;seed++){
+   const battle=makeGeneratedEncounter(seed,difficulty,'plague');
+   const foes=battle.units.filter(unit=>unit.side==='enemy'&&!unit.dead);
+   assert.equal(foes.length,battle.encounterPlan.profiles.length);
+   for(const foe of foes){
+    const legal=foe.enemySkills.filter(id=>availableTargets(battle,foe.id,id).length>0);
+    assert.ok(legal.length>0,difficulty+' seed '+seed+' stranded '+foe.enemyProfile);
+    const choice=chooseEnemyAction(battle,foe.id);
+    assert.ok(choice,difficulty+' seed '+seed+' AI failed for '+foe.enemyProfile);
+   }
+  }
+ }
+});
