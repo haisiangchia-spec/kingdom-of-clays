@@ -26,6 +26,7 @@ test('Sanitarium unlocks at week four; original DD1 apprentice pricing and one w
 test('one week cures illness or removes negative quirk; locked traits cost more',()=>{
  const s=town();s.gold=30000;
  s.roster[0].quirks.negative.push({id:'nervous',locked:true});
+ s.roster[0].unit.stress=40;
  s.roster[1].diseases=['creepingCough'];
  bookSanitarium(s,'r1','negative','nervous');
  bookSanitarium(s,'r2','disease','creepingCough');
