@@ -550,3 +550,24 @@ Costs multiply by the level being purchased (second level ×2, third ×3). No up
 **Fidelity boundary:** The current trait subset (**Sturdy**, **Eagle Eye**, **Nervous**, **Slow Reflexes**, **Creeping Cough**, **Ashen Fever**) is an authored Clays prototype set; no combat stat modifiers or monster disease-infliction mechanics have yet been wired. Trait roll odds (20% positive, 20% negative, 10% disease), deterministic choice, the small trait pool, simplistic slot overflow, absence of chronic negative-quirk locking and no secondary disease-removal chance are **not certified DD1 equivalents**. Higher-level cost scaling, cost-reduction/Patient Cells upgrades, extra Sanitarium wards, quirks earned from curios, and DD1 disease interactions remain for later passes.
 
 **Regression:** `tests/sanitarium.test.js` checks week-four unlock, source-backed prices, ward occupancy, disease/quirk treatment, lock status and save migrations; `tests/browser/sanitarium.spec.js` checks real browser bookings, persistence across reloads, recovery after a town week and treatment restrictions.
+
+## Pass 33 — Trait stat effects, crypt disease exposure and negative quirk reinforcement (2026-11-14)
+
+**Scope:** `src/trait-effects.js` implements a first set of **combat-effective** numeric modifications for permanent positive/negative quirks and diseases already stored on the roster. Effects are applied to temporary expedition units when the party embarks, propagate through actual combat formulas (accuracy, speed/initiative, dodge, resistances, maximum HP), and are precisely **reversed on roster return**. Existing HP loss, stress and permanent disease lists remain; no permanent stacking of temporary bonuses occurs between expeditions, and Guild max-HP modifiers are still independently reversed. Diseases newly contracted mid-expedition immediately update combat stats and are synced to the permanent hero after the expedition. The source-audited combat lab encounters never receive additional disease rolls.
+
+| Clays trait | Initial gameplay effect | Fidelity status |
+| --- | --- | --- |
+| Sturdy | +2 maximum and current HP | Provisional |
+| Eagle Eye | +5 accuracy | Provisional |
+| Nervous | −2 speed | Provisional |
+| Slow Reflexes | −5 dodge | Provisional |
+| Creeping Cough | −2 speed | Provisional |
+| Ashen Fever | −5 accuracy, −10 bleed resistance | Provisional |
+
+**Disease transmission:** In roster-led dungeon battles only, each damaging hit from a `cryptDefender` or `cryptArbalist` rolls an additional **8%** disease-exposure check. The disease is selected with the combat RNG and is prevented if already present or the three-disease cap is reached. Such rolls use the saved combat RNG cursor, preserving deterministic replay and in-progress save/reload behaviour. Neither the chosen source monsters nor the specific 8% odds are intended as DD1 canon; source-accurate disease-applying skills and monsters remain to be modelled.
+
+**Negative quirk reinforcement:** After a victorious expedition, the existing seeded trait-roll path may select a negative quirk already present. A repeated quirk is now **locked** rather than added twice, requiring the Sanitarium's more expensive locked-negative removal. This is a deliberately simplified stand-in for DD1's negative-quirk reinforcement and is idempotent on replay/reload.
+
+**Non-combat boundaries:** Full original DD1 quirks, conditional modifiers, disease transfer and cure odds, trait rarity, disease-inflicting enemy skills, and exactly sourced numerical effects are not yet implemented. The six current traits remain Kingdom of Clays prototypes; the stat values above must not be cited as the original game's effects. Expansion to the 17-class roster and higher-difficulty disease interaction requires further audit.
+
+**Coverage:** `tests/trait-effects.test.js` and `tests/browser/trait-effects.spec.js` cover cumulative individual stat modifiers, repeated expedition returns without numerical drift, immediate crypt disease exposure and later persistence, disease cap/duplicate guards, negative-quirk reinforcement, and save/reload compatibility. The original combat reference tests remain unchanged.
