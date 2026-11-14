@@ -897,7 +897,7 @@ test('Every configured Veteran Warrens formation spawns combat-ready enemies',()
    const units=plan.profiles;
    assert.ok(units.length>=3&&units.length<=4);
    assert.ok(units.every(id=>Object.hasOwn(ENEMY_PROFILES,id)));
-   assert.equal(plan.slots.length,units.length);
+   assert.equal(plan.slots,units.reduce((sum,id)=>sum+(ENEMY_PROFILES[id].stats.size??1),0));
    for(let seed=1;seed<=20;seed++){
     const battle=makeGeneratedEncounter(seed*1009,difficulty,'plague','veteran');
     for(const foe of battle.units.filter(u=>u.side==='enemy')){
