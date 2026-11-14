@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chooseEnemyAction,bossPhase} from '../src/enemy-ai.js';
 import {makeBattle,makeLargeMonsterBattle,makeGeneratedEncounter,rank,ABILITIES,availableTargets,rng} from '../src/engine.js';
+import {moveWithinFormation} from '../src/formation.js';
 
 test('enemy decision selects skill uniformly before target, not over all skill-target pairs',()=>{
  const state={};
@@ -138,4 +139,26 @@ test('Javelineer AI honours skill preferences without selecting illegal ranks',(
   counts[picked.key]=(counts[picked.key]??0)+1;
  }
  assert.ok((counts.plague_skiver_cripple??0)>(counts.plague_skiver_roast??0),'Volley should be favoured over Javelin at rear ranks');
+});
+
+
+test('Champion Javelineer AI rechecks legal skills after forced front-rank displacement',()=>{
+ let exercised=0;
+ for(let seed=1;seed<=200;seed++){
+  const battle=makeGeneratedEncounter(seed*1000003,'gauntlet','plague','champion');
+  const foe=battle.units.find(u=>u.enemyProfile==='plagueSkiver');
+  if(!foe)continue;
+  moveWithinFormation(battle,foe.id,-4);
+  assert.equal(rank(battle,foe.id),0);
+  const legal=foe.enemySkills.filter(id=>availableTargets(battle,foe.id,id).length);
+  assert.ok(legal.length,'Front-rank Javelineer must retain a legal move');
+  for(let choice=0;choice<5;choice++){
+   const action=chooseEnemyAction(battle,foe.id,foe.enemySkills,()=>choice/5,ABILITIES,availableTargets);
+   assert.ok(action,'AI must return an action');
+   assert.ok(legal.includes(action.key),'AI selected an illegal front-rank skill');
+   assert.ok(availableTargets(battle,foe.id,action.key).includes(action.targetId));
+  }
+  exercised++;
+ }
+ assert.ok(exercised>0);
 });
