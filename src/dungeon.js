@@ -265,6 +265,8 @@ export function resolveDungeonBattle(dungeon){
      // Distinct source-specific rewards; all provisional Clays amounts.
      const drops={
        'room:watch':['crest',3],
+       'corridor:gallery-watch':['bust',3],
+       'corridor:gallery-vault':['bust',3],
        'room:vault':['gem',2],
        'corridor:watch-sanctum':['deed',2],
        'corridor:vault-sanctum':['deed',2]
