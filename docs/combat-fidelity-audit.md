@@ -658,3 +658,12 @@ The Blighted Warrens now offers a Veteran expedition tier in the HTML5 dungeon s
 Veteran generation, tier isolation, and campaign validation are covered by unit tests. The Veteran Playwright test checks selection, save/reload persistence, entering corridor combat, encounter tier, and monster scaling. GitHub Actions run 43601105785 confirmed the unit suite passed; run 43601211481 confirmed the Veteran browser test passed. Additional browser coverage checks that unsupported Veteran Crypt selection preserves a previously completed expedition, and updates the corresponding Champion message assertion; its CI result is tracked separately.
 
 **Required next step for fidelity:** Replace the placeholder Veteran HP/Dodge/resistance model with independently verified tier-specific profiles and skill data. Review Veteran encounter formations and probabilities against source material rather than assuming Apprentice reuse. Keep Veteran balancing labeled provisional until then.
+
+
+## Passes 103–108: Veteran attack isolation and combat verification
+
+Veteran Plague Butcher and War Drummer now use dedicated Veteran skill IDs rather than reusing Apprentice attacks. Their Veteran **statistics** are encoded separately from their attacks; the current Veteran attack parameters (accuracy, damage, bleed, stun, mark, stress and debuff magnitudes) are provisional and must not be represented as source-verified DD1 numbers. Veteran Wretch and Hookstalker still use provisional HP/Dodge/resistance scaling and Apprentice attacks.
+
+Combat tests execute Veteran Cleave bleed and healing reduction, Weakening Rhythm marking and Dodge reduction, Spiked Chain stun/knockback, and Doombeat group damage/stress. The initial bleed test failed because it inspected the wrong hero property; the combat engine stores bleed in the `dot` array. Corrected test passed in GitHub Actions run 43601705886. Subsequent combined combat and remaining support-monster CI runs were pending when this entry was written. The older Veteran loadout assertion was also updated to expect distinct Veteran attacks.
+
+**Next verification:** Confirm combined CI, verify all provisional skill numbers against primary/authoritative references, and replace Wretch/Hookstalker placeholder Veteran profiles. Avoid claiming overall DD1 parity while these gaps remain.
