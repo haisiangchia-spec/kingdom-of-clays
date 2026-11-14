@@ -2,6 +2,12 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Weekly Stage Coach and stress recovery (Milestone 31)
+
+Between dungeon expeditions, a **weekly Stage Coach** shows a small number of deterministic recruit candidates. Recruiting one costs no gold but removes the offer until the next week; the player cannot freely pick an unlimited class outside the displayed candidates. Each completed expedition advances the week once, refreshing available recruits. The current eight-hero roster cap still applies.
+
+The town also has an **Abbey Cloister** and **Tavern Bar**, each providing one paid treatment slot per week. The source-backed base Apprentice treatment costs **1,000 gold**, relieves **45 stress** after a full expedition week, and holds its hero out of the next party. Other idle non-deployed heroes recover **5 stress** each week. Weekly reservations, offers and the town week survive save/reload. Stage Coach class odds, additional services and side effects, room expansion, unlock timing and caretaker restrictions are not yet source-complete. See `docs/combat-fidelity-audit.md` Pass 31.
+
 ## Persistent hero roster and resurrection (Milestone 30)
 
 The expedition now uses a **persistent four-hero party chosen from an eight-slot roster**. Named hero records survive quest completion, defeat and browser reloads; each hero retains HP, stress, class, equipment, and Resolve XP/level, and dead heroes cannot embark. Stage Coach-style recruits of the four currently implemented classes are free (as in DD1), with duplicates permitted. A short Apprentice victory grants 2 Resolve XP and uses the standard DD1 level thresholds. After an expedition, the town interface can recruit, select/replace heroes in combat ranks, equip/unequip a stored Ward Charm, and permanently dismiss heroes to free a full roster slot. Dismissed dead heroes are listed in the graveyard and cannot return.
