@@ -56,7 +56,7 @@ test('Abbey and Tavern booking deduct DD1 apprentice base costs and forbid doubl
  bookStressTreatment(s,'r2','tavern');
  assert.equal(s.gold,0);
  assert.throws(()=>bookStressTreatment(s,'r3','abbey'),/room is occupied/);
- assert.throws(()=>prepareRosterParty(s),/Hero receiving stress treatment/);
+ assert.throws(()=>prepareRosterParty(s),/Hero receiving treatment/);
  assert.throws(()=>selectHero(s,2,'r1'),/Hero is unavailable/);
 });
 test('treatment recovers exactly one town week later, idle heroes shed five stress, expedition heroes do not',()=>{
@@ -109,7 +109,7 @@ test('pending treatment and available recruits remain identical after save reloa
  const before=structuredClone(s.town);
  const saved=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
  assert.deepEqual(saved.town,before);
- assert.throws(()=>prepareRosterParty(saved),/Hero receiving stress treatment/);
+ assert.throws(()=>prepareRosterParty(saved),/Hero receiving treatment/);
  const offer=saved.town.offers[0];
  const fresh=recruitFromCoach(saved,offer.offerId);
  selectHero(saved,0,fresh.rosterId);
