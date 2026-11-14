@@ -182,3 +182,26 @@ test('Champion Javelineer can recover from front rank using Goring Retreat',()=>
  }
  assert.ok(recovered>0,'A seeded Champion encounter must allow Javelineer retreat');
 });
+
+
+test('Champion Javelineer regains rear-rank attacks after Goring Retreat',()=>{
+ let regained=0;
+ for(let seed=1;seed<=200;seed++){
+  const battle=makeGeneratedEncounter(seed*1000003,'gauntlet','plague','champion');
+  const foe=battle.units.find(u=>u.enemyProfile==='plagueSkiver');
+  if(!foe)continue;
+  moveWithinFormation(battle,foe.id,-4);
+  assert.equal(rank(battle,foe.id),0);
+  assert.equal(availableTargets(battle,foe.id,'plague_skiver_roast').length,0);
+  assert.equal(availableTargets(battle,foe.id,'plague_skiver_cripple').length,0);
+  const retreatTargets=availableTargets(battle,foe.id,'plague_skiver_flight');
+  if(!retreatTargets.length)continue;
+  battle.queue=[foe.id];
+  takeTurn(battle,foe.id,'plague_skiver_flight',retreatTargets[0],()=>0);
+  if(rank(battle,foe.id)<1)continue;
+  assert.ok(availableTargets(battle,foe.id,'plague_skiver_roast').length,'Impaling Javelin must become legal after retreat');
+  assert.ok(availableTargets(battle,foe.id,'plague_skiver_cripple').length,'Crippling Volley must become legal after retreat');
+  regained++;
+ }
+ assert.ok(regained>0,'At least one seeded encounter must recover rear-rank attacks');
+});
