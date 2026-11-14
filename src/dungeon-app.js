@@ -1,4 +1,4 @@
-import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,DUNGEON_ROOMS,useProvision,torchBand} from './dungeon.js';
+import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
 
@@ -19,7 +19,7 @@ const el=(tag,text,container,action)=>{
 };
 function startExpedition(){
  const seed=(Math.floor(Math.random()*0xffffffff)>>>0)||1;
- expedition=createDungeon(seed,{difficulty:'scout'});
+ expedition=createDungeon(seed,{difficulty:'scout',interactiveEvents:true});
  random=rng(seed^0x9e3779b9);
  preparedId=null;chosenSkill=null;
  render();
@@ -79,23 +79,59 @@ function render(){
    marker.className=id===expedition.room?'here':expedition.visited.includes(id)?'seen':'';
    if(expedition.cleared.includes(id))marker.textContent+=' ✓';
  }
+ const decisions=$('dungeon-decisions');decisions.replaceChildren();
+ if(expedition.phase==='explore'&&expedition.pendingHunger){
+   el('p','Hunger! Feed the party four rations or go without (-3 HP and +15 stress per hero).',decisions);
+   const feed=el('button','Eat four food',decisions,()=>{
+     try{resolveHunger(expedition,'eat');}catch(error){expedition.log.push(error.message);}render();
+   });
+   feed.disabled=expedition.supplies.food<4;
+   el('button','Go hungry',decisions,()=>{resolveHunger(expedition,'skip');render();});
+ }
+ if(expedition.phase==='explore'&&!expedition.pendingHunger&&!expedition.pendingTravel&&DUNGEON_CURIOS[expedition.room]&&!expedition.curiosUsed.includes(expedition.room)){
+   el('p','Curio: '+DUNGEON_CURIOS[expedition.room].name,decisions);
+   for(const [action,label] of [['leave','Leave untouched'],['touch','Inspect without provision'],['purify','Use holy water (safe reward)']]){
+     const btn=el('button',label,decisions,()=>{
+       try{interactCurio(expedition,action);}catch(error){expedition.log.push(error.message);}render();
+     });
+     if(action==='purify')btn.disabled=expedition.curioSupplies.holyWater===0;
+   }
+ }
  const travel=$('dungeon-travel');travel.replaceChildren();
  if(expedition.phase==='explore'){
    if(expedition.pendingTravel){
      const trip=expedition.pendingTravel;
      el('p',`Corridor: ${DUNGEON_ROOMS[trip.to].name}, step ${trip.progress}/${trip.steps}`,travel);
-     el('button','Advance corridor',travel,()=>{advanceCorridor(expedition);syncCombat();render();});
-   }else{
+     const record=expedition.corridors[trip.corridor];
+     if(trip.progress===0&&record?.trapRevealed&&!record.hazardChecked){
+       el('p','Scouted trap ahead — choose a hero to disarm it.',decisions);
+       for(const hero of expedition.party.filter(u=>!u.dead)){
+         el('button','Disarm with '+hero.name,decisions,()=>{
+           try{disarmTrap(expedition,hero.id);}catch(error){expedition.log.push(error.message);}render();
+         });
+       }
+     }
+     const advance=el('button','Advance corridor',travel,()=>{advanceCorridor(expedition);syncCombat();render();});
+     advance.disabled=!!expedition.pendingHunger;
+   }else if(!expedition.pendingHunger){
      for(const adjacent of adjacentRooms(expedition)){
+       const record=expedition.corridors[adjacent.corridor];
        el('button','Travel to '+DUNGEON_ROOMS[adjacent.room].name,travel,()=>{
          beginCorridor(expedition,adjacent.room);render();
        });
+       if(!record?.scouted){
+         el('button','Scout '+DUNGEON_ROOMS[adjacent.room].name,travel,()=>{
+           try{scoutCorridor(expedition,adjacent.room);}catch(error){expedition.log.push(error.message);}render();
+         });
+       }else{
+         el('p',`Scouted ${adjacent.corridor}: ${record.encounterRevealed?'foes likely':'no enemy signs'}${record.trapRevealed?', trap detected':''}`,travel);
+       }
      }
    }
  }else if(expedition.phase==='combat')el('p','Combat blocks further exploration',travel);
  else el('p',expedition.phase==='victory'?'The Sanctum has been secured.':'The expedition has fallen.',travel);
  const supplies=$('dungeon-supplies');supplies.replaceChildren();
- el('p',`Torches: ${expedition.supplies.torch} · Food: ${expedition.supplies.food}`,supplies);
+ el('p',`Torches: ${expedition.supplies.torch} · Food: ${expedition.supplies.food} · Holy water: ${expedition.curioSupplies.holyWater} · Loot: ${expedition.loot}`,supplies);
  if(expedition.phase==='explore'){
    const torchButton=el('button','Light torch (+25)',supplies,()=>{
      try{useProvision(expedition,'torch');}catch(error){expedition.log.push(error.message);}
