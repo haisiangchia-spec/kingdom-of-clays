@@ -94,7 +94,11 @@ export function spawnEncounterPlan(unitFactory,plan){
     plagueWretch:['plague_champion_vomit'],
     plagueSlasher:['plague_champion_hook_slash']
    };
-   enemy.enemySkills=verifiedChampion?[...championSkills[profileId]]:[...profile.skills];
+   const veteranSkills={
+    plagueChopper:['plague_veteran_butcher_cut','plague_veteran_ball_chain'],
+    plagueDrummer:['plague_veteran_drum_doom','plague_veteran_drum_debilitation']
+   };
+   enemy.enemySkills=verifiedChampion?[...championSkills[profileId]]:verifiedVeteran?[...veteranSkills[profileId]]:[...profile.skills];
    return enemy;
  });
 }
