@@ -251,7 +251,7 @@ test('Champion Warrens generator includes Skiver while Apprentice never does',()
    const champion=makeGeneratedEncounter(seed*1000003,difficulty,'plague','champion');
    assert.equal(champion.encounterPlan.tier,'champion');
    assert.ok(champion.units.some(u=>u.enemyProfile==='plagueSkiver'));
-   assert.equal(champion.encounterPlan.slots,3);
+   assert.ok([3,4].includes(champion.encounterPlan.slots),'Champion formations may occupy three or four ranks');
    const apprentice=makeGeneratedEncounter(seed*1000003,difficulty,'plague');
    assert.ok(!apprentice.units.some(u=>u.enemyProfile==='plagueSkiver'));
   }
@@ -271,7 +271,8 @@ test('Champion Javelineer attacks, advances, and retreats using combat engine',(
  assert.ok(targets.length>0);
  b.queue=[foe.id];
  takeTurn(b,foe.id,'plague_skiver_flight',targets[0],()=>.5);
- assert.equal(rank(b,foe.id),2,'retreat should reach back of three-monster formation');
+ const rearRank=b.encounterPlan.slots-1;
+ assert.equal(rank(b,foe.id),rearRank,'retreat should reach back of generated formation');
  assert.equal(foe.actionsTaken,1);
  // Reuse the battle with a fresh action slot to validate the ranged javelin.
  foe.acted=false;
@@ -279,7 +280,7 @@ test('Champion Javelineer attacks, advances, and retreats using combat engine',(
  targets=availableTargets(b,foe.id,'plague_skiver_roast');
  assert.ok(targets.length>0);
  takeTurn(b,foe.id,'plague_skiver_roast',targets[0],()=>.5);
- assert.equal(rank(b,foe.id),1,'javelin should advance one rank');
+ assert.equal(rank(b,foe.id),rearRank-1,'javelin should advance one rank');
 });
 test('Champion Javelineer Crippling Volley applies damage and blight to rear heroes',()=>{
  const b=makeGeneratedEncounter(2000006,'patrol','plague','champion');
