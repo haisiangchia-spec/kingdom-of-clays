@@ -2,6 +2,16 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Blighted Warrens and expanded Swine enemy roster (Milestone 35)
+
+The [Dungeon Expedition](./dungeon.html) now lets you choose **Ashen Crypt** (the default existing area) or **Blighted Warrens** for each new quest. The selected region persists after reloading an active expedition, and applies to corridor and room encounters. The new Warrens region has seeded scout, patrol and gauntlet encounter compositions featuring three DD1 Apprentice monster references under original Clays names:
+
+- **Plague Butcher** (Swine Chopper): front-line bleeding Butcher's Cleave and rear-targeting Stun/Knockback Spiked Chain
+- **Plague War Drummer** (Swine Drummer): four-target, 70%-chance +5 stress Doombeat; a one-damage Weakening Rhythm that Marks and reduces Dodge
+- **Blight Wretch** (Swine Wretch): the source-backed disease-bearing Vomit attack introduced in Pass 34
+
+Base Apprentice enemy stats, abilities and resistances follow DD1 sources, while the **region spawn probabilities, formation weights and threat values are provisional Clays design**. The existing Crypt region and reference combat lab retain their previous defaults; no graphical biome/map overhaul is claimed. New Node and Chromium tests cover both regions, reskinned skill legality, AI selection, live combat, and saved region selection. See `docs/combat-fidelity-audit.md` Pass 35.
+
 ## Sanitarium upgrades and explicit disease attacks (Milestone 34)
 
 The **Sanitarium** now supports DD1's **Treatment Library**, **Medical Devices**, and **Patient Cells** upgrades, purchased with Bust and Crest heirlooms. Treatment Library provides up to five 10% quirk discounts; Medical Devices supplies three disease-price reductions across five upgrades and a provisional chance to cure an additional illness; Patient Cells raises capacity from one to three quirk and medical patients. Four source-backed patient-cell levels and their Bust/Crest upgrade costs are covered by tests. Busts are now collectable in selected dungeon corridor rewards and persist across saves.
