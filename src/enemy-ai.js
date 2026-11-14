@@ -3,7 +3,7 @@
 // Select a legal skill first, then a target independently. This avoids giving
 // four-target skills four times the selection chance of single-target skills.
 const PROFILES=Object.freeze({
-  'Skeleton Swordsman':Object.freeze({targetDesires:Object.freeze([{type:'marked',weight:4}])}),
+  'Skeleton Swordsman':Object.freeze({targetDesires:Object.freeze([{type:'marked',weight:4}]),skillDesires:Object.freeze([{type:'ally_dead',skill:'skeleton_guard_break',allyProfile:'mage',weight:3}])}),
   'Skeleton Archer':Object.freeze({targetPreference:'rear',targetDesires:Object.freeze([{type:'resistance',stat:'debuff',direction:'low',weight:2,skills:['skeleton_pin_arrow']}])}),
   'Skeleton Court Mage':Object.freeze({skillWeights:Object.freeze({court_curse:3,court_blight:1,enemy_stress:3,enemy_strike:1}),targetPreference:'stressed'}),
   'Goblin Emperor':Object.freeze({
@@ -43,6 +43,34 @@ export function targetDesireWeight(unit,skillKey,desires=[]){
  return weight;
 }
 
+// DD1 monster brains describe conditional SKILL desires as well as target
+// desires. These multipliers are Clays approximations, not vanilla weights.
+// A desire can affect only an already-legal action and never grants new ranks.
+export function skillDesireWeight(state,actor,skillKey,legalTargets,desires=[]){
+ let weight=1;
+ for(const desire of desires??[]){
+   if(desire.skill!==skillKey||!Number.isFinite(desire.weight)||desire.weight<=0)continue;
+   const units=state?.units??[];
+   const allies=units.filter(u=>u.side===actor?.side&&u.id!==actor?.id&&!u.corpse);
+   let matches=false;
+   if(desire.type==='ally_alive')matches=allies.some(u=>!u.dead&&u.enemyProfile===desire.allyProfile);
+   if(desire.type==='ally_dead')matches=!allies.some(u=>!u.dead&&u.enemyProfile===desire.allyProfile);
+   if(desire.type==='target_status'){
+     matches=legalTargets.some(id=>{
+       const target=units.find(u=>u.id===id);
+       if(!target||target.dead||target.corpse)return false;
+       if(desire.status==='marked')return target.marked>0;
+       if(desire.status==='stunned')return target.stun>0;
+       if(desire.status==='bleed'||desire.status==='blight')return target.dot?.some(d=>d.type===desire.status&&d.turns>0);
+       return false;
+     });
+   }
+   if(desire.type==='performing_turn')matches=(actor?.actionsTaken??0)+1===desire.turn;
+   if(matches)weight*=desire.weight;
+ }
+ return weight;
+}
+
 function weightedChoice(items,weightFor,random){
   const weighted=items.map(item=>({item,weight:weightFor(item)}))
     .filter(x=>Number.isFinite(x.weight)&&x.weight>0);
@@ -60,7 +88,8 @@ export function chooseEnemyAction(state,actorId,skillIds,random,abilities,availa
     const skill=abilities[key];
     if(!skill)continue;
     const targets=availableTargets(state,actorId,key);
-    const weight=profile.phaseWeights?.[bossPhase(actor)]?.[key]??profile.skillWeights?.[key]??skill.aiWeight??1;
+    const baseWeight=profile.phaseWeights?.[bossPhase(actor)]?.[key]??profile.skillWeights?.[key]??skill.aiWeight??1;
+    const weight=baseWeight*skillDesireWeight(state,actor,key,targets,profile.skillDesires);
     if(!targets.length||!Number.isFinite(weight)||weight<=0)continue;
     choices.push({key,targets,weight});
   }
