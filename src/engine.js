@@ -86,6 +86,16 @@ function finishActionSlot(state,actor,skipRemaining=false){
  }
 }
 export function currentActor(s){while(s.queue.length){const u=s.units.find(x=>x.id===s.queue[0]);if(u&&!u.dead&&!u.acted)return u;s.queue.shift();}return null;}
+// An actor unable to use any legal skill forfeits its remaining action slots.
+// This uses the same finalization path as a stunned turn: no extra start-of-turn
+// DOT tick, and timed status effects expire once, even for multi-action bosses.
+export function passActorTurn(state,actorId){
+ const actor=currentActor(state);
+ if(!actor||actor.id!==actorId)throw Error('Not this actor’s turn');
+ finishActionSlot(state,actor,true);
+ state.log.push(`${actor.name} passes`);
+ return state;
+}
 export function stress(state,u,amount,r){
  if(u.dead||amount<=0)return;
  amount=Math.round(amount*effectiveCombatStats(u).stressMultiplier*(1-clamp(effectModifier(u,'stressResist'),0,90)/100));
