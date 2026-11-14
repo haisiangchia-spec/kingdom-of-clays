@@ -108,8 +108,12 @@ export function applyQuestTraitRolls(settlement,expedition){
     hero.quirks.positive.push({id,locked:false});
   }else if(roll<40){
    const id=negative[r%negative.length];
-   if(!hero.quirks.negative.some(q=>q.id===id)&&hero.quirks.negative.length<5)
-    hero.quirks.negative.push({id,locked:false});
+   const existing=hero.quirks.negative.find(q=>q.id===id);
+   if(existing){
+    // Simplified, source-inspired negative quirk reinforcement: a repeated
+    // trait turns permanent. The recurrence rate is a Clays fixture.
+    existing.locked=true;
+   }else if(hero.quirks.negative.length<5)hero.quirks.negative.push({id,locked:false});
   }else if(roll<50){
    const id=diseases[r%diseases.length];
    if(!hero.diseases.includes(id)&&hero.diseases.length<3)hero.diseases.push(id);
