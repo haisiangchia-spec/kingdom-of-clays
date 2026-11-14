@@ -4,6 +4,7 @@ import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
 import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
 import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket} from './hero-roster.js';
+import {TREATMENTS,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
 
 const $=id=>document.getElementById(id);
 const HERO_SKILLS={
@@ -115,6 +116,9 @@ function render(){
  if(['victory','defeat'].includes(expedition.phase)&&!expedition.rosterReturned){
   try{returnPartyToRoster(settlement,expedition);}catch(e){expedition.log.push('Roster transfer failed: '+e.message);}
  }
+ if(['victory','defeat'].includes(expedition.phase)&&expedition.rosterReturned&&!expedition.townWeekProcessed){
+  try{advanceTownWeek(settlement,expedition);}catch(e){expedition.log.push('Town week failed: '+e.message);}
+ }
  $('dungeon-status').textContent=`${DUNGEON_ROOMS[expedition.room].name} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
  const map=$('dungeon-rooms');map.replaceChildren();
  for(const [id,room] of Object.entries(DUNGEON_ROOMS)){
@@ -141,9 +145,19 @@ function render(){
  const roster=$('hero-roster');roster.replaceChildren();
  const townAvailable=['victory','defeat'].includes(expedition.phase);
  el('p',`Heroes: ${settlement.roster.length}/${ROSTER_CAPACITY} · Recruitment ${RECRUITMENT_COST} gold · Resurrection ${RESURRECTION_COST} gold (Temple Lv 1)`,roster);
+ el('p',`Town Week ${settlement.town.week} · Stage Coach candidates: ${settlement.town.offers.length} · Treatment rooms: ${settlement.town.treatments.length}/2`,roster);
+ if(townAvailable){
+  for(const offer of settlement.town.offers){
+   const btn=el('button','Recruit '+offer.heroClass+' · '+offer.offerId,roster,()=>{
+    try{recruitFromCoach(settlement,offer.offerId);}catch(e){expedition.log.push(e.message);}render();
+   });
+   btn.disabled=settlement.roster.length>=ROSTER_CAPACITY;
+  }
+ }
+
  for(const h of settlement.roster){
   const u=h.unit;
-  const row=el('div',`${h.name} [${h.rosterId}] · ${h.heroClass} Lv ${h.level} · ${u.dead?'FALLEN':u.hp+'/'+u.maxHp+' HP'} · ${u.stress} stress${h.equippedTrinket?' · Ward Charm':''}`,roster);
+  const row=el('div',`${h.name} [${h.rosterId}] · ${h.heroClass} Lv ${h.level} · ${u.dead?'FALLEN':u.hp+'/'+u.maxHp+' HP'} · ${u.stress} stress${townUnavailable(settlement,h.rosterId)?' · IN TREATMENT':''}${h.equippedTrinket?' · Ward Charm':''}`,roster);
   row.className='dungeon-unit';
   if(u.dead){
    const revive=el('button','Resurrect '+h.name,row,()=>{
@@ -153,10 +167,10 @@ function render(){
    revive.disabled=!townAvailable||settlement.facilities.temple<1||settlement.gold<RESURRECTION_COST;
   }else if(h.equippedTrinket){
    const remove=el('button','Unequip charm',row,()=>{try{unequipTrinket(settlement,h.rosterId);}catch(e){expedition.log.push(e.message);}render();});
-   remove.disabled=!townAvailable;
+   remove.disabled=!townAvailable||townUnavailable(settlement,h.rosterId);
   }else{
    const equip=el('button','Equip charm',row,()=>{try{equipTrinket(settlement,h.rosterId);}catch(e){expedition.log.push(e.message);}render();});
-   equip.disabled=!townAvailable||!settlement.trinkets.includes('ward-charm');
+   equip.disabled=!townAvailable||townUnavailable(settlement,h.rosterId)||!settlement.trinkets.includes('ward-charm');
   }
   if(townAvailable){
    const dismiss=el('button','Dismiss permanently '+h.name,row,()=>{
@@ -164,6 +178,15 @@ function render(){
     render();
    });
    dismiss.title='Irreversibly remove this hero and free a roster slot';
+   dismiss.disabled=townUnavailable(settlement,h.rosterId);
+   if(!u.dead&&u.stress>0&&!townUnavailable(settlement,h.rosterId)){
+    for(const [service,rule] of Object.entries(TREATMENTS)){
+     const book=el('button',`Treat at ${rule.name} · ${rule.gold} gold`,row,()=>{
+      try{bookStressTreatment(settlement,h.rosterId,service);}catch(e){expedition.log.push(e.message);}render();
+     });
+     book.disabled=settlement.gold<rule.gold||settlement.town.treatments.some(t=>t.service===service);
+    }
+   }
   }
  }
  if(settlement.graveyard?.length)el('p','Graveyard: '+settlement.graveyard.map(h=>h.name).join(', '),roster);
@@ -173,7 +196,7 @@ function render(){
    const row=el('div','Rank '+(i+1)+': ',roster);row.className='dungeon-unit';
    const select=el('select',null,row);
    if(settlement.squad[rank]===null){const empty=el('option','Select an available hero',select);empty.value='';}
-   for(const h of settlement.roster.filter(h=>!h.unit.dead&&(settlement.squad[rank]===h.rosterId||!settlement.squad.includes(h.rosterId)))){
+   for(const h of settlement.roster.filter(h=>!h.unit.dead&&!townUnavailable(settlement,h.rosterId)&&(settlement.squad[rank]===h.rosterId||!settlement.squad.includes(h.rosterId)))){
     const option=el('option',h.name+' ('+h.heroClass+')',select);
     option.value=h.rosterId;
    }
@@ -183,13 +206,6 @@ function render(){
     try{selectHero(settlement,rank,select.value);}catch(e){expedition.log.push(e.message);}
     render();
    });
-  }
-  for(const className of HERO_CLASSES){
-   const recruit=el('button','Recruit '+className,roster,()=>{
-    try{recruitHero(settlement,className);}catch(e){expedition.log.push(e.message);}
-    render();
-   });
-   recruit.disabled=settlement.gold<RECRUITMENT_COST||settlement.roster.length>=ROSTER_CAPACITY;
   }
  }
  const save=$('campaign-save-status');
