@@ -2,6 +2,10 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Expedition inventory and loot (Milestone 27)
+
+The [Dungeon Expedition](./dungeon.html) now shows a shared **8-slot** backpack for food (stacks of 4), torches (2), holy water (1), and gold (100). Curio rewards and 50-gold provisional rewards from completed non-final encounters are offered as treasure: **collect**, **leave behind**, or **discard a carried stack** to make room. Gold merges into partial stacks first; a full backpack never partially collects a reward. Travel is blocked until pending treasure is resolved. Discarded provisions immediately update their usable supplies. Capacities, drop quantities and valuations are **original Clays prototype settings**, not yet confirmed DD1 data. The combat and expedition economy remain separate from the future settlement layer.
+
 ## Expedition scouting, hunger and curios (Milestone 26)
 
 In [Dungeon Expedition](./dungeon.html), players can scout adjacent corridors (spending 2 torchlight) to reveal seeded enemy and trap risks, attempt to disarm discovered traps with a chosen hero, and respond to hunger after every four completed corridor steps by spending four food or taking HP/stress penalties. The Gallery and Vault contain one-time curios that can be left, examined at risk or safely purified with a limited holy-water provision. Encounter/curio outcomes and supplies persist across the expedition. These probabilities, rewards, thresholds and light costs are **original Clays provisional choices**, not verified DD1 values. See `docs/combat-fidelity-audit.md` Pass 26.
