@@ -16,6 +16,8 @@ export const PLAGUE_TEMPLATES=Object.freeze({
  plagueChampionGuard:Object.freeze(['plagueSlasher','plagueDrummer','plagueSkiver']),
  plagueChampionAmbush:Object.freeze(['plagueWretch','plagueSlasher','plagueSkiver']),
  plagueChampionEscort:Object.freeze(['plagueDrummer','plagueChopper','plagueSkiver']),
+ // Four-slot Champion variant; Clays-provisional composition, not a DD1 spawn weight.
+ plagueChampionFullPatrol:Object.freeze(['plagueChopper','plagueSlasher','plagueWretch','plagueSkiver']),
  plagueAmbush:Object.freeze(['plagueChopper','plagueWretch','plagueWretch','plagueDrummer'])
 });
 export const PLAGUE_TABLES=Object.freeze({
@@ -24,9 +26,9 @@ export const PLAGUE_TABLES=Object.freeze({
  gauntlet:Object.freeze([{id:'plagueRaid',weight:4},{id:'plagueMarch',weight:3},{id:'plagueAmbush',weight:3},{id:'plagueHookRaid',weight:3},{id:'plagueHookPack',weight:2}])
 });
 export const PLAGUE_CHAMPION_TABLES=Object.freeze({
- scout:Object.freeze([{id:'plagueChampionSkirmish',weight:3},{id:'plagueChampionGuard',weight:2},{id:'plagueChampionEscort',weight:1}]),
- patrol:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:3},{id:'plagueChampionEscort',weight:2},{id:'plagueChampionAmbush',weight:1}]),
- gauntlet:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:4},{id:'plagueChampionAmbush',weight:3},{id:'plagueChampionEscort',weight:2}])
+ scout:Object.freeze([{id:'plagueChampionSkirmish',weight:3},{id:'plagueChampionGuard',weight:2},{id:'plagueChampionEscort',weight:1},{id:'plagueChampionFullPatrol',weight:1}]),
+ patrol:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:3},{id:'plagueChampionEscort',weight:2},{id:'plagueChampionAmbush',weight:1},{id:'plagueChampionFullPatrol',weight:2}]),
+ gauntlet:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:4},{id:'plagueChampionAmbush',weight:3},{id:'plagueChampionEscort',weight:2},{id:'plagueChampionFullPatrol',weight:3}])
 });
 export const PLAGUE_THREAT=Object.freeze({plagueChopper:3,plagueWretch:2,plagueDrummer:2,plagueSlasher:2,plagueSkiver:5});
 export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random,tier='apprentice'){
