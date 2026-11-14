@@ -123,3 +123,19 @@ test('Javelineer AI chooses only legal rank-dependent attacks',()=>{
   assert.ok(availableTargets(battle,foe.id,picked.key).includes(picked.targetId));
  }
 });
+
+test('Javelineer AI honours skill preferences without selecting illegal ranks',()=>{
+ const battle=makeGeneratedEncounter(2000006,'patrol','plague','champion');
+ const foe=battle.units.find(u=>u.enemyProfile==='plagueSkiver');
+ assert.ok(foe);
+ const legal=foe.enemySkills.filter(key=>availableTargets(battle,foe.id,key).length);
+ assert.ok(legal.includes('plague_skiver_roast'));
+ assert.ok(legal.includes('plague_skiver_cripple'));
+ const counts={};
+ for(let n=0;n<100;n++){
+  const picked=chooseEnemyAction(battle,foe.id,foe.enemySkills,()=>((n+.5)/100),ABILITIES,availableTargets);
+  assert.ok(picked);
+  counts[picked.key]=(counts[picked.key]??0)+1;
+ }
+ assert.ok((counts.plague_skiver_cripple??0)>(counts.plague_skiver_roast??0),'Volley should be favoured over Javelin at rear ranks');
+});
