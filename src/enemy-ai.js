@@ -5,12 +5,12 @@
 const PROFILES=Object.freeze({
   'Skeleton Swordsman':Object.freeze({targetDesires:Object.freeze([{type:'marked',weight:4}]),skillDesires:Object.freeze([{type:'ally_dead',skill:'skeleton_guard_break',allyProfile:'mage',weight:3}])}),
   'Skeleton Archer':Object.freeze({targetPreference:'rear',targetDesires:Object.freeze([{type:'resistance',stat:'debuff',direction:'low',weight:2,skills:['skeleton_pin_arrow']}])}),
-  'Skeleton Court Mage':Object.freeze({skillWeights:Object.freeze({court_curse:3,court_blight:1,enemy_stress:3,enemy_strike:1}),targetPreference:'stressed'}),
+  'Skeleton Court Mage':Object.freeze({skillWeights:Object.freeze({court_curse:3,court_blight:1,enemy_stress:3,enemy_strike:1}),targetPreference:'stressed',skillDesires:Object.freeze([{type:'target_status',skill:'court_curse',status:'blight',weight:2}])}),
   'Goblin Emperor':Object.freeze({
     phaseWeights:Object.freeze({
       commanding:Object.freeze({emperor_slam:1,emperor_roar:3,emperor_call:0}),
       desperate:Object.freeze({emperor_slam:4,emperor_roar:1,emperor_call:3})
-    }),targetPreference:'weakest'
+    }),targetPreference:'weakest',skillDesires:Object.freeze([{type:'performing_turn',skill:'emperor_slam',turn:2,weight:1.5}])
   })
 });
 export const ENEMY_TACTICS=PROFILES;
