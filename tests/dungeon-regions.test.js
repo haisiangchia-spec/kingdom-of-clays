@@ -368,3 +368,10 @@ test('Champion encounter selection is reproducible for identical seeds',()=>{
   }
  }
 });
+
+test('Champion tier is explicitly restricted to the implemented Warrens region',()=>{
+ assert.throws(()=>makeGeneratedEncounter(1,'patrol','crypt','champion'),/supported only for Blighted Warrens/);
+ assert.throws(()=>makeGeneratedEncounter(1,'patrol','unknown','champion'),/supported only for Blighted Warrens/);
+ assert.ok(makeGeneratedEncounter(1,'patrol','crypt').encounterPlan);
+ assert.equal(makeGeneratedEncounter(1,'patrol','plague','champion').encounterPlan.tier,'champion');
+});
