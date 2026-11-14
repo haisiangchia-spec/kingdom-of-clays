@@ -63,11 +63,12 @@ test('surviving heroes earn one experience on victory; Guild HP does not become 
  returnPartyToRoster(s,first);
  assert.equal(s.roster[0].unit.maxHp,33);
  assert.equal(s.roster[0].unit.hp,28);
- assert.equal(s.roster[0].xp,1);
+ assert.equal(s.roster[0].xp,2);
+ assert.equal(s.roster[0].level,1);
  const second=createDungeon(903,{party:prepareRosterParty(s,bonuses),bonuses});
  second.phase='victory';returnPartyToRoster(s,second);
  assert.equal(s.roster[0].level,1);
- assert.equal(s.roster[0].xp,2);
+ assert.equal(s.roster[0].xp,4);
  assert.equal(s.roster[0].unit.maxHp,33);
 });
 test('Temple resurrection is a priced user-approved exception to permanent death',()=>{
@@ -119,5 +120,5 @@ test('reward claims and roster return are separately idempotent',()=>{
  assert.equal(returnPartyToRoster(s,d),false);
  claimExpeditionRewards(d,s);
  assert.throws(()=>claimExpeditionRewards(d,s),/already been claimed/);
- assert.equal(s.roster[0].xp,1);
+ assert.equal(s.roster[0].xp,2);
 });
