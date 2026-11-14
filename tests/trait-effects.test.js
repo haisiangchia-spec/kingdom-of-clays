@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
-import {createDungeon,dungeonBattle,beginCorridor,advanceCorridor} from '../src/dungeon.js';
+import {createDungeon,dungeonBattle,beginCorridor,advanceCorridor,resolveDungeonBattle} from '../src/dungeon.js';
 import {prepareRosterParty,returnPartyToRoster} from '../src/hero-roster.js';
 import {traitBonus,applyTraitBonus,reverseTraitBonus,exposeHeroToDisease,DISEASE_EXPOSURE_CHANCE} from '../src/trait-effects.js';
 import {applyQuestTraitRolls} from '../src/sanitarium.js';
@@ -58,7 +58,6 @@ test('seeded disease exposure works only in roster-led dungeons and survives ros
  assert.equal(hero.spd,s.roster[0].unit.spd-2);
  assert.equal(exposeHeroToDisease(b,crypt,hero,()=>0),false);
  for(const foe of b.units.filter(u=>u.side==='enemy'))foe.dead=true;
- const {resolveDungeonBattle}=await import('../src/dungeon.js');
  resolveDungeonBattle(d);d.phase='victory';
  returnPartyToRoster(s,d);
  assert.deepEqual(s.roster[0].diseases,['creepingCough']);
