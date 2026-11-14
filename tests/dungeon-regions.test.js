@@ -59,7 +59,7 @@ test('source-backed Doombeat targets all living heroes for optional stress and 1
  assert.deepEqual(availableTargets(b,drum.id,'plague_drum_doom').length,1);
  const hp=b.units.filter(u=>u.side==='hero').map(u=>u.hp);
  // Hit, no crit, minimum damage, stress chance passes; repeat as needed
- takeTurn(b,drum.id,'plague_drum_doom','h1',()=>0);
+ takeTurn(b,drum.id,'plague_drum_doom','h1',()=>.5);
  const heroes=b.units.filter(u=>u.side==='hero');
  heroes.forEach((u,i)=>{assert.ok(u.hp<hp[i]);assert.equal(u.stress,5);});
 });
@@ -68,7 +68,7 @@ test('Drummer weakens and marks a chosen hero; its mark attack deals one damage'
  const drum=b.units.find(u=>u.enemyProfile==='plagueDrummer');
  const h=b.units.find(u=>u.id==='h2'),before=h.hp;
  b.queue=[drum.id];
- takeTurn(b,drum.id,'plague_drum_debilitation','h2',()=>0);
+ takeTurn(b,drum.id,'plague_drum_debilitation','h2',()=>.5);
  assert.equal(h.hp,before-1);
  assert.equal(h.marked,3);
  assert.ok(h.effects.some(e=>e.modifiers?.dodge===-10));
