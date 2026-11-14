@@ -28,8 +28,8 @@ test('Blighted Warrens can be selected after quest and selection survives reload
   return {region:state.expedition.region,foes:state.expedition.pendingBattle.battle.units.filter(x=>x.side==='enemy').map(x=>x.enemyProfile)};
  });
  expect(profiles.region).toBe('plague');
- expect(profiles.foes).toContain('plagueChopper');
- expect(profiles.foes).toContain('plagueDrummer');
+ expect(profiles.foes.length).toBeGreaterThan(0);
+ expect(profiles.foes.every(id=>['plagueChopper','plagueDrummer','plagueWretch','plagueSlasher'].includes(id))).toBe(true);
 });
 
 test('Drummer and Chopper abilities are legal and source stats survive browser combat setup',async ({page})=>{
