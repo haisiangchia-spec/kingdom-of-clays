@@ -1,6 +1,6 @@
 // Initial Clays dungeon traversal scaffold. Room layout, event odds, and
 // travel costs are original fixtures: not yet verified DD1 dungeon rules.
-import {makeGeneratedEncounter,rng,status} from './engine.js';
+import {makeGeneratedEncounter,makeUndeadEncounter,rng,status} from './engine.js';
 import {offerLoot,collectLoot,leaveLoot} from './inventory.js';
 
 export const DUNGEON_ROOMS=Object.freeze({
@@ -191,7 +191,7 @@ export function beginCorridor(dungeon,to){
 }
 function startBattle(dungeon,source,difficulty){
  const seed=encounterSeed(dungeon.seed,source+'|'+dungeon.battleSerial++);
- const battle=makeGeneratedEncounter(seed,difficulty);
+ const battle=source==='room:vault'?makeUndeadEncounter(seed,'blightWretch'):makeGeneratedEncounter(seed,difficulty);
  battle.expeditionEncounter=true; // guards extra disease rolls outside the combat lab
  const enemyUnits=battle.units.filter(u=>u.side==='enemy');
  battle.units=[...dungeon.party.map(copy),...enemyUnits];
