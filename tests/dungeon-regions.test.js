@@ -422,8 +422,12 @@ test('Champion Warrens support monsters scale without modifying Apprentice or Ja
 
 
 test('Champion fixed-range attacks deal their provisional bonus in actual combat',()=>{
- const boosted=makeGeneratedEncounter(1000003,'patrol','plague','champion');
- const actor=boosted.units.find(u=>u.enemyProfile==='plagueSlasher');
+ let boosted,actor;
+ for(let seed=1;seed<=200;seed++){
+  const candidate=makeGeneratedEncounter(seed*1000003,'patrol','plague','champion');
+  const hookstalker=candidate.units.find(u=>u.enemyProfile==='plagueSlasher');
+  if(hookstalker&&availableTargets(candidate,hookstalker.id,'plague_hook_slash').length){boosted=candidate;actor=hookstalker;break;}
+ }
  assert.ok(actor,'test seed must provide a Hookstalker');
  const baseline=structuredClone(boosted);
  const ordinary=baseline.units.find(u=>u.id===actor.id);
