@@ -165,15 +165,16 @@ function encounterSeed(seed,key){
  for(let i=0;i<key.length;i++)h=Math.imul(h^key.charCodeAt(i),16777619)>>>0;
  return h||1;
 }
-export function createDungeon(seed=1,{difficulty='scout',interactiveEvents=false,bonuses={},party:rosterParty=null}={}){
+export function createDungeon(seed=1,{difficulty='scout',region='crypt',interactiveEvents=false,bonuses={},party:rosterParty=null}={}){
  if(!['scout','patrol','gauntlet'].includes(difficulty))throw Error('Unknown dungeon difficulty');
- const party=rosterParty?rosterParty.map(copy):makeGeneratedEncounter(seed,difficulty).units.filter(u=>u.side==='hero').map(copy);
+ if(!['crypt','plague'].includes(region))throw Error('Unknown dungeon region');
+ const party=rosterParty?rosterParty.map(copy):makeGeneratedEncounter(seed,difficulty,region).units.filter(u=>u.side==='hero').map(copy);
  if(party.length!==4||party.some((u,i)=>u.id!=='h'+(i+1)||u.dead))throw Error('Expedition needs four living ranked heroes');
  const bonusHp=Math.max(0,Math.min(6,Math.trunc(bonuses.heroHp??0)));
  if(!rosterParty)for(const hero of party){hero.maxHp+=bonusHp;hero.hp+=bonusHp;} // roster party already includes Guild bonus
  const bonusFood=Math.max(0,Math.min(6,Math.trunc(bonuses.food??0)));
  const hungerStressReduction=Math.max(0,Math.min(6,Math.trunc(bonuses.hungerStressReduction??0)));
- return {seed,difficulty,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood},hungerStressReduction,
+ return {seed,difficulty,region,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood},hungerStressReduction,
   pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,inventory:[],pendingLoot:null,battleSerial:0,phase:'explore',log:['Entered the Crypt Entrance']};
 }
 export function adjacentRooms(dungeon){
@@ -191,7 +192,7 @@ export function beginCorridor(dungeon,to){
 }
 function startBattle(dungeon,source,difficulty){
  const seed=encounterSeed(dungeon.seed,source+'|'+dungeon.battleSerial++);
- const battle=source==='room:vault'?makeUndeadEncounter(seed,'blightWretch'):makeGeneratedEncounter(seed,difficulty);
+ const battle=dungeon.region==='plague'?makeGeneratedEncounter(seed,difficulty,'plague'):(source==='room:vault'?makeUndeadEncounter(seed,'blightWretch'):makeGeneratedEncounter(seed,difficulty));
  battle.expeditionEncounter=true; // guards extra disease rolls outside the combat lab
  const enemyUnits=battle.units.filter(u=>u.side==='enemy');
  battle.units=[...dungeon.party.map(copy),...enemyUnits];
