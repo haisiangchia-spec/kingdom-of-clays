@@ -617,3 +617,15 @@ Costs multiply by the level being purchased (second level ×2, third ×3). No up
 **Browser regression:** The Warrens travel selector now uses the region-specific Fungal Passage label; the previous stale Ashen Gallery selector caused a Chromium CI failure. The correction passed GitHub Actions (commit a8f658b). The regional exploration regression passed on commit 401e8b0. Later test commits require independent CI confirmation.
 
 **Remaining fidelity work:** Source-audit more Warrens enemies and original monster-brain decisions; replace provisional encounter weights, curio tables, trap probabilities, and layout with independently verified DD1 rules. Do not conflate green regression tests with original-game rules fidelity.
+
+## Passes 52–66: Champion Warrens tier and expedition integration
+
+**Champion scope:** Champion encounters are implemented only for Blighted Warrens. Crypt remains Apprentice-only, and Veteran is not implemented. The Champion Blight Javelineer (Skiver analogue) has a 49 HP, 9 SPD, 15% PROT profile and three skills: Impaling Javelin, Crippling Volley, and Goring Retreat. The Javelineer's skill preferences (3:4:2), target preference, encounter threat (5), and Champion encounter table weights are **provisional Clays approximations**, not DD1 source-verified AI or spawn frequencies.
+
+**Encounter scope:** Four Champion Warrens formations (Skirmish, Guard, Ambush, Escort) use three single-slot monsters each and include the Javelineer. This is not a complete DD1 Champion Warrens monster pool, rank distribution, or original dungeon composition model. The tier is independent of the existing scout/patrol/gauntlet encounter-difficulty labels.
+
+**Campaign integration:** The expedition API accepts `tier:'champion'` for Warrens, carries that value into generated room/corridor battles, and saves the tier with the expedition. The dungeon page has an Apprentice/Champion selector, locked during active expeditions and restored on reload. Unsupported Crypt Champion and unknown tier requests are rejected rather than silently downgraded. Old saves lacking tier default to Apprentice at encounter generation and in the UI.
+
+**Verification:** Deterministic seed replay, encounter weight boundaries, monster action legality, Champion-only formation selection, and secondary skill effects have unit coverage. Chromium browser coverage selects Champion, reloads the saved expedition, enters corridor combat, and checks the Javelineer is present. The latest confirmed successful CI run is 43580421102 (commit 4cdae226); it establishes regression-test health, **not full DD1 fidelity**.
+
+**Next fidelity gaps:** Audit original Champion monster skill probabilities and conditions, expand the Champion and Veteran rosters using verified data, differentiate dungeon layouts/quests, and validate original progression gating and tier reward scaling before claiming parity.
