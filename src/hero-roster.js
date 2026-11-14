@@ -3,6 +3,7 @@
 // not validated DD1 roster/economy values. Resurrection is a deliberate
 // user-approved departure from ordinary DD1 permadeath.
 import {makeBattle} from './engine.js';
+import {ensureTraits,sanitariumUnavailable} from './sanitarium.js';
 
 export const ROSTER_CAPACITY=8;
 export const RECRUITMENT_COST=0; // DD1 base Stage Coach recruits are free
@@ -55,6 +56,7 @@ export function recruitHero(settlement,className){
  if(!integer(settlement.gold)||settlement.gold<RECRUITMENT_COST)throw Error('Insufficient gold to recruit');
  const hero={rosterId:'r'+settlement.nextHeroId,name:className+' '+settlement.nextHeroId,
    heroClass:className,level:0,xp:0,equippedTrinket:null,unit:template(className)};
+ ensureTraits(hero);
  settlement.roster.push(hero);settlement.nextHeroId++;
  settlement.gold-=RECRUITMENT_COST;
  return hero;
@@ -63,7 +65,7 @@ export function dismissHero(settlement,rosterId){
  checkRoster(settlement);
  const index=settlement.roster.findIndex(h=>h.rosterId===rosterId);
  if(index<0)throw Error('Unknown hero');
- if(settlement.town?.treatments?.some(t=>t.rosterId===rosterId))throw Error('Hero is receiving treatment');
+ if(settlement.town?.treatments?.some(t=>t.rosterId===rosterId)||sanitariumUnavailable(settlement,rosterId))throw Error('Hero is receiving treatment');
  const [hero]=settlement.roster.splice(index,1);
  for(let i=0;i<settlement.squad.length;i++)if(settlement.squad[i]===rosterId)settlement.squad[i]=null;
  settlement.graveyard??=[];
@@ -77,7 +79,7 @@ export function selectHero(settlement,position,rosterId){
  checkRoster(settlement);
  if(!integer(position)||position>3)throw Error('Invalid party rank');
  const hero=settlement.roster.find(h=>h.rosterId===rosterId);
- if(!hero||hero.unit.dead||settlement.town?.treatments?.some(t=>t.rosterId===rosterId))throw Error('Hero is unavailable');
+ if(!hero||hero.unit.dead||settlement.town?.treatments?.some(t=>t.rosterId===rosterId)||sanitariumUnavailable(settlement,rosterId))throw Error('Hero is unavailable');
  const existing=settlement.squad.indexOf(rosterId);
  if(existing>=0&&existing!==position)throw Error('Hero is already selected');
  settlement.squad[position]=rosterId;
@@ -88,7 +90,7 @@ export function availableParty(settlement){
  checkRoster(settlement);
  const squad=settlement.squad.map(id=>settlement.roster.find(h=>h.rosterId===id));
  if(squad.some(h=>!h||h.unit.dead))throw Error('Replace dead heroes before starting expedition');
- if(squad.some(h=>settlement.town?.treatments?.some(t=>t.rosterId===h.rosterId)))throw Error('Hero receiving stress treatment cannot embark');
+ if(squad.some(h=>settlement.town?.treatments?.some(t=>t.rosterId===h.rosterId)||sanitariumUnavailable(settlement,h.rosterId)))throw Error('Hero receiving treatment cannot embark');
  return squad;
 }
 export function prepareRosterParty(settlement,bonuses={}){
