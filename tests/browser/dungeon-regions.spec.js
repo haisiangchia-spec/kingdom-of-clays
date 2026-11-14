@@ -113,3 +113,34 @@ test('Hookstalker is encounter-reachable and its retreating strike has legal tar
  expect(data.retreat).toBe(1);
  expect(data.from).toEqual([0,1,2,3]);
 });
+
+test('Champion Warrens expedition selection persists and generates Champion combat',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const {createDungeon}=await import('./src/dungeon.js');
+  const s=createCampaignSettlement();
+  const d=createDungeon(763);d.phase='victory';d.rosterReturned=true;d.townWeekProcessed=true;d.rewardClaimed=true;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(s,d));
+ });
+ await page.reload();
+ await page.locator('#dungeon-region').selectOption('plague');
+ await page.locator('#dungeon-tier').selectOption('champion');
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-tier')).toBeDisabled();
+ await expect(page.locator('#dungeon-tier')).toHaveValue('champion');
+ await page.reload();
+ await expect(page.locator('#dungeon-tier')).toHaveValue('champion');
+ await page.getByRole('button',{name:'Travel to Fungal Passage'}).click();
+ await page.getByRole('button',{name:'Advance corridor'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+ const saved=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {tier:expedition.tier,battleTier:expedition.pendingBattle?.battle?.encounterPlan?.tier,
+   foes:expedition.pendingBattle?.battle?.units.filter(u=>u.side==='enemy').map(u=>u.enemyProfile)};
+ });
+ expect(saved.tier).toBe('champion');
+ expect(saved.battleTier).toBe('champion');
+ expect(saved.foes).toContain('plagueSkiver');
+});
