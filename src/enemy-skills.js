@@ -38,6 +38,10 @@ export const ENEMY_SKILLS=Object.freeze({
   plague_drum_debilitation:{name:'Weakening Rhythm',from:[0,1,2,3],to:[0,1,2,3],
     kind:'mark',acc:82.5,crit:6,damageMin:1,damageMax:1,mod:0,markTurns:3,
     debuff:{chance:100,turns:3,modifiers:{dodge:-10}}},
+  // DD1 Apprentice Swine Slasher, Hook Where It Hurts (wiki.gg):
+  // all launch ranks, targets 1–3, ACC 82.5, CRIT 16, DMG 3–7, back 1.
+  plague_hook_slash:{name:'Hookstalker Strike',from:[0,1,2,3],to:[0,1,2],
+    acc:82.5,crit:16,damageMin:3,damageMax:7,selfBack:1},
   // Source-checked Apprentice Swine Chopper (DD1).
   plague_butcher_cut:{name:"Butcher's Cleave",from:[0,1],to:[0,1,2],
     acc:82.5,crit:12,damageMin:3,damageMax:7,
