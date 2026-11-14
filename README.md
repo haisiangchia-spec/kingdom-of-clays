@@ -2,6 +2,16 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Persistent settlement and facilities (Milestone 29)
+
+[Dungeon Expedition](./dungeon.html) now autosaves the **active expedition and the settlement** to versioned browser-local storage, restoring rooms, party HP/stress, supplies, pending decisions, combat, resources and purchased upgrades after a reload. Completing an expedition and transferring its reward fills the treasury and records crests, deeds and trinkets; each reward transfer may occur only once. Settlement upgrades become available after the expedition ends:
+
+- **Market:** 100 gold + 1 Crest at level 1; +2 starting food per tier
+- **Guild:** 125 gold + 1 Deed at level 1; +2 starting HP per hero per tier
+- **Temple:** 150 gold + 1 Crest + 1 Deed at level 1; reduce skipped-hunger stress by 2 per tier
+
+Tier costs scale with purchase level up to level 3. Upgrades affect **new expeditions**, not the current one. This is local-browser persistence (not a cloud account or cross-device save); clearing browser site data erases it. Facility costs, benefits and upgrade tiers are provisional Clays rules rather than original DD1 values. See `docs/combat-fidelity-audit.md` Pass 29.
+
 ## Gems, heirlooms, trinkets and settlement rewards (Milestone 28)
 
 Completed room and corridor encounters can now offer mixed valuables: gold, Moonstone gems, Crests and Deeds; purifying the Vault curio yields a Ward Charm trinket. Gems, heirlooms and charms occupy the shared inventory slots and use their own stack capacities. On a victorious expedition, **Return rewards to settlement** transfers carried gold and gem sale value into a settlement treasury and records Crests, Deeds and trinkets separately. Rewards can only be claimed once. The settlement currently persists for the current page session, not across reloads. The quantities and economy are original Clays prototypes, not yet sourced DD1 item rules. See `docs/combat-fidelity-audit.md` Pass 28.
