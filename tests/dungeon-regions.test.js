@@ -176,20 +176,25 @@ test('Apprentice Blight Hookstalker matches source-verified Swine Slasher stats 
  assert.ok(Object.values(PLAGUE_TEMPLATES).some(ids=>ids.includes('plagueSlasher')));
 });
 
-test('Hookstalker Strike executes a legal attack and retreats one rank when space exists',()=>{
+test('Hookstalker Strike executes and retreats exactly one rank from the front',()=>{
  let verified=false;
  for(let seed=1;seed<=300&&!verified;seed++){
-  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague');
-  const foe=b.units.find(u=>u.enemyProfile==='plagueSlasher');
-  if(!foe||rank(b,foe.id)>=3)continue;
-  const targets=availableTargets(b,foe.id,'plague_hook_slash');
-  if(!targets.length)continue;
-  const before=rank(b,foe.id);
-  b.queue=[foe.id];
-  takeTurn(b,foe.id,'plague_hook_slash',targets[0],()=>.5);
+  const battle=makeGeneratedEncounter(seed*1000003,'patrol','plague');
+  const foe=battle.units.find(u=>u.enemyProfile==='plagueSlasher');
+  if(!foe)continue;
+  // Force the Hookstalker to the front so the one-rank retreat is unambiguous.
+  const enemyIndices=battle.units.flatMap((u,i)=>u.side==='enemy'?[i]:[]);
+  const foeIndex=battle.units.indexOf(foe);
+  const firstIndex=enemyIndices[0];
+  [battle.units[firstIndex],battle.units[foeIndex]]=[battle.units[foeIndex],battle.units[firstIndex]];
+  assert.equal(rank(battle,foe.id),0);
+  const targets=availableTargets(battle,foe.id,'plague_hook_slash');
+  assert.ok(targets.length>0);
+  battle.queue=[foe.id];
+  takeTurn(battle,foe.id,'plague_hook_slash',targets[0],()=>.5);
   assert.equal(foe.actionsTaken,1);
-  assert.ok(rank(b,foe.id)>=before,'retreat must never move forward');
+  assert.equal(rank(battle,foe.id),1,'Hookstalker must retreat exactly one rank');
   verified=true;
  }
- assert.ok(verified,'Hookstalker attack must execute in a generated Warrens formation');
+ assert.ok(verified,'Hookstalker must appear in seeded Warrens encounters');
 });
