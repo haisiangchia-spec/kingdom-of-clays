@@ -547,9 +547,13 @@ test('Champion Warrens support attack tables match official wiki values',()=>{
 
 
 test('Champion Wretch Vomit is eligible for expedition disease transmission',()=>{
- const b=makeGeneratedEncounter(1000003,'patrol','plague','champion');
- const foe=b.units.find(u=>u.enemyProfile==='plagueWretch');
- if(!foe)return; // Other seeded encounters are covered by the Champion formation suite.
+ let b,foe;
+ for(let seed=1;seed<=200;seed++){
+  const candidate=makeGeneratedEncounter(seed*1000003,'patrol','plague','champion');
+  const wretch=candidate.units.find(u=>u.enemyProfile==='plagueWretch');
+  if(wretch&&availableTargets(candidate,wretch.id,'plague_champion_vomit').length){b=candidate;foe=wretch;break;}
+ }
+ assert.ok(foe,'Champion Wretch encounter must be generated');
  const targetId=availableTargets(b,foe.id,'plague_champion_vomit')[0];
  assert.ok(targetId);
  const hero=b.units.find(u=>u.id===targetId);
