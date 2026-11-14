@@ -678,3 +678,21 @@ Combat tests execute Veteran Cleave bleed and healing reduction, Weakening Rhyth
 **Remaining fidelity gaps:** The Butcher and Drummer Veteran attack parameters were estimated and remain provisional, even though the attacks function correctly. The Veteran Wretch/Hookstalker numeric data should be cross-checked against authoritative tables before treating the full skill implementation as definitively source-verified. Veteran encounter formations currently reuse Apprentice template weights, and the dungeon/campaign systems remain incomplete relative to DD1. Combat regression success demonstrates internal consistency, **not** complete DD1 fidelity.
 
 **Next implementation milestone:** Audit Veteran encounter formations and attack values against DD1 references, then expand dungeon regions only after confirming the encounter-generation contract and test coverage.
+
+
+## Pass 116: Veteran encounter formation/weight audit snapshot
+
+GitHub Actions run **43627017185** passed the deterministic 36,000-encounter distribution regression. This validates weighted sampling against the configured tables, **not** whether those tables reproduce DD1 encounter frequencies.
+
+The Veteran table is deliberately isolated in `PLAGUE_VETERAN_TABLES` but currently duplicates the Apprentice weights:
+
+| Formation ID | Composition (front to back in current template order) | Scout | Patrol | Gauntlet |
+|---|---|---:|---:|---:|
+| `plagueScouts` | Chopper, Wretch, Drummer | 5 | 2 | — |
+| `plagueRaid` | Chopper, Chopper, Wretch, Drummer | 2 | 5 | 4 |
+| `plagueMarch` | Chopper, Chopper, Drummer, Drummer | — | 2 | 3 |
+| `plagueAmbush` | Chopper, Wretch, Wretch, Drummer | — | — | 3 |
+| `plagueHookRaid` | Chopper, Hookstalker, Wretch, Drummer | 2 | 2 | 3 |
+| `plagueHookPack` | Hookstalker, Hookstalker, Wretch, Drummer | 1 | 1 | 2 |
+
+Totals: Scout **10**, Patrol **12**, Gauntlet **15** weight units. These are **Clays-designed gameplay distributions**, not authenticated DD1 formation tables. There is currently no cited primary data source in the repository proving DD1's exact Veteran Warrens formations or encounter-selection probabilities. Therefore no weight has been reclassified as verified. A future change must supply a versioned source, identify the corresponding in-game encounter category, and update formation tests and the distribution audit together.
