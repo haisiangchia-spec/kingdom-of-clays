@@ -22,22 +22,22 @@ test('recruiting a duplicate class and selecting a new party persists through re
   localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(s,d));
  });
  await page.reload();
- await page.getByRole('button',{name:'Recruit Hunter'}).click();
+ await page.getByRole('button',{name:/Recruit Swordsman · w2-o1/}).click();
  await expect(page.locator('#hero-roster')).toContainText('Heroes: 5/8');
- await expect(page.locator('#hero-roster')).toContainText('Hunter 5 [r5]');
+ await expect(page.locator('#hero-roster')).toContainText('Swordsman 5 [r5]');
  const first=page.locator('#hero-roster select').first();
  await first.selectOption('r5');
  await page.reload();
  await expect(page.locator('#hero-roster select').first()).toHaveValue('r5');
  await page.getByRole('button',{name:'New expedition'}).click();
  await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
- await expect(page.locator('#dungeon-party')).toContainText('Hunter 5');
+ await expect(page.locator('#dungeon-party')).toContainText('Swordsman 5');
  const details=await page.evaluate(async ()=>{
   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const state=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
   return {rosterId:state.expedition.party[0].rosterId,combatId:state.expedition.party[0].id,heroClass:state.expedition.party[0].heroClass};
  });
- expect(details).toEqual({rosterId:'r5',combatId:'h1',heroClass:'Hunter'});
+ expect(details).toEqual({rosterId:'r5',combatId:'h1',heroClass:'Swordsman'});
 });
 
 test('Temple resurrection and trinket equipment keep spend and hero states through reload',async ({page})=>{
@@ -100,7 +100,7 @@ test('full roster with a dead hero can dismiss, recruit and fill vacant party ra
  await page.getByRole('button',{name:'Dismiss permanently Swordsman'}).click();
  await expect(page.locator('#hero-roster')).toContainText('Heroes: 7/8');
  await expect(page.locator('#hero-roster')).toContainText('Graveyard: Swordsman');
- await page.getByRole('button',{name:'Recruit Priest'}).click();
+ await page.getByRole('button',{name:/Recruit Priest · w2-o2/}).click();
  await expect(page.locator('#hero-roster')).toContainText('Heroes: 8/8');
  await page.locator('#hero-roster select').first().selectOption('r9');
  await page.getByRole('button',{name:'New expedition'}).click();
