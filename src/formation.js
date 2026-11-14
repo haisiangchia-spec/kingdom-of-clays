@@ -79,7 +79,10 @@ export function corpseFromEnemy(enemy,round){
   enemy.corpse=true;enemy.dead=false;
   enemy.hp=Math.max(1,Math.ceil(enemy.maxHp*.5));
   enemy.maxHp=enemy.hp;enemy.prot=0;enemy.dodge=0;
-  enemy.dot=[];enemy.guard=null;enemy.riposte=0;
+  // DD1 corpses have their own resistances, regardless of the defeated monster:
+  // no bleed/blight protection, but immunity to displacement, stun and debuffs.
+  enemy.resist={...enemy.resist,bleed:0,blight:0,move:200,stun:200,debuff:200};
+  enemy.dot=[];enemy.effects=[];enemy.guard=null;enemy.riposte=0;
   enemy.expiresRound=round+4;
   // Size is intentionally unchanged: a large creature leaves a large obstacle.
   return true;
