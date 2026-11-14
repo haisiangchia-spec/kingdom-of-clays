@@ -885,3 +885,28 @@ test('Veteran Warrens weighted encounters reproduce configured frequencies witho
   }
  }
 });
+
+
+test('Every configured Veteran Warrens formation spawns combat-ready enemies',()=>{
+ for(const difficulty of ['scout','patrol','gauntlet']){
+  const entries=PLAGUE_VETERAN_TABLES[difficulty];
+  const total=entries.reduce((n,e)=>n+e.weight,0);
+  let offset=0;
+  for(const entry of entries){
+   const plan=createPlagueEncounterPlan(difficulty,()=>(offset+entry.weight/2)/total,'veteran');
+   const units=plan.profiles;
+   assert.ok(units.length>=3&&units.length<=4);
+   assert.ok(units.every(id=>Object.hasOwn(ENEMY_PROFILES,id)));
+   assert.equal(plan.slots.length,units.length);
+   for(let seed=1;seed<=20;seed++){
+    const battle=makeGeneratedEncounter(seed*1009,difficulty,'plague','veteran');
+    for(const foe of battle.units.filter(u=>u.side==='enemy')){
+     assert.ok(foe.enemySkills.length>0);
+     assert.ok(foe.enemySkills.some(skill=>availableTargets(battle,foe.id,skill).length>0),
+      `${difficulty}/${entry.id}: ${foe.enemyProfile} has no legal attack`);
+    }
+   }
+   offset+=entry.weight;
+  }
+ }
+});
