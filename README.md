@@ -2,6 +2,16 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Sanitarium upgrades and explicit disease attacks (Milestone 34)
+
+The **Sanitarium** now supports DD1's **Treatment Library**, **Medical Devices**, and **Patient Cells** upgrades, purchased with Bust and Crest heirlooms. Treatment Library provides up to five 10% quirk discounts; Medical Devices supplies three disease-price reductions across five upgrades and a provisional chance to cure an additional illness; Patient Cells raises capacity from one to three quirk and medical patients. Four source-backed patient-cell levels and their Bust/Crest upgrade costs are covered by tests. Busts are now collectable in selected dungeon corridor rewards and persist across saves.
+
+Two conditional quirks follow their DD1 source: **Early Riser** grants +2 speed when torchlight exceeds 75, while **Nocturnal** imposes −2 speed at that threshold. Their bonuses are calculated at initiative, not permanently saved on the hero.
+
+The **Blight Wretch**, a reskinned Apprentice DD1 Swine Wretch, now guards the Vault room. Its `Blight Vomit` attack follows source-backed stats: 1 base damage, 10 stress, 33% chance to inflict a disease, 82.5 ACC and 12% CRIT. Only the initial two Clays diseases are in the current selectable infection pool. The earlier provisional 8% disease chance on Crypt Shieldbearer/Arbalist attacks remains an explicitly documented fidelity gap.
+
+**Original Clays values still include** disease selection, extra-disease cure odds, Bust loot sources/stack capacity, old generic Crypt infection, and the initial six prototype trait values. See `docs/combat-fidelity-audit.md` Pass 34 for source references and the audit boundary.
+
 ## Quirk/disease combat effects and crypt exposure (Milestone 33)
 
 Persistent quirks and diseases now **change active expedition combat statistics** rather than remaining cosmetic. The first six Clays trait fixtures affect starting HP, accuracy, speed, dodge or bleed resistance. Bonuses are applied to the expedition's temporary hero copy and removed before returning the hero to the permanent roster, preventing accidental stat stacking after multiple quests. Crypt Shieldbearers and Arbalists have an **8% provisional disease-exposure roll** on damaging hits in dungeon battles only (the separate DD1 reference combat lab is unchanged). Contracted illnesses change live hero stats and persist on return. A repeated negative trait in the seeded quest-return roll becomes locked, making Sanitarium removal more expensive. All six numerical stat effects, disease eligibility and infection odds are **original Clays balance values**, not the exact effects of DD1 traits or monsters. See `docs/combat-fidelity-audit.md` Pass 33.
