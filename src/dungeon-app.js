@@ -20,7 +20,9 @@ function bindRandom(){
  random=()=>{expedition.randomCalls=(expedition.randomCalls??0)+1;return stream();};
 }
 function persistCampaign(){
- try{localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,expedition));saveError='';}
+ try{
+  expedition.preparedActorId=preparedId;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,expedition));saveError='';}
  catch(e){saveError='Save unavailable: '+e.message;}
 }
 function restoreCampaign(){
@@ -31,6 +33,8 @@ function restoreCampaign(){
   settlement=restored.settlement;
   if(!restored.expedition)return false;
   expedition=restored.expedition;
+  const actor=dungeonBattle(expedition)?currentActor(dungeonBattle(expedition)):null;
+  preparedId=actor?.side==='hero'&&expedition.preparedActorId===actor.id?actor.id:null;
   // Battle-log state and the deterministic RNG cursor resume together.
   bindRandom();
   return true;
