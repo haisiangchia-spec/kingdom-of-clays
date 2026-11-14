@@ -81,7 +81,7 @@ export function advanceTownWeek(settlement,expedition){
  if(expedition.townWeekProcessed)return false;
  if(expedition.phase==='victory'&&!expedition.traitsProcessed)applyQuestTraitRolls(settlement,expedition);
  const deployed=new Set(expedition.party.map(u=>u.rosterId).filter(Boolean));
- const treated=new Set([...town.treatments.map(t=>t.rosterId),...['quirkWard','medicalWard'].map(w=>settlement.sanitarium?.[w]?.rosterId).filter(Boolean)]);
+ const treated=new Set([...town.treatments.map(t=>t.rosterId),...['quirkWard','medicalWard'].map(w=>settlement.sanitarium?.[w]?.rosterId),...(settlement.sanitarium?.extraQuirkWards??[]).map(t=>t.rosterId),...(settlement.sanitarium?.extraMedicalWards??[]).map(t=>t.rosterId)].filter(Boolean));
  for(const t of town.treatments){
   const hero=settlement.roster.find(h=>h.rosterId===t.rosterId);
   if(!hero||hero.unit.dead)continue;
