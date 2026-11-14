@@ -2,6 +2,12 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Persistent hero roster and resurrection (Milestone 30)
+
+The expedition now uses a **persistent four-hero party chosen from an eight-slot roster**. Named hero records survive quest completion, defeat and browser reloads; each hero retains HP, stress, class, equipment, and Resolve XP/level, and dead heroes cannot embark. Stage Coach-style recruits of the four currently implemented classes are free (as in DD1), with duplicates permitted. A short Apprentice victory grants 2 Resolve XP and uses the standard DD1 level thresholds. After an expedition, the town interface can recruit, select/replace heroes in combat ranks, equip/unequip a stored Ward Charm, and permanently dismiss heroes to free a full roster slot. Dismissed dead heroes are listed in the graveyard and cannot return.
+
+**Agreed DD1 exception:** the Temple at level 1+ offers repeatable resurrection of a *rostered* fallen hero for a provisional cost of 250 gold, restoring half health and 100 stress. The rest of the resurrection system is original Clays rules. Weekly random recruits, full 17-class roster, quirks, diseases, equipment upgrades, real trinket stat modifiers and paid stress treatment remain future milestones. See `docs/combat-fidelity-audit.md` Pass 30.
+
 ## Persistent settlement and facilities (Milestone 29)
 
 [Dungeon Expedition](./dungeon.html) now autosaves the **active expedition and the settlement** to versioned browser-local storage, restoring rooms, party HP/stress, supplies, pending decisions, combat, resources and purchased upgrades after a reload. Completing an expedition and transferring its reward fills the treasury and records crests, deeds and trinkets; each reward transfer may occur only once. Settlement upgrades become available after the expedition ends:
