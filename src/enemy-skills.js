@@ -12,6 +12,15 @@ export const ENEMY_SKILLS=Object.freeze({
   court_curse:{name:'Courtly Dread',from:[2,3],to:[0,1,2,3],kind:'stress',amount:15,acc:95},
   court_blight:{name:'Withering Sigil',from:[2,3],to:[1,2,3],acc:90,crit:0,mod:-.8,
     status:{type:'blight',chance:105,value:2,turns:3}},
+  // Source-checked APPRENTICE DD1 Bone Defender abilities.
+  boneguard_axe:{name:'Crypt Axeblade',from:[0,1],to:[0,1],
+    acc:72.5,crit:6,damageMin:3,damageMax:5},
+  boneguard_weight:{name:'Grave Weight',from:[0,1],to:[0,1],
+    acc:82.5,crit:6,damageMin:2,damageMax:4,
+    status:{type:'stun',chance:100},
+    moveTarget:{type:'push',distance:1,chance:100}},
+  boneguard_clumsy:{name:'Clumsy Axeblade',from:[2,3],to:[0,1],
+    acc:42.5,crit:0,damageMin:2,damageMax:4,advance:1},
   // Source-checked DD1 APPRENTICE Bone Arbalist (Bone Arbalist wiki.gg).
   // Zero-based ranks: Quarrel usable at 3–4 against heroes 2–4;
   // Bayonet Jab usable at 1–2 against heroes 1–2, self-retreat one rank.
