@@ -402,6 +402,15 @@ test('Champion Warrens support monsters scale without modifying Apprentice or Ja
  assert.ok(support.length>0);
  for(const foe of support){
   const base=ENEMY_PROFILES[foe.enemyProfile].stats;
+  if(foe.enemyProfile==='plagueChopper'){
+   assert.equal(foe.maxHp,41);
+   assert.equal(foe.spd,5);
+   assert.equal(foe.dodge,21.25);
+   assert.equal(foe.prot,33);
+   assert.deepEqual(foe.resist,{stun:65,blight:100,bleed:60,debuff:55,move:90});
+   assert.equal(foe.tierScaling,'dd1-verified-champion-chopper-stats');
+   continue;
+  }
   assert.equal(foe.maxHp,Math.ceil(base.hp*1.5));
   assert.equal(foe.dmgMin,base.dmgMin+2);
   assert.equal(foe.dmgMax,base.dmgMax+2);
