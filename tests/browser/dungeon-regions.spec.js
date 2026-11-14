@@ -82,3 +82,34 @@ test('regional exploration names and curio interactions survive browser save and
   log:'Spore-Covered Cache yields treasure'
  });
 });
+
+test('Hookstalker is encounter-reachable and its retreating strike has legal targets',async ({page})=>{
+ await page.goto('/dungeon.html');
+ const data=await page.evaluate(async ()=>{
+  const {makeGeneratedEncounter,availableTargets,ABILITIES}=await import('./src/engine.js');
+  const {ENEMY_PROFILES}=await import('./src/enemy-roster.js');
+  let battle=null,foe=null;
+  for(let seed=1;seed<=120;seed++){
+   const candidate=makeGeneratedEncounter(seed,'patrol','plague');
+   const found=candidate.units.find(u=>u.enemyProfile==='plagueSlasher');
+   if(found){battle=candidate;foe=found;break;}
+  }
+  if(!foe)return null;
+  return {
+   name:foe.name,hp:foe.hp,prot:foe.prot,
+   skills:foe.enemySkills,
+   legal:availableTargets(battle,foe.id,'plague_hook_slash'),
+   retreat:ABILITIES.plague_hook_slash.selfBack,
+   from:ABILITIES.plague_hook_slash.from,
+   template:ENEMY_PROFILES.plagueSlasher.name
+  };
+ });
+ expect(data).not.toBeNull();
+ expect(data.name).toBe('Blight Hookstalker');
+ expect(data.hp).toBe(8);
+ expect(data.prot).toBe(25);
+ expect(data.skills).toContain('plague_hook_slash');
+ expect(data.legal.length).toBeGreaterThan(0);
+ expect(data.retreat).toBe(1);
+ expect(data.from).toEqual([0,1,2,3]);
+});
