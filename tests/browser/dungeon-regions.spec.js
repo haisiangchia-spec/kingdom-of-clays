@@ -160,7 +160,7 @@ test('Unsupported Champion Crypt selection preserves completed expedition',async
  await page.locator('#dungeon-region').selectOption('crypt');
  await page.locator('#dungeon-tier').selectOption('champion');
  await page.getByRole('button',{name:'New expedition'}).click();
- await expect(page.locator('#dungeon-log')).toContainText('Champion expeditions are currently available only in Blighted Warrens');
+ await expect(page.locator('#dungeon-log')).toContainText('Veteran and Champion expeditions are currently available only in Blighted Warrens');
  const persisted=await page.evaluate(async ()=>{
   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
@@ -203,4 +203,28 @@ test('Veteran Warrens selection survives reload and retains provisional combat t
  expect(result.battleTier).toBe('veteran');
  expect(result.scalings.length).toBeGreaterThan(0);
  expect(result.scalings.every(x=>x==='clays-provisional-veteran')).toBe(true);
+});
+
+
+test('Unsupported Veteran Crypt selection preserves completed expedition',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const {createDungeon}=await import('./src/dungeon.js');
+  const settlement=createCampaignSettlement();
+  const dungeon=createDungeon(763);
+  dungeon.phase='victory';dungeon.rosterReturned=true;dungeon.townWeekProcessed=true;dungeon.rewardClaimed=true;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,dungeon));
+ });
+ await page.reload();
+ await page.locator('#dungeon-region').selectOption('crypt');
+ await page.locator('#dungeon-tier').selectOption('veteran');
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-log')).toContainText('Veteran and Champion expeditions are currently available only in Blighted Warrens');
+ const persisted=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {phase:expedition.phase,region:expedition.region,tier:expedition.tier,seed:expedition.seed};
+ });
+ expect(persisted).toEqual({phase:'victory',region:'crypt',tier:'apprentice',seed:763});
 });
