@@ -1,7 +1,7 @@
 import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
-import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack} from './inventory.js';
+import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards,createSettlement} from './inventory.js';
 
 const $=id=>document.getElementById(id);
 const HERO_SKILLS={
@@ -10,7 +10,7 @@ const HERO_SKILLS={
  h3:['eagle_eye_shot','hunters_mark'],
  h4:['greater_heal','group_healing','sacred_strike']
 };
-let expedition,random,preparedId=null,chosenSkill=null;
+let expedition,random,preparedId=null,chosenSkill=null,settlement=createSettlement();
 const el=(tag,text,container,action)=>{
  const node=document.createElement(tag);
  if(text!=null)node.textContent=text;
@@ -93,13 +93,23 @@ function render(){
  }
  if(expedition.pendingLoot&&expedition.phase==='explore'){
    const pending=expedition.pendingLoot;
-   el('p',`Unclaimed treasure: ${pending.quantity} ${ITEM_RULES[pending.kind].name}. Free a slot or leave it behind.`,inventory);
+   el('p',`Unclaimed reward: ${pending.quantity} ${ITEM_RULES[pending.kind].name}. Free a slot or leave it behind.`,inventory);
    el('button','Collect treasure',inventory,()=>{
      try{collectLoot(expedition);}catch(error){expedition.log.push(error.message);}
      render();
    });
    el('button','Leave treasure',inventory,()=>{leaveLoot(expedition);render();});
  }
+ if(expedition.phase==='victory'){
+   const reward=expeditionRewardSummary(expedition);
+   el('p',`Settlement rewards: ${reward.totalGold} gold (including gems), ${reward.crests} crests, ${reward.deeds} deeds, ${reward.trinkets} trinkets.`,inventory);
+   if(!expedition.rewardClaimed)el('button','Return rewards to settlement',inventory,()=>{
+     try{claimExpeditionRewards(expedition,settlement);}catch(error){expedition.log.push(error.message);}
+     render();
+   });
+   else el('p','Rewards transferred to the settlement ✓',inventory);
+ }
+ el('p',`Settlement: ${settlement.gold} gold · ${settlement.crests} crests · ${settlement.deeds} deeds · ${settlement.trinkets.length} trinkets`,inventory);
  const decisions=$('dungeon-decisions');decisions.replaceChildren();
  if(expedition.phase==='explore'&&expedition.pendingHunger){
    el('p','Hunger! Feed the party four rations or go without (-3 HP and +15 stress per hero).',decisions);
