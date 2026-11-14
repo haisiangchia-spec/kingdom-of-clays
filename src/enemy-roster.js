@@ -17,6 +17,12 @@ export const ENEMY_PROFILES=Object.freeze({
     stunResist:35,bleedResist:15,blightResist:45,moveResist:25,debuffResist:30,
     types:['unholy']
   }),skills:['court_curse','court_blight']}),
+  // Apprentice Bone Defender reference (DD1), original Clays reskin.
+  cryptDefender:Object.freeze({name:'Crypt Shieldbearer',stats:Object.freeze({
+    hp:15,spd:0,dodge:0,prot:25,dmgMin:3,dmgMax:5,
+    stunResist:25,bleedResist:200,blightResist:10,moveResist:50,debuffResist:15,
+    types:['unholy']
+  }),skills:['boneguard_axe','boneguard_weight','boneguard_clumsy']}),
   // Apprentice Bone Arbalist reference, independently reskinned.
   cryptArbalist:Object.freeze({name:'Crypt Arbalist',stats:Object.freeze({
     hp:15,spd:5,dodge:5,prot:0,dmgMin:3,dmgMax:7,
@@ -42,7 +48,8 @@ export const ENCOUNTER_PRESETS=Object.freeze({
   rearguard:Object.freeze(['swordsman','archer','archer','mage']),
   curseCourt:Object.freeze(['swordsman','archer','mage','mage']),
   outlawPatrol:Object.freeze(['duelist','swordsman','archer','mage']),
-  cryptVolley:Object.freeze(['swordsman','swordsman','cryptArbalist','cryptArbalist'])
+  cryptVolley:Object.freeze(['swordsman','swordsman','cryptArbalist','cryptArbalist']),
+  shieldwallVolley:Object.freeze(['cryptDefender','cryptDefender','cryptArbalist','cryptArbalist'])
 });
 
 export function spawnProfileEnemy(unitFactory,id,profileId){
