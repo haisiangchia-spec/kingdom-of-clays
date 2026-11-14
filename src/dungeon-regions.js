@@ -33,7 +33,8 @@ export const PLAGUE_CHAMPION_TABLES=Object.freeze({
 });
 export const PLAGUE_THREAT=Object.freeze({plagueChopper:3,plagueWretch:2,plagueDrummer:2,plagueSlasher:2,plagueSkiver:5});
 export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random,tier='apprentice'){
- if(!['apprentice','champion'].includes(tier))throw Error('Unknown Warrens tier: '+tier);
+ if(!['apprentice','veteran','champion'].includes(tier))throw Error('Unknown Warrens tier: '+tier);
+ // Veteran encounter weights initially reuse Apprentice templates; this is not DD1 parity.
  const table=(tier==='champion'?PLAGUE_CHAMPION_TABLES:PLAGUE_TABLES)[difficulty];
  if(!table)throw Error('Unknown encounter difficulty: '+difficulty);
  const value=random();
