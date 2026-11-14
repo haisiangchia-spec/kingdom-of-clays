@@ -474,3 +474,40 @@ test('Champion Butcher tier skills preserve Apprentice loadout and have legal ta
  for(const ordinary of apprentice.units.filter(u=>u.enemyProfile==='plagueChopper'))
   assert.deepEqual(ordinary.enemySkills,ENEMY_PROFILES.plagueChopper.skills);
 });
+
+
+test('Champion Butcher Cleave applies bleed and reduced healing in combat',()=>{
+ let battle,butcher;
+ for(let seed=1;seed<=200;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague','champion');
+  const foe=b.units.find(u=>u.enemyProfile==='plagueChopper');
+  if(foe&&availableTargets(b,foe.id,'plague_champion_butcher_cut').length){battle=b;butcher=foe;break;}
+ }
+ assert.ok(butcher);
+ const targetId=availableTargets(battle,butcher.id,'plague_champion_butcher_cut')[0];
+ const victim=battle.units.find(u=>u.id===targetId);
+ const before=victim.hp;
+ battle.queue=[butcher.id];
+ takeTurn(battle,butcher.id,'plague_champion_butcher_cut',targetId,()=>0);
+ assert.ok(victim.hp<before,'Cleave must damage the hero');
+ assert.ok(victim.dot.some(d=>d.type==='bleed'&&d.value===4),'Cleave must apply Champion bleed');
+ assert.ok(victim.effects.some(e=>e.modifiers?.healingReceived===-50),'Cleave must apply healing reduction');
+});
+
+test('Champion Butcher Spiked Chain applies stun and rank displacement',()=>{
+ let battle,butcher;
+ for(let seed=1;seed<=200;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague','champion');
+  const foe=b.units.find(u=>u.enemyProfile==='plagueChopper');
+  if(foe&&availableTargets(b,foe.id,'plague_champion_ball_chain').length){battle=b;butcher=foe;break;}
+ }
+ assert.ok(butcher);
+ const targetId=availableTargets(battle,butcher.id,'plague_champion_ball_chain')[0];
+ const victim=battle.units.find(u=>u.id===targetId);
+ const before=victim.hp;
+ battle.queue=[butcher.id];
+ takeTurn(battle,butcher.id,'plague_champion_ball_chain',targetId,()=>0);
+ assert.ok(victim.hp<before,'Spiked Chain must damage the hero');
+ assert.ok(victim.stun>0||battle.log.some(line=>line.includes(victim.name)&&line.includes('stun')),'Spiked Chain must stun');
+ assert.ok(battle.log.some(line=>line.includes(victim.name)&&line.includes('rank')),'Spiked Chain must displace the hero');
+});
