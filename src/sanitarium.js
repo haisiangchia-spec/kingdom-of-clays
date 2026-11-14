@@ -71,8 +71,11 @@ export function sanitariumTreatmentCost(settlement,hero,mode,target){
  const base=mode==='negative'?(hero.quirks.negative.find(q=>q.id===target)?.locked?SANITARIUM_COSTS.lockedNegative:SANITARIUM_COSTS.negative):
   mode==='lockPositive'?SANITARIUM_COSTS.lockPositive:SANITARIUM_COSTS.disease;
  const tier=hero.level>=5?1.8:hero.level>=3?1.4:1;
- const discount=mode==='disease'?medicalTreatmentDiscount(settlement):quirkTreatmentDiscount(settlement);
- return Math.round(base*tier*(1-discount)/5)*5;
+ if(mode==='disease'){
+  const medicalLevel=sanitariumUpgradeLevels(settlement).medicalDevices;
+  return Math.round(((base-100*Math.ceil(medicalLevel/2))*tier)/5)*5;
+ }
+ return Math.round(base*tier*(1-quirkTreatmentDiscount(settlement))/5)*5;
 }
 export function sanitariumUnavailable(settlement,id){
  return !![settlement.sanitarium?.quirkWard,settlement.sanitarium?.medicalWard,...(settlement.sanitarium?.extraQuirkWards??[]),...(settlement.sanitarium?.extraMedicalWards??[])].some(t=>t?.rosterId===id);
@@ -108,7 +111,15 @@ export function completeSanitariumWeek(settlement){
   for(const booking of bookings){
   const hero=settlement.roster.find(h=>h.rosterId===booking.rosterId);
   if(hero&&!hero.unit.dead){
-   if(booking.mode==='disease')hero.diseases=hero.diseases.filter(x=>x!==booking.target);
+   if(booking.mode==='disease'){
+    hero.diseases=hero.diseases.filter(x=>x!==booking.target);
+    const chance=multiDiseaseCureChance(settlement);
+    // Seed by ward, week and hero so a save/reload never rerolls cures.
+    const hashKey=booking.rosterId+':'+(settlement.town?.week??1)+':'+ward;
+    const roll=hash(0x41af7291,hashKey)%100;
+    if(chance>0&&roll<chance&&hero.diseases.length)
+     hero.diseases.splice(hash(0x28aca901,hashKey)%hero.diseases.length,1);
+   }
    if(booking.mode==='negative')hero.quirks.negative=hero.quirks.negative.filter(x=>x.id!==booking.target);
    if(booking.mode==='lockPositive'){
     const quirk=hero.quirks.positive.find(x=>x.id===booking.target);if(quirk)quirk.locked=true;
