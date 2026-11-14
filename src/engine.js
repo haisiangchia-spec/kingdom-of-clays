@@ -11,6 +11,7 @@ import {FIFTH_CLASS_SKILLS} from './class-skills-batch5.js';
 import {SPIRITBOUND_SKILLS} from './class-skills-spiritbound.js';
 import {ENEMY_SKILLS} from './enemy-skills.js';
 import {spawnProfileEnemy,makeEnemyFormation} from './enemy-roster.js';
+import {createEncounterPlan,spawnEncounterPlan} from './encounter-generator.js';
 import {resolveSkillDefinition,equipVerifiedSkillLevel} from './skill-progression.js';
 // This is a fidelity scaffold, not a claim of complete DD1 mechanics.
 export function rng(seed=1){let s=seed>>>0||1;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};}
@@ -607,6 +608,17 @@ export function makeProgressionBattle(seed=1){
  ])for(const key of keys)setActorSkillLevel(state,heroId,key,5);
  state.log.unshift('Verified level-five skill progression laboratory (21 upgraded skills)');
  return state;
+}
+// Campaign-ready reference-enemy combat entry point. Composition is
+// seeded, weights are Clays fixtures, and hero setup uses the same DD1
+// battle-engine baseline as all existing laboratory encounters.
+export function makeGeneratedEncounter(seed=1,difficulty='patrol'){
+  const state=makeBattle(seed);
+  const plan=createEncounterPlan(difficulty,rng(seed));
+  state.units=[...state.units.filter(u=>u.side==='hero'),...spawnEncounterPlan(unit,plan)];
+  state.encounterPlan=plan;
+  state.log.unshift(`Generated ${difficulty} encounter: ${plan.template}, threat ${plan.threat}`);
+  return state;
 }
 export function makeUndeadEncounter(seed=1,preset='rearguard'){
  const state=makeBattle(seed);
