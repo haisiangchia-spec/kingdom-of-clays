@@ -12,6 +12,8 @@ export const PLAGUE_TEMPLATES=Object.freeze({
  plagueMarch:Object.freeze(['plagueChopper','plagueChopper','plagueDrummer','plagueDrummer']),
  plagueHookRaid:Object.freeze(['plagueChopper','plagueSlasher','plagueWretch','plagueDrummer']),
  plagueHookPack:Object.freeze(['plagueSlasher','plagueSlasher','plagueWretch','plagueDrummer']),
+ plagueChampionSkirmish:Object.freeze(['plagueChopper','plagueWretch','plagueSkiver']),
+ plagueChampionGuard:Object.freeze(['plagueSlasher','plagueDrummer','plagueSkiver']),
  plagueAmbush:Object.freeze(['plagueChopper','plagueWretch','plagueWretch','plagueDrummer'])
 });
 export const PLAGUE_TABLES=Object.freeze({
@@ -19,9 +21,15 @@ export const PLAGUE_TABLES=Object.freeze({
  patrol:Object.freeze([{id:'plagueScouts',weight:2},{id:'plagueRaid',weight:5},{id:'plagueMarch',weight:2},{id:'plagueHookRaid',weight:2},{id:'plagueHookPack',weight:1}]),
  gauntlet:Object.freeze([{id:'plagueRaid',weight:4},{id:'plagueMarch',weight:3},{id:'plagueAmbush',weight:3},{id:'plagueHookRaid',weight:3},{id:'plagueHookPack',weight:2}])
 });
-export const PLAGUE_THREAT=Object.freeze({plagueChopper:3,plagueWretch:2,plagueDrummer:2,plagueSlasher:2});
-export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random){
- const table=PLAGUE_TABLES[difficulty];
+export const PLAGUE_CHAMPION_TABLES=Object.freeze({
+ scout:Object.freeze([{id:'plagueChampionSkirmish',weight:3},{id:'plagueChampionGuard',weight:2}]),
+ patrol:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:3}]),
+ gauntlet:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:4}])
+});
+export const PLAGUE_THREAT=Object.freeze({plagueChopper:3,plagueWretch:2,plagueDrummer:2,plagueSlasher:2,plagueSkiver:5});
+export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random,tier='apprentice'){
+ if(!['apprentice','champion'].includes(tier))throw Error('Unknown Warrens tier: '+tier);
+ const table=(tier==='champion'?PLAGUE_CHAMPION_TABLES:PLAGUE_TABLES)[difficulty];
  if(!table)throw Error('Unknown encounter difficulty: '+difficulty);
  const value=random();
  if(!Number.isFinite(value)||value<0||value>=1)throw Error('Encounter random must be in [0,1)');
@@ -30,7 +38,7 @@ export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random
  for(const entry of table){roll-=entry.weight;if(roll<0){chosen=entry;break;}}
  const profiles=[...PLAGUE_TEMPLATES[chosen.id]];
  const slots=validatePlagueFormation(profiles);
- return {difficulty,region:'plague',template:chosen.id,profiles,slots,
+ return {difficulty,tier,region:'plague',template:chosen.id,profiles,slots,
    threat:profiles.reduce((n,id)=>n+PLAGUE_THREAT[id],0),source:'clays-provisional-plague-encounter-table'};
 }
 
