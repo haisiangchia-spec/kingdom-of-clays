@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {ENEMY_PROFILES} from '../src/enemy-roster.js';
 import {DUNGEON_REGIONS,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES,regionCurio,regionHazard,validatePlagueFormation} from '../src/dungeon-regions.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,interactCurio,scoutCorridor,disarmTrap} from '../src/dungeon.js';
-import {makeGeneratedEncounter,makeUndeadEncounter,availableTargets,takeTurn,rng} from '../src/engine.js';
+import {makeGeneratedEncounter,makeUndeadEncounter,availableTargets,takeTurn,rng,rank} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {ABILITIES} from '../src/engine.js';
 
@@ -174,4 +174,22 @@ test('Apprentice Blight Hookstalker matches source-verified Swine Slasher stats 
  assert.deepEqual(s.to,[0,1,2]);
  assert.deepEqual([s.acc,s.crit,s.damageMin,s.damageMax,s.selfBack],[82.5,16,3,7,1]);
  assert.ok(Object.values(PLAGUE_TEMPLATES).some(ids=>ids.includes('plagueSlasher')));
+});
+
+test('Hookstalker Strike executes a legal attack and retreats one rank when space exists',()=>{
+ let verified=false;
+ for(let seed=1;seed<=150&&!verified;seed++){
+  const b=makeGeneratedEncounter(seed,'patrol','plague');
+  const foe=b.units.find(u=>u.enemyProfile==='plagueSlasher');
+  if(!foe||rank(b,foe.id)>=3)continue;
+  const targets=availableTargets(b,foe.id,'plague_hook_slash');
+  if(!targets.length)continue;
+  const before=rank(b,foe.id);
+  b.queue=[foe.id];
+  takeTurn(b,foe.id,'plague_hook_slash',targets[0],()=>.5);
+  assert.equal(foe.actionsTaken,1);
+  assert.ok(rank(b,foe.id)>=before,'retreat must never move forward');
+  verified=true;
+ }
+ assert.ok(verified,'Hookstalker attack must execute in a generated Warrens formation');
 });
