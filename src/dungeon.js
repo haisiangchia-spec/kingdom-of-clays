@@ -147,7 +147,8 @@ export function interactCurio(dungeon,choice){
  const safe=choice==='purify'||rng(encounterSeed(dungeon.seed,'curio:'+dungeon.room))()<.50;
  if(safe){
    const amount=choice==='purify'?175:100;
-   offerLoot(dungeon,'gold',amount);
+   if(dungeon.interactiveEvents&&dungeon.room==='vault'&&choice==='purify')offerLoot(dungeon,'trinket',1);
+   else offerLoot(dungeon,'gold',amount);
    if(!dungeon.interactiveEvents)collectLoot(dungeon); // keep test/API compatibility
    dungeon.log.push(curio.name+' yields treasure');
  }
@@ -254,7 +255,17 @@ export function resolveDungeonBattle(dungeon){
    }
    dungeon.phase=dungeon.cleared.includes('sanctum')?'victory':'explore';
    dungeon.log.push('Encounter cleared: '+source);
-   if(dungeon.interactiveEvents&&dungeon.phase==='explore')offerLoot(dungeon,'gold',50); // provisional battle drop
+   if(dungeon.interactiveEvents&&dungeon.phase==='explore'){
+     // Distinct source-specific rewards; all provisional Clays amounts.
+     const drops={
+       'room:watch':['crest',3],
+       'room:vault':['gem',2],
+       'corridor:watch-sanctum':['deed',2],
+       'corridor:vault-sanctum':['deed',2]
+     };
+     const [kind,quantity]=drops[source]??['gold',50];
+     offerLoot(dungeon,kind,quantity);
+   }
 
  }
  return dungeon;
