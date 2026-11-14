@@ -9,7 +9,7 @@ import {SANITARIUM_UPGRADE_TREES,upgradeSanitarium,nextSanitariumUpgradeCost,san
 import {offerLoot,collectLoot,claimExpeditionRewards} from '../src/inventory.js';
 
 function town(){
- const s=createCampaignSettlement();s.gold=50000;s.busts=300;s.crests=200;s.town.week=4;
+ const s=createCampaignSettlement();s.gold=50000;s.busts=300;s.crests=200;s.town.week=4;s.town.offers=[];
  return s;
 }
 test('DD1 upgrade tier costs, maximum levels and atomic funds consumption',()=>{
