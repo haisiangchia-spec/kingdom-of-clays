@@ -70,10 +70,17 @@ export function spawnEncounterPlan(unitFactory,plan){
     plagueWretch:{hp:25,spd:10,dodge:35,prot:0,stunResist:55,blightResist:85,bleedResist:55,debuffResist:60,moveResist:45},
     plagueSlasher:{hp:16,spd:7,dodge:30,prot:40,stunResist:55,blightResist:85,bleedResist:85,debuffResist:60,moveResist:70}
    };
+   const veteranSupport=plan.region==='plague'&&plan.tier==='veteran';
    const verifiedChampion=plan.region==='plague'&&plan.tier==='champion'&&Object.hasOwn(championStats,profileId);
-   const stats=verifiedChampion?{...profile.stats,...championStats[profileId]}:profile.stats;
+   // Explicitly provisional Veteran scaling until source-audited tier profiles exist.
+   const stats=verifiedChampion?{...profile.stats,...championStats[profileId]}:veteranSupport?{
+    ...profile.stats,hp:Math.ceil(profile.stats.hp*1.3),
+    dodge:profile.stats.dodge+5,stunResist:profile.stats.stunResist+10,
+    bleedResist:profile.stats.bleedResist+10,blightResist:profile.stats.blightResist+10
+   }:profile.stats;
    const enemy=unitFactory('e'+(i+1),profile.name,'enemy',stats);
    if(verifiedChampion)enemy.tierScaling='dd1-verified-champion-stats';
+   if(veteranSupport)enemy.tierScaling='clays-provisional-veteran';
    enemy.enemyProfile=profileId;
    const championSkills={
     plagueChopper:['plague_champion_butcher_cut','plague_champion_ball_chain'],
