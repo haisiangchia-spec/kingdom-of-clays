@@ -26,6 +26,13 @@ export const PLAGUE_TABLES=Object.freeze({
  patrol:Object.freeze([{id:'plagueScouts',weight:2},{id:'plagueRaid',weight:5},{id:'plagueMarch',weight:2},{id:'plagueHookRaid',weight:2},{id:'plagueHookPack',weight:1}]),
  gauntlet:Object.freeze([{id:'plagueRaid',weight:4},{id:'plagueMarch',weight:3},{id:'plagueAmbush',weight:3},{id:'plagueHookRaid',weight:3},{id:'plagueHookPack',weight:2}])
 });
+// Separate Veteran encounter contract. These weights are provisional until
+// the DD1 Veteran formation distribution is independently verified.
+export const PLAGUE_VETERAN_TABLES=Object.freeze({
+ scout:Object.freeze([{id:'plagueScouts',weight:5},{id:'plagueRaid',weight:2},{id:'plagueHookRaid',weight:2},{id:'plagueHookPack',weight:1}]),
+ patrol:Object.freeze([{id:'plagueScouts',weight:2},{id:'plagueRaid',weight:5},{id:'plagueMarch',weight:2},{id:'plagueHookRaid',weight:2},{id:'plagueHookPack',weight:1}]),
+ gauntlet:Object.freeze([{id:'plagueRaid',weight:4},{id:'plagueMarch',weight:3},{id:'plagueAmbush',weight:3},{id:'plagueHookRaid',weight:3},{id:'plagueHookPack',weight:2}])
+});
 export const PLAGUE_CHAMPION_TABLES=Object.freeze({
  scout:Object.freeze([{id:'plagueChampionSkirmish',weight:3},{id:'plagueChampionGuard',weight:2},{id:'plagueChampionEscort',weight:1},{id:'plagueChampionFullPatrol',weight:1}]),
  patrol:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:3},{id:'plagueChampionEscort',weight:2},{id:'plagueChampionAmbush',weight:1},{id:'plagueChampionFullPatrol',weight:2},{id:'plagueChampionDrumGuard',weight:1}]),
@@ -34,8 +41,9 @@ export const PLAGUE_CHAMPION_TABLES=Object.freeze({
 export const PLAGUE_THREAT=Object.freeze({plagueChopper:3,plagueWretch:2,plagueDrummer:2,plagueSlasher:2,plagueSkiver:5});
 export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random,tier='apprentice'){
  if(!['apprentice','veteran','champion'].includes(tier))throw Error('Unknown Warrens tier: '+tier);
- // Veteran encounter weights initially reuse Apprentice templates; this is not DD1 parity.
- const table=(tier==='champion'?PLAGUE_CHAMPION_TABLES:PLAGUE_TABLES)[difficulty];
+ // Veteran weights are isolated from Apprentice, but still provisional.
+ const tables={apprentice:PLAGUE_TABLES,veteran:PLAGUE_VETERAN_TABLES,champion:PLAGUE_CHAMPION_TABLES};
+ const table=tables[tier][difficulty];
  if(!table)throw Error('Unknown encounter difficulty: '+difficulty);
  const value=random();
  if(!Number.isFinite(value)||value<0||value>=1)throw Error('Encounter random must be in [0,1)');
