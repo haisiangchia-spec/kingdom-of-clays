@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ENEMY_PROFILES} from '../src/enemy-roster.js';
-import {DUNGEON_REGIONS,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan} from '../src/dungeon-regions.js';
+import {DUNGEON_REGIONS,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES} from '../src/dungeon-regions.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle} from '../src/dungeon.js';
 import {makeGeneratedEncounter,makeUndeadEncounter,availableTargets,takeTurn,rng} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
@@ -83,4 +83,17 @@ test('dungeon region persists and creates plague squads without changing default
  assert.equal(crypt.region,'crypt');
  assert.ok(dungeonBattle(crypt).units.some(u=>u.enemyProfile==='cryptDefender'));
  assert.throws(()=>createDungeon(69,{region:'not-real'}),/Unknown dungeon region/);
+});
+
+test('regional room labels cover every room without altering stable map identifiers',()=>{
+ const rooms=['entrance','gallery','watch','vault','sanctum'];
+ for(const region of ['crypt','plague']){
+  assert.deepEqual(Object.keys(REGION_ROOM_NAMES[region]),rooms);
+  for(const id of rooms)assert.equal(typeof regionRoomName(region,id),'string');
+ }
+ assert.equal(regionRoomName('crypt','gallery'),'Ashen Gallery');
+ assert.equal(regionRoomName('plague','gallery'),'Fungal Passage');
+ assert.notEqual(regionRoomName('crypt','sanctum'),regionRoomName('plague','sanctum'));
+ assert.throws(()=>regionRoomName('unknown','gallery'),/Unknown dungeon region/);
+ assert.throws(()=>regionRoomName('plague','missing'),/Unknown dungeon room/);
 });
