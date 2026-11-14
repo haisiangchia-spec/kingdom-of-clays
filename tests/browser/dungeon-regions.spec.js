@@ -168,3 +168,39 @@ test('Unsupported Champion Crypt selection preserves completed expedition',async
  });
  expect(persisted).toEqual({phase:'victory',region:'crypt',tier:'apprentice',seed:763});
 });
+
+
+test('Veteran Warrens selection survives reload and retains provisional combat tier',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const {createDungeon}=await import('./src/dungeon.js');
+  const settlement=createCampaignSettlement();
+  const dungeon=createDungeon(763);
+  dungeon.phase='victory';dungeon.rosterReturned=true;
+  dungeon.townWeekProcessed=true;dungeon.rewardClaimed=true;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,dungeon));
+ });
+ await page.reload();
+ await page.locator('#dungeon-region').selectOption('plague');
+ await page.locator('#dungeon-tier').selectOption('veteran');
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-tier')).toHaveValue('veteran');
+ await expect(page.locator('#dungeon-tier')).toBeDisabled();
+ await expect(page.locator('#dungeon-status')).toContainText('VETERAN');
+ await page.reload();
+ await expect(page.locator('#dungeon-tier')).toHaveValue('veteran');
+ await page.getByRole('button',{name:'Travel to Fungal Passage'}).click();
+ await page.getByRole('button',{name:'Advance corridor'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+ const result=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {tier:expedition.tier,battleTier:expedition.pendingBattle?.battle?.encounterPlan?.tier,
+   scalings:expedition.pendingBattle?.battle?.units.filter(u=>u.side==='enemy').map(u=>u.tierScaling)};
+ });
+ expect(result.tier).toBe('veteran');
+ expect(result.battleTier).toBe('veteran');
+ expect(result.scalings.length).toBeGreaterThan(0);
+ expect(result.scalings.every(x=>x==='clays-provisional-veteran')).toBe(true);
+});
