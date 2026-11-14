@@ -2,6 +2,10 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Gems, heirlooms, trinkets and settlement rewards (Milestone 28)
+
+Completed room and corridor encounters can now offer mixed valuables: gold, Moonstone gems, Crests and Deeds; purifying the Vault curio yields a Ward Charm trinket. Gems, heirlooms and charms occupy the shared inventory slots and use their own stack capacities. On a victorious expedition, **Return rewards to settlement** transfers carried gold and gem sale value into a settlement treasury and records Crests, Deeds and trinkets separately. Rewards can only be claimed once. The settlement currently persists for the current page session, not across reloads. The quantities and economy are original Clays prototypes, not yet sourced DD1 item rules. See `docs/combat-fidelity-audit.md` Pass 28.
+
 ## Expedition inventory and loot (Milestone 27)
 
 The [Dungeon Expedition](./dungeon.html) now shows a shared **8-slot** backpack for food (stacks of 4), torches (2), holy water (1), and gold (100). Curio rewards and 50-gold provisional rewards from completed non-final encounters are offered as treasure: **collect**, **leave behind**, or **discard a carried stack** to make room. Gold merges into partial stacks first; a full backpack never partially collects a reward. Travel is blocked until pending treasure is resolved. Discarded provisions immediately update their usable supplies. Capacities, drop quantities and valuations are **original Clays prototype settings**, not yet confirmed DD1 data. The combat and expedition economy remain separate from the future settlement layer.
