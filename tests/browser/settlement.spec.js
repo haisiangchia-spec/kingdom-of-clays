@@ -69,3 +69,30 @@ test('campaign save decoder rejects broken payload before state restoration',asy
  });
  expect(outcome).toEqual({invalidVersion:true,invalidTreasury:true,key:'kingdom-of-clays-campaign-v1'});
 });
+
+test('combat reload preserves prepared turn and does not tick Bleed twice',async ({page})=>{
+ await page.goto('/dungeon.html');
+ const expected=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,encodeCampaignSave,createCampaignSettlement}=await import('./src/settlement.js');
+  const {createDungeon,beginCorridor,advanceCorridor,dungeonBattle}=await import('./src/dungeon.js');
+  const {prepareActorTurn}=await import('./src/engine.js');
+  const d=createDungeon(855,{interactiveEvents:true});
+  beginCorridor(d,'gallery');advanceCorridor(d);
+  const b=dungeonBattle(d),hero=b.units.find(u=>u.id==='h1');
+  b.queue=['h1','e1'];
+  hero.dot=[{type:'bleed',value:2,turns:3}];
+  prepareActorTurn(b,'h1',()=>.5);
+  d.preparedActorId='h1';d.randomCalls=0;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(createCampaignSettlement(),d));
+  return {hp:hero.hp,turns:hero.dot[0].turns};
+ });
+ await page.reload();
+ const actual=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('./src/settlement.js');
+  const state=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  const hero=state.expedition.pendingBattle.battle.units.find(u=>u.id==='h1');
+  return {hp:hero.hp,turns:hero.dot[0].turns};
+ });
+ expect(actual).toEqual(expected);
+ await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+});
