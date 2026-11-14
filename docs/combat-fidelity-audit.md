@@ -667,3 +667,14 @@ Veteran Plague Butcher and War Drummer now use dedicated Veteran skill IDs rathe
 Combat tests execute Veteran Cleave bleed and healing reduction, Weakening Rhythm marking and Dodge reduction, Spiked Chain stun/knockback, and Doombeat group damage/stress. The initial bleed test failed because it inspected the wrong hero property; the combat engine stores bleed in the `dot` array. Corrected test passed in GitHub Actions run 43601705886. Subsequent combined combat and remaining support-monster CI runs were pending when this entry was written. The older Veteran loadout assertion was also updated to expect distinct Veteran attacks.
 
 **Next verification:** Confirm combined CI, verify all provisional skill numbers against primary/authoritative references, and replace Wretch/Hookstalker placeholder Veteran profiles. Avoid claiming overall DD1 parity while these gaps remain.
+
+
+## Pass 112: Veteran Warrens integration checkpoint
+
+**CI:** GitHub Actions run 43602140883 passed after enabling `plague_veteran_vomit` in the expedition disease allowlist. Regression tests cover Veteran Butcher Cleave bleed/healing reduction, Spiked Chain stun/push, Drummer Weakening Rhythm mark/Dodge reduction, Doombeat group damage/stress, Wretch Vomit disease/Dodge reduction, and Hookstalker Strike retreat/resistance debuffs. The Wretch test revealed a real integration defect: the new Veteran skill ID was absent from `exposeHeroToDisease`; fixed in commit `dbd4c427`.
+
+**Tier separation:** Apprentice and Champion skills remain separate from Veteran skill IDs. Wretch and Hookstalker now have dedicated Veteran HP, Dodge, speed, resistance profiles and attacks, replacing their provisional flat scaling. Butcher and Drummer also have dedicated Veteran profiles.
+
+**Remaining fidelity gaps:** The Butcher and Drummer Veteran attack parameters were estimated and remain provisional, even though the attacks function correctly. The Veteran Wretch/Hookstalker numeric data should be cross-checked against authoritative tables before treating the full skill implementation as definitively source-verified. Veteran encounter formations currently reuse Apprentice template weights, and the dungeon/campaign systems remain incomplete relative to DD1. Combat regression success demonstrates internal consistency, **not** complete DD1 fidelity.
+
+**Next implementation milestone:** Audit Veteran encounter formations and attack values against DD1 references, then expand dungeon regions only after confirming the encounter-generation contract and test coverage.
