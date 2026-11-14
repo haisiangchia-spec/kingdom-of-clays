@@ -611,4 +611,26 @@ test('Champion Hookstalker applies resistance debuffs and retreats in combat',()
  takeTurn(battle,foe.id,'plague_champion_hook_slash',targetId,()=>0);
  assert.ok(hero.effects.some(e=>e.modifiers?.bleedResist===-30&&e.modifiers?.diseaseResist===-15));
  assert.ok(rank(battle,foe.id)>=originalRank,'Hookstalker cannot advance when using retreat skill');
+ assert.ok(hero.hp<hero.maxHp,'Champion Hookstalker hit must inflict HP damage');
+ assert.ok(battle.log.some(entry=>entry.includes('Hookstalker Strike')),'attack must appear in combat log');
+});
+
+
+test('Champion Drummer Doombeat damages multiple heroes and applies stress',()=>{
+ let battle,foe;
+ for(let seed=1;seed<=200;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague','champion');
+  const drummer=b.units.find(u=>u.enemyProfile==='plagueDrummer');
+  if(drummer&&availableTargets(b,drummer.id,'plague_champion_drum_doom').length){battle=b;foe=drummer;break;}
+ }
+ assert.ok(foe);
+ const heroes=battle.units.filter(u=>u.side==='hero'&&!u.dead);
+ const before=heroes.map(u=>({id:u.id,hp:u.hp,stress:u.stress}));
+ battle.queue=[foe.id];
+ const targetId=availableTargets(battle,foe.id,'plague_champion_drum_doom')[0];
+ takeTurn(battle,foe.id,'plague_champion_drum_doom',targetId,()=>0);
+ const damaged=before.filter(h=>battle.units.find(u=>u.id===h.id).hp<h.hp);
+ const stressed=before.filter(h=>battle.units.find(u=>u.id===h.id).stress>h.stress);
+ assert.ok(damaged.length>=2,'Doombeat should damage multiple heroes');
+ assert.ok(stressed.length>=2,'Doombeat should stress multiple heroes');
 });
