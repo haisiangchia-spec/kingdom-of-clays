@@ -603,3 +603,17 @@ Costs multiply by the level being purchased (second level ×2, third ×3). No up
 **AI:** Drummer and Butcher use the existing legal-action weighted AI without introducing unverified original-game behaviour weights. Future region-specific monster brain auditing will compare per-turn skill weights and desire conditions against original monster AI source files.
 
 **Testing:** `tests/dungeon-regions.test.js` checks Apprentice reference profiles, AoE stress, marking/debuffs, bleed/stun/knockback skill shapes, weighted template selection, seeded deterministic spawns, legal AI actions and expedition region differences. `tests/browser/dungeon-regions.spec.js` checks new region selection/reload and playable monster skill legality.
+
+## Passes 36–43: Warrens exploration and encounter legality
+
+**Region presentation:** Region-specific room labels and curio names now render in the dungeon UI and persist through expedition state. Both regions still use the same five-room topology. Warrens room names are Clays fiction, not original DD1 room assets.
+
+**Curios:** The Spore-Covered Cache and Diseased Offering are region-specific names for the existing two interactive curios. Their holy-water interactions, treasure and stress outcomes remain shared provisional fixtures; these are **not** claims of DD1 curio probabilities or provision tables.
+
+**Hazards:** Crypt Hidden Trap inflicts 2 HP/+5 stress; Warrens Spore Snare inflicts 2 HP/+7 stress. Both use existing deterministic scouting and disarm state. These are **Clays-specific provisional values**, not source-verified DD1 trap statistics.
+
+**Encounter validation:** Warrens templates now enforce a four-rank footprint using each enemy profile's size, exclude non-Warrens profiles, and require at least one skill usable from the monster's initial ranks. The 300-seed regression checks legal targets and AI choice for every generated monster across scout, patrol and gauntlet. This does not establish complete DD1 spawn-table fidelity, AI weights, or correctness after movement and deaths.
+
+**Browser regression:** The Warrens travel selector now uses the region-specific Fungal Passage label; the previous stale Ashen Gallery selector caused a Chromium CI failure. The correction passed GitHub Actions (commit a8f658b). The regional exploration regression passed on commit 401e8b0. Later test commits require independent CI confirmation.
+
+**Remaining fidelity work:** Source-audit more Warrens enemies and original monster-brain decisions; replace provisional encounter weights, curio tables, trap probabilities, and layout with independently verified DD1 rules. Do not conflate green regression tests with original-game rules fidelity.
