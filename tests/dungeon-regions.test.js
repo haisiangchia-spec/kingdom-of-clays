@@ -458,3 +458,19 @@ test('Champion fixed-range attacks deal their provisional bonus in actual combat
  const ordinaryLoss=before-baseline.units.find(u=>u.id===targetId).hp;
  assert.ok(boostedLoss>ordinaryLoss,'Champion bonus must increase real HP loss');
 });
+
+
+test('Champion Butcher tier skills preserve Apprentice loadout and have legal targets',()=>{
+ let champion,foe;
+ for(let seed=1;seed<=200;seed++){
+  const candidate=makeGeneratedEncounter(seed*1000003,'patrol','plague','champion');
+  const butcher=candidate.units.find(u=>u.enemyProfile==='plagueChopper');
+  if(butcher){champion=candidate;foe=butcher;break;}
+ }
+ assert.ok(foe);
+ assert.deepEqual(foe.enemySkills,['plague_champion_butcher_cut','plague_champion_ball_chain']);
+ for(const skill of foe.enemySkills)assert.ok(availableTargets(champion,foe.id,skill).length,skill+' has no legal target');
+ const apprentice=makeGeneratedEncounter(1000003,'patrol','plague','apprentice');
+ for(const ordinary of apprentice.units.filter(u=>u.enemyProfile==='plagueChopper'))
+  assert.deepEqual(ordinary.enemySkills,ENEMY_PROFILES.plagueChopper.skills);
+});
