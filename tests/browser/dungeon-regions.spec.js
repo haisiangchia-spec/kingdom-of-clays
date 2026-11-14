@@ -129,6 +129,7 @@ test('Champion Warrens expedition selection persists and generates Champion comb
  await page.getByRole('button',{name:'New expedition'}).click();
  await expect(page.locator('#dungeon-tier')).toBeDisabled();
  await expect(page.locator('#dungeon-tier')).toHaveValue('champion');
+ await expect(page.locator('#dungeon-status')).toContainText('CHAMPION');
  await page.reload();
  await expect(page.locator('#dungeon-tier')).toHaveValue('champion');
  await page.getByRole('button',{name:'Travel to Fungal Passage'}).click();
