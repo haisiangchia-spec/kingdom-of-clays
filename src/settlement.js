@@ -3,6 +3,7 @@
 import {createSettlement} from './inventory.js';
 import {setupHeroRoster,validateHeroRoster} from './hero-roster.js';
 import {initTown,validateTown} from './town-week.js';
+import {initSanitarium,validateSanitarium} from './sanitarium.js';
 
 export const SETTLEMENT_FACILITIES=Object.freeze({
  market:Object.freeze({name:'Market',maxLevel:3,baseCost:Object.freeze({gold:100,crests:1,deeds:0}),description:'+2 starting food per level'}),
@@ -14,7 +15,7 @@ export const CAMPAIGN_SAVE_VERSION=1;
 const safeNumber=x=>Number.isSafeInteger(x)&&x>=0;
 const isObject=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 export function createCampaignSettlement(){
- return initTown(setupHeroRoster({...createSettlement(),facilities:{market:0,guild:0,temple:0},completedExpeditions:0}));
+ return initSanitarium(initTown(setupHeroRoster({...createSettlement(),facilities:{market:0,guild:0,temple:0},completedExpeditions:0})));
 }
 export function normalizeCampaignSettlement(input){
  if(!isObject(input))throw Error('Invalid settlement');
@@ -43,8 +44,10 @@ export function normalizeCampaignSettlement(input){
   base.graveyard=structuredClone(input.graveyard??[]);
  }
  if(input.town!==undefined)base.town=structuredClone(input.town);
+ if(input.sanitarium!==undefined)base.sanitarium=structuredClone(input.sanitarium);
  validateHeroRoster(base);
  validateTown(base);
+ validateSanitarium(base);
  return base;
 }
 export function nextFacilityCost(settlement,id){
