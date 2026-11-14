@@ -2,6 +2,10 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Dungeon supplies and hazards (Milestone 25)
+
+The dungeon expedition screen now includes three starting torches and eight food. Torches restore 25 light (up to 100); food heals a wounded living hero for 2 HP. Supplies cannot be used during combat. Four torchlight bands are displayed, lower light increases corridor encounter and trap probabilities, and the two late-stage corridors can trigger a one-time seeded trap that damages HP and stress. These values and odds are **provisional Kingdom of Clays exploration rules**, not certified DD1 numerical fidelity. See `docs/combat-fidelity-audit.md` Pass 25.
+
 ## Dungeon expedition (Milestone 24)
 
 Open **[Dungeon Expedition](./dungeon.html)** from the Combat Lab or navigate directly to `dungeon.html`. The first campaign slice has five connected rooms, two-step corridors, seeded reference-enemy encounters, a Sanctum objective, and persistent hero HP/stress/death state between battles. In battle, choose a hero ability and target; enemy AI executes automatically. On victory, corridor traversal resumes where it stopped. A failed combat ends the expedition.
