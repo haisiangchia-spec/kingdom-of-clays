@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ENEMY_PROFILES} from '../src/enemy-roster.js';
 import {DUNGEON_REGIONS,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES,regionCurio} from '../src/dungeon-regions.js';
-import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle} from '../src/dungeon.js';
+import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,interactCurio} from '../src/dungeon.js';
 import {makeGeneratedEncounter,makeUndeadEncounter,availableTargets,takeTurn,rng} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {ABILITIES} from '../src/engine.js';
@@ -109,5 +109,9 @@ test('Warrens curios are region-specific but keep legacy choices and rewards',()
  const initial=d.curioSupplies.holyWater;
  // Purification is deterministic, costs exactly one supply and grants a reward.
  assert.equal(initial,1);
- assert.equal(d.curiosUsed.length,0);
+ interactCurio(d,'purify');
+ assert.equal(d.curioSupplies.holyWater,0);
+ assert.deepEqual(d.curiosUsed,['gallery']);
+ assert.match(d.log.at(-1),/Spore-Covered Cache yields treasure/);
+ assert.throws(()=>interactCurio(d,'touch'),/No untouched curio/);
 });
