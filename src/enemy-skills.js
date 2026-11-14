@@ -12,6 +12,13 @@ export const ENEMY_SKILLS=Object.freeze({
   court_curse:{name:'Courtly Dread',from:[2,3],to:[0,1,2,3],kind:'stress',amount:15,acc:95},
   court_blight:{name:'Withering Sigil',from:[2,3],to:[1,2,3],acc:90,crit:0,mod:-.8,
     status:{type:'blight',chance:105,value:2,turns:3}},
+  // Source-checked DD1 APPRENTICE Bone Arbalist (Bone Arbalist wiki.gg).
+  // Zero-based ranks: Quarrel usable at 3–4 against heroes 2–4;
+  // Bayonet Jab usable at 1–2 against heroes 1–2, self-retreat one rank.
+  crypt_quarrel:{name:'Crypt Quarrel',from:[2,3],to:[1,2,3],
+    acc:82.5,crit:12,damageMin:3,damageMax:7,vsMarked:.25},
+  crypt_bayonet:{name:'Crypt Bayonet',from:[0,1],to:[0,1],
+    acc:72.5,crit:2,damageMin:2,damageMax:4,selfBack:1},
   // DD1 VETERAN Brigand Cutthroat ability data (wiki.gg).
   // Accuracy shown in DD1 tables is reproduced as skill ACC here, with
   // the combat engine's documented +5 hidden hit correction applied separately.
