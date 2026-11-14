@@ -764,3 +764,21 @@ test('Veteran Drummer Doombeat hits multiple heroes and inflicts stress',()=>{
  assert.ok(heroes.filter((u,i)=>u.hp<before[i].hp).length>=2);
  assert.ok(heroes.some((u,i)=>u.stress>before[i].stress));
 });
+
+
+test('Veteran Wretch and Hookstalker retain explicitly provisional profiles until audited',()=>{
+ const ids=['plagueWretch','plagueSlasher'];
+ let checked=new Set();
+ for(let seed=1;seed<=200;seed++){
+  const battle=makeGeneratedEncounter(seed*1000003,'gauntlet','plague','veteran');
+  for(const foe of battle.units.filter(u=>ids.includes(u.enemyProfile))){
+   const original=ENEMY_PROFILES[foe.enemyProfile];
+   assert.equal(foe.tierScaling,'clays-provisional-veteran');
+   assert.equal(foe.maxHp,Math.ceil(original.stats.hp*1.3));
+   assert.deepEqual(foe.enemySkills,original.skills);
+   assert.ok(foe.enemySkills.some(id=>availableTargets(battle,foe.id,id).length),'Veteran support monster must have a legal action');
+   checked.add(foe.enemyProfile);
+  }
+ }
+ assert.deepEqual([...checked].sort(),ids.sort());
+});
