@@ -27,7 +27,7 @@ test('quirk and disease stats are applied to the live expedition, then saved wit
  await expect(page.locator('#hero-roster')).toContainText('1 diseases');
 });
 
-test('a real crypt encounter can infect roster heroes and persists infection through victory',async ({page})=>{
+test('a Vault Wretch infects roster heroes and persists infection through victory',async ({page})=>{
  await page.goto('/dungeon.html');
  const result=await page.evaluate(async ()=>{
   const {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave}=await import('./src/settlement.js');
@@ -36,10 +36,12 @@ test('a real crypt encounter can infect roster heroes and persists infection thr
   const {exposeHeroToDisease}=await import('./src/trait-effects.js');
   const s=createCampaignSettlement();
   const d=createDungeon(1230,{party:prepareRosterParty(s),interactiveEvents:true});
-  beginCorridor(d,'gallery');advanceCorridor(d);
-  const b=dungeonBattle(d),h=b.units.find(u=>u.id==='h1'),enemy=b.units.find(u=>u.enemyProfile==='cryptDefender');
-  const first=exposeHeroToDisease(b,enemy,h,()=>0);
-  const second=exposeHeroToDisease(b,enemy,h,()=>0);
+  d.room='gallery';d.visited.push('gallery');beginCorridor(d,'vault');
+  d.corridors['gallery-vault']={traversals:0,encounterCleared:true};
+  advanceCorridor(d);advanceCorridor(d);
+  const b=dungeonBattle(d),h=b.units.find(u=>u.id==='h1'),enemy=b.units.find(u=>u.enemyProfile==='plagueWretch');
+  const first=exposeHeroToDisease(b,enemy,h,()=>0,'plague_vomit');
+  const second=exposeHeroToDisease(b,enemy,h,()=>0,'plague_vomit');
   for(const foe of b.units.filter(u=>u.side==='enemy'))foe.dead=true;
   resolveDungeonBattle(d);d.phase='victory';returnPartyToRoster(s,d);
   const loaded=decodeCampaignSave(encodeCampaignSave(s,d));
