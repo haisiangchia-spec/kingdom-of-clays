@@ -19,7 +19,7 @@ test('Blighted Warrens can be selected after quest and selection survives reload
  await page.reload();
  await expect(region).toHaveValue('plague');
  await expect(page.locator('#dungeon-status')).toContainText('Blighted Warrens');
- await page.getByRole('button',{name:'Travel to Ashen Gallery'}).click();
+ await page.getByRole('button',{name:'Travel to Fungal Passage'}).click();
  await page.getByRole('button',{name:'Advance corridor'}).click();
  await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
  const profiles=await page.evaluate(async ()=>{
