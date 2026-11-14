@@ -398,3 +398,21 @@ The engine's previously audited global hidden +5 accuracy calculation still appl
 **Fidelity boundaries:** The reference establishes the Apprentice stats, attack values and forced rank-dependent selection. It does not establish the behaviour of a mixed Clays encounter or the targeting weights among multiple eligible heroes; those are still prototype defaults. The separate `Skeleton Archer` profile and its provisional abilities remain unchanged. Do not apply this Apprentice reference to Veteran or Champion scaling without independent verification.
 
 **Tests:** `tests/crypt-arbalist-reference.test.js` and `tests/browser/crypt-arbalist-reference.spec.js` check profile fields, legal ranks, marked damage, forced bayonet use, post-attack retreat and duplicate independence.
+
+## Pass 22 — Apprentice Bone Defender reference and Shieldwall Volley (2026-11-14)
+
+**Source:** [Official DD1 wiki — Bone Defender](https://darkestdungeon.wiki.gg/wiki/Bone_Defender) (Apprentice difficulty). The Kingdom of Clays **Crypt Shieldbearer** is a renamed version used alongside two **Crypt Arbalists** in the playable **Shieldwall Volley** encounter. This makes a four-enemy reference formation, while keeping the standalone, provisional Skeleton Swordsman roster unchanged.
+
+**Verified Apprentice baseline:** HP 15; DODGE 0%; PROT 25%; SPD 0; Unholy; STUN 25%; Blight 10%; Bleed 200%; Debuff 15%; Move 50%. Source-checked abilities:
+
+| Reskinned skill | DD1 reference | Usable ranks | Hero targets | ACC | CRIT | DMG | Effect |
+| --- | --- | --- | --- | ---: | ---: | --- | --- |
+| Crypt Axeblade | Axeblade | 1–2 | 1–2 | 72.5% | 6% | 3–5 | No additional effect |
+| Grave Weight | Dead Weight | 1–2 | 1–2 | 82.5% | 6% | 2–4 | 100% Stun; 100% knockback one rank |
+| Clumsy Axeblade | Clumsy Axeblade | 3–4 | 1–2 | 42.5% | 0% | 2–4 | Advance one rank |
+
+**Source-checked Apprentice monster brain:** On first performed action, Axeblade and Dead Weight have a **4:1** relative choice ratio, thereafter **1:1**. If **three or more heroes are stunned**, Dead Weight is excluded; it also does not choose stunned victims. In ranks 3–4, only Clumsy Axeblade can be used, and the Shieldbearer moves toward the front. Axeblade gains an additive **+200%** target weighting for marked heroes; Dead Weight gains **+200%** for a hero with the lowest Move resistance. These boosts do not guarantee the target.
+
+**Fidelity boundaries:** The attack data, Apprentice profile, skill-selection ratios, forced fallback and target preference values have direct published references. Mixed encounter composition and specific reskinned character names are original Clays choices. Exact combined Stun/knockback sequencing and all non-reference enemies still need deeper validation; a particular chance roll can resist either effect independently.
+
+**Tests:** `tests/crypt-shieldbearer-reference.test.js` and `tests/browser/crypt-shieldbearer-reference.spec.js` cover baseline stats, duplicated units, 4:1/1:1 choices, stun exclusions, marked/Move-resist preferences, forced fallback, Stun and knockback.
