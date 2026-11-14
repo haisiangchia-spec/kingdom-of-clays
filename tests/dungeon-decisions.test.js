@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createDungeon,scoutCorridor,beginCorridor,advanceCorridor,disarmTrap,resolveHunger,interactCurio,dungeonBattle,resolveDungeonBattle} from '../src/dungeon.js';
+import {collectLoot} from '../src/inventory.js';
 
 function clearCombat(d){
  const b=dungeonBattle(d);
@@ -14,8 +15,10 @@ function travel(d,to){
   advanceCorridor(d);
   if(d.pendingHunger)resolveHunger(d,'eat');
   clearCombat(d);
+  if(d.pendingLoot)collectLoot(d);
  }
  clearCombat(d);
+ if(d.pendingLoot)collectLoot(d);
  assert.equal(d.room,to);
 }
 test('scouting reveals a deterministic corridor encounter before entering and cannot be spammed',()=>{
