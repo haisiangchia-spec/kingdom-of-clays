@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon} from '../src/dungeon.js';
+import {createDungeon,resolveHunger} from '../src/dungeon.js';
 import {createCampaignSettlement,normalizeCampaignSettlement,SETTLEMENT_FACILITIES,nextFacilityCost,upgradeFacility,expeditionBonuses,encodeCampaignSave,decodeCampaignSave,CAMPAIGN_SAVE_VERSION} from '../src/settlement.js';
 import {offerLoot,collectLoot,claimExpeditionRewards} from '../src/inventory.js';
 
@@ -50,7 +50,6 @@ test('facility upgrades change future expedition supplies, HP, and hunger stress
  assert.equal(newDungeon.party[0].hp,baseline.party[0].hp+2);
  newDungeon.stepsTaken=4;newDungeon.room='watch';newDungeon.pendingTravel={from:'watch',to:'gallery',corridor:'gallery-watch',progress:0,steps:2};
  newDungeon.pendingHunger=true;
- const {resolveHunger}=await import('../src/dungeon.js');
  resolveHunger(newDungeon,'skip');
  assert.equal(newDungeon.party[0].stress,13);
  assert.equal(newDungeon.party[0].hp,newDungeon.party[0].maxHp-3);
