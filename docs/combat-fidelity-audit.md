@@ -482,3 +482,15 @@ This milestone extends `src/dungeon.js` and the playable `dungeon.html` expediti
 **Testing:** `tests/dungeon-inventory.test.js` and `tests/browser/dungeon-inventory.spec.js` cover initial supply accounting, gold stacking and merging, atomic overflow, discard-and-collect, leave behind, curio reward persistence, battle loot locks and real browser controls. Existing hunger traversal regression helpers resolve pending battle loot to preserve their intended test path.
 
 **Remaining:** More item categories, DD1-accurate provision capacities and stack sizes, reward tables, actual trinkets/heirlooms, item sorting, quest rewards and settlement conversion after the expedition.
+
+## Pass 28 — Gems, heirlooms, trinkets and settlement handoff (2026-11-14)
+
+This milestone expands the expedition inventory from gold to four additional reward types: **Moonstone gems** (3 per stack, 125 gold each), **Crests** (6 per stack), **Deeds** (4 per stack), and unique **Ward Charms** (1 trinket per stack). Existing gold, food, torch, and holy-water stack behaviour is retained; all rewards continue to count against the same 8-slot pack limit. Mixed rewards merge with existing stacks of the same kind, and capacity checks are atomic. Discarding gold reduces carried gold; discarding a gem, crest, deed, or trinket removes the appropriate stack without incorrectly changing the gold counter.
+
+**New deterministic reward fixtures:** Non-final corridor battles ordinarily offer 50 gold. The Guard Post room victory offers 3 Crests; the Relic Vault room victory offers 2 Moonstones; Sanctum approach corridor battles offer 2 Deeds. Purifying the Sealed Urn in the Vault offers one Ward Charm in interactive expeditions; older non-interactive calls retain their immediate-gold behaviour. The new reward types reuse the pending-loot collect / leave / discard-to-make-room choice, and persist until the expedition ends.
+
+**Settlement reward handoff:** On victory, an explicit **Return rewards to settlement** control transfers all *carried* valuables to an in-memory settlement record once. Gold plus the sale value of Moonstones becomes settlement gold. Crests and Deeds are separate upgrade currencies, and Ward Charms enter a trinket collection. A second transfer from the same expedition is rejected, and unclaimed or discarded items are excluded. The settlement survives a new expedition within the same browser page, but is **not yet saved persistently across page reloads**. This is a foundation for the future Temple, Market, upgrades, and other settlement facilities.
+
+**Fidelity warning:** Reward types are inspired by DD1 but the specific stack sizes, values, item names, source-specific drops, payout conversion, economy and end-of-quest settlement behaviour are **provisional Kingdom of Clays rules**, not exact original DD1 data. Death/retreat reward retention and persistent settlement storage still require implementation.
+
+**Coverage:** `tests/dungeon-rewards.test.js` and `tests/browser/dungeon-rewards.spec.js` validate heterogeneous stacking, reward selection, Vault trinkets, inventory overflow and once-only settlement payouts.
