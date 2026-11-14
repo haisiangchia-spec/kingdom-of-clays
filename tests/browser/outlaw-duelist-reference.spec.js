@@ -30,3 +30,21 @@ test('duelist chooses exact turn-weighted skill and forced rear fallback in Chro
   rearRank:3,rearSkill:'duelist_poke'
  });
 });
+
+test('Veteran Shank target bonuses add up and never guarantee a marked target',async ({page})=>{
+ await page.goto('/');
+ const result=await page.evaluate(async ()=>{
+  const {makeUndeadEncounter,ABILITIES,availableTargets}=await import('./src/engine.js');
+  const {chooseEnemyAction,additiveTargetWeight,ENEMY_TACTICS}=await import('./src/enemy-ai.js');
+  const b=makeUndeadEncounter(91,'outlawPatrol'),d=b.units.find(u=>u.enemyProfile==='duelist');
+  const ids=availableTargets(b,d.id,'duelist_shank');
+  const heroes=ids.map(id=>b.units.find(u=>u.id===id));
+  heroes.forEach(h=>{h.resist.bleed=40;h.marked=0;});
+  heroes[0].resist.bleed=10;heroes[1].marked=3;
+  const desires=ENEMY_TACTICS[d.name].additiveTargetDesires;
+  const weights=heroes.map(h=>additiveTargetWeight(b,h,'duelist_shank',ids,desires));
+  const choose=(draw)=>{const rs=[.95,draw];let i=0;return chooseEnemyAction(b,d.id,d.enemySkills,()=>rs[i++],ABILITIES,availableTargets);};
+  return {weights,early:choose(.02).targetId,marked:choose(.5).targetId};
+ });
+ expect(result).toEqual({weights:[2,4,1,1],early:'h1',marked:'h2'});
+});
