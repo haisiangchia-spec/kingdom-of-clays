@@ -1,6 +1,7 @@
 import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
+import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack} from './inventory.js';
 
 const $=id=>document.getElementById(id);
 const HERO_SKILLS={
@@ -79,6 +80,26 @@ function render(){
    marker.className=id===expedition.room?'here':expedition.visited.includes(id)?'seen':'';
    if(expedition.cleared.includes(id))marker.textContent+=' ✓';
  }
+ const inventory=$('dungeon-inventory');inventory.replaceChildren();
+ el('p',`Inventory: ${inventoryUsed(expedition)}/${INVENTORY_CAPACITY} slots · Gold carried: ${expedition.loot}`,inventory);
+ for(const stack of inventoryStacks(expedition)){
+   const row=el('div',`${ITEM_RULES[stack.kind].name} ×${stack.quantity} · `,inventory);
+   row.className='dungeon-unit';
+   const discard=el('button','Discard',row,()=>{
+     try{discardInventoryStack(expedition,stack.id);}catch(error){expedition.log.push(error.message);}
+     render();
+   });
+   discard.disabled=expedition.phase!=='explore';
+ }
+ if(expedition.pendingLoot&&expedition.phase==='explore'){
+   const pending=expedition.pendingLoot;
+   el('p',`Unclaimed treasure: ${pending.quantity} ${ITEM_RULES[pending.kind].name}. Free a slot or leave it behind.`,inventory);
+   el('button','Collect treasure',inventory,()=>{
+     try{collectLoot(expedition);}catch(error){expedition.log.push(error.message);}
+     render();
+   });
+   el('button','Leave treasure',inventory,()=>{leaveLoot(expedition);render();});
+ }
  const decisions=$('dungeon-decisions');decisions.replaceChildren();
  if(expedition.phase==='explore'&&expedition.pendingHunger){
    el('p','Hunger! Feed the party four rations or go without (-3 HP and +15 stress per hero).',decisions);
@@ -88,7 +109,7 @@ function render(){
    feed.disabled=expedition.supplies.food<4;
    el('button','Go hungry',decisions,()=>{resolveHunger(expedition,'skip');render();});
  }
- if(expedition.phase==='explore'&&!expedition.pendingHunger&&!expedition.pendingTravel&&DUNGEON_CURIOS[expedition.room]&&!expedition.curiosUsed.includes(expedition.room)){
+ if(expedition.phase==='explore'&&!expedition.pendingHunger&&!expedition.pendingTravel&&!expedition.pendingLoot&&DUNGEON_CURIOS[expedition.room]&&!expedition.curiosUsed.includes(expedition.room)){
    el('p','Curio: '+DUNGEON_CURIOS[expedition.room].name,decisions);
    for(const [action,label] of [['leave','Leave untouched'],['touch','Inspect without provision'],['purify','Use holy water (safe reward)']]){
      const btn=el('button',label,decisions,()=>{
@@ -112,8 +133,8 @@ function render(){
        }
      }
      const advance=el('button','Advance corridor',travel,()=>{advanceCorridor(expedition);syncCombat();render();});
-     advance.disabled=!!expedition.pendingHunger;
-   }else if(!expedition.pendingHunger){
+     advance.disabled=!!expedition.pendingHunger||!!expedition.pendingLoot;
+   }else if(!expedition.pendingHunger&&!expedition.pendingLoot){
      for(const adjacent of adjacentRooms(expedition)){
        const record=expedition.corridors[adjacent.corridor];
        el('button','Travel to '+DUNGEON_ROOMS[adjacent.room].name,travel,()=>{
