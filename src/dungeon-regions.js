@@ -26,9 +26,8 @@ export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random
  let roll=value*total,chosen=table[table.length-1];
  for(const entry of table){roll-=entry.weight;if(roll<0){chosen=entry;break;}}
  const profiles=[...PLAGUE_TEMPLATES[chosen.id]];
- if(profiles.length>4||profiles.length<3)throw Error('Invalid plague formation');
- for(const profile of profiles)if(!ENEMY_PROFILES[profile])throw Error('Unknown plague enemy');
- return {difficulty,region:'plague',template:chosen.id,profiles,slots:profiles.length,
+ const slots=validatePlagueFormation(profiles);
+ return {difficulty,region:'plague',template:chosen.id,profiles,slots,
    threat:profiles.reduce((n,id)=>n+PLAGUE_THREAT[id],0),source:'clays-provisional-plague-encounter-table'};
 }
 
@@ -70,4 +69,20 @@ export function regionHazard(region){
  const hazard=REGION_HAZARDS[region];
  if(!hazard)throw Error('Unknown dungeon region: '+region);
  return hazard;
+}
+
+// Check the actual formation footprint and every starting monster's legal
+// action. These rank restrictions are engine ability definitions, not guessed
+// region spawn probabilities.
+export function validatePlagueFormation(profiles){
+ if(!Array.isArray(profiles)||profiles.length<1)throw Error('Invalid plague formation');
+ let slots=0;
+ for(const id of profiles){
+  const profile=ENEMY_PROFILES[id];
+  if(!profile||!Object.hasOwn(PLAGUE_THREAT,id))throw Error('Unknown plague enemy: '+id);
+  const size=profile.stats.size??1;
+  if(!Number.isInteger(size)||size<1||slots+size>4)throw Error('Invalid plague formation');
+  slots+=size;
+ }
+ return slots;
 }
