@@ -2,6 +2,12 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Dungeon expedition (Milestone 24)
+
+Open **[Dungeon Expedition](./dungeon.html)** from the Combat Lab or navigate directly to `dungeon.html`. The first campaign slice has five connected rooms, two-step corridors, seeded reference-enemy encounters, a Sanctum objective, and persistent hero HP/stress/death state between battles. In battle, choose a hero ability and target; enemy AI executes automatically. On victory, corridor traversal resumes where it stopped. A failed combat ends the expedition.
+
+**Fidelity boundary:** Dungeon graph, encounter chances, travel cost and goal are intentional prototype fixtures, not copied DD1 exploration or encounter distributions. Provisions, loot, scouting, traps, retreat, curios and camping are planned for later milestones. Combat still uses the earlier DD1-inspired engine and verified reference-monster subsets.
+
 ## Run and test
 
 Serve the repository root with `python3 -m http.server 8000` and open `http://localhost:8000`. Use Node.js 22+ and `npm test` for the unit/regression suite. On every push/PR, GitHub Actions also runs real Chromium tests via Playwright.
