@@ -144,6 +144,7 @@ test('dismissal frees roster capacity and a vacant rank can be filled by a free 
  const restored=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
  assert.deepEqual(restored.squad,s.squad);
  assert.deepEqual(restored.graveyard,s.graveyard);
+ s.facilities.temple=1;s.gold=RESURRECTION_COST;
  assert.throws(()=>resurrectHero(s,'r1'),/not deceased/);
 });
 
