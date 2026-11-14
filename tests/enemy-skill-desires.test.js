@@ -88,3 +88,23 @@ test('unknown and invalid skill desires do not produce illegal choices',()=>{
   assert.ok(availableTargets(battle,'e3',action.key).includes(action.targetId));
  }
 });
+
+test('playable Court Mage and Emperor profiles react to status and action sequence',()=>{
+ const battle=makeBattle(77),mage=find(battle,'e4');
+ const magePick=()=>chooseEnemyAction(battle,'e4',mage.enemySkills,()=>.68,ABILITIES,availableTargets);
+ assert.equal(magePick().key,'court_curse');
+ find(battle,'h3').dot.push({type:'blight',value:2,turns:3});
+ assert.equal(magePick().key,'court_curse');
+ // At 0.80 the normal 3:1 ratio picks blight, but 6:1 picks curse.
+ const threshold=()=>chooseEnemyAction(battle,'e4',mage.enemySkills,()=>.80,ABILITIES,availableTargets);
+ assert.equal(threshold().key,'court_curse');
+ find(battle,'h3').dot=[];
+ assert.equal(threshold().key,'court_blight');
+ const bossBattle=makeLargeMonsterBattle(78),boss=find(bossBattle,'boss');
+ const first=skillDesireWeight(bossBattle,boss,'emperor_slam',availableTargets(bossBattle,'boss','emperor_slam'),
+  [{type:'performing_turn',skill:'emperor_slam',turn:2,weight:1.5}]);
+ assert.equal(first,1);
+ bossBattle.queue=['boss','boss','h1'];
+ takeTurn(bossBattle,'boss','emperor_roar','h1',()=>.5);
+ assert.equal(boss.actionsTaken,1);
+});
