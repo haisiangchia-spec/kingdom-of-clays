@@ -363,4 +363,21 @@ The [official DD1 modding guide](https://steamcommunity.com/sharedfiles/filedeta
 
 **Verified Shank target priority:** The Wiki reports a **+100% relative chance** to target the hero with the lowest Bleed resistance and, at Veteran difficulty, **+300% relative chance** to target a marked hero. `additiveTargetWeight` implements those as bonuses **+1** and **+3** to a default target weight of 1; the bonuses add (rather than multiply) if a target meets both conditions. For four targets with only one marked hero, this means relative weights **1:4:1:1**, not guaranteed targeting. These bonuses apply only to `duelist_shank` and only across currently legal targets. Tests include the interaction between lowest resistance and mark status.
 
-**Outstanding AI parity:** Verify full per-skill damage, critical chance, hit chance, and side effects for the Duelist, then map additional monster brains from reference data without assuming every reskin shares its source creature's behaviour.
+**Outstanding AI parity:** Continue mapping additional monster brains from reference data without assuming every reskin shares its source creature's behaviour.
+
+## Pass 20 — Veteran Cutthroat ability data and resistance sign (2026-11-14)
+
+**Source:** [Official DD1 wiki: Brigand Cutthroat](https://darkestdungeon.wiki.gg/wiki/Brigand_Cutthroat), Veteran abilities table. The *Outlaw Duelist* remains an original-name reskin. Individual skills now carry their own damage range; these ranges replace the actor's shared base damage only for skills that specify them.
+
+| Reskinned skill | Veteran ACC | CRIT | DMG | Status / movement |
+| --- | ---: | ---: | ---: | --- |
+| Crossblade Sweep (Slice and Dice) | 78.75% | 16% | 4–7 each | Front two heroes; 120% -25 Bleed Resist |
+| Rising Pommel (Uppercut Slice) | 78.75% | 12% | 3–5 | Push 1 rank, 120% |
+| Outlaw Stab (Shank) | 82.5% | 12% | 5–11 | Bleed 2, 120% |
+| Retreating Jab (Harmless Poke) | 52.5% | 0% | 3–5 | Advance 1 rank and +2 SPD |
+
+The engine already applies the hidden DD1 +5 ACC correction to the skill's nominal ACC. The target's DODGE still lowers hit probability, and PROT reduces direct damage but not DoT. The Speed buff's exact duration is currently a **provisional two-turn fixture**, pending confirmation from game data; its **+2 value** is source-backed.
+
+**Related bug fixed:** The shared secondary-status resistance path previously **subtracted** effect modifiers from the target's baseline resistance. With a -25 Bleed Resist debuff this mistakenly made the target **more** resistant. The application now uses **baseline resistance + signed modifier**; the same correction applies to debuff resistance. A follow-up Shank regression checks that -25 Bleed Resist increases the chance of Bleed.
+
+**Tests:** `tests/outlaw-duelist-abilities.test.js` and `tests/browser/outlaw-duelist-abilities.spec.js` check damage ranges, AoE hits, status modifiers, knockback, retreat and buff. This is an implementation-level ability parity pass, not a full certification of round-by-round game behaviour or animations.
