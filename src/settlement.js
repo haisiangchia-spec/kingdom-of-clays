@@ -2,6 +2,7 @@
 // Prices and unlock effects are authored prototypes, NOT DD1 building values.
 import {createSettlement} from './inventory.js';
 import {setupHeroRoster,validateHeroRoster} from './hero-roster.js';
+import {initTown,validateTown} from './town-week.js';
 
 export const SETTLEMENT_FACILITIES=Object.freeze({
  market:Object.freeze({name:'Market',maxLevel:3,baseCost:Object.freeze({gold:100,crests:1,deeds:0}),description:'+2 starting food per level'}),
@@ -13,7 +14,7 @@ export const CAMPAIGN_SAVE_VERSION=1;
 const safeNumber=x=>Number.isSafeInteger(x)&&x>=0;
 const isObject=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 export function createCampaignSettlement(){
- return setupHeroRoster({...createSettlement(),facilities:{market:0,guild:0,temple:0},completedExpeditions:0});
+ return initTown(setupHeroRoster({...createSettlement(),facilities:{market:0,guild:0,temple:0},completedExpeditions:0}));
 }
 export function normalizeCampaignSettlement(input){
  if(!isObject(input))throw Error('Invalid settlement');
@@ -41,7 +42,9 @@ export function normalizeCampaignSettlement(input){
   base.nextHeroId=input.nextHeroId;
   base.graveyard=structuredClone(input.graveyard??[]);
  }
+ if(input.town!==undefined)base.town=structuredClone(input.town);
  validateHeroRoster(base);
+ validateTown(base);
  return base;
 }
 export function nextFacilityCost(settlement,id){
