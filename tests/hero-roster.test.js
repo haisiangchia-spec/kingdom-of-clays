@@ -83,6 +83,7 @@ test('Temple resurrection is a priced user-approved exception to permanent death
  assert.equal(hero.unit.dead,false);
  assert.equal(hero.unit.hp,Math.ceil(hero.unit.maxHp/2));
  assert.equal(hero.unit.stress,100);
+ s.facilities.temple=1;s.gold=RESURRECTION_COST;
  assert.throws(()=>resurrectHero(s,'r1'),/not deceased/);
 });
 test('equipment is stored per hero and not multiplied by duplicated recruits',()=>{
