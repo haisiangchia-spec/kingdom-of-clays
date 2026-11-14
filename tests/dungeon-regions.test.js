@@ -258,3 +258,42 @@ test('Champion Warrens generator includes Skiver while Apprentice never does',()
  }
  assert.throws(()=>makeGeneratedEncounter(1,'patrol','plague','legendary'),/Unknown Warrens tier/);
 });
+
+test('Champion Javelineer attacks, advances, and retreats using combat engine',()=>{
+ const b=makeGeneratedEncounter(1000003,'patrol','plague','champion');
+ const foe=b.units.find(u=>u.enemyProfile==='plagueSkiver');
+ assert.ok(foe);
+ const front=b.units.findIndex(u=>u.side==='enemy');
+ const idx=b.units.indexOf(foe);
+ [b.units[front],b.units[idx]]=[b.units[idx],b.units[front]];
+ assert.equal(rank(b,foe.id),0);
+ let targets=availableTargets(b,foe.id,'plague_skiver_flight');
+ assert.ok(targets.length>0);
+ b.queue=[foe.id];
+ takeTurn(b,foe.id,'plague_skiver_flight',targets[0],()=>.5);
+ assert.equal(rank(b,foe.id),2,'retreat should reach back of three-monster formation');
+ assert.equal(foe.actionsTaken,1);
+ // Reuse the battle with a fresh action slot to validate the ranged javelin.
+ foe.acted=false;
+ b.queue=[foe.id];
+ targets=availableTargets(b,foe.id,'plague_skiver_roast');
+ assert.ok(targets.length>0);
+ takeTurn(b,foe.id,'plague_skiver_roast',targets[0],()=>.5);
+ assert.equal(rank(b,foe.id),1,'javelin should advance one rank');
+});
+test('Champion Javelineer Crippling Volley applies damage and blight to rear heroes',()=>{
+ const b=makeGeneratedEncounter(2000006,'patrol','plague','champion');
+ const foe=b.units.find(u=>u.enemyProfile==='plagueSkiver');
+ assert.ok(foe);
+ const before=b.units.filter(u=>u.side==='hero').map(u=>u.hp);
+ const targets=availableTargets(b,foe.id,'plague_skiver_cripple');
+ assert.equal(targets.length,1,'multi-target skill has one selectable group target');
+ b.queue=[foe.id];
+ takeTurn(b,foe.id,'plague_skiver_cripple',targets[0],()=>.5);
+ const heroes=b.units.filter(u=>u.side==='hero');
+ assert.equal(heroes[0].hp,before[0],'front hero should be outside volley target ranks');
+ for(let i=1;i<4;i++){
+  assert.ok(heroes[i].hp<before[i],'rear hero '+i+' should take damage');
+  assert.ok(heroes[i].dot.some(d=>d.type==='blight'),'rear hero '+i+' should receive blight');
+ }
+});
