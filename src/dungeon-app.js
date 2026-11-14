@@ -128,7 +128,7 @@ function render(){
  if(['victory','defeat'].includes(expedition.phase)&&expedition.rosterReturned&&!expedition.townWeekProcessed){
   try{advanceTownWeek(settlement,expedition);}catch(e){expedition.log.push('Town week failed: '+e.message);}
  }
- $('dungeon-status').textContent=`${DUNGEON_REGIONS[expedition.region??'crypt'].name} · ${regionRoomName(expedition.region??'crypt',expedition.room)} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
+ $('dungeon-status').textContent=`${DUNGEON_REGIONS[expedition.region??'crypt'].name} · ${(expedition.tier??'apprentice').toUpperCase()} · ${regionRoomName(expedition.region??'crypt',expedition.room)} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
  $('dungeon-region').disabled=!['victory','defeat'].includes(expedition.phase);
  $('dungeon-tier').disabled=!['victory','defeat'].includes(expedition.phase);
  $('dungeon-tier').value=expedition.tier??'apprentice';
