@@ -3,6 +3,12 @@
 // Select a legal skill first, then a target independently. This avoids giving
 // four-target skills four times the selection chance of single-target skills.
 const PROFILES=Object.freeze({
+  'Blight Javelineer':Object.freeze({
+    // Provisional Clays AI preferences, not claimed as DD1 source weights.
+    // Illegal skills remain filtered by availableTargets at the current rank.
+    skillWeights:Object.freeze({plague_skiver_roast:3,plague_skiver_cripple:4,plague_skiver_flight:2}),
+    targetPreference:'rear'
+  }),
   'Crypt Shieldbearer':Object.freeze({
     // Apprentice Bone Defender: first turn 4:1 Axeblade/Dead Weight;
     // thereafter 1:1. Rank 3-4 forces Clumsy Axeblade.
