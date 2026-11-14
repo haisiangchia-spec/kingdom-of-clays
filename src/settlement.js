@@ -15,7 +15,7 @@ export const CAMPAIGN_SAVE_VERSION=1;
 const safeNumber=x=>Number.isSafeInteger(x)&&x>=0;
 const isObject=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 export function createCampaignSettlement(){
- return initSanitarium(initTown(setupHeroRoster({...createSettlement(),facilities:{market:0,guild:0,temple:0},completedExpeditions:0})));
+ return initSanitarium(initTown(setupHeroRoster({...createSettlement(),busts:0,facilities:{market:0,guild:0,temple:0},completedExpeditions:0})));
 }
 export function normalizeCampaignSettlement(input){
  if(!isObject(input))throw Error('Invalid settlement');
@@ -26,6 +26,7 @@ export function normalizeCampaignSettlement(input){
  }
  if(!Array.isArray(input.trinkets)||input.trinkets.length>1000||input.trinkets.some(x=>x!=='ward-charm'))throw Error('Invalid settlement trinkets');
  base.trinkets=[...input.trinkets];
+ if(input.busts!==undefined){if(!safeNumber(input.busts))throw Error('Invalid settlement busts');base.busts=input.busts;}
  const fields=input.facilities??{};
  if(!isObject(fields))throw Error('Invalid settlement facilities');
  for(const [key,rule] of Object.entries(SETTLEMENT_FACILITIES)){
