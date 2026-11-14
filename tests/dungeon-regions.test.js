@@ -375,3 +375,17 @@ test('Champion tier is explicitly restricted to the implemented Warrens region',
  assert.ok(makeGeneratedEncounter(1,'patrol','crypt').encounterPlan);
  assert.equal(makeGeneratedEncounter(1,'patrol','plague','champion').encounterPlan.tier,'champion');
 });
+
+test('Champion Warrens dungeon carries tier into generated corridor encounters',()=>{
+ const dungeon=createDungeon(42,{difficulty:'patrol',region:'plague',tier:'champion'});
+ assert.equal(dungeon.tier,'champion');
+ beginCorridor(dungeon,'gallery');
+ let guard=0;
+ while(dungeon.phase==='explore'&&dungeon.pendingTravel&&guard++<30)advanceCorridor(dungeon);
+ if(dungeon.pendingBattle){
+  assert.equal(dungeonBattle(dungeon).encounterPlan.tier,'champion');
+  assert.ok(dungeonBattle(dungeon).units.some(u=>u.enemyProfile==='plagueSkiver'));
+ }
+ assert.throws(()=>createDungeon(1,{region:'crypt',tier:'champion'}),/supported only in Blighted Warrens/);
+ assert.throws(()=>createDungeon(1,{region:'plague',tier:'veteran'}),/Unknown dungeon tier/);
+});
