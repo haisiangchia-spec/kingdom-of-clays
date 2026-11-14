@@ -3,7 +3,7 @@ import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,avai
 import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
 import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
-import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,equipTrinket,unequipTrinket} from './hero-roster.js';
+import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket} from './hero-roster.js';
 
 const $=id=>document.getElementById(id);
 const HERO_SKILLS={
@@ -158,18 +158,28 @@ function render(){
    const equip=el('button','Equip charm',row,()=>{try{equipTrinket(settlement,h.rosterId);}catch(e){expedition.log.push(e.message);}render();});
    equip.disabled=!townAvailable||!settlement.trinkets.includes('ward-charm');
   }
+  if(townAvailable){
+   const dismiss=el('button','Dismiss permanently '+h.name,row,()=>{
+    try{dismissHero(settlement,h.rosterId);}catch(e){expedition.log.push(e.message);}
+    render();
+   });
+   dismiss.title='Irreversibly remove this hero and free a roster slot';
+  }
  }
+ if(settlement.graveyard?.length)el('p','Graveyard: '+settlement.graveyard.map(h=>h.name).join(', '),roster);
  if(townAvailable){
   for(let i=0;i<4;i++){
    const rank=i;
    const row=el('div','Rank '+(i+1)+': ',roster);row.className='dungeon-unit';
    const select=el('select',null,row);
+   if(settlement.squad[rank]===null){const empty=el('option','Select an available hero',select);empty.value='';}
    for(const h of settlement.roster.filter(h=>!h.unit.dead&&(settlement.squad[rank]===h.rosterId||!settlement.squad.includes(h.rosterId)))){
     const option=el('option',h.name+' ('+h.heroClass+')',select);
     option.value=h.rosterId;
    }
-   select.value=settlement.squad[rank];
+   select.value=settlement.squad[rank]??'';
    select.addEventListener('change',()=>{
+    if(!select.value)return;
     try{selectHero(settlement,rank,select.value);}catch(e){expedition.log.push(e.message);}
     render();
    });
