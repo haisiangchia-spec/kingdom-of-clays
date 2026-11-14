@@ -654,3 +654,21 @@ test('Champion Hookstalker retreat moves back when a rear slot is available',()=
  }
  assert.ok(exercised>0,'At least one seeded formation must permit a real Hookstalker retreat');
 });
+
+
+test('Champion Javelineer selects only rank-legal attacks after displacement',()=>{
+ let checked=0;
+ for(let seed=1;seed<=300;seed++){
+  const battle=makeGeneratedEncounter(seed*1000003,'gauntlet','plague','champion');
+  const foe=battle.units.find(u=>u.enemyProfile==='plagueSkiver');
+  if(!foe)continue;
+  const legal=foe.enemySkills.filter(id=>availableTargets(battle,foe.id,id).length>0);
+  assert.ok(legal.length,'Javelineer must have an action at its starting rank');
+  for(const id of legal){
+   const targets=availableTargets(battle,foe.id,id);
+   assert.ok(targets.length,'Legal Javelineer action must have a selectable target');
+  }
+  checked++;
+ }
+ assert.ok(checked>0);
+});
