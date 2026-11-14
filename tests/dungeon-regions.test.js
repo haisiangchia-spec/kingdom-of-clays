@@ -511,3 +511,25 @@ test('Champion Butcher Spiked Chain applies stun and rank displacement',()=>{
  assert.ok(victim.stun>0||battle.log.some(line=>line.includes(victim.name)&&line.includes('stun')),'Spiked Chain must stun');
  assert.ok(battle.log.some(line=>line.includes(victim.name)&&line.includes('rank')),'Spiked Chain must displace the hero');
 });
+
+
+test('Champion scaling does not mutate frozen Apprentice monster definitions across encounters',()=>{
+ const original=Object.fromEntries(['plagueChopper','plagueDrummer','plagueWretch','plagueSlasher'].map(id=>[id,{
+  stats:structuredClone(ENEMY_PROFILES[id].stats),skills:[...ENEMY_PROFILES[id].skills]
+ }]));
+ for(let seed=1;seed<=80;seed++)makeGeneratedEncounter(seed*101,'gauntlet','plague','champion');
+ for(const [id,profile] of Object.entries(original)){
+  assert.deepEqual(ENEMY_PROFILES[id].stats,profile.stats,id+' base stats mutated');
+  assert.deepEqual(ENEMY_PROFILES[id].skills,profile.skills,id+' base skills mutated');
+ }
+ for(let seed=1;seed<=80;seed++){
+  const apprentice=makeGeneratedEncounter(seed*101,'gauntlet','plague','apprentice');
+  for(const foe of apprentice.units.filter(u=>u.side==='enemy')){
+   const source=ENEMY_PROFILES[foe.enemyProfile];
+   assert.equal(foe.maxHp,source.stats.hp);
+   assert.deepEqual(foe.enemySkills,source.skills);
+   assert.equal(foe.skillDamageBonus,undefined);
+   assert.equal(foe.tierScaling,undefined);
+  }
+ }
+});
