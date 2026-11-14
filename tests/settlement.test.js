@@ -6,7 +6,9 @@ import {offerLoot,collectLoot,claimExpeditionRewards} from '../src/inventory.js'
 
 test('campaign settlement starts empty with three independent upgradeable facilities',()=>{
  const s=createCampaignSettlement();
- assert.deepEqual(s,{gold:0,crests:0,deeds:0,trinkets:[],facilities:{market:0,guild:0,temple:0},completedExpeditions:0});
+ assert.deepEqual({gold:s.gold,crests:s.crests,deeds:s.deeds,trinkets:s.trinkets,facilities:s.facilities,completedExpeditions:s.completedExpeditions},{gold:0,crests:0,deeds:0,trinkets:[],facilities:{market:0,guild:0,temple:0},completedExpeditions:0});
+ assert.equal(s.roster.length,4);
+ assert.deepEqual(s.squad,['r1','r2','r3','r4']);
  assert.deepEqual(Object.keys(SETTLEMENT_FACILITIES),['market','guild','temple']);
  assert.deepEqual(nextFacilityCost(s,'market'),{gold:100,crests:1,deeds:0});
  assert.deepEqual(nextFacilityCost(s,'guild'),{gold:125,crests:0,deeds:1});
