@@ -170,8 +170,8 @@ function encounterSeed(seed,key){
 export function createDungeon(seed=1,{difficulty='scout',region='crypt',tier='apprentice',interactiveEvents=false,bonuses={},party:rosterParty=null}={}){
  if(!['scout','patrol','gauntlet'].includes(difficulty))throw Error('Unknown dungeon difficulty');
  if(!['crypt','plague'].includes(region))throw Error('Unknown dungeon region');
- if(!['apprentice','champion'].includes(tier))throw Error('Unknown dungeon tier');
- if(region!=='plague'&&tier!=='apprentice')throw Error('Champion expeditions are supported only in Blighted Warrens');
+ if(!['apprentice','veteran','champion'].includes(tier))throw Error('Unknown dungeon tier');
+ if(region!=='plague'&&tier!=='apprentice')throw Error('Veteran and Champion expeditions are supported only in Blighted Warrens');
  const party=rosterParty?rosterParty.map(copy):makeGeneratedEncounter(seed,difficulty,region,tier).units.filter(u=>u.side==='hero').map(copy);
  if(party.length!==4||party.some((u,i)=>u.id!=='h'+(i+1)||u.dead))throw Error('Expedition needs four living ranked heroes');
  const bonusHp=Math.max(0,Math.min(6,Math.trunc(bonuses.heroHp??0)));
