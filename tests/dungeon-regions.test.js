@@ -356,3 +356,15 @@ test('Champion encounter weights map deterministic rolls to the expected formati
   assert.throws(()=>createPlagueEncounterPlan('patrol',()=>invalid,'champion'),/Encounter random/);
  }
 });
+
+test('Champion encounter selection is reproducible for identical seeds',()=>{
+ for(const difficulty of ['scout','patrol','gauntlet']){
+  for(let seed=1;seed<=100;seed++){
+   const first=makeGeneratedEncounter(seed*1000003,difficulty,'plague','champion');
+   const second=makeGeneratedEncounter(seed*1000003,difficulty,'plague','champion');
+   assert.deepEqual(first.encounterPlan,second.encounterPlan);
+   assert.deepEqual(first.units.filter(u=>u.side==='enemy').map(u=>[u.enemyProfile,u.hp,u.spd]),
+                    second.units.filter(u=>u.side==='enemy').map(u=>[u.enemyProfile,u.hp,u.spd]));
+  }
+ }
+});
