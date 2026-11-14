@@ -71,12 +71,17 @@ export function spawnEncounterPlan(unitFactory,plan){
     plagueSlasher:{hp:16,spd:7,dodge:30,prot:40,stunResist:55,blightResist:85,bleedResist:85,debuffResist:60,moveResist:70}
    };
    const verifiedChampion=plan.region==='plague'&&plan.tier==='champion'&&Object.hasOwn(championStats,profileId);
-   const verifiedChampionChopper=verifiedChampion&&profileId==='plagueChopper';
    const stats=verifiedChampion?{...profile.stats,...championStats[profileId]}:profile.stats;
    const enemy=unitFactory('e'+(i+1),profile.name,'enemy',stats);
    if(verifiedChampion)enemy.tierScaling='dd1-verified-champion-stats';
    enemy.enemyProfile=profileId;
-   enemy.enemySkills=verifiedChampionChopper?['plague_champion_butcher_cut','plague_champion_ball_chain']:[...profile.skills];
+   const championSkills={
+    plagueChopper:['plague_champion_butcher_cut','plague_champion_ball_chain'],
+    plagueDrummer:['plague_champion_drum_doom','plague_champion_drum_debilitation'],
+    plagueWretch:['plague_champion_vomit'],
+    plagueSlasher:['plague_champion_hook_slash']
+   };
+   enemy.enemySkills=verifiedChampion?[...championSkills[profileId]]:[...profile.skills];
    return enemy;
  });
 }
