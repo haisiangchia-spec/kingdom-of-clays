@@ -1,6 +1,7 @@
 // Named Clays encounter regions. Enemy stats/skills are source-audited;
 // roster compositions, weights and threat scores are provisional.
 import {ENEMY_PROFILES} from './enemy-roster.js';
+import {ENEMY_SKILLS} from './enemy-skills.js';
 export const DUNGEON_REGIONS=Object.freeze({
  crypt:Object.freeze({name:'Ashen Crypt',description:'Ancient defenders and outlaws'}),
  plague:Object.freeze({name:'Blighted Warrens',description:'Butchers, drummers and disease-bearing wretches'})
@@ -82,6 +83,11 @@ export function validatePlagueFormation(profiles){
   if(!profile||!Object.hasOwn(PLAGUE_THREAT,id))throw Error('Unknown plague enemy: '+id);
   const size=profile.stats.size??1;
   if(!Number.isInteger(size)||size<1||slots+size>4)throw Error('Invalid plague formation');
+  const occupied=Array.from({length:size},(_,i)=>slots+i);
+  if(!profile.skills.some(key=>{
+   const skill=ENEMY_SKILLS[key];
+   return skill&&Array.isArray(skill.from)&&occupied.some(rank=>skill.from.includes(rank));
+  }))throw Error('Plague enemy has no legal starting skill: '+id);
   slots+=size;
  }
  return slots;
