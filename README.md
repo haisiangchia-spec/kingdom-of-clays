@@ -2,6 +2,10 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Expedition scouting, hunger and curios (Milestone 26)
+
+In [Dungeon Expedition](./dungeon.html), players can scout adjacent corridors (spending 2 torchlight) to reveal seeded enemy and trap risks, attempt to disarm discovered traps with a chosen hero, and respond to hunger after every four completed corridor steps by spending four food or taking HP/stress penalties. The Gallery and Vault contain one-time curios that can be left, examined at risk or safely purified with a limited holy-water provision. Encounter/curio outcomes and supplies persist across the expedition. These probabilities, rewards, thresholds and light costs are **original Clays provisional choices**, not verified DD1 values. See `docs/combat-fidelity-audit.md` Pass 26.
+
 ## Dungeon supplies and hazards (Milestone 25)
 
 The dungeon expedition screen now includes three starting torches and eight food. Torches restore 25 light (up to 100); food heals a wounded living hero for 2 HP. Supplies cannot be used during combat. Four torchlight bands are displayed, lower light increases corridor encounter and trap probabilities, and the two late-stage corridors can trigger a one-time seeded trap that damages HP and stress. These values and odds are **provisional Kingdom of Clays exploration rules**, not certified DD1 numerical fidelity. See `docs/combat-fidelity-audit.md` Pass 25.
