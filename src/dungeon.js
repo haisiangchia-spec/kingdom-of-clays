@@ -254,6 +254,8 @@ export function resolveDungeonBattle(dungeon){
    }
    dungeon.phase=dungeon.cleared.includes('sanctum')?'victory':'explore';
    dungeon.log.push('Encounter cleared: '+source);
+   if(dungeon.interactiveEvents&&dungeon.phase==='explore')offerLoot(dungeon,'gold',50); // provisional battle drop
+
  }
  return dungeon;
 }
