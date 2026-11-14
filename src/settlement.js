@@ -39,6 +39,7 @@ export function normalizeCampaignSettlement(input){
   base.roster=structuredClone(input.roster);
   base.squad=structuredClone(input.squad);
   base.nextHeroId=input.nextHeroId;
+  base.graveyard=structuredClone(input.graveyard??[]);
  }
  validateHeroRoster(base);
  return base;
