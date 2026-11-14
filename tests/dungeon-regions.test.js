@@ -505,3 +505,23 @@ test('Champion scaling does not mutate frozen Apprentice monster definitions acr
   }
  }
 });
+
+
+test('All Champion Warrens support monsters use separate legal skill IDs',()=>{
+ const championSkills={
+  plagueChopper:['plague_champion_butcher_cut','plague_champion_ball_chain'],
+  plagueDrummer:['plague_champion_drum_doom','plague_champion_drum_debilitation'],
+  plagueWretch:['plague_champion_vomit'],
+  plagueSlasher:['plague_champion_hook_slash']
+ };
+ const seen=new Set();
+ for(let seed=1;seed<=300;seed++){
+  const battle=makeGeneratedEncounter(seed*1000003,'gauntlet','plague','champion');
+  for(const foe of battle.units.filter(u=>u.side==='enemy'&&championSkills[u.enemyProfile])){
+   seen.add(foe.enemyProfile);
+   assert.deepEqual(foe.enemySkills,championSkills[foe.enemyProfile]);
+   for(const skill of foe.enemySkills)assert.ok(availableTargets(battle,foe.id,skill).length,skill+' lacks legal targets');
+  }
+ }
+ assert.deepEqual([...seen].sort(),Object.keys(championSkills).sort());
+});
