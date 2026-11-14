@@ -1,3 +1,4 @@
+import {spawnEncounterPlan} from '../src/encounter-generator.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ENEMY_PROFILES} from '../src/enemy-roster.js';
@@ -905,6 +906,31 @@ test('Every configured Veteran Warrens formation spawns combat-ready enemies',()
      assert.ok(foe.enemySkills.some(skill=>availableTargets(battle,foe.id,skill).length>0),
       `${difficulty}/${entry.id}: ${foe.enemyProfile} has no legal attack`);
     }
+   }
+   offset+=entry.weight;
+  }
+ }
+});
+
+
+test('Every Veteran weighted formation spawns its exact roster with tier-specific combat skills',()=>{
+ const expected={
+  plagueChopper:['plague_veteran_butcher_cut','plague_veteran_ball_chain'],
+  plagueDrummer:['plague_veteran_drum_doom','plague_veteran_drum_debilitation'],
+  plagueWretch:['plague_veteran_vomit'],
+  plagueSlasher:['plague_veteran_hook_slash']
+ };
+ for(const [difficulty,entries] of Object.entries(PLAGUE_VETERAN_TABLES)){
+  const total=entries.reduce((n,e)=>n+e.weight,0);
+  let offset=0;
+  for(const entry of entries){
+   const plan=createPlagueEncounterPlan(difficulty,()=>(offset+entry.weight/2)/total,'veteran');
+   const spawned=spawnEncounterPlan((id,name,side,stats)=>({id,name,side,stats}),plan);
+   assert.deepEqual(spawned.map(enemy=>enemy.enemyProfile),plan.profiles);
+   for(const enemy of spawned){
+    assert.deepEqual(enemy.enemySkills,expected[enemy.enemyProfile]);
+    assert.equal(enemy.tierScaling,'dd1-verified-veteran-stats');
+    assert.ok(enemy.enemySkills.some(key=>ABILITIES[key]));
    }
    offset+=entry.weight;
   }
