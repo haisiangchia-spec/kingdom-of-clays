@@ -50,3 +50,13 @@ export function regionRoomName(region,roomId){
  if(!Object.hasOwn(rooms,roomId))throw Error('Unknown dungeon room: '+roomId);
  return rooms[roomId];
 }
+
+export const REGION_CURIOS=Object.freeze({
+ crypt:Object.freeze({gallery:Object.freeze({name:'Abandoned Reliquary'}),vault:Object.freeze({name:'Sealed Urn'})}),
+ plague:Object.freeze({gallery:Object.freeze({name:'Spore-Covered Cache'}),vault:Object.freeze({name:'Diseased Offering'})})
+});
+export function regionCurio(region,roomId){
+ const curios=REGION_CURIOS[region];
+ if(!curios)throw Error('Unknown dungeon region: '+region);
+ return curios[roomId]??null;
+}
