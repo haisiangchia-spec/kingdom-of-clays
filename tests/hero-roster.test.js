@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCampaignSettlement,normalizeCampaignSettlement,encodeCampaignSave,decodeCampaignSave,expeditionBonuses,upgradeFacility} from '../src/settlement.js';
 import {createDungeon} from '../src/dungeon.js';
 import {claimExpeditionRewards} from '../src/inventory.js';
-import {HERO_CLASSES,ROSTER_CAPACITY,RECRUITMENT_COST,RESURRECTION_COST,createHeroRoster,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,equipTrinket,unequipTrinket,validateHeroRoster} from '../src/hero-roster.js';
+import {HERO_CLASSES,ROSTER_CAPACITY,RECRUITMENT_COST,RESURRECTION_COST,createHeroRoster,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,validateHeroRoster} from '../src/hero-roster.js';
 
 test('initial four heroes have persistent IDs, classes, and independent combat units',()=>{
  const s=createCampaignSettlement();
@@ -121,4 +121,38 @@ test('reward claims and roster return are separately idempotent',()=>{
  claimExpeditionRewards(d,s);
  assert.throws(()=>claimExpeditionRewards(d,s),/already been claimed/);
  assert.equal(s.roster[0].xp,2);
+});
+
+test('dismissal frees roster capacity and a vacant rank can be filled by a free recruit',()=>{
+ const s=createCampaignSettlement();
+ for(let i=4;i<ROSTER_CAPACITY;i++)recruitHero(s,'Hunter');
+ assert.equal(s.roster.length,ROSTER_CAPACITY);
+ assert.throws(()=>recruitHero(s,'Priest'),/Roster is full/);
+ s.roster[0].unit.dead=true;s.roster[0].unit.hp=0;
+ const fallen=dismissHero(s,'r1');
+ assert.equal(fallen.unit.dead,true);
+ assert.equal(s.roster.length,ROSTER_CAPACITY-1);
+ assert.equal(s.squad[0],null);
+ assert.equal(s.graveyard.length,1);
+ assert.throws(()=>prepareRosterParty(s),/Replace dead heroes/);
+ const replacement=recruitHero(s,'Priest');
+ assert.equal(s.roster.length,ROSTER_CAPACITY);
+ assert.equal(replacement.rosterId,'r9');
+ selectHero(s,0,replacement.rosterId);
+ assert.equal(prepareRosterParty(s)[0].heroClass,'Priest');
+ const restored=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ assert.deepEqual(restored.squad,s.squad);
+ assert.deepEqual(restored.graveyard,s.graveyard);
+ assert.throws(()=>resurrectHero(s,'r1'),/not deceased/);
+});
+
+test('dead and living retirement differ in equipment handling',()=>{
+ const s=createCampaignSettlement();s.trinkets=['ward-charm','ward-charm'];
+ equipTrinket(s,'r1');equipTrinket(s,'r2');
+ assert.equal(s.trinkets.length,0);
+ dismissHero(s,'r1');
+ assert.equal(s.trinkets.length,1,'living retiree returns the equipped charm');
+ s.roster.find(h=>h.rosterId==='r2').unit.dead=true;
+ dismissHero(s,'r2');
+ assert.equal(s.trinkets.length,1,'dead hero loses the worn charm');
 });
