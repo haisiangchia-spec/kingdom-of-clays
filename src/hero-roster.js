@@ -38,11 +38,13 @@ function checkRoster(settlement){
     new Set(settlement.squad.filter(id=>id!==null)).size!==settlement.squad.filter(id=>id!==null).length||
     settlement.squad.some(id=>id!==null&&!seen.has(id)))throw Error('Invalid selected party');
  if(!integer(settlement.nextHeroId)||settlement.nextHeroId<=Math.max(0,...settlement.roster.map(h=>Number(h.rosterId.slice(1)))))throw Error('Invalid next hero ID');
+ if(!Array.isArray(settlement.graveyard??[])||(settlement.graveyard??[]).length>2000)throw Error('Invalid graveyard');
 }
 export function setupHeroRoster(settlement){
  settlement.roster=createHeroRoster();
  settlement.squad=settlement.roster.map(x=>x.rosterId);
  settlement.nextHeroId=5;
+ settlement.graveyard=[];
  return settlement;
 }
 export function validateHeroRoster(settlement){checkRoster(settlement);return settlement;}
