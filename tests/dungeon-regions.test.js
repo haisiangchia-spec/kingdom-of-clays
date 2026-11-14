@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ENEMY_PROFILES} from '../src/enemy-roster.js';
-import {DUNGEON_REGIONS,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES} from '../src/dungeon-regions.js';
+import {DUNGEON_REGIONS,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES,regionCurio} from '../src/dungeon-regions.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle} from '../src/dungeon.js';
 import {makeGeneratedEncounter,makeUndeadEncounter,availableTargets,takeTurn,rng} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
@@ -96,4 +96,18 @@ test('regional room labels cover every room without altering stable map identifi
  assert.notEqual(regionRoomName('crypt','sanctum'),regionRoomName('plague','sanctum'));
  assert.throws(()=>regionRoomName('unknown','gallery'),/Unknown dungeon region/);
  assert.throws(()=>regionRoomName('plague','missing'),/Unknown dungeon room/);
+});
+
+test('Warrens curios are region-specific but keep legacy choices and rewards',()=>{
+ assert.equal(regionCurio('crypt','gallery').name,'Abandoned Reliquary');
+ assert.equal(regionCurio('plague','gallery').name,'Spore-Covered Cache');
+ assert.equal(regionCurio('plague','vault').name,'Diseased Offering');
+ assert.equal(regionCurio('plague','watch'),null);
+ const d=createDungeon(77,{region:'plague'});
+ assert.equal(d.log[0],'Entered Warrens Entrance');
+ d.room='gallery';
+ const initial=d.curioSupplies.holyWater;
+ // Purification is deterministic, costs exactly one supply and grants a reward.
+ assert.equal(initial,1);
+ assert.equal(d.curiosUsed.length,0);
 });
