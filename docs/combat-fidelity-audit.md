@@ -629,3 +629,12 @@ Costs multiply by the level being purchased (second level ×2, third ×3). No up
 **Verification:** Deterministic seed replay, encounter weight boundaries, monster action legality, Champion-only formation selection, and secondary skill effects have unit coverage. Chromium browser coverage selects Champion, reloads the saved expedition, enters corridor combat, and checks the Javelineer is present. The latest confirmed successful CI run is 43580421102 (commit 4cdae226); it establishes regression-test health, **not full DD1 fidelity**.
 
 **Next fidelity gaps:** Audit original Champion monster skill probabilities and conditions, expand the Champion and Veteran rosters using verified data, differentiate dungeon layouts/quests, and validate original progression gating and tier reward scaling before claiming parity.
+
+
+## Passes 67–75: Champion formation expansion and regression coverage
+
+Champion Warrens now has six provisional encounter templates: Skirmish, Guard, Ambush, Escort (three monsters each), Full Patrol and Drum Guard (four monsters each). Full Patrol combines Butcher, Hookstalker, Wretch, and Javelineer; Drum Guard substitutes the War Drummer for the Wretch. Their encounter frequencies are Clays-only approximations; no claim of DD1 composition or spawn-weight parity is made. All six templates retain the Champion-only Javelineer, while Apprentice encounter tables exclude it.
+
+The dungeon status header shows the active tier, and the UI rejects Champion Crypt selection without replacing the existing expedition. Tests cover the unsupported selection, tier display, seeded generation, legal starting enemy actions, formation rank footprints, and Javelineer Volley effects (rear-three damage/blight/speed/dodge penalties; no front-rank effects). Earlier CI failed because old tests assumed exactly three Champion monsters; rank-aware tests corrected those assumptions, with commit 2900fc3 confirmed passing in run 43595779193. The six-template CI run is pending verification as of this documentation update.
+
+**Remaining limitations:** All Champion templates still use Apprentice-stat support monsters alongside the Champion Javelineer. Veteran and Champion tier-scaled profiles, encounter probabilities, rewards, progression gating, and other DD1 enemies require further source-based implementation. The new formation variety is not equivalent to authentic Champion Warrens balance.
