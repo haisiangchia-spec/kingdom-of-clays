@@ -17,6 +17,13 @@ export const ENEMY_PROFILES=Object.freeze({
     stunResist:35,bleedResist:15,blightResist:45,moveResist:25,debuffResist:30,
     types:['unholy']
   }),skills:['court_curse','court_blight']}),
+  // Outlaw Duelist is a Kingdom of Clays reskin of the DD1 Veteran
+  // Brigand Cutthroat for a source-grounded enemy-AI reference encounter.
+  duelist:Object.freeze({name:'Outlaw Duelist',stats:Object.freeze({
+    hp:17,spd:4,dodge:11.25,prot:25,dmgMin:4,dmgMax:8,
+    stunResist:45,bleedResist:40,blightResist:40,moveResist:45,debuffResist:35,
+    types:['human']
+  }),skills:['duelist_sweep','duelist_uppercut','duelist_shank','duelist_poke']}),
   emperor:Object.freeze({name:'Goblin Emperor',stats:Object.freeze({
     size:3,actionsPerRound:2,hp:96,spd:2,dodge:3,prot:15,dmgMin:7,dmgMax:13,
     stunResist:70,bleedResist:60,blightResist:50,moveResist:80,debuffResist:60,
@@ -27,7 +34,8 @@ export const ENEMY_PROFILES=Object.freeze({
 export const ENCOUNTER_PRESETS=Object.freeze({
   standard:Object.freeze(['swordsman','swordsman','archer','mage']),
   rearguard:Object.freeze(['swordsman','archer','archer','mage']),
-  curseCourt:Object.freeze(['swordsman','archer','mage','mage'])
+  curseCourt:Object.freeze(['swordsman','archer','mage','mage']),
+  outlawPatrol:Object.freeze(['duelist','swordsman','archer','mage'])
 });
 
 export function spawnProfileEnemy(unitFactory,id,profileId){
