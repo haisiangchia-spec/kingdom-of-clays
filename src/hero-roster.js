@@ -4,6 +4,7 @@
 // user-approved departure from ordinary DD1 permadeath.
 import {makeBattle} from './engine.js';
 import {ensureTraits,sanitariumUnavailable} from './sanitarium.js';
+import {traitBonus,applyTraitBonus,reverseTraitBonus} from './trait-effects.js';
 
 export const ROSTER_CAPACITY=8;
 export const RECRUITMENT_COST=0; // DD1 base Stage Coach recruits are free
@@ -105,6 +106,8 @@ export function prepareRosterParty(settlement,bonuses={}){
   u.rosterLevel=hero.level;
   u.equippedTrinket=hero.equippedTrinket;
   u.maxHp+=bonus;u.hp=Math.min(u.maxHp,u.hp+bonus);
+  applyTraitBonus(u,traitBonus(hero));
+  u.diseases=[...(hero.diseases??[])];
   // No lingering short-lived combat effects or statuses across quests.
   u.dot=[];u.restoration=[];u.effects=[];u.stun=0;u.acted=false;
   u.actionsTaken=0;u.actionsRemaining=u.actionsPerRound??1;
@@ -125,6 +128,7 @@ export function returnPartyToRoster(settlement,expedition){
   if(!hero)throw Error('Unknown expedition roster ID');
   found.add(id);
   const copyUnit=copy(unit);
+  reverseTraitBonus(copyUnit);
   copyUnit.id=hero.unit.id;
   copyUnit.name=hero.heroClass;
   const originalMax=hero.unit.maxHp;
@@ -135,6 +139,7 @@ export function returnPartyToRoster(settlement,expedition){
   copyUnit.deathDoor=false;copyUnit.acted=false;
   copyUnit.actionsTaken=0;copyUnit.actionsRemaining=copyUnit.actionsPerRound??1;
   hero.unit=copyUnit;
+  hero.diseases=[...(copyUnit.diseases??hero.diseases??[])];
   if(!hero.unit.dead&&expedition.phase==='victory'){
    hero.xp+=2; // Apprentice short mission: 2 Resolve XP (DD1)
    const thresholds=[0,2,8,14,24,36,48];
