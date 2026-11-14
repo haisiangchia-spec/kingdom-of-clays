@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ENEMY_PROFILES} from '../src/enemy-roster.js';
-import {DUNGEON_REGIONS,PLAGUE_CHAMPION_TABLES,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES,regionCurio,regionHazard,validatePlagueFormation} from '../src/dungeon-regions.js';
+import {DUNGEON_REGIONS,PLAGUE_CHAMPION_TABLES,PLAGUE_VETERAN_TABLES,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES,regionCurio,regionHazard,validatePlagueFormation} from '../src/dungeon-regions.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,interactCurio,scoutCorridor,disarmTrap} from '../src/dungeon.js';
 import {makeGeneratedEncounter,makeUndeadEncounter,availableTargets,takeTurn,rng,rank} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
@@ -821,4 +821,25 @@ test('Veteran Hookstalker Strike inflicts resistance debuffs and retreats',()=>{
  assert.ok(rank(battle,foe.id)>=originalRank);
  assert.ok(hero.hp<hero.maxHp);
  assert.ok(battle.log.some(line=>line.includes('Hookstalker Strike')));
+});
+
+
+test('Veteran Warrens tables independently define deterministic weighted formations',()=>{
+ assert.notEqual(PLAGUE_VETERAN_TABLES,PLAGUE_TABLES);
+ for(const difficulty of ['scout','patrol','gauntlet']){
+  const entries=PLAGUE_VETERAN_TABLES[difficulty];
+  assert.notEqual(entries,PLAGUE_TABLES[difficulty]);
+  const total=entries.reduce((n,e)=>n+e.weight,0);
+  let offset=0;
+  for(const entry of entries){
+   assert.ok(entry.weight>0);
+   const result=createPlagueEncounterPlan(difficulty,()=>(offset+entry.weight/2)/total,'veteran');
+   assert.equal(result.tier,'veteran');
+   assert.equal(result.template,entry.id);
+   assert.deepEqual(result.profiles,PLAGUE_TEMPLATES[entry.id]);
+   assert.equal(result.source,'clays-provisional-plague-encounter-table');
+   offset+=entry.weight;
+  }
+  assert.equal(offset,total);
+ }
 });
