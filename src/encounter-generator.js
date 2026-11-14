@@ -60,7 +60,21 @@ export function spawnEncounterPlan(unitFactory,plan){
  assertTemplate(plan.profiles);
  return plan.profiles.map((profileId,i)=>{
    const profile=ENEMY_PROFILES[profileId];
-   const enemy=unitFactory('e'+(i+1),profile.name,'enemy',profile.stats);
+   // Temporary Champion scaling for Apprentice support monsters in the Warrens.
+   // These are NOT source-verified DD1 Champion stat blocks; the Javelineer
+   // already has its own Champion profile and must not be scaled again.
+   const championSupport=plan.region==='plague'&&plan.tier==='champion'&&profileId!=='plagueSkiver';
+   const stats=championSupport?{
+    ...profile.stats,
+    hp:Math.ceil(profile.stats.hp*1.5),
+    dmgMin:profile.stats.dmgMin+2,
+    dmgMax:profile.stats.dmgMax+2,
+    stunResist:profile.stats.stunResist+20,
+    bleedResist:profile.stats.bleedResist+20,
+    blightResist:profile.stats.blightResist+20
+   }:profile.stats;
+   const enemy=unitFactory('e'+(i+1),profile.name,'enemy',stats);
+   if(championSupport)enemy.tierScaling='clays-provisional-champion-support';
    enemy.enemyProfile=profileId;
    enemy.enemySkills=[...profile.skills];
    return enemy;
