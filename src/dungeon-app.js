@@ -1,7 +1,8 @@
 import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
-import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards,createSettlement} from './inventory.js';
+import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
+import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
 
 const $=id=>document.getElementById(id);
 const HERO_SKILLS={
@@ -10,7 +11,31 @@ const HERO_SKILLS={
  h3:['eagle_eye_shot','hunters_mark'],
  h4:['greater_heal','group_healing','sacred_strike']
 };
-let expedition,random,preparedId=null,chosenSkill=null,settlement=createSettlement();
+let expedition,random,preparedId=null,chosenSkill=null,settlement=createCampaignSettlement();
+let saveError='';
+function bindRandom(){
+ const stream=rng(expedition.seed^0x9e3779b9);
+ const calls=Math.max(0,Math.min(100000,expedition.randomCalls??0));
+ for(let i=0;i<calls;i++)stream();
+ random=()=>{expedition.randomCalls=(expedition.randomCalls??0)+1;return stream();};
+}
+function persistCampaign(){
+ try{localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,expedition));saveError='';}
+ catch(e){saveError='Save unavailable: '+e.message;}
+}
+function restoreCampaign(){
+ try{
+  const raw=localStorage.getItem(CAMPAIGN_SAVE_KEY);
+  if(!raw)return false;
+  const restored=decodeCampaignSave(raw);
+  settlement=restored.settlement;
+  if(!restored.expedition)return false;
+  expedition=restored.expedition;
+  // Battle-log state and the deterministic RNG cursor resume together.
+  bindRandom();
+  return true;
+ }catch(e){saveError='Existing save could not be loaded: '+e.message;return false;}
+}
 const el=(tag,text,container,action)=>{
  const node=document.createElement(tag);
  if(text!=null)node.textContent=text;
@@ -20,8 +45,9 @@ const el=(tag,text,container,action)=>{
 };
 function startExpedition(){
  const seed=(Math.floor(Math.random()*0xffffffff)>>>0)||1;
- expedition=createDungeon(seed,{difficulty:'scout',interactiveEvents:true});
- random=rng(seed^0x9e3779b9);
+ expedition=createDungeon(seed,{difficulty:'scout',interactiveEvents:true,bonuses:expeditionBonuses(settlement)});
+ expedition.randomCalls=0;
+ bindRandom();
  preparedId=null;chosenSkill=null;
  render();
 }
@@ -73,6 +99,7 @@ function pass(){
  syncCombat();render();
 }
 function render(){
+ if(!expedition)return;
  $('dungeon-status').textContent=`${DUNGEON_ROOMS[expedition.room].name} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
  const map=$('dungeon-rooms');map.replaceChildren();
  for(const [id,room] of Object.entries(DUNGEON_ROOMS)){
@@ -80,6 +107,24 @@ function render(){
    marker.className=id===expedition.room?'here':expedition.visited.includes(id)?'seen':'';
    if(expedition.cleared.includes(id))marker.textContent+=' ✓';
  }
+ const settlementPanel=$('settlement-panel');settlementPanel.replaceChildren();
+ el('p',`Treasury: ${settlement.gold} gold · ${settlement.crests} crests · ${settlement.deeds} deeds · ${settlement.trinkets.length} trinkets · ${settlement.completedExpeditions} completed`,settlementPanel);
+ for(const [id,facility] of Object.entries(SETTLEMENT_FACILITIES)){
+  const level=settlement.facilities[id];
+  const row=el('div',`${facility.name} Lv ${level}/${facility.maxLevel}: ${facility.description}`,settlementPanel);
+  row.className='dungeon-unit';
+  const cost=nextFacilityCost(settlement,id);
+  if(cost){
+   const text=`Upgrade ${facility.name} (${cost.gold} gold, ${cost.crests} crests, ${cost.deeds} deeds)`;
+   const upgrade=el('button',text,row,()=>{
+    try{upgradeFacility(settlement,id);}catch(e){expedition.log.push(e.message);}
+    render();
+   });
+   upgrade.disabled=!['victory','defeat'].includes(expedition.phase)||Object.entries(cost).some(([key,amount])=>settlement[key]<amount);
+  }
+ }
+ const save=$('campaign-save-status');
+ save.textContent=saveError||'Progress saves automatically in this browser';
  const inventory=$('dungeon-inventory');inventory.replaceChildren();
  el('p',`Inventory: ${inventoryUsed(expedition)}/${INVENTORY_CAPACITY} slots · Gold carried: ${expedition.loot}`,inventory);
  for(const stack of inventoryStacks(expedition)){
@@ -104,7 +149,7 @@ function render(){
    const reward=expeditionRewardSummary(expedition);
    el('p',`Settlement rewards: ${reward.totalGold} gold (including gems), ${reward.crests} crests, ${reward.deeds} deeds, ${reward.trinkets} trinkets.`,inventory);
    if(!expedition.rewardClaimed)el('button','Return rewards to settlement',inventory,()=>{
-     try{claimExpeditionRewards(expedition,settlement);}catch(error){expedition.log.push(error.message);}
+     try{claimExpeditionRewards(expedition,settlement);settlement.completedExpeditions++;}catch(error){expedition.log.push(error.message);}
      render();
    });
    else el('p','Rewards transferred to the settlement ✓',inventory);
@@ -219,6 +264,8 @@ function render(){
  }
  const log=$('dungeon-log');log.replaceChildren();
  for(const line of expedition.log.slice(-12).reverse())el('p',line,log);
+ persistCampaign();
+ $('campaign-save-status').textContent=saveError||'Progress saves automatically in this browser';
 }
 $('dungeon-restart').onclick=startExpedition;
-startExpedition();
+if(restoreCampaign()){syncCombat();render();}else startExpedition();
