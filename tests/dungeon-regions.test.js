@@ -392,7 +392,8 @@ test('Champion Warrens dungeon carries tier into generated corridor encounters',
   assert.ok(dungeonBattle(dungeon).units.some(u=>u.enemyProfile==='plagueSkiver'));
  }
  assert.throws(()=>createDungeon(1,{region:'crypt',tier:'champion'}),/supported only in Blighted Warrens/);
- assert.throws(()=>createDungeon(1,{region:'plague',tier:'veteran'}),/Unknown dungeon tier/);
+ assert.equal(createDungeon(1,{region:'plague',tier:'veteran'}).tier,'veteran');
+ assert.throws(()=>createDungeon(1,{region:'crypt',tier:'veteran'}),/supported only in Blighted Warrens/);
 });
 
 
