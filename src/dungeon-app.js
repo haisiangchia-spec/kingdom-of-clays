@@ -6,6 +6,7 @@ import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeC
 import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket} from './hero-roster.js';
 import {TREATMENTS,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
 import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits,sanitariumTreatmentCost,sanitariumWardBookings} from './sanitarium.js';
+import {DUNGEON_REGIONS} from './dungeon-regions.js';
 import {SANITARIUM_UPGRADE_TREES,sanitariumUpgradeLevels,nextSanitariumUpgradeCost,upgradeSanitarium,sanitariumWardCapacity} from './sanitarium-upgrades.js';
 
 const $=id=>document.getElementById(id);
@@ -60,7 +61,7 @@ function startExpedition(){
  try{party=prepareRosterParty(settlement,expeditionBonuses(settlement));}
  catch(e){if(expedition){expedition.log.push(e.message);render();}return;}
  const seed=(Math.floor(Math.random()*0xffffffff)>>>0)||1;
- expedition=createDungeon(seed,{difficulty:'scout',interactiveEvents:true,bonuses:expeditionBonuses(settlement),party});
+ expedition=createDungeon(seed,{difficulty:'scout',region:$('dungeon-region').value,interactiveEvents:true,bonuses:expeditionBonuses(settlement),party});
  expedition.randomCalls=0;
  bindRandom();
  preparedId=null;chosenSkill=null;
@@ -121,7 +122,8 @@ function render(){
  if(['victory','defeat'].includes(expedition.phase)&&expedition.rosterReturned&&!expedition.townWeekProcessed){
   try{advanceTownWeek(settlement,expedition);}catch(e){expedition.log.push('Town week failed: '+e.message);}
  }
- $('dungeon-status').textContent=`${DUNGEON_ROOMS[expedition.room].name} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
+ $('dungeon-status').textContent=`${DUNGEON_REGIONS[expedition.region??'crypt'].name} · ${DUNGEON_ROOMS[expedition.room].name} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
+ $('dungeon-region').disabled=!['victory','defeat'].includes(expedition.phase);
  const map=$('dungeon-rooms');map.replaceChildren();
  for(const [id,room] of Object.entries(DUNGEON_ROOMS)){
    const marker=el('span',room.name,map);
@@ -396,4 +398,4 @@ function render(){
  $('campaign-save-status').textContent=saveError||'Progress saves automatically in this browser';
 }
 $('dungeon-restart').onclick=startExpedition;
-if(restoreCampaign()){syncCombat();render();}else startExpedition();
+if(restoreCampaign()){$('dungeon-region').value=expedition.region??'crypt';syncCombat();render();}else startExpedition();
