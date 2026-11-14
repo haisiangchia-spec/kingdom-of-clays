@@ -292,3 +292,22 @@ The engine also applies the target's `healingReceived` modifier to variable heal
 **Tests:** `tests/hero-baseline-parity.test.js` now includes negative-modifier cases for a single-target heal and a party heal, including an ally already at Death's Door. This fixes a defensive engine invariant; it does not claim that an arbitrary -200% modifier is obtainable under standard DD1 equipment or abilities.
 
 **Outstanding:** The broader healing pipeline still needs validation against live-game rounding order, critical modifiers and battle affliction edge cases. The enemy roster and tactical AI remain major next milestones.
+
+## Pass 15 — Source-checked enemy and corpse mechanics (2026-11-14)
+
+**Sources reviewed**
+- [Official DD1 wiki: Corpse](https://darkestdungeon.wiki.gg/wiki/Corpse) — rank occupancy, no initiative, despawning, corpse-specific defenses, critical attack consequences.
+- [Official DD1 wiki: Combat Mechanics](https://darkestdungeon.wiki.gg/wiki/Combat_Mechanics_%28Darkest_Dungeon%29) — initiative, default one action and multi-action monster exceptions.
+- [Darkest Dungeon official modding guide](https://steamcommunity.com/sharedfiles/filedetails/?id=819597757) — per-monster `initiative` and `monster_brain` data, conditional skill-selection desires and target desires.
+
+| Subsystem | Current implementation | Fidelity status | Remaining work |
+| --- | --- | --- | --- |
+| Corpse rank footprint | Preserved until destroyed/expired; size three bosses leave none | DD1-supported base behaviour | Check every monster's `noCorpse` flag and exceptions |
+| Corpse resistance | Bleed/Blight 0%; Stun/Move/Debuff 200%; PROT/DODGE 0 | **Corrected and source checked** | Bleed/blight ticking on corpse needs dedicated round-lifecycle implementation |
+| Critical hits on corpses | Single-target critical attacks do not grant hero stress relief; area attacks can | **Corrected and source checked** | Validate other critical stress interactions against authentic fights |
+| Multi-action monsters | Engine supports multiple slots with one shared turn lifecycle | Engine capability; **boss-specific fixture provisional** | Read actual `initiative` entries for each intended monster |
+| Enemy decision policies | Skill-first weighted selection, sample targeting profiles | **Provisional** | Replace test profiles with actual `monster_brain` desires and conditional weights |
+| Goblin Emperor HP phases and summons | Custom low-HP phase, once-per-battle summon with rank check | **Kingdom of Clays exception / prototype** | Clearly identify as original content; never claim base DD1 boss parity |
+| Enemy HP, resistances and abilities | Distinct working sample roster | **Provisional** | Record monster-by-monster source evidence before marking verified |
+
+**Tests:** `tests/corpse-fidelity.test.js` and `tests/browser/corpse-fidelity.spec.js` cover the two corrected corpse mechanics and ensure corpses never receive initiative slots. Other systems remain intentionally flagged as provisional.
