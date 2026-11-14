@@ -617,10 +617,10 @@ export function makeProgressionBattle(seed=1){
 // Campaign-ready reference-enemy combat entry point. Composition is
 // seeded, weights are Clays fixtures, and hero setup uses the same DD1
 // battle-engine baseline as all existing laboratory encounters.
-export function makeGeneratedEncounter(seed=1,difficulty='patrol',region='crypt'){
+export function makeGeneratedEncounter(seed=1,difficulty='patrol',region='crypt',tier='apprentice'){
   const state=makeBattle(seed);
   if(!['crypt','plague'].includes(region))throw Error('Unknown encounter region: '+region);
-  const plan=region==='plague'?createPlagueEncounterPlan(difficulty,rng(seed)):createEncounterPlan(difficulty,rng(seed));
+  const plan=region==='plague'?createPlagueEncounterPlan(difficulty,rng(seed),tier):createEncounterPlan(difficulty,rng(seed));
   state.units=[...state.units.filter(u=>u.side==='hero'),...spawnEncounterPlan(unit,plan)];
   state.encounterPlan=plan;
   state.log.unshift(`Generated ${difficulty} encounter: ${plan.template}, threat ${plan.threat}`);
