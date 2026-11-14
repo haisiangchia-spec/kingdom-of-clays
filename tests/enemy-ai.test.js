@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chooseEnemyAction,bossPhase} from '../src/enemy-ai.js';
-import {makeBattle,makeLargeMonsterBattle,makeGeneratedEncounter,rank,ABILITIES,availableTargets,rng} from '../src/engine.js';
+import {makeBattle,makeLargeMonsterBattle,makeGeneratedEncounter,rank,ABILITIES,availableTargets,rng,takeTurn} from '../src/engine.js';
 import {moveWithinFormation} from '../src/formation.js';
 
 test('enemy decision selects skill uniformly before target, not over all skill-target pairs',()=>{
@@ -161,4 +161,24 @@ test('Champion Javelineer AI rechecks legal skills after forced front-rank displ
   exercised++;
  }
  assert.ok(exercised>0);
+});
+
+
+test('Champion Javelineer can recover from front rank using Goring Retreat',()=>{
+ let recovered=0;
+ for(let seed=1;seed<=150;seed++){
+  const battle=makeGeneratedEncounter(seed*1000003,'gauntlet','plague','champion');
+  const foe=battle.units.find(u=>u.enemyProfile==='plagueSkiver');
+  if(!foe)continue;
+  moveWithinFormation(battle,foe.id,-4);
+  const front=rank(battle,foe.id);
+  assert.equal(front,0);
+  const targets=availableTargets(battle,foe.id,'plague_skiver_flight');
+  if(!targets.length)continue;
+  battle.queue=[foe.id];
+  takeTurn(battle,foe.id,'plague_skiver_flight',targets[0],()=>0);
+  assert.ok(rank(battle,foe.id)>=front,'Retreat must never move Javelineer forward');
+  if(rank(battle,foe.id)>front)recovered++;
+ }
+ assert.ok(recovered>0,'A seeded Champion encounter must allow Javelineer retreat');
 });
