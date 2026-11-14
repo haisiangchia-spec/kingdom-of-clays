@@ -74,7 +74,11 @@ export function spawnEncounterPlan(unitFactory,plan){
     blightResist:profile.stats.blightResist+20
    }:profile.stats;
    const enemy=unitFactory('e'+(i+1),profile.name,'enemy',stats);
-   if(championSupport)enemy.tierScaling='clays-provisional-champion-support';
+   if(championSupport){
+    enemy.tierScaling='clays-provisional-champion-support';
+    // Explicit skill damage ranges bypass actor base DMG in the combat engine.
+    enemy.skillDamageBonus=2;
+   }
    enemy.enemyProfile=profileId;
    enemy.enemySkills=[...profile.skills];
    return enemy;
