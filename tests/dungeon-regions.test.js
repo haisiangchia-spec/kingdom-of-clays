@@ -400,27 +400,17 @@ test('Champion Warrens support monsters scale without modifying Apprentice or Ja
  const champion=makeGeneratedEncounter(1000003,'patrol','plague','champion');
  const support=champion.units.filter(u=>u.side==='enemy'&&u.enemyProfile!=='plagueSkiver');
  assert.ok(support.length>0);
+ const expected={
+  plagueChopper:[41,5,21.25,33,65,100,60,55,90],
+  plagueDrummer:[31,9,22.5,0,55,85,65,60,70],
+  plagueWretch:[25,10,35,0,55,85,55,60,45],
+  plagueSlasher:[16,7,30,40,55,85,85,60,70]
+ };
  for(const foe of support){
-  const base=ENEMY_PROFILES[foe.enemyProfile].stats;
-  if(foe.enemyProfile==='plagueChopper'){
-   assert.equal(foe.maxHp,41);
-   assert.equal(foe.spd,5);
-   assert.equal(foe.dodge,21.25);
-   assert.equal(foe.prot,33);
-   assert.deepEqual(foe.resist,{stun:65,blight:100,bleed:60,debuff:55,move:90});
-   assert.equal(foe.tierScaling,'dd1-verified-champion-chopper-stats');
-   assert.equal(foe.skillDamageBonus,undefined,'verified defensive profile must not silently modify Apprentice attack damage');
-   assert.deepEqual(foe.enemySkills,['plague_champion_butcher_cut','plague_champion_ball_chain']);
-   continue;
-  }
-  assert.equal(foe.maxHp,Math.ceil(base.hp*1.5));
-  assert.equal(foe.dmgMin,base.dmgMin+2);
-  assert.equal(foe.dmgMax,base.dmgMax+2);
-  assert.equal(foe.resist.stun,base.stunResist+20);
-  assert.equal(foe.resist.bleed,base.bleedResist+20);
-  assert.equal(foe.resist.blight,base.blightResist+20);
-  assert.equal(foe.tierScaling,'clays-provisional-champion-support');
-  assert.equal(foe.skillDamageBonus,2);
+  assert.deepEqual([foe.maxHp,foe.spd,foe.dodge,foe.prot,foe.resist.stun,foe.resist.blight,foe.resist.bleed,foe.resist.debuff,foe.resist.move],expected[foe.enemyProfile]);
+  assert.equal(foe.tierScaling,'dd1-verified-champion-stats');
+  assert.equal(foe.skillDamageBonus,undefined);
+  if(foe.enemyProfile==='plagueChopper')assert.deepEqual(foe.enemySkills,['plague_champion_butcher_cut','plague_champion_ball_chain']);
  }
  const skiver=champion.units.find(u=>u.enemyProfile==='plagueSkiver');
  assert.equal(skiver.maxHp,ENEMY_PROFILES.plagueSkiver.stats.hp);
