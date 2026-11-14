@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ENEMY_PROFILES} from '../src/enemy-roster.js';
-import {DUNGEON_REGIONS,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES,regionCurio,regionHazard,validatePlagueFormation} from '../src/dungeon-regions.js';
+import {DUNGEON_REGIONS,PLAGUE_CHAMPION_TABLES,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES,regionCurio,regionHazard,validatePlagueFormation} from '../src/dungeon-regions.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,interactCurio,scoutCorridor,disarmTrap} from '../src/dungeon.js';
 import {makeGeneratedEncounter,makeUndeadEncounter,availableTargets,takeTurn,rng,rank} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
@@ -333,4 +333,26 @@ test('Champion Impaling Javelin attempts stun and knockback on a hit',()=>{
  assert.ok(victim.hp<hp,'javelin should deal damage');
  assert.ok(victim.stun>0||battle.log.some(line=>line.includes(victim.name)&&line.includes('stun')),'javelin should apply or log stun');
  assert.ok(battle.log.some(line=>line.includes(victim.name)&&line.includes('rank')),'javelin should log target displacement');
+});
+
+test('Champion encounter weights map deterministic rolls to the expected formations',()=>{
+ for(const [difficulty,entries] of Object.entries(PLAGUE_CHAMPION_TABLES)){
+  const total=entries.reduce((sum,e)=>sum+e.weight,0);
+  assert.ok(total>0);
+  assert.ok(entries.every(e=>Number.isInteger(e.weight)&&e.weight>0));
+  let cumulative=0;
+  for(const entry of entries){
+   const low=cumulative/total,high=(cumulative+entry.weight)/total;
+   const midpoint=(low+high)/2;
+   const plan=createPlagueEncounterPlan(difficulty,()=>midpoint,'champion');
+   assert.equal(plan.template,entry.id);
+   assert.equal(plan.tier,'champion');
+   assert.ok(plan.profiles.includes('plagueSkiver'));
+   cumulative+=entry.weight;
+  }
+  assert.equal(cumulative,total);
+ }
+ for(const invalid of [-.1,1,Number.NaN,Number.POSITIVE_INFINITY]){
+  assert.throws(()=>createPlagueEncounterPlan('patrol',()=>invalid,'champion'),/Encounter random/);
+ }
 });
