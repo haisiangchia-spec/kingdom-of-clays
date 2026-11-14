@@ -124,6 +124,8 @@ function render(){
  }
  $('dungeon-status').textContent=`${DUNGEON_REGIONS[expedition.region??'crypt'].name} · ${regionRoomName(expedition.region??'crypt',expedition.room)} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
  $('dungeon-region').disabled=!['victory','defeat'].includes(expedition.phase);
+ $('dungeon-tier').disabled=!['victory','defeat'].includes(expedition.phase);
+ $('dungeon-tier').value=expedition.tier??'apprentice';
  const map=$('dungeon-rooms');map.replaceChildren();
  for(const [id,room] of Object.entries(DUNGEON_ROOMS)){
    const marker=el('span',regionRoomName(expedition.region??'crypt',id),map);
@@ -398,4 +400,4 @@ function render(){
  $('campaign-save-status').textContent=saveError||'Progress saves automatically in this browser';
 }
 $('dungeon-restart').onclick=startExpedition;
-if(restoreCampaign()){$('dungeon-region').value=expedition.region??'crypt';syncCombat();render();}else startExpedition();
+if(restoreCampaign()){$('dungeon-region').value=expedition.region??'crypt';$('dungeon-tier').value=expedition.tier??'apprentice';syncCombat();render();}else startExpedition();
