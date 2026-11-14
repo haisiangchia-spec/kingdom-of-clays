@@ -63,22 +63,19 @@ export function spawnEncounterPlan(unitFactory,plan){
    // Temporary Champion scaling for Apprentice support monsters in the Warrens.
    // These are NOT source-verified DD1 Champion stat blocks; the Javelineer
    // already has its own Champion profile and must not be scaled again.
-   const verifiedChampionChopper=plan.region==='plague'&&plan.tier==='champion'&&profileId==='plagueChopper';
-   const championSupport=plan.region==='plague'&&plan.tier==='champion'&&profileId!=='plagueSkiver'&&!verifiedChampionChopper;
-   const stats=verifiedChampionChopper?{
-    ...profile.stats,hp:41,spd:5,dodge:21.25,prot:33,
-    stunResist:65,blightResist:100,bleedResist:60,debuffResist:55,moveResist:90
-   }:championSupport?{
-    ...profile.stats,
-    hp:Math.ceil(profile.stats.hp*1.5),
-    dmgMin:profile.stats.dmgMin+2,
-    dmgMax:profile.stats.dmgMax+2,
-    stunResist:profile.stats.stunResist+20,
-    bleedResist:profile.stats.bleedResist+20,
-    blightResist:profile.stats.blightResist+20
-   }:profile.stats;
+   // Champion stats from the official DD1 wiki.gg Swine monster pages.
+   const championStats={
+    plagueChopper:{hp:41,spd:5,dodge:21.25,prot:33,stunResist:65,blightResist:100,bleedResist:60,debuffResist:55,moveResist:90},
+    plagueDrummer:{hp:31,spd:9,dodge:22.5,prot:0,stunResist:55,blightResist:85,bleedResist:65,debuffResist:60,moveResist:70},
+    plagueWretch:{hp:25,spd:10,dodge:35,prot:0,stunResist:55,blightResist:85,bleedResist:55,debuffResist:60,moveResist:45},
+    plagueSlasher:{hp:16,spd:7,dodge:30,prot:40,stunResist:55,blightResist:85,bleedResist:85,debuffResist:60,moveResist:70}
+   };
+   const verifiedChampion=plan.region==='plague'&&plan.tier==='champion'&&Object.hasOwn(championStats,profileId);
+   const verifiedChampionChopper=verifiedChampion&&profileId==='plagueChopper';
+   const championSupport=false;
+   const stats=verifiedChampion?{...profile.stats,...championStats[profileId]}:profile.stats;
    const enemy=unitFactory('e'+(i+1),profile.name,'enemy',stats);
-   if(verifiedChampionChopper)enemy.tierScaling='dd1-verified-champion-chopper-stats';
+   if(verifiedChampion)enemy.tierScaling='dd1-verified-champion-stats';
    if(championSupport){
     enemy.tierScaling='clays-provisional-champion-support';
     // Explicit skill damage ranges bypass actor base DMG in the combat engine.
