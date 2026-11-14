@@ -63,3 +63,11 @@ export function exposeHeroToDisease(state,attacker,hero,random){
  state.log.push(hero.name+' contracts '+(disease==='creepingCough'?'Creeping Cough':'Ashen Fever')+'!');
  return true;
 }
+
+// DD1: Early Riser gains 2 SPD with light strictly above 75;
+// Nocturnal loses 2 SPD at that same threshold.
+export function conditionalQuirkSpeed(unit,torch){
+ if(!Number.isFinite(torch)||torch<=75)return 0;
+ const positive=unit.quirks?.positive??[],negative=unit.quirks?.negative??[];
+ return (positive.some(q=>q.id==='earlyRiser')?2:0)+(negative.some(q=>q.id==='nocturnal')?-2:0);
+}
