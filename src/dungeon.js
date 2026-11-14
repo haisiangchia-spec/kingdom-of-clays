@@ -2,7 +2,7 @@
 // travel costs are original fixtures: not yet verified DD1 dungeon rules.
 import {makeGeneratedEncounter,makeUndeadEncounter,rng,status} from './engine.js';
 import {offerLoot,collectLoot,leaveLoot} from './inventory.js';
-import {regionCurio,regionRoomName} from './dungeon-regions.js';
+import {regionCurio,regionRoomName,regionHazard} from './dungeon-regions.js';
 
 export const DUNGEON_ROOMS=Object.freeze({
  entrance:Object.freeze({name:'Crypt Entrance',x:0,y:1,encounter:false}),
@@ -99,10 +99,11 @@ export function disarmTrap(dungeon,heroId){
  return success;
 }
 function applyTrapDamage(dungeon,victim){
- victim.hp=Math.max(0,victim.hp-2);
- victim.stress=Math.min(200,victim.stress+5);
+ const hazard=regionHazard(dungeon.region??'crypt');
+ victim.hp=Math.max(0,victim.hp-hazard.damage);
+ victim.stress=Math.min(200,victim.stress+hazard.stress);
  if(victim.hp===0)victim.dead=true;
- dungeon.log.push('A hidden trap wounds '+victim.name+' (-2 HP, +5 stress)');
+ dungeon.log.push(hazard.name+' wounds '+victim.name+' (-'+hazard.damage+' HP, +'+hazard.stress+' stress)');
  if(dungeon.party.every(u=>u.dead)){
    dungeon.phase='defeat';dungeon.pendingTravel=null;
    dungeon.log.push('The expedition has fallen');
