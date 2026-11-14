@@ -61,6 +61,21 @@ if(sk.kind==='transform'&&(a.form!=='human'&&a.form!=='beast'||a.transformUsedTh
  }
 const side=['heal','groupHeal','guard','cleanse','buff','restore','partyBuff','selfBuff','stressHeal','selfCleanseBuff','rallyFlare','stealth','partyStressChance','selfHeal','stressOnly','variableHeal','selfHealStress','reverseGuard','transform'].includes(sk.kind)?a.side:(a.side==='hero'?'enemy':'hero');const candidates=ranks(state,side).filter(x=>occupiedRanks(state,x.id).some(i=>sk.to.includes(i))&&(!x.stealthed||sk.ignoreStealth||side===a.side)&& (!['selfBuff','selfCleanseBuff','stealth','selfHeal','selfHealStress','transform'].includes(sk.kind)||x.id===a.id)&& (sk.kind!=='reverseGuard'||x.id!==a.id));const selectable=candidates.filter(x=>side===a.side||isSelectable(x,sk,side));return (sk.targetMode==='all'||sk.kind==='randomAttack'||sk.kind==='rallyFlare'?selectable.slice(0,1):selectable).map(x=>x.id);}
 export function startRound(state,r){
+ // Corpse DoT ticks at the next round boundary: a provisional scheduling
+ // approximation because corpses never receive initiative turns.
+ for(const corpse of state.units.filter(u=>u.corpse&&!u.dead)){
+   for(const dot of corpse.dot??[]){
+     if(corpse.dead)break;
+     corpse.hp=Math.max(0,corpse.hp-dot.value);
+     dot.turns--;
+     state.log.push(`${corpse.name} takes ${dot.value} ${dot.type}`);
+     if(corpse.hp===0){
+       corpse.dead=true;
+       state.log.push(`${corpse.name} is destroyed by ${dot.type}`);
+     }
+   }
+   corpse.dot=(corpse.dot??[]).filter(dot=>dot.turns>0);
+ }
  state.round++;
  clearExpiredCorpses(state);
  // One initiative roll per combatant. Multi-action monsters take their slots
@@ -385,7 +400,7 @@ export function takeTurn(state,actorId,key,targetId,r){
             for(const u of ranks(state,'hero'))if(r()<.50)stress(state,u,5,r);
           }
         }
-        if(sk.status&&!actual.dead&&!actual.corpse)pendingStatus={...sk.status,crit};
+        if(sk.status&&!actual.dead&&(!actual.corpse||['bleed','blight'].includes(sk.status.type)))pendingStatus={...sk.status,crit};
         if(sk.debuff&&!actual.dead&&!actual.corpse&&r()*100<resistChance({applicationChance:sk.debuff.chance,resistance:(actual.resist.debuff??0)-effectModifier(actual,'debuffResist'),crit})){
           addTimedEffect(actual,{...sk.debuff,kind:'debuff'});
           state.log.push(`${actual.name} is debuffed by ${sk.name}`);
