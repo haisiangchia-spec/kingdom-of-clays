@@ -28,6 +28,10 @@ export const ENEMY_SKILLS=Object.freeze({
     acc:82.5,crit:12,damageMin:3,damageMax:7,vsMarked:.25},
   crypt_bayonet:{name:'Crypt Bayonet',from:[0,1],to:[0,1],
     acc:72.5,crit:2,damageMin:2,damageMax:4,selfBack:1},
+  // Source-checked DD1 Apprentice Swine Wretch Vomit: all ranks/targets,
+  // ACC 82.5, CRIT 12, 1 damage, +10 stress and 33% disease.
+  plague_vomit:{name:'Blight Vomit',from:[0,1,2,3],to:[0,1,2,3],
+    acc:82.5,crit:12,damageMin:1,damageMax:1,onHitStress:10,diseaseChance:33},
   // DD1 VETERAN Brigand Cutthroat ability data (wiki.gg).
   // Accuracy shown in DD1 tables is reproduced as skill ACC here, with
   // the combat engine's documented +5 hidden hit correction applied separately.
