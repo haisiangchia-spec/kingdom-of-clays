@@ -62,6 +62,18 @@ export const ENEMY_SKILLS=Object.freeze({
     acc:82.5,crit:12,damageMin:2,damageMax:4,
     status:{type:'stun',chance:100},
     moveTarget:{type:'push',distance:1,chance:100}},
+  // Champion-specific skill slots. Values are deliberately inherited from the
+  // Apprentice definitions until the Champion attack tables are source-audited.
+  // Keeping separate IDs prevents future tier changes from altering Apprentice play.
+  plague_champion_vomit:{name:'Blight Vomit',from:[0,1,2,3],to:[0,1,2,3],
+    acc:82.5,crit:12,damageMin:1,damageMax:1,onHitStress:10,diseaseChance:33},
+  plague_champion_drum_doom:{name:'Doombeat',from:[0,1,2,3],to:[0,1,2,3],targetMode:'all',
+    acc:82.5,crit:2,damageMin:1,damageMax:1,onHitStress:5,onHitStressChance:70},
+  plague_champion_drum_debilitation:{name:'Weakening Rhythm',from:[0,1,2,3],to:[0,1,2,3],
+    kind:'mark',acc:82.5,crit:6,damageMin:1,damageMax:1,mod:0,markTurns:3,
+    debuff:{chance:100,turns:3,modifiers:{dodge:-10}}},
+  plague_champion_hook_slash:{name:'Hookstalker Strike',from:[0,1,2,3],to:[0,1,2],
+    acc:82.5,crit:16,damageMin:3,damageMax:7,selfBack:1},
   // Champion Swine Slayer analogue. ACC/CRIT/status from wiki.gg;
   // damage ranges follow the official June 2018 balance patch (6-13 / 4-7).
   plague_champion_butcher_cut:{name:"Butcher's Cleave",from:[0,1],to:[0,1,2],
