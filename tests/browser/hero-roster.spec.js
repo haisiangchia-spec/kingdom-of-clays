@@ -3,13 +3,13 @@ import {test,expect} from '@playwright/test';
 test('new campaign shows persistent four-hero roster and restores it after reload',async ({page})=>{
  await page.goto('/dungeon.html');
  const roster=page.locator('#hero-roster');
- await expect(roster).toContainText('Heroes: 4/12');
+ await expect(roster).toContainText('Heroes: 4/8');
  await expect(roster).toContainText('Swordsman [r1]');
  await expect(roster).toContainText('Warrior [r2]');
  await expect(roster).toContainText('Hunter [r3]');
  await expect(roster).toContainText('Priest [r4]');
  await page.reload();
- await expect(page.locator('#hero-roster')).toContainText('Heroes: 4/12');
+ await expect(page.locator('#hero-roster')).toContainText('Heroes: 4/8');
 });
 
 test('recruiting a duplicate class and selecting a new party persists through reload',async ({page})=>{
@@ -23,7 +23,7 @@ test('recruiting a duplicate class and selecting a new party persists through re
  });
  await page.reload();
  await page.getByRole('button',{name:'Recruit Hunter'}).click();
- await expect(page.locator('#hero-roster')).toContainText('Heroes: 5/12');
+ await expect(page.locator('#hero-roster')).toContainText('Heroes: 5/8');
  await expect(page.locator('#hero-roster')).toContainText('Hunter 5 [r5]');
  const first=page.locator('#hero-roster select').first();
  await first.selectOption('r5');
