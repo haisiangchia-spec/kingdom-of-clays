@@ -2,6 +2,10 @@
 
 HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
 
+## Quirk/disease combat effects and crypt exposure (Milestone 33)
+
+Persistent quirks and diseases now **change active expedition combat statistics** rather than remaining cosmetic. The first six Clays trait fixtures affect starting HP, accuracy, speed, dodge or bleed resistance. Bonuses are applied to the expedition's temporary hero copy and removed before returning the hero to the permanent roster, preventing accidental stat stacking after multiple quests. Crypt Shieldbearers and Arbalists have an **8% provisional disease-exposure roll** on damaging hits in dungeon battles only (the separate DD1 reference combat lab is unchanged). Contracted illnesses change live hero stats and persist on return. A repeated negative trait in the seeded quest-return roll becomes locked, making Sanitarium removal more expensive. All six numerical stat effects, disease eligibility and infection odds are **original Clays balance values**, not the exact effects of DD1 traits or monsters. See `docs/combat-fidelity-audit.md` Pass 33.
+
 ## Sanitarium and persistent quirks/diseases (Milestone 32)
 
 Heroes now have permanent, saved positive/negative quirks and diseases. The **Sanitarium** unlocks on town week 4, with **one quirk ward and one medical ward**. For Apprentice heroes the starting DD1-inspired prices are 1,500 gold to remove a negative quirk, 5,000 to remove a locked negative quirk, 7,500 to lock a positive quirk, and 750 to cure a disease. Treatments finish after one expedition week, and booked heroes cannot embark or receive other town treatment. Successfully completed quests trigger a one-time seeded trait acquisition check. The roster and Sanitarium reservations are included in browser-local campaign saves.
