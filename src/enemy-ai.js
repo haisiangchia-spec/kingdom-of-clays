@@ -3,6 +3,18 @@
 // Select a legal skill first, then a target independently. This avoids giving
 // four-target skills four times the selection chance of single-target skills.
 const PROFILES=Object.freeze({
+  'Crypt Shieldbearer':Object.freeze({
+    // Apprentice Bone Defender: first turn 4:1 Axeblade/Dead Weight;
+    // thereafter 1:1. Rank 3-4 forces Clumsy Axeblade.
+    turnWeights:Object.freeze({
+      1:Object.freeze({boneguard_axe:4,boneguard_weight:1,boneguard_clumsy:1}),
+      later:Object.freeze({boneguard_axe:1,boneguard_weight:1,boneguard_clumsy:1})
+    }),
+    additiveTargetDesires:Object.freeze([
+      Object.freeze({type:'marked',bonus:2,skills:['boneguard_axe']}),
+      Object.freeze({type:'lowest_resistance',stat:'move',bonus:2,skills:['boneguard_weight']})
+    ])
+  }),
   'Outlaw Duelist':Object.freeze({
     // Verified *relative skill weights* for DD1 Veteran/Champion Brigand
     // Cutthroat. Clays uses its own reskinned ability names.
@@ -121,7 +133,14 @@ export function chooseEnemyAction(state,actorId,skillIds,random,abilities,availa
   for(const key of skillIds){
     const skill=abilities[key];
     if(!skill)continue;
-    const targets=availableTargets(state,actorId,key);
+    let targets=availableTargets(state,actorId,key);
+    if(actor?.enemyProfile==='cryptDefender'&&key==='boneguard_weight'){
+      // DD1 Apprentice Bone Defender never uses Dead Weight when three
+      // or more heroes are stunned, and never chooses a stunned victim.
+      const heroes=(state?.units??[]).filter(u=>u.side==='hero'&&!u.dead);
+      if(heroes.filter(u=>u.stun>0).length>=3)continue;
+      targets=targets.filter(id=>!state.units.find(u=>u.id===id)?.stun);
+    }
     const turnWeights=profile.turnWeights?.[(actor?.actionsTaken??0)+1]??profile.turnWeights?.later;
     const baseWeight=turnWeights?.[key]??profile.phaseWeights?.[bossPhase(actor)]?.[key]??profile.skillWeights?.[key]??skill.aiWeight??1;
     const weight=baseWeight*skillDesireWeight(state,actor,key,targets,profile.skillDesires);
