@@ -39,7 +39,7 @@ export const ENEMY_SKILLS=Object.freeze({
     kind:'mark',acc:82.5,crit:6,damageMin:1,damageMax:1,mod:0,markTurns:3,
     debuff:{chance:100,turns:3,modifiers:{dodge:-10}}},
   // Source-checked Apprentice Swine Chopper (DD1).
-  plague_butcher_cut:{name:'Butcher's Cleave',from:[0,1],to:[0,1,2],
+  plague_butcher_cut:{name:"Butcher's Cleave",from:[0,1],to:[0,1,2],
     acc:82.5,crit:12,damageMin:3,damageMax:7,
     status:{type:'bleed',chance:100,value:2,turns:3}},
   plague_ball_chain:{name:'Spiked Chain',from:[0,1,2,3],to:[2,3],
