@@ -31,3 +31,22 @@ export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random
  return {difficulty,region:'plague',template:chosen.id,profiles,slots:profiles.length,
    threat:profiles.reduce((n,id)=>n+PLAGUE_THREAT[id],0),source:'clays-provisional-plague-encounter-table'};
 }
+
+// Region-specific room labels share a common layout and room identifiers.
+// They are cosmetic; event placement, navigation, and save keys do not change.
+export const REGION_ROOM_NAMES=Object.freeze({
+ crypt:Object.freeze({
+  entrance:'Crypt Entrance',gallery:'Ashen Gallery',watch:'Guard Post',
+  vault:'Relic Vault',sanctum:'Forgotten Sanctum'
+ }),
+ plague:Object.freeze({
+  entrance:'Warrens Entrance',gallery:'Fungal Passage',watch:'Butcher Post',
+  vault:'Plague Cache',sanctum:'Rotting Shrine'
+ })
+});
+export function regionRoomName(region,roomId){
+ const rooms=REGION_ROOM_NAMES[region];
+ if(!rooms)throw Error('Unknown dungeon region: '+region);
+ if(!Object.hasOwn(rooms,roomId))throw Error('Unknown dungeon room: '+roomId);
+ return rooms[roomId];
+}
