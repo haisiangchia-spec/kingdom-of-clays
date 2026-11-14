@@ -89,8 +89,8 @@ test('Hookstalker is encounter-reachable and its retreating strike has legal tar
   const {makeGeneratedEncounter,availableTargets,ABILITIES}=await import('./src/engine.js');
   const {ENEMY_PROFILES}=await import('./src/enemy-roster.js');
   let battle=null,foe=null;
-  for(let seed=1;seed<=120;seed++){
-   const candidate=makeGeneratedEncounter(seed,'patrol','plague');
+  for(let seed=1;seed<=300;seed++){
+   const candidate=makeGeneratedEncounter(seed*1000003,'patrol','plague');
    const found=candidate.units.find(u=>u.enemyProfile==='plagueSlasher');
    if(found){battle=candidate;foe=found;break;}
   }
