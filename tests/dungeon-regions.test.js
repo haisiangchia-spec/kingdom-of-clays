@@ -422,33 +422,15 @@ test('Champion Warrens support monsters scale without modifying Apprentice or Ja
 });
 
 
-test('Champion fixed-range attacks deal their provisional bonus in actual combat',()=>{
- let boosted,actor;
- for(let seed=1;seed<=200;seed++){
-  const candidate=makeGeneratedEncounter(seed*1000003,'patrol','plague','champion');
-  const hookstalker=candidate.units.find(u=>u.enemyProfile==='plagueSlasher');
-  if(hookstalker&&availableTargets(candidate,hookstalker.id,'plague_hook_slash').length){boosted=candidate;actor=hookstalker;break;}
+test('Champion support monsters no longer use provisional flat damage bonuses',()=>{
+ for(let seed=1;seed<=100;seed++){
+  const battle=makeGeneratedEncounter(seed*1000003,'patrol','plague','champion');
+  for(const foe of battle.units.filter(u=>u.side==='enemy')){
+   assert.equal(foe.skillDamageBonus,undefined);
+   assert.notEqual(foe.tierScaling,'clays-provisional-champion-support');
+  }
  }
- assert.ok(actor,'test seed must provide a Hookstalker');
- const baseline=structuredClone(boosted);
- const ordinary=baseline.units.find(u=>u.id===actor.id);
- assert.equal(actor.skillDamageBonus,2);
- delete ordinary.skillDamageBonus;
- const boostedTargets=availableTargets(boosted,actor.id,'plague_hook_slash');
- const ordinaryTargets=availableTargets(baseline,actor.id,'plague_hook_slash');
- assert.ok(boostedTargets.length>0);
- assert.deepEqual(boostedTargets,ordinaryTargets);
- const targetId=boostedTargets[0];
- const before=boosted.units.find(u=>u.id===targetId).hp;
- boosted.queue=[actor.id];
- baseline.queue=[actor.id];
- takeTurn(boosted,actor.id,'plague_hook_slash',targetId,()=>.5);
- takeTurn(baseline,actor.id,'plague_hook_slash',targetId,()=>.5);
- const boostedLoss=before-boosted.units.find(u=>u.id===targetId).hp;
- const ordinaryLoss=before-baseline.units.find(u=>u.id===targetId).hp;
- assert.ok(boostedLoss>ordinaryLoss,'Champion bonus must increase real HP loss');
 });
-
 
 test('Champion Butcher tier skills preserve Apprentice loadout and have legal targets',()=>{
  let champion,foe;
