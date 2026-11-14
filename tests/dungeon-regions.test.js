@@ -419,3 +419,27 @@ test('Champion Warrens support monsters scale without modifying Apprentice or Ja
   assert.equal(foe.tierScaling,undefined);
  }
 });
+
+
+test('Champion fixed-range attacks deal their provisional bonus in actual combat',()=>{
+ const boosted=makeGeneratedEncounter(1000003,'patrol','plague','champion');
+ const actor=boosted.units.find(u=>u.enemyProfile==='plagueSlasher');
+ assert.ok(actor,'test seed must provide a Hookstalker');
+ const baseline=structuredClone(boosted);
+ const ordinary=baseline.units.find(u=>u.id===actor.id);
+ assert.equal(actor.skillDamageBonus,2);
+ delete ordinary.skillDamageBonus;
+ const boostedTargets=availableTargets(boosted,actor.id,'plague_hook_slash');
+ const ordinaryTargets=availableTargets(baseline,actor.id,'plague_hook_slash');
+ assert.ok(boostedTargets.length>0);
+ assert.deepEqual(boostedTargets,ordinaryTargets);
+ const targetId=boostedTargets[0];
+ const before=boosted.units.find(u=>u.id===targetId).hp;
+ boosted.queue=[actor.id];
+ baseline.queue=[actor.id];
+ takeTurn(boosted,actor.id,'plague_hook_slash',targetId,()=>.5);
+ takeTurn(baseline,actor.id,'plague_hook_slash',targetId,()=>.5);
+ const boostedLoss=before-boosted.units.find(u=>u.id===targetId).hp;
+ const ordinaryLoss=before-baseline.units.find(u=>u.id===targetId).hp;
+ assert.ok(boostedLoss>ordinaryLoss,'Champion bonus must increase real HP loss');
+});
