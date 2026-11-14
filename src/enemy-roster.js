@@ -29,6 +29,13 @@ export const ENEMY_PROFILES=Object.freeze({
     stunResist:10,bleedResist:200,blightResist:10,moveResist:25,debuffResist:15,
     types:['unholy']
   }),skills:['crypt_quarrel','crypt_bayonet']}),
+  // Apprentice DD1 Swine Wretch source: 12 HP, 12.5 DODGE, 8 SPD.
+  // Disease/stress attack is source-audited; appearance/name are Clays.
+  plagueWretch:Object.freeze({name:'Blight Wretch',stats:Object.freeze({
+    hp:12,spd:8,dodge:12.5,prot:0,dmgMin:1,dmgMax:1,
+    stunResist:10,bleedResist:10,blightResist:40,moveResist:0,debuffResist:15,
+    types:['beast']
+  }),skills:['plague_vomit']}),
   // Outlaw Duelist is a Kingdom of Clays reskin of the DD1 Veteran
   // Brigand Cutthroat for a source-grounded enemy-AI reference encounter.
   duelist:Object.freeze({name:'Outlaw Duelist',stats:Object.freeze({
@@ -49,7 +56,8 @@ export const ENCOUNTER_PRESETS=Object.freeze({
   curseCourt:Object.freeze(['swordsman','archer','mage','mage']),
   outlawPatrol:Object.freeze(['duelist','swordsman','archer','mage']),
   cryptVolley:Object.freeze(['swordsman','swordsman','cryptArbalist','cryptArbalist']),
-  shieldwallVolley:Object.freeze(['cryptDefender','cryptDefender','cryptArbalist','cryptArbalist'])
+  shieldwallVolley:Object.freeze(['cryptDefender','cryptDefender','cryptArbalist','cryptArbalist']),
+  blightWretch:Object.freeze(['cryptDefender','cryptDefender','plagueWretch','cryptArbalist'])
 });
 
 export function spawnProfileEnemy(unitFactory,id,profileId){
