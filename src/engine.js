@@ -1,6 +1,6 @@
 // Kingdom of Clays: deterministic, UI-independent combat prototype.
 import {clamp,hitChance,rollCrit,directDamage,resistChance,dotDuration,deathBlowResistance,initiativeScore,effectiveCombatStats,combinedAttackMultiplier} from './dd1-math.js';
-import {exposeHeroToDisease} from './trait-effects.js';
+import {exposeHeroToDisease,conditionalQuirkSpeed} from './trait-effects.js';
 import {stunResistance,inflictStun,consumeStun,completeUnstunnedTurn,applyGuard,guardTarget,canCounter,tickTimedEffects,addTimedEffect,effectModifier} from './status.js';
 import {resolveTargets,cleanseUnit,restorationTick,addRestoration} from './combat-effects.js';
 import {isSelectable,moveWithinFormation,attemptDisplacement,corpseFromEnemy,clearExpiredCorpses,hasLiveOpponents,rankOf,occupiedRanks,formationSlots,widthOf} from './formation.js';
@@ -84,7 +84,7 @@ export function startRound(state,r){
  // consecutively and process start/end-of-turn effects just once per round.
  state.units.forEach(u=>{u.acted=false;u.actionsRemaining=u.actionsPerRound??1;});
  state.queue=state.units.filter(x=>!x.dead&&!x.corpse)
-  .map(x=>({id:x.id,score:initiativeScore({...x,spd:x.spd+effectModifier(x,'speed')},r)}))
+  .map(x=>({id:x.id,score:initiativeScore({...x,spd:x.spd+effectModifier(x,'speed')+conditionalQuirkSpeed(x,state.torch)},r)}))
   .sort((a,b)=>b.score-a.score||(state.units.find(x=>x.id===a.id).side==='hero'?-1:1)||rank(state,a.id)-rank(state,b.id))
   .flatMap(x=>Array(state.units.find(u=>u.id===x.id).actionsPerRound??1).fill(x.id));
  state.log.push(`Round ${state.round} begins`);
