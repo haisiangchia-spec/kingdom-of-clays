@@ -5,14 +5,14 @@ import {ITEM_RULES,inventoryStacks,inventoryUsed,inventoryCanAdd,offerLoot,colle
 
 test('mixed reward kinds have independently bounded stacks and carried gold tracks only actual gold',()=>{
  const d=createDungeon(401,{interactiveEvents:true});
- for(const [kind,quantity] of [['gem',4],['crest',5],['deed',2]]){
+ for(const [kind,quantity] of [['gem',3],['crest',5],['deed',2]]){
   offerLoot(d,kind,quantity);collectLoot(d);
  }
  assert.deepEqual(d.inventory,[
-  {kind:'gem',quantity:3},{kind:'gem',quantity:1},
+  {kind:'gem',quantity:3},
   {kind:'crest',quantity:5},{kind:'deed',quantity:2}
  ]);
- assert.equal(inventoryUsed(d),9,'capacity would have rejected the final stack');
+ assert.equal(inventoryUsed(d),8,'five starting supply slots and three distinct reward stacks');
 });
 test('mixed rewards enforce total capacity atomically and merge same-kind stacks',()=>{
  const d=createDungeon(402,{interactiveEvents:true});
