@@ -82,3 +82,29 @@ test('hero roster state survives an expedition end and cannot be transferred twi
  });
  expect(output).toEqual({hp:9,stress:76,dead:true,again:false});
 });
+
+test('full roster with a dead hero can dismiss, recruit and fill vacant party rank',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const {createDungeon}=await import('./src/dungeon.js');
+  const {recruitHero}=await import('./src/hero-roster.js');
+  const s=createCampaignSettlement();
+  for(let i=4;i<8;i++)recruitHero(s,'Warrior');
+  s.roster[0].unit.dead=true;s.roster[0].unit.hp=0;
+  const d=createDungeon(934);d.phase='defeat';d.rosterReturned=true;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(s,d));
+ });
+ await page.reload();
+ await expect(page.locator('#hero-roster')).toContainText('Heroes: 8/8');
+ await page.getByRole('button',{name:'Dismiss permanently Swordsman'}).click();
+ await expect(page.locator('#hero-roster')).toContainText('Heroes: 7/8');
+ await expect(page.locator('#hero-roster')).toContainText('Graveyard: Swordsman');
+ await page.getByRole('button',{name:'Recruit Priest'}).click();
+ await expect(page.locator('#hero-roster')).toContainText('Heroes: 8/8');
+ await page.locator('#hero-roster select').first().selectOption('r9');
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-party')).toContainText('Priest 9');
+ await page.reload();
+ await expect(page.locator('#dungeon-party')).toContainText('Priest 9');
+});
