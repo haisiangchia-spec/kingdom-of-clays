@@ -3,13 +3,14 @@ import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,avai
 import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
 import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
+import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,equipTrinket,unequipTrinket} from './hero-roster.js';
 
 const $=id=>document.getElementById(id);
 const HERO_SKILLS={
- h1:['heavy_slash','countering_advance','battle_shout','guardian_parry','riposte_stance','swordmasters_orders','steadfast_resolve'],
- h2:['crushing_strike','sweeping_assault','concussive_blow','iron_fortress','warrior_recovery','charging_blade','rallying_roar'],
- h3:['eagle_eye_shot','hunters_mark'],
- h4:['greater_heal','group_healing','sacred_strike']
+ Swordsman:['heavy_slash','countering_advance','battle_shout','guardian_parry','riposte_stance','swordmasters_orders','steadfast_resolve'],
+ Warrior:['crushing_strike','sweeping_assault','concussive_blow','iron_fortress','warrior_recovery','charging_blade','rallying_roar'],
+ Hunter:['eagle_eye_shot','hunters_mark'],
+ Priest:['greater_heal','group_healing','sacred_strike']
 };
 let expedition,random,preparedId=null,chosenSkill=null,settlement=createCampaignSettlement();
 let saveError='';
@@ -48,8 +49,15 @@ const el=(tag,text,container,action)=>{
  return node;
 };
 function startExpedition(){
+ if(expedition&&!['victory','defeat'].includes(expedition.phase)){
+   expedition.log.push('Finish the expedition before starting another');
+   render();return;
+ }
+ let party;
+ try{party=prepareRosterParty(settlement,expeditionBonuses(settlement));}
+ catch(e){if(expedition){expedition.log.push(e.message);render();}return;}
  const seed=(Math.floor(Math.random()*0xffffffff)>>>0)||1;
- expedition=createDungeon(seed,{difficulty:'scout',interactiveEvents:true,bonuses:expeditionBonuses(settlement)});
+ expedition=createDungeon(seed,{difficulty:'scout',interactiveEvents:true,bonuses:expeditionBonuses(settlement),party});
  expedition.randomCalls=0;
  bindRandom();
  preparedId=null;chosenSkill=null;
@@ -104,6 +112,9 @@ function pass(){
 }
 function render(){
  if(!expedition)return;
+ if(['victory','defeat'].includes(expedition.phase)&&!expedition.rosterReturned){
+  try{returnPartyToRoster(settlement,expedition);}catch(e){expedition.log.push('Roster transfer failed: '+e.message);}
+ }
  $('dungeon-status').textContent=`${DUNGEON_ROOMS[expedition.room].name} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
  const map=$('dungeon-rooms');map.replaceChildren();
  for(const [id,room] of Object.entries(DUNGEON_ROOMS)){
@@ -125,6 +136,50 @@ function render(){
     render();
    });
    upgrade.disabled=!['victory','defeat'].includes(expedition.phase)||Object.entries(cost).some(([key,amount])=>settlement[key]<amount);
+  }
+ }
+ const roster=$('hero-roster');roster.replaceChildren();
+ const townAvailable=['victory','defeat'].includes(expedition.phase);
+ el('p',`Heroes: ${settlement.roster.length}/${ROSTER_CAPACITY} · Recruitment ${RECRUITMENT_COST} gold · Resurrection ${RESURRECTION_COST} gold (Temple Lv 1)`,roster);
+ for(const h of settlement.roster){
+  const u=h.unit;
+  const row=el('div',`${h.name} [${h.rosterId}] · ${h.heroClass} Lv ${h.level} · ${u.dead?'FALLEN':u.hp+'/'+u.maxHp+' HP'} · ${u.stress} stress${h.equippedTrinket?' · Ward Charm':''}`,roster);
+  row.className='dungeon-unit';
+  if(u.dead){
+   const revive=el('button','Resurrect '+h.name,row,()=>{
+    try{resurrectHero(settlement,h.rosterId);}catch(e){expedition.log.push(e.message);}
+    render();
+   });
+   revive.disabled=!townAvailable||settlement.facilities.temple<1||settlement.gold<RESURRECTION_COST;
+  }else if(h.equippedTrinket){
+   const remove=el('button','Unequip charm',row,()=>{try{unequipTrinket(settlement,h.rosterId);}catch(e){expedition.log.push(e.message);}render();});
+   remove.disabled=!townAvailable;
+  }else{
+   const equip=el('button','Equip charm',row,()=>{try{equipTrinket(settlement,h.rosterId);}catch(e){expedition.log.push(e.message);}render();});
+   equip.disabled=!townAvailable||!settlement.trinkets.includes('ward-charm');
+  }
+ }
+ if(townAvailable){
+  for(let i=0;i<4;i++){
+   const rank=i;
+   const row=el('div','Rank '+(i+1)+': ',roster);row.className='dungeon-unit';
+   const select=el('select',null,row);
+   for(const h of settlement.roster.filter(h=>!h.unit.dead&&(settlement.squad[rank]===h.rosterId||!settlement.squad.includes(h.rosterId)))){
+    const option=el('option',h.name+' ('+h.heroClass+')',select);
+    option.value=h.rosterId;
+   }
+   select.value=settlement.squad[rank];
+   select.addEventListener('change',()=>{
+    try{selectHero(settlement,rank,select.value);}catch(e){expedition.log.push(e.message);}
+    render();
+   });
+  }
+  for(const className of HERO_CLASSES){
+   const recruit=el('button','Recruit '+className,roster,()=>{
+    try{recruitHero(settlement,className);}catch(e){expedition.log.push(e.message);}
+    render();
+   });
+   recruit.disabled=settlement.gold<RECRUITMENT_COST||settlement.roster.length>=ROSTER_CAPACITY;
   }
  }
  const save=$('campaign-save-status');
@@ -243,7 +298,7 @@ function render(){
    const actor=currentActor(battle);
    if(actor?.side==='hero'&&status(battle)==='ongoing'){
      el('h3',actor.name+' to act',combat);
-     for(const key of HERO_SKILLS[actor.id]??[]){
+     for(const key of HERO_SKILLS[actor.heroClass??actor.name]??[]){
        if(!ABILITIES[key])continue;
        const targets=availableTargets(battle,actor.id,key);
        if(!targets.length)continue;
