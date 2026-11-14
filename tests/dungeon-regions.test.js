@@ -410,7 +410,7 @@ test('Champion Warrens support monsters scale without modifying Apprentice or Ja
    assert.deepEqual(foe.resist,{stun:65,blight:100,bleed:60,debuff:55,move:90});
    assert.equal(foe.tierScaling,'dd1-verified-champion-chopper-stats');
    assert.equal(foe.skillDamageBonus,undefined,'verified defensive profile must not silently modify Apprentice attack damage');
-   assert.deepEqual(foe.enemySkills,ENEMY_PROFILES.plagueChopper.skills,'Champion Butcher attack skills remain pending separate source audit');
+   assert.deepEqual(foe.enemySkills,['plague_champion_butcher_cut','plague_champion_ball_chain']);
    continue;
   }
   assert.equal(foe.maxHp,Math.ceil(base.hp*1.5));
