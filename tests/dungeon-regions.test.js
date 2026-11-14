@@ -5,6 +5,7 @@ import {DUNGEON_REGIONS,PLAGUE_CHAMPION_TABLES,PLAGUE_TABLES,PLAGUE_TEMPLATES,cr
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,interactCurio,scoutCorridor,disarmTrap} from '../src/dungeon.js';
 import {makeGeneratedEncounter,makeUndeadEncounter,availableTargets,takeTurn,rng,rank} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
+import {exposeHeroToDisease} from '../src/trait-effects.js';
 import {ABILITIES} from '../src/engine.js';
 
 test('DD1 Apprentice Drummer and Chopper statistics and all reskinned skills',()=>{
@@ -563,4 +564,17 @@ test('Champion Wretch Vomit is eligible for expedition disease transmission',()=
  b.queue=[foe.id];
  takeTurn(b,foe.id,'plague_champion_vomit',targetId,()=>0);
  assert.ok(hero.diseases.length>0,'Champion Vomit must be eligible to transmit disease');
+});
+
+
+test('Champion Hookstalker disease-resistance debuff changes subsequent Wretch infection roll',()=>{
+ const attacker={side:'enemy',enemyProfile:'plagueWretch'};
+ const makeHero=()=>({side:'hero',rosterId:'disease-test',dead:false,diseases:[],resist:{disease:20},effects:[]});
+ const clean=makeHero(),debuffed=makeHero();
+ debuffed.effects.push({kind:'debuff',turns:3,modifiers:{diseaseResist:-15}});
+ const state={expeditionEncounter:true,log:[]};
+ // 20% lies above the baseline 13% but below the debuffed 28%.
+ assert.equal(exposeHeroToDisease(state,attacker,clean,()=>.20,'plague_champion_vomit'),false);
+ assert.equal(exposeHeroToDisease(state,attacker,debuffed,()=>.20,'plague_champion_vomit'),true);
+ assert.equal(debuffed.diseases.length,1);
 });
