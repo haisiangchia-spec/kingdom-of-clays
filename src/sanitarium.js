@@ -1,6 +1,7 @@
 // DD1-inspired Sanitarium: one quirk ward and one medical ward, unlocked week 4.
 // Apprentice base prices from darkestdungeon.wiki.gg/wiki/Sanitarium.
 // Trait pool/quest acquisition below are Kingdom of Clays provisional fixtures.
+import {sanitariumUpgradeLevels,nextSanitariumUpgradeCost,upgradeSanitarium,sanitariumWardCapacity,quirkTreatmentDiscount,medicalTreatmentDiscount,multiDiseaseCureChance} from './sanitarium-upgrades.js';
 export const QUIRKS=Object.freeze({
  sturdy:{name:'Sturdy',kind:'positive'},eagleEye:{name:'Eagle Eye',kind:'positive'},
  nervous:{name:'Nervous',kind:'negative'},slowReflexes:{name:'Slow Reflexes',kind:'negative'}
@@ -15,7 +16,7 @@ function goodTrait(entry,kind){
  return !!entry&&typeof entry.id==='string'&&!!QUIRKS[entry.id]&&QUIRKS[entry.id].kind===kind&&typeof entry.locked==='boolean';
 }
 export function initSanitarium(settlement){
- settlement.sanitarium={quirkWard:null,medicalWard:null};
+ settlement.sanitarium={quirkWard:null,medicalWard:null,extraQuirkWards:[],extraMedicalWards:[],upgrades:{treatmentLibrary:0,medicalDevices:0,patientCells:0}};
  for(const hero of settlement.roster)ensureTraits(hero);
  return settlement;
 }
@@ -26,6 +27,16 @@ export function ensureTraits(hero){
 export function validateSanitarium(settlement){
  const state=settlement.sanitarium;
  if(!state||typeof state!=='object')throw Error('Invalid Sanitarium');
+ state.extraQuirkWards??=[];state.extraMedicalWards??=[];
+ state.upgrades??={treatmentLibrary:0,medicalDevices:0,patientCells:0};
+ for(const [id,max] of [['treatmentLibrary',5],['medicalDevices',5],['patientCells',4]]){
+  const level=state.upgrades[id];
+  if(!Number.isInteger(level)||level<0||level>max)throw Error('Invalid Sanitarium upgrade');
+ }
+ if(!Array.isArray(state.extraQuirkWards)||!Array.isArray(state.extraMedicalWards)||
+    state.extraQuirkWards.length>sanitariumWardCapacity(settlement,'quirkWard')-1||
+    state.extraMedicalWards.length>sanitariumWardCapacity(settlement,'medicalWard')-1)
+    throw Error('Invalid Sanitarium ward capacity');
  for(const hero of settlement.roster){
   ensureTraits(hero);
   for(const kind of ['positive','negative']){
@@ -38,23 +49,40 @@ export function validateSanitarium(settlement){
     hero.diseases.some(x=>!DISEASES[x]))throw Error('Invalid hero diseases');
  }
  for(const [ward,modes] of [['quirkWard',['negative','lockPositive']],['medicalWard',['disease']]]){
+  for(const booking of state[ward==='quirkWard'?'extraQuirkWards':'extraMedicalWards']){
+   if(!booking||!modes.includes(booking.mode)||typeof booking.rosterId!=='string'||
+     typeof booking.target!=='string'||!settlement.roster.some(h=>h.rosterId===booking.rosterId&&!h.unit.dead))
+      throw Error('Invalid Sanitarium booking');
+  }
   const booking=state[ward];if(booking===null)continue;
   if(!booking||!modes.includes(booking.mode)||typeof booking.rosterId!=='string'||
      typeof booking.target!=='string'||!settlement.roster.some(h=>h.rosterId===booking.rosterId&&!h.unit.dead))
     throw Error('Invalid Sanitarium booking');
  }
- if(state.quirkWard&&state.medicalWard&&state.quirkWard.rosterId===state.medicalWard.rosterId)throw Error('Duplicate Sanitarium patient');
+ const all=[state.quirkWard,state.medicalWard,...state.extraQuirkWards,...state.extraMedicalWards].filter(Boolean);
+ if(new Set(all.map(t=>t.rosterId)).size!==all.length)throw Error('Duplicate Sanitarium patient');
  return state;
 }
+export function sanitariumWardBookings(settlement,ward){
+ if(!['quirkWard','medicalWard'].includes(ward))throw Error('Unknown Sanitarium ward');
+ return [settlement.sanitarium?.[ward],...(settlement.sanitarium?.[ward==='quirkWard'?'extraQuirkWards':'extraMedicalWards']??[])].filter(Boolean);
+}
+export function sanitariumTreatmentCost(settlement,hero,mode,target){
+ const base=mode==='negative'?(hero.quirks.negative.find(q=>q.id===target)?.locked?SANITARIUM_COSTS.lockedNegative:SANITARIUM_COSTS.negative):
+  mode==='lockPositive'?SANITARIUM_COSTS.lockPositive:SANITARIUM_COSTS.disease;
+ const tier=hero.level>=5?1.8:hero.level>=3?1.4:1;
+ const discount=mode==='disease'?medicalTreatmentDiscount(settlement):quirkTreatmentDiscount(settlement);
+ return Math.round(base*tier*(1-discount)/5)*5;
+}
 export function sanitariumUnavailable(settlement,id){
- return !!(settlement.sanitarium?.quirkWard?.rosterId===id||settlement.sanitarium?.medicalWard?.rosterId===id);
+ return !![settlement.sanitarium?.quirkWard,settlement.sanitarium?.medicalWard,...(settlement.sanitarium?.extraQuirkWards??[]),...(settlement.sanitarium?.extraMedicalWards??[])].some(t=>t?.rosterId===id);
 }
 export function bookSanitarium(settlement,rosterId,mode,target){
  validateSanitarium(settlement);
  if(settlement.town?.week<4)throw Error('Sanitarium unlocks in week 4');
  if(!['negative','lockPositive','disease'].includes(mode))throw Error('Invalid treatment mode');
  const ward=mode==='disease'?'medicalWard':'quirkWard';
- if(settlement.sanitarium[ward])throw Error('Sanitarium ward is occupied');
+ if(sanitariumWardBookings(settlement,ward).length>=sanitariumWardCapacity(settlement,ward))throw Error('Sanitarium ward is occupied');
  if(sanitariumUnavailable(settlement,rosterId)||settlement.town?.treatments?.some(t=>t.rosterId===rosterId))
   throw Error('Hero already undergoing treatment');
  const hero=settlement.roster.find(h=>h.rosterId===rosterId);
@@ -64,17 +92,20 @@ export function bookSanitarium(settlement,rosterId,mode,target){
  if(mode==='disease'&&!hero.diseases.includes(target))throw Error('Disease is not present');
  if(mode!=='disease'&&!record)throw Error('Quirk is not present');
  if(mode==='lockPositive'&&(record.locked||hero.quirks.positive.filter(x=>x.locked).length>=3))throw Error('Cannot lock more positive quirks');
- const cost=mode==='negative'?(record.locked?SANITARIUM_COSTS.lockedNegative:SANITARIUM_COSTS.negative):
-   mode==='lockPositive'?SANITARIUM_COSTS.lockPositive:SANITARIUM_COSTS.disease;
+ const cost=sanitariumTreatmentCost(settlement,hero,mode,target);
  if(settlement.gold<cost)throw Error('Insufficient gold for Sanitarium');
  settlement.gold-=cost;
- settlement.sanitarium[ward]={rosterId,mode,target};
+ const booking={rosterId,mode,target};
+ if(!settlement.sanitarium[ward])settlement.sanitarium[ward]=booking;
+ else settlement.sanitarium[ward==='quirkWard'?'extraQuirkWards':'extraMedicalWards'].push(booking);
  return {ward,cost};
 }
 export function completeSanitariumWeek(settlement){
  validateSanitarium(settlement);
  for(const ward of ['quirkWard','medicalWard']){
-  const booking=settlement.sanitarium[ward];if(!booking)continue;
+  const extra=ward==='quirkWard'?'extraQuirkWards':'extraMedicalWards';
+  const bookings=[settlement.sanitarium[ward],...settlement.sanitarium[extra]].filter(Boolean);
+  for(const booking of bookings){
   const hero=settlement.roster.find(h=>h.rosterId===booking.rosterId);
   if(hero&&!hero.unit.dead){
    if(booking.mode==='disease')hero.diseases=hero.diseases.filter(x=>x!==booking.target);
@@ -83,7 +114,9 @@ export function completeSanitariumWeek(settlement){
     const quirk=hero.quirks.positive.find(x=>x.id===booking.target);if(quirk)quirk.locked=true;
    }
   }
+  }
   settlement.sanitarium[ward]=null;
+  settlement.sanitarium[extra]=[];
  }
 }
 function hash(seed,key){
