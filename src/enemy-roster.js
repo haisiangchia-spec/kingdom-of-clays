@@ -17,6 +17,12 @@ export const ENEMY_PROFILES=Object.freeze({
     stunResist:35,bleedResist:15,blightResist:45,moveResist:25,debuffResist:30,
     types:['unholy']
   }),skills:['court_curse','court_blight']}),
+  // Apprentice Bone Arbalist reference, independently reskinned.
+  cryptArbalist:Object.freeze({name:'Crypt Arbalist',stats:Object.freeze({
+    hp:15,spd:5,dodge:5,prot:0,dmgMin:3,dmgMax:7,
+    stunResist:10,bleedResist:200,blightResist:10,moveResist:25,debuffResist:15,
+    types:['unholy']
+  }),skills:['crypt_quarrel','crypt_bayonet']}),
   // Outlaw Duelist is a Kingdom of Clays reskin of the DD1 Veteran
   // Brigand Cutthroat for a source-grounded enemy-AI reference encounter.
   duelist:Object.freeze({name:'Outlaw Duelist',stats:Object.freeze({
@@ -35,7 +41,8 @@ export const ENCOUNTER_PRESETS=Object.freeze({
   standard:Object.freeze(['swordsman','swordsman','archer','mage']),
   rearguard:Object.freeze(['swordsman','archer','archer','mage']),
   curseCourt:Object.freeze(['swordsman','archer','mage','mage']),
-  outlawPatrol:Object.freeze(['duelist','swordsman','archer','mage'])
+  outlawPatrol:Object.freeze(['duelist','swordsman','archer','mage']),
+  cryptVolley:Object.freeze(['swordsman','swordsman','cryptArbalist','cryptArbalist'])
 });
 
 export function spawnProfileEnemy(unitFactory,id,profileId){
