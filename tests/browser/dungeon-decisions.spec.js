@@ -4,7 +4,7 @@ test('expedition UI exposes scouting and a one-time curio decision after reachin
  await page.goto('/dungeon.html');
  await expect(page.getByRole('button',{name:'Scout Ashen Gallery'})).toBeVisible();
  await page.getByRole('button',{name:'Scout Ashen Gallery'}).click();
- await expect(page.getByText(/Scouted entrance-gallery:/)).toBeVisible();
+ await expect(page.locator('#dungeon-travel').getByText(/Scouted entrance-gallery:/)).toBeVisible();
  await expect(page.getByRole('button',{name:'Scout Ashen Gallery'})).toHaveCount(0);
  await expect(page.locator('#dungeon-status')).toContainText('Torch 73');
 });
