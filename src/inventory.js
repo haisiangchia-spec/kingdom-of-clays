@@ -11,6 +11,7 @@ export const ITEM_RULES=Object.freeze({
  gem:Object.freeze({name:'Moonstone',stack:3,value:125}),
  crest:Object.freeze({name:'Crest',stack:6}),
  deed:Object.freeze({name:'Deed',stack:4}),
+ bust:Object.freeze({name:'Bust',stack:6}),
  trinket:Object.freeze({name:'Ward Charm',stack:1,value:250})
 });
 const valid=(kind,quantity)=>!!ITEM_RULES[kind]&&Number.isInteger(quantity)&&quantity>0;
@@ -93,6 +94,7 @@ export function expeditionRewardSummary(d){
   if(stack.kind==='gem'){summary.gems+=stack.quantity;summary.gemValue+=stack.quantity*ITEM_RULES.gem.value;}
   if(stack.kind==='crest')summary.crests+=stack.quantity;
   if(stack.kind==='deed')summary.deeds+=stack.quantity;
+  if(stack.kind==='bust')summary.busts=(summary.busts??0)+stack.quantity;
   if(stack.kind==='trinket'){summary.trinkets+=stack.quantity;summary.trinketValue+=stack.quantity*ITEM_RULES.trinket.value;}
  }
  summary.totalGold=summary.gold+summary.gemValue;
@@ -107,6 +109,7 @@ export function claimExpeditionRewards(d,settlement){
  settlement.gold+=report.totalGold;
  settlement.crests+=report.crests;
  settlement.deeds+=report.deeds;
+ if(Object.hasOwn(settlement,'busts'))settlement.busts+=(report.busts??0);
  for(let i=0;i<report.trinkets;i++)settlement.trinkets.push('ward-charm');
  d.rewardClaimed=true;
  d.rewardReport=report;
