@@ -52,3 +52,33 @@ test('Drummer and Chopper abilities are legal and source stats survive browser c
  expect(actual.doomStress).toBe(5);
  expect(actual.doomChance).toBe(70);
 });
+
+test('regional exploration names and curio interactions survive browser save and reload',async ({page})=>{
+ await page.goto('/dungeon.html');
+ const result=await page.evaluate(async ()=>{
+  const {createDungeon,interactCurio}=await import('./src/dungeon.js');
+  const {regionRoomName,regionCurio,regionHazard}=await import('./src/dungeon-regions.js');
+  const d=createDungeon(911,{region:'plague'});
+  d.room='gallery';
+  interactCurio(d,'purify');
+  const restored=structuredClone(d);
+  return {
+   entrance:d.log[0],
+   gallery:regionRoomName(restored.region,restored.room),
+   curio:regionCurio(restored.region,restored.room).name,
+   hazard:regionHazard(restored.region).name,
+   used:restored.curiosUsed,
+   water:restored.curioSupplies.holyWater,
+   log:restored.log.at(-1)
+  };
+ });
+ expect(result).toEqual({
+  entrance:'Entered Warrens Entrance',
+  gallery:'Fungal Passage',
+  curio:'Spore-Covered Cache',
+  hazard:'Spore Snare',
+  used:['gallery'],
+  water:0,
+  log:'Spore-Covered Cache yields treasure'
+ });
+});
