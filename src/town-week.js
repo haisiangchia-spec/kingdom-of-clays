@@ -3,6 +3,7 @@
 // and 5 idle stress recovery. Offer class odds/slot count and incomplete town
 // activity side effects are Clays campaign fixtures.
 import {HERO_CLASSES,recruitHero,validateHeroRoster} from './hero-roster.js';
+import {sanitariumUnavailable,completeSanitariumWeek,applyQuestTraitRolls} from './sanitarium.js';
 
 export const TREATMENTS=Object.freeze({
  abbey:Object.freeze({name:'Abbey Cloister',gold:1000,stressRelief:45}),
@@ -63,14 +64,14 @@ export function bookStressTreatment(settlement,rosterId,service){
  if(!hero||hero.unit.dead)throw Error('Hero is unavailable');
  if(hero.unit.stress<=0)throw Error('Hero has no stress to treat');
  if(town.treatments.some(t=>t.service===service))throw Error('Treatment room is occupied');
- if(town.treatments.some(t=>t.rosterId===rosterId))throw Error('Hero is already receiving treatment');
+ if(town.treatments.some(t=>t.rosterId===rosterId)||sanitariumUnavailable(settlement,rosterId))throw Error('Hero is already receiving treatment');
  if(settlement.gold<config.gold)throw Error('Insufficient gold for treatment');
  settlement.gold-=config.gold;
  town.treatments.push({rosterId,service});
  return hero;
 }
 export function townUnavailable(settlement,rosterId){
- return !!settlement.town?.treatments?.some(t=>t.rosterId===rosterId);
+ return !!settlement.town?.treatments?.some(t=>t.rosterId===rosterId)||sanitariumUnavailable(settlement,rosterId);
 }
 export function advanceTownWeek(settlement,expedition){
  validateHeroRoster(settlement);
@@ -78,8 +79,9 @@ export function advanceTownWeek(settlement,expedition){
  if(!expedition||!['victory','defeat'].includes(expedition.phase))throw Error('Expedition has not ended');
  if(!expedition.rosterReturned)throw Error('Return the expedition party to the roster first');
  if(expedition.townWeekProcessed)return false;
+ if(expedition.phase==='victory'&&!expedition.traitsProcessed)applyQuestTraitRolls(settlement,expedition);
  const deployed=new Set(expedition.party.map(u=>u.rosterId).filter(Boolean));
- const treated=new Set(town.treatments.map(t=>t.rosterId));
+ const treated=new Set([...town.treatments.map(t=>t.rosterId),...['quirkWard','medicalWard'].map(w=>settlement.sanitarium?.[w]?.rosterId).filter(Boolean)]);
  for(const t of town.treatments){
   const hero=settlement.roster.find(h=>h.rosterId===t.rosterId);
   if(!hero||hero.unit.dead)continue;
@@ -90,6 +92,7 @@ export function advanceTownWeek(settlement,expedition){
   if(hero.unit.dead||deployed.has(hero.rosterId)||treated.has(hero.rosterId))continue;
   hero.unit.stress=Math.max(0,hero.unit.stress-5);
  }
+ completeSanitariumWeek(settlement);
  town.week++;
  town.offers=stageCoachOffers(town.week,settlement.roster);
  town.treatments=[];
