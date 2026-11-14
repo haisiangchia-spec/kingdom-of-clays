@@ -494,3 +494,23 @@ This milestone expands the expedition inventory from gold to four additional rew
 **Fidelity warning:** Reward types are inspired by DD1 but the specific stack sizes, values, item names, source-specific drops, payout conversion, economy and end-of-quest settlement behaviour are **provisional Kingdom of Clays rules**, not exact original DD1 data. Death/retreat reward retention and persistent settlement storage still require implementation.
 
 **Coverage:** `tests/dungeon-rewards.test.js` and `tests/browser/dungeon-rewards.spec.js` validate heterogeneous stacking, reward selection, Vault trinkets, inventory overflow and once-only settlement payouts.
+
+## Pass 29 — Persistent settlement, facility upgrades and browser campaign saves (2026-11-14)
+
+This milestone connects the earlier single-expedition reward handoff to an upgradeable **campaign settlement**, implemented in `src/settlement.js`. Settlement resources include gold, Crests, Deeds and Ward Charm trinket storage, with completed-expedition tracking and three upgradable facilities. The next-tier upgrade consumes gold and, where applicable, heirloom currency, with escalating requirements and a level-three cap. Resource checks run before any deduction, preventing partially paid upgrades.
+
+| Facility | Level-1 cost | Per-level benefit for *future* expeditions |
+| --- | --- | --- |
+| Market | 100 gold + 1 Crest | +2 starting food |
+| Guild | 125 gold + 1 Deed | +2 maximum and current starting HP per hero |
+| Temple | 150 gold + 1 Crest + 1 Deed | −2 stress per hero from skipping hunger |
+
+Costs multiply by the level being purchased (second level ×2, third ×3). No upgrade modifies the currently active expedition; new expeditions use the settlement's purchased benefits. These three effects, names, costs and tiering rules are **provisional Clays campaign values**, not DD1 source-verified upgrade trees. Resurrection, stress-treatment services, permanent hero-roster progression and actual DD1 hamlet building functions remain separate future work.
+
+**Persistence:** The browser expedition now automatically saves both settlement and active dungeon state to first-party `localStorage` under the versioned key `kingdom-of-clays-campaign-v1`. The save includes party HP/stress/status, rooms/corridors, supplies, loot, pending choices, pending combat state, facility levels, treasury, trinket store, and the deterministic combat RNG cursor (`randomCalls`). Reloading restores the expedition rather than starting a fresh one, while **New expedition** creates a new seeded dungeon without discarding settlement resources or upgrades. Malformed JSON, unknown schema versions, negative currencies, impossible facility levels and invalid trinket data are rejected. Browser storage is device/browser-local, is not cloud-synced, and can be cleared by the browser; no cross-device account persistence is implied.
+
+**Reward integrity:** The prior once-only `rewardClaimed` flag is included in expedition saves. Returning an expedition's gold, gem proceeds, heirlooms and trinkets to settlement is rejected when already claimed; no double-counting should occur from reloading. Settlement `completedExpeditions` increments on a successful handoff.
+
+**Verification:** `tests/settlement.test.js` covers upgrade costs, max-level checks, atomic failure, new-expedition bonuses, hunger stress, save serialization/validation and one-time reward transfers. `tests/browser/settlement.spec.js` tests the actual UI, reloads an in-progress expedition, transfers an end-of-quest reward, upgrades a facility, reloads the settlement, and launches a new expedition with its earned bonus.
+
+**Remaining DD1 fidelity:** Proper hero roster persistence, town services, resurrection in the Temple (user-approved exception), stress treatment, trinket equipment, provision purchasing and retirement/death lifecycle. These will require separate mechanics and tests before campaign parity can be claimed.
