@@ -7,7 +7,11 @@ export const ITEM_RULES=Object.freeze({
  food:Object.freeze({name:'Food',stack:4}),
  torch:Object.freeze({name:'Torch',stack:2}),
  holyWater:Object.freeze({name:'Holy Water',stack:1}),
- gold:Object.freeze({name:'Gold',stack:100})
+ gold:Object.freeze({name:'Gold',stack:100,value:1}),
+ gem:Object.freeze({name:'Moonstone',stack:3,value:125}),
+ crest:Object.freeze({name:'Crest',stack:6}),
+ deed:Object.freeze({name:'Deed',stack:4}),
+ trinket:Object.freeze({name:'Ward Charm',stack:1,value:250})
 });
 const valid=(kind,quantity)=>!!ITEM_RULES[kind]&&Number.isInteger(quantity)&&quantity>0;
 function sourceQuantity(d,kind){
@@ -26,16 +30,16 @@ export function inventoryStacks(d){
 export function inventoryUsed(d){return inventoryStacks(d).length;}
 export function inventoryCanAdd(d,kind,quantity){
  if(!valid(kind,quantity))throw Error('Invalid inventory item');
- if(kind!=='gold')throw Error('Only treasure can be collected with this action');
+ if(['food','torch','holyWater'].includes(kind))throw Error('Only rewards can be collected with this action');
  let remaining=quantity;
  for(const stack of d.inventory??[])if(stack.kind===kind)remaining-=Math.min(remaining,ITEM_RULES[kind].stack-stack.quantity);
  return inventoryUsed(d)+Math.ceil(Math.max(0,remaining)/ITEM_RULES[kind].stack)<=INVENTORY_CAPACITY;
 }
 export function offerLoot(d,kind,quantity){
- if(!valid(kind,quantity)||kind!=='gold')throw Error('Invalid loot');
+ if(!valid(kind,quantity)||['food','torch','holyWater'].includes(kind))throw Error('Invalid loot');
  if(d.pendingLoot)throw Error('Resolve current loot first');
  d.pendingLoot={kind,quantity};
- d.log.push('Found '+quantity+' gold: collect or leave');
+ d.log.push('Found '+quantity+' '+ITEM_RULES[kind].name+': collect or leave');
  return d;
 }
 export function collectLoot(d){
@@ -53,14 +57,14 @@ export function collectLoot(d){
   const add=Math.min(remaining,ITEM_RULES[offer.kind].stack);
   d.inventory.push({kind:offer.kind,quantity:add});remaining-=add;
  }
- d.loot=(d.loot??0)+offer.quantity;
+ if(offer.kind==='gold')d.loot=(d.loot??0)+offer.quantity;
  d.pendingLoot=null;
- d.log.push('Collected '+offer.quantity+' gold');
+ d.log.push('Collected '+offer.quantity+' '+ITEM_RULES[offer.kind].name);
  return d;
 }
 export function leaveLoot(d){
  if(!d.pendingLoot)throw Error('No pending loot');
- d.log.push('Left '+d.pendingLoot.quantity+' gold behind');
+ d.log.push('Left '+d.pendingLoot.quantity+' '+ITEM_RULES[d.pendingLoot.kind].name+' behind');
  d.pendingLoot=null;
  return d;
 }
@@ -72,9 +76,41 @@ export function discardInventoryStack(d,id){
  if(id.startsWith('treasure:')){
   const index=Number(id.slice(9));
   const [removed]=d.inventory.splice(index,1);
-  d.loot=Math.max(0,(d.loot??0)-removed.quantity);
+  if(removed.kind==='gold')d.loot=Math.max(0,(d.loot??0)-removed.quantity);
  }else if(found.kind==='holyWater')d.curioSupplies.holyWater-=found.quantity;
  else d.supplies[found.kind]-=found.quantity;
  d.log.push('Discarded '+found.quantity+' '+ITEM_RULES[found.kind].name);
  return d;
 }
+
+// Reward valuation is intentionally separated from carry capacity. Heirlooms
+// and trinkets transfer to the settlement rather than becoming spendable gold.
+export function expeditionRewardSummary(d){
+ const summary={gold:0,gems:0,crests:0,deeds:0,trinkets:0,gemValue:0,trinketValue:0,totalGold:0};
+ for(const stack of d.inventory??[]){
+  if(!ITEM_RULES[stack.kind])continue;
+  if(stack.kind==='gold')summary.gold+=stack.quantity;
+  if(stack.kind==='gem'){summary.gems+=stack.quantity;summary.gemValue+=stack.quantity*ITEM_RULES.gem.value;}
+  if(stack.kind==='crest')summary.crests+=stack.quantity;
+  if(stack.kind==='deed')summary.deeds+=stack.quantity;
+  if(stack.kind==='trinket'){summary.trinkets+=stack.quantity;summary.trinketValue+=stack.quantity*ITEM_RULES.trinket.value;}
+ }
+ summary.totalGold=summary.gold+summary.gemValue;
+ return summary;
+}
+export function claimExpeditionRewards(d,settlement){
+ if(d.phase!=='victory')throw Error('Complete expedition before settlement transfer');
+ if(d.pendingLoot)throw Error('Resolve pending loot before settlement transfer');
+ if(d.rewardClaimed)throw Error('Expedition rewards have already been claimed');
+ if(!settlement||!Number.isFinite(settlement.gold)||!Number.isFinite(settlement.crests)||!Number.isFinite(settlement.deeds)||!Array.isArray(settlement.trinkets))throw Error('Invalid settlement');
+ const report=expeditionRewardSummary(d);
+ settlement.gold+=report.totalGold;
+ settlement.crests+=report.crests;
+ settlement.deeds+=report.deeds;
+ for(let i=0;i<report.trinkets;i++)settlement.trinkets.push('ward-charm');
+ d.rewardClaimed=true;
+ d.rewardReport=report;
+ d.log.push('Expedition spoils delivered to the settlement');
+ return report;
+}
+export function createSettlement(){return {gold:0,crests:0,deeds:0,trinkets:[]};}
