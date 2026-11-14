@@ -357,8 +357,10 @@ The [official DD1 modding guide](https://steamcommunity.com/sharedfiles/filedeta
 - At rank 3 (zero-based rank 2), Rising Pommel is illegal: normalize remaining weights (7:2; 2:6; then 2:2).
 - At rank 4 (zero-based rank 3), only Retreating Jab is legal, so it is selected with 100% probability and moves the Duelist forward one rank.
 - The **verified scope** is the Veteran Cutthroat's relative AI skill-selection weights, rank-eligibility pattern, and published Veteran baseline HP/DODGE/PROT/SPD/resistances.
-- **Still provisional:** Exact attack damage, hit chance, effects, targeting desire magnitudes, and all other Clays monsters. The Duelist abilities use custom names and approximate effect values, not fully verified DD1 attack numerical parity.
+- **Still provisional:** Exact attack damage, hit chance, non-Shank effects, and all other Clays monsters. The Duelist abilities use custom names and approximate effect values, not fully verified DD1 attack numerical parity.
 
 `src/enemy-ai.js` supports an optional per-monster `turnWeights` table keyed to `actionsTaken+1` (with `later` fallback). The legal skill filter occurs before the weighted draw, exactly so disabling one attack automatically renormalizes surviving weights. `tests/outlaw-duelist-reference.test.js` and `tests/browser/outlaw-duelist-reference.spec.js` cover the documented branch cases.
 
-**Outstanding AI parity:** Implement source-verified conditional target desires for Shank and map further monster brains from reference data without assuming all anime reskins share the source creature's behaviour.
+**Verified Shank target priority:** The Wiki reports a **+100% relative chance** to target the hero with the lowest Bleed resistance and, at Veteran difficulty, **+300% relative chance** to target a marked hero. `additiveTargetWeight` implements those as bonuses **+1** and **+3** to a default target weight of 1; the bonuses add (rather than multiply) if a target meets both conditions. For four targets with only one marked hero, this means relative weights **1:4:1:1**, not guaranteed targeting. These bonuses apply only to `duelist_shank` and only across currently legal targets. Tests include the interaction between lowest resistance and mark status.
+
+**Outstanding AI parity:** Verify full per-skill damage, critical chance, hit chance, and side effects for the Duelist, then map additional monster brains from reference data without assuming every reskin shares its source creature's behaviour.
