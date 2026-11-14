@@ -301,7 +301,7 @@ test('Champion Javelineer Crippling Volley applies damage and blight to rear her
  }
 });
 
-test('all four Champion Warrens templates are reachable with legal enemy actions',()=>{
+test('all five Champion Warrens templates are reachable with legal enemy actions',()=>{
  const seen=new Set();
  for(const difficulty of ['scout','patrol','gauntlet']){
   for(let seed=1;seed<=300;seed++){
@@ -309,7 +309,7 @@ test('all four Champion Warrens templates are reachable with legal enemy actions
    const plan=battle.encounterPlan;
    seen.add(plan.template);
    assert.equal(plan.tier,'champion');
-   assert.equal(plan.slots,3);
+   assert.equal(plan.slots,plan.template==='plagueChampionFullPatrol'?4:3);
    assert.ok(plan.profiles.includes('plagueSkiver'));
    for(const foe of battle.units.filter(u=>u.side==='enemy')){
     const action=chooseEnemyAction(battle,foe.id,foe.enemySkills,()=>.37,ABILITIES,availableTargets);
@@ -319,7 +319,7 @@ test('all four Champion Warrens templates are reachable with legal enemy actions
   }
  }
  assert.deepEqual([...seen].sort(),[
-  'plagueChampionAmbush','plagueChampionEscort','plagueChampionGuard','plagueChampionSkirmish'
+  'plagueChampionAmbush','plagueChampionEscort','plagueChampionFullPatrol','plagueChampionGuard','plagueChampionSkirmish'
  ]);
 });
 
