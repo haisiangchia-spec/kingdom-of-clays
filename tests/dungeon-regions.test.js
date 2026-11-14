@@ -783,3 +783,42 @@ test('Veteran Wretch and Hookstalker use source-verified stats and attacks',()=>
  }
  assert.deepEqual([...seen].sort(),Object.keys(expected).sort());
 });
+
+
+test('Veteran Wretch Vomit inflicts Dodge debuff and can transmit expedition disease',()=>{
+ let battle,foe;
+ for(let seed=1;seed<=200;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague','veteran');
+  const w=b.units.find(u=>u.enemyProfile==='plagueWretch');
+  if(w&&availableTargets(b,w.id,'plague_veteran_vomit').length){battle=b;foe=w;break;}
+ }
+ assert.ok(foe);
+ const targetId=availableTargets(battle,foe.id,'plague_veteran_vomit')[0];
+ const hero=battle.units.find(u=>u.id===targetId);
+ hero.rosterId='veteran-wretch-test';hero.diseases=[];
+ battle.expeditionEncounter=true;
+ battle.queue=[foe.id];
+ takeTurn(battle,foe.id,'plague_veteran_vomit',targetId,()=>0);
+ assert.ok(hero.effects.some(e=>e.modifiers?.dodge===-7));
+ assert.ok(hero.diseases.length>0);
+ assert.ok(battle.log.some(line=>line.includes('Blight Vomit')));
+});
+
+test('Veteran Hookstalker Strike inflicts resistance debuffs and retreats',()=>{
+ let battle,foe;
+ for(let seed=1;seed<=200;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague','veteran');
+  const w=b.units.find(u=>u.enemyProfile==='plagueSlasher');
+  if(w&&availableTargets(b,w.id,'plague_veteran_hook_slash').length){battle=b;foe=w;break;}
+ }
+ assert.ok(foe);
+ const targetId=availableTargets(battle,foe.id,'plague_veteran_hook_slash')[0];
+ const hero=battle.units.find(u=>u.id===targetId);
+ const originalRank=rank(battle,foe.id);
+ battle.queue=[foe.id];
+ takeTurn(battle,foe.id,'plague_veteran_hook_slash',targetId,()=>0);
+ assert.ok(hero.effects.some(e=>e.modifiers?.bleedResist===-20&&e.modifiers?.diseaseResist===-10));
+ assert.ok(rank(battle,foe.id)>=originalRank);
+ assert.ok(hero.hp<hero.maxHp);
+ assert.ok(battle.log.some(line=>line.includes('Hookstalker Strike')));
+});
