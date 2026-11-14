@@ -1,4 +1,4 @@
-import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,DUNGEON_ROOMS} from './dungeon.js';
+import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,DUNGEON_ROOMS,useProvision,torchBand} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
 
@@ -72,7 +72,7 @@ function pass(){
  syncCombat();render();
 }
 function render(){
- $('dungeon-status').textContent=`${DUNGEON_ROOMS[expedition.room].name} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} · Seed ${expedition.seed}`;
+ $('dungeon-status').textContent=`${DUNGEON_ROOMS[expedition.room].name} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
  const map=$('dungeon-rooms');map.replaceChildren();
  for(const [id,room] of Object.entries(DUNGEON_ROOMS)){
    const marker=el('span',room.name,map);
@@ -94,6 +94,22 @@ function render(){
    }
  }else if(expedition.phase==='combat')el('p','Combat blocks further exploration',travel);
  else el('p',expedition.phase==='victory'?'The Sanctum has been secured.':'The expedition has fallen.',travel);
+ const supplies=$('dungeon-supplies');supplies.replaceChildren();
+ el('p',`Torches: ${expedition.supplies.torch} · Food: ${expedition.supplies.food}`,supplies);
+ if(expedition.phase==='explore'){
+   const torchButton=el('button','Light torch (+25)',supplies,()=>{
+     try{useProvision(expedition,'torch');}catch(error){expedition.log.push(error.message);}
+     render();
+   });
+   torchButton.disabled=expedition.supplies.torch<=0||expedition.torch>=100;
+   for(const hero of expedition.party.filter(u=>!u.dead)){
+     const foodButton=el('button','Feed '+hero.name+' (+2 HP)',supplies,()=>{
+       try{useProvision(expedition,'food',hero.id);}catch(error){expedition.log.push(error.message);}
+       render();
+     });
+     foodButton.disabled=expedition.supplies.food<=0||hero.hp>=hero.maxHp;
+   }
+ }
  const party=$('dungeon-party');party.replaceChildren();
  for(const hero of expedition.party){
    el('div',`${hero.name}: ${hero.dead?'FALLEN':hero.hp+'/'+hero.maxHp+' HP'} · ${hero.stress} stress`,party).className='dungeon-unit';
