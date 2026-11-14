@@ -117,7 +117,7 @@ export function resolveHunger(dungeon,choice){
  }else{
    for(const hero of dungeon.party.filter(u=>!u.dead)){
      hero.hp=Math.max(0,hero.hp-3);
-     hero.stress=Math.min(200,hero.stress+15);
+     hero.stress=Math.min(200,hero.stress+Math.max(0,15-(dungeon.hungerStressReduction??0)));
      if(hero.hp===0)hero.dead=true;
    }
    dungeon.log.push('The party goes hungry (-3 HP, +15 stress each)');
@@ -165,10 +165,14 @@ function encounterSeed(seed,key){
  for(let i=0;i<key.length;i++)h=Math.imul(h^key.charCodeAt(i),16777619)>>>0;
  return h||1;
 }
-export function createDungeon(seed=1,{difficulty='scout',interactiveEvents=false}={}){
+export function createDungeon(seed=1,{difficulty='scout',interactiveEvents=false,bonuses={}}={}){
  if(!['scout','patrol','gauntlet'].includes(difficulty))throw Error('Unknown dungeon difficulty');
  const party=makeGeneratedEncounter(seed,difficulty).units.filter(u=>u.side==='hero').map(copy);
- return {seed,difficulty,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8},
+ const bonusHp=Math.max(0,Math.min(6,Math.trunc(bonuses.heroHp??0)));
+ for(const hero of party){hero.maxHp+=bonusHp;hero.hp+=bonusHp;}
+ const bonusFood=Math.max(0,Math.min(6,Math.trunc(bonuses.food??0)));
+ const hungerStressReduction=Math.max(0,Math.min(6,Math.trunc(bonuses.hungerStressReduction??0)));
+ return {seed,difficulty,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood},hungerStressReduction,
   pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,inventory:[],pendingLoot:null,battleSerial:0,phase:'explore',log:['Entered the Crypt Entrance']};
 }
 export function adjacentRooms(dungeon){
