@@ -544,3 +544,19 @@ test('Champion Warrens support attack tables match official wiki values',()=>{
  assert.equal(ABILITIES.plague_champion_hook_slash.debuff.modifiers.bleedResist,-30);
  assert.equal(ABILITIES.plague_champion_hook_slash.debuff.modifiers.diseaseResist,-15);
 });
+
+
+test('Champion Wretch Vomit is eligible for expedition disease transmission',()=>{
+ const b=makeGeneratedEncounter(1000003,'patrol','plague','champion');
+ const foe=b.units.find(u=>u.enemyProfile==='plagueWretch');
+ if(!foe)return; // Other seeded encounters are covered by the Champion formation suite.
+ const targetId=availableTargets(b,foe.id,'plague_champion_vomit')[0];
+ assert.ok(targetId);
+ const hero=b.units.find(u=>u.id===targetId);
+ hero.rosterId='test-roster-hero';
+ hero.diseases=[];
+ b.expeditionEncounter=true;
+ b.queue=[foe.id];
+ takeTurn(b,foe.id,'plague_champion_vomit',targetId,()=>0);
+ assert.ok(hero.diseases.length>0,'Champion Vomit must be eligible to transmit disease');
+});
