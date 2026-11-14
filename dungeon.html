@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kingdom of Clays · Dungeon Expedition</title><link rel="stylesheet" href="./style.css">
+<style>
+.dungeon-layout{max-width:1100px;margin:auto;padding:16px;display:grid;grid-template-columns:minmax(270px,1fr) minmax(300px,1.6fr);gap:18px}
+.dungeon-card{border:1px solid #77654e;border-radius:8px;padding:15px;background:#211f1e;color:#f5e9d5}
+.dungeon-card button{margin:4px;padding:8px;cursor:pointer}
+.dungeon-card button:disabled{opacity:.45;cursor:not-allowed}
+.dungeon-unit{padding:7px;border-bottom:1px solid #6b5844}
+#dungeon-log{max-height:230px;overflow:auto;font-size:.9em}
+#dungeon-log p{margin:5px 0}
+.dungeon-rooms{display:flex;flex-wrap:wrap;gap:6px}
+.dungeon-rooms span{border:1px solid #756c59;padding:5px;border-radius:5px}
+.dungeon-rooms .seen{border-color:#dec48a}
+.dungeon-rooms .here{background:#6b523b}
+@media(max-width:800px){.dungeon-layout{grid-template-columns:1fr}}
+</style></head>
+<body><header><h1>Kingdom of Clays <small>Dungeon Expedition · Prototype</small></h1>
+<p><a href="./index.html">← Combat Lab</a> · Seeded dungeon navigation with persistent party</p></header>
+<div class="dungeon-layout"><section class="dungeon-card">
+<h2>Dungeon map</h2><p id="dungeon-status"></p><div id="dungeon-rooms" class="dungeon-rooms"></div>
+<h3>Travel</h3><div id="dungeon-travel"></div>
+<h3>Party</h3><div id="dungeon-party"></div>
+<button id="dungeon-restart">New expedition</button></section>
+<section class="dungeon-card"><h2 id="dungeon-panel-title">Expedition</h2>
+<div id="dungeon-combat"></div><h3>Expedition log</h3><div id="dungeon-log" aria-live="polite"></div></section></div>
+<script type="module" src="./src/dungeon-app.js"></script></body></html>
