@@ -10,7 +10,9 @@ function town(){const s=createCampaignSettlement();s.town.week=4;s.town.offers=[
 test('Sanitarium unlocks at week four; original DD1 apprentice pricing and one ward of each type',()=>{
  const s=createCampaignSettlement();s.gold=20000;
  s.roster[0].quirks.negative.push({id:'nervous',locked:false});
- assert.deepEqual(Object.keys(s.sanitarium),['quirkWard','medicalWard']);
+ assert.equal(s.sanitarium.quirkWard,null);
+ assert.equal(s.sanitarium.medicalWard,null);
+ assert.deepEqual(s.sanitarium.upgrades,{treatmentLibrary:0,medicalDevices:0,patientCells:0});
  assert.equal(SANITARIUM_COSTS.negative,1500);
  assert.equal(SANITARIUM_COSTS.lockedNegative,5000);
  assert.equal(SANITARIUM_COSTS.lockPositive,7500);
