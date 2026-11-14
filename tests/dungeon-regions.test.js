@@ -292,6 +292,8 @@ test('Champion Javelineer Crippling Volley applies damage and blight to rear her
  takeTurn(b,foe.id,'plague_skiver_cripple',targets[0],()=>.5);
  const heroes=b.units.filter(u=>u.side==='hero');
  assert.equal(heroes[0].hp,before[0],'front hero should be outside volley target ranks');
+ assert.ok(!heroes[0].dot.some(d=>d.type==='blight'),'front hero must not receive volley blight');
+ assert.ok(!heroes[0].effects.some(e=>e.kind==='debuff'&&e.modifiers?.speed===-6),'front hero must not receive volley debuff');
  for(let i=1;i<4;i++){
   assert.ok(heroes[i].hp<before[i],'rear hero '+i+' should take damage');
   assert.ok(heroes[i].dot.some(d=>d.type==='blight'),'rear hero '+i+' should receive blight');
