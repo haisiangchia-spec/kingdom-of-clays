@@ -295,6 +295,7 @@ test('Champion Javelineer Crippling Volley applies damage and blight to rear her
  for(let i=1;i<4;i++){
   assert.ok(heroes[i].hp<before[i],'rear hero '+i+' should take damage');
   assert.ok(heroes[i].dot.some(d=>d.type==='blight'),'rear hero '+i+' should receive blight');
+  assert.ok(heroes[i].effects.some(e=>e.kind==='debuff'&&e.modifiers?.speed===-6&&e.modifiers?.dodge===-8),'rear hero '+i+' should receive volley speed/dodge debuff');
  }
 });
 
