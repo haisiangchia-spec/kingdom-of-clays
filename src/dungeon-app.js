@@ -6,7 +6,7 @@ import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeC
 import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket} from './hero-roster.js';
 import {TREATMENTS,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
 import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits,sanitariumTreatmentCost,sanitariumWardBookings} from './sanitarium.js';
-import {DUNGEON_REGIONS,regionRoomName} from './dungeon-regions.js';
+import {DUNGEON_REGIONS,regionRoomName,regionCurio} from './dungeon-regions.js';
 import {SANITARIUM_UPGRADE_TREES,sanitariumUpgradeLevels,nextSanitariumUpgradeCost,upgradeSanitarium,sanitariumWardCapacity} from './sanitarium-upgrades.js';
 
 const $=id=>document.getElementById(id);
@@ -294,8 +294,8 @@ function render(){
    feed.disabled=expedition.supplies.food<4;
    el('button','Go hungry',decisions,()=>{resolveHunger(expedition,'skip');render();});
  }
- if(expedition.phase==='explore'&&!expedition.pendingHunger&&!expedition.pendingTravel&&!expedition.pendingLoot&&DUNGEON_CURIOS[expedition.room]&&!expedition.curiosUsed.includes(expedition.room)){
-   el('p','Curio: '+DUNGEON_CURIOS[expedition.room].name,decisions);
+ if(expedition.phase==='explore'&&!expedition.pendingHunger&&!expedition.pendingTravel&&!expedition.pendingLoot&&regionCurio(expedition.region??'crypt',expedition.room)&&!expedition.curiosUsed.includes(expedition.room)){
+   el('p','Curio: '+regionCurio(expedition.region??'crypt',expedition.room).name,decisions);
    for(const [action,label] of [['leave','Leave untouched'],['touch','Inspect without provision'],['purify','Use holy water (safe reward)']]){
      const btn=el('button',label,decisions,()=>{
        try{interactCurio(expedition,action);}catch(error){expedition.log.push(error.message);}render();
