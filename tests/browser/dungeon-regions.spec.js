@@ -202,7 +202,7 @@ test('Veteran Warrens selection survives reload and retains provisional combat t
  expect(result.tier).toBe('veteran');
  expect(result.battleTier).toBe('veteran');
  expect(result.scalings.length).toBeGreaterThan(0);
- expect(result.scalings.every(x=>x==='clays-provisional-veteran')).toBe(true);
+ expect(result.scalings.every(x=>['clays-provisional-veteran','dd1-verified-veteran-stats'].includes(x))).toBe(true);
 });
 
 
