@@ -619,6 +619,7 @@ export function makeProgressionBattle(seed=1){
 // battle-engine baseline as all existing laboratory encounters.
 export function makeGeneratedEncounter(seed=1,difficulty='patrol',region='crypt',tier='apprentice'){
   const state=makeBattle(seed);
+  if(region!=='plague'&&tier!=='apprentice')throw Error('Encounter tier is supported only for Blighted Warrens');
   if(!['crypt','plague'].includes(region))throw Error('Unknown encounter region: '+region);
   const plan=region==='plague'?createPlagueEncounterPlan(difficulty,rng(seed),tier):createEncounterPlan(difficulty,rng(seed));
   state.units=[...state.units.filter(u=>u.side==='hero'),...spawnEncounterPlan(unit,plan)];
