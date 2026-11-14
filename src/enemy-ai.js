@@ -27,7 +27,7 @@ export function bossPhase(actor){
 // must be transcribed from the source data before claiming full parity.
 export function targetDesireWeight(unit,skillKey,desires=[]){
  let weight=1;
- for(const desire of desires){
+ for(const desire of desires??[]){
    if(desire.skills&&!desire.skills.includes(skillKey))continue;
    if(!Number.isFinite(desire.weight)||desire.weight<=0)continue;
    if(desire.type==='marked'&&unit.marked>0)weight*=desire.weight;
