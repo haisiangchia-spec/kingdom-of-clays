@@ -54,19 +54,102 @@ function triggerHazard(dungeon,edge){
  if(corridor.hazardChecked)return;
  corridor.hazardChecked=true;
  const chance=dungeon.torch>=75?.15:dungeon.torch>=25?.30:.50;
- const roll=rng(encounterSeed(dungeon.seed,'hazard:'+edge.id))();
- if(roll>=chance){dungeon.log.push('The party safely passes a suspected trap');return;}
+ const present=corridor.scouted?corridor.trapRevealed:rng(encounterSeed(dungeon.seed,'hazard:'+edge.id))()<chance;
+ if(!present){dungeon.log.push('The party safely passes a suspected trap');return;}
  const victim=dungeon.party.find(u=>!u.dead&&u.hp>0);
- if(!victim)return;
+ if(victim)applyTrapDamage(dungeon,victim);
+}
+// Optional event-choice layer for expedition clients; original Clays fixtures.
+// Scouting previews the existing seeded encounter/trap rolls (not DD1 odds).
+export function scoutCorridor(dungeon,to){
+ if(dungeon.phase!=='explore'||dungeon.pendingTravel)throw Error('Scouting requires a free room');
+ const edge=DUNGEON_CORRIDORS.find(e=>(e.from===dungeon.room&&e.to===to)||(e.to===dungeon.room&&e.from===to));
+ if(!edge)throw Error('Destination is not adjacent');
+ const record=dungeon.corridors[edge.id]??{traversals:0,encounterCleared:false};
+ if(record.scouted)throw Error('Corridor already scouted');
+ dungeon.corridors[edge.id]=record;
+ dungeon.torch=Math.max(0,dungeon.torch-2); // provisional scouting light cost
+ const chance=dungeon.torch>=75?.30:dungeon.torch>=25?.40:.55;
+ const trapChance=dungeon.torch>=75?.15:dungeon.torch>=25?.30:.50;
+ record.scouted=true;
+ record.encounterRevealed=!record.encounterCleared&&(edge.forcedEncounter||rng(encounterSeed(dungeon.seed,edge.id))()<chance);
+ record.trapRevealed=['watch-sanctum','vault-sanctum'].includes(edge.id)&&!record.hazardChecked&&rng(encounterSeed(dungeon.seed,'hazard:'+edge.id))()<trapChance;
+ dungeon.log.push('Scouted '+edge.id+': '+(record.encounterRevealed?'enemy signs':'no enemy signs')+(record.trapRevealed?', trap detected':''));
+ return record;
+}
+export function disarmTrap(dungeon,heroId){
+ const trip=dungeon.pendingTravel;
+ if(dungeon.phase!=='explore'||!trip||trip.progress!==0)throw Error('Disarm before moving along the corridor');
+ const record=dungeon.corridors[trip.corridor];
+ if(!record?.scouted||!record.trapRevealed||record.hazardChecked)throw Error('No revealed trap to disarm');
+ const hero=dungeon.party.find(u=>u.id===heroId&&!u.dead);
+ if(!hero)throw Error('Choose a living hero');
+ const chance=Math.min(.95,.55+Math.max(0,hero.spd??0)*.04);
+ const success=rng(encounterSeed(dungeon.seed,'disarm:'+trip.corridor+':'+hero.id))()<chance;
+ record.hazardChecked=true;record.trapDisarmed=success;record.trapRevealed=false;
+ if(success){
+   hero.stress=Math.max(0,hero.stress-3);
+   dungeon.log.push(hero.name+' disarms a discovered trap');
+ }else{
+   applyTrapDamage(dungeon,hero);
+   dungeon.log.push(hero.name+' fails to disarm the trap');
+ }
+ return success;
+}
+function applyTrapDamage(dungeon,victim){
  victim.hp=Math.max(0,victim.hp-2);
  victim.stress=Math.min(200,victim.stress+5);
  if(victim.hp===0)victim.dead=true;
  dungeon.log.push('A hidden trap wounds '+victim.name+' (-2 HP, +5 stress)');
  if(dungeon.party.every(u=>u.dead)){
-   dungeon.phase='defeat';
-   dungeon.pendingTravel=null;
+   dungeon.phase='defeat';dungeon.pendingTravel=null;
    dungeon.log.push('The expedition has fallen');
  }
+}
+export function resolveHunger(dungeon,choice){
+ if(dungeon.phase!=='explore'||!dungeon.pendingHunger)throw Error('No hunger check pending');
+ if(choice!=='eat'&&choice!=='skip')throw Error('Choose eat or skip');
+ if(choice==='eat'){
+   if((dungeon.supplies.food??0)<4)throw Error('Four food required to feed the party');
+   dungeon.supplies.food-=4;
+   dungeon.log.push('The party eats four rations and marches onward');
+ }else{
+   for(const hero of dungeon.party.filter(u=>!u.dead)){
+     hero.hp=Math.max(0,hero.hp-3);
+     hero.stress=Math.min(200,hero.stress+15);
+     if(hero.hp===0)hero.dead=true;
+   }
+   dungeon.log.push('The party goes hungry (-3 HP, +15 stress each)');
+   if(dungeon.party.every(u=>u.dead)){
+     dungeon.phase='defeat';dungeon.pendingTravel=null;
+     dungeon.log.push('The expedition has fallen');
+   }
+ }
+ dungeon.pendingHunger=false;
+ return dungeon;
+}
+export const DUNGEON_CURIOS=Object.freeze({
+ gallery:Object.freeze({name:'Abandoned Reliquary'}),
+ vault:Object.freeze({name:'Sealed Urn'})
+});
+export function interactCurio(dungeon,choice){
+ if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingHunger)throw Error('Cannot inspect curio now');
+ const curio=DUNGEON_CURIOS[dungeon.room];
+ if(!curio||dungeon.curiosUsed.includes(dungeon.room))throw Error('No untouched curio in this room');
+ if(!['leave','touch','purify'].includes(choice))throw Error('Unknown curio choice');
+ if(choice==='purify'){
+   if(dungeon.curioSupplies.holyWater<1)throw Error('No holy water remaining');
+   dungeon.curioSupplies.holyWater--;
+ }
+ dungeon.curiosUsed.push(dungeon.room);
+ if(choice==='leave'){dungeon.log.push('The party leaves '+curio.name+' untouched');return dungeon;}
+ const safe=choice==='purify'||rng(encounterSeed(dungeon.seed,'curio:'+dungeon.room))()<.50;
+ if(safe){dungeon.loot+=choice==='purify'?175:100;dungeon.log.push(curio.name+' yields treasure');}
+ else{
+   const hero=dungeon.party.find(u=>!u.dead);
+   if(hero){hero.stress=Math.min(200,hero.stress+12);dungeon.log.push(curio.name+' causes '+hero.name+' distress (+12 stress)');}
+ }
+ return dungeon;
 }
 const keyFor=(edge,from)=>edge.from===from?edge.to:edge.from;
 const copy=x=>structuredClone(x);
@@ -75,11 +158,11 @@ function encounterSeed(seed,key){
  for(let i=0;i<key.length;i++)h=Math.imul(h^key.charCodeAt(i),16777619)>>>0;
  return h||1;
 }
-export function createDungeon(seed=1,{difficulty='scout'}={}){
+export function createDungeon(seed=1,{difficulty='scout',interactiveEvents=false}={}){
  if(!['scout','patrol','gauntlet'].includes(difficulty))throw Error('Unknown dungeon difficulty');
  const party=makeGeneratedEncounter(seed,difficulty).units.filter(u=>u.side==='hero').map(copy);
  return {seed,difficulty,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8},
-  pendingTravel:null,pendingBattle:null,battleSerial:0,phase:'explore',log:['Entered the Crypt Entrance']};
+  pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,battleSerial:0,phase:'explore',log:['Entered the Crypt Entrance']};
 }
 export function adjacentRooms(dungeon){
  if(dungeon.phase!=='explore'||dungeon.pendingTravel)return [];
@@ -87,7 +170,7 @@ export function adjacentRooms(dungeon){
   .map(e=>({room:keyFor(e,dungeon.room),corridor:e.id}));
 }
 export function beginCorridor(dungeon,to){
- if(dungeon.phase!=='explore'||dungeon.pendingTravel)throw Error('Exploration is blocked');
+ if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingHunger)throw Error('Exploration is blocked');
  const edge=DUNGEON_CORRIDORS.find(e=>(e.from===dungeon.room&&e.to===to)||(e.to===dungeon.room&&e.from===to));
  if(!edge)throw Error('Destination is not adjacent');
  dungeon.pendingTravel={from:dungeon.room,to,corridor:edge.id,progress:0,steps:edge.steps};
@@ -108,9 +191,16 @@ function startBattle(dungeon,source,difficulty){
 }
 export function advanceCorridor(dungeon){
  if(dungeon.phase!=='explore'||!dungeon.pendingTravel)throw Error('No traversable corridor');
+ if(dungeon.pendingHunger)throw Error('Resolve hunger before advancing');
+ if(dungeon.interactiveEvents&&dungeon.stepsTaken>0&&dungeon.stepsTaken%4===0&&dungeon.lastHungerStep!==dungeon.stepsTaken){
+   dungeon.pendingHunger=true;dungeon.lastHungerStep=dungeon.stepsTaken;
+   dungeon.log.push('Hunger: eat four food or risk the consequences');
+   return dungeon;
+ }
  const trip=dungeon.pendingTravel;
  const edge=DUNGEON_CORRIDORS.find(e=>e.id===trip.corridor);
  trip.progress++;
+ dungeon.stepsTaken++;
  dungeon.torch=Math.max(0,dungeon.torch-1); // provisional travel torch cost
  const visited=dungeon.corridors[edge.id]??{traversals:0,encounterCleared:false};
  dungeon.corridors[edge.id]=visited;
@@ -119,7 +209,7 @@ export function advanceCorridor(dungeon){
  if(trip.progress===1&&!visited.encounterCleared){
    const roll=rng(encounterSeed(dungeon.seed,edge.id))();
    const danger=dungeon.torch>=75?.30:dungeon.torch>=25?.40:.55;
-   if(edge.forcedEncounter||roll<danger){
+   if(visited.scouted?visited.encounterRevealed:(edge.forcedEncounter||roll<danger)){
      startBattle(dungeon,'corridor:'+edge.id,dungeon.difficulty);
      return dungeon;
    }
