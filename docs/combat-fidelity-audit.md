@@ -708,3 +708,10 @@ Sources describing mash layout and difficulty mapping:
 - https://darkestdungeon.wiki.gg/wiki/Expeditions (Veteran corresponds to resolve level 3)
 
 **Required parity work:** obtain and preserve a legally sourced copy or extracted data of the installed vanilla Veteran Warrens mash; record its game version; parse each `hall:` and `room:` entry separately; map original monster identifiers to Clays reskins; support missing enemy species and encounter conditions before replacing the provisional Scout/Patrol/Gauntlet distributions. Current Scout/Patrol/Gauntlet are original Clays encounter categories, not direct DD1 hall/room equivalents. No DD1 encounter probability is claimed verified at this checkpoint.
+
+
+## Pass 121: DD1 mash parser syntax correction
+
+The initial audit parser incorrectly expected `.monster` tokens. The official Red Hook modding guide documents the real syntax as `hall: .chance 1 .types skeleton_common_A skeleton_common_A ...`, with space-separated IDs after `.types`. Parser and fixtures have been corrected to this format. It now recognizes `hall`, `room`, `stall`, `boss`, and `named` encounter kinds and excludes trailing optional fields from monster IDs. This parser is **audit-only**, not wired into campaign generation.
+
+Primary syntax reference: https://steamcommunity.com/sharedfiles/filedetails/?id=819597757 (official Darkest Dungeon modding guide, Monster Encounter Groups). File-presence corroboration: https://steamdb.info/depot/262061/manifests/ (lists `dungeons/warrens/warrens.3.mash.darkest`). Source file contents and game version remain to be acquired; no Veteran probabilities have been promoted to verified.
