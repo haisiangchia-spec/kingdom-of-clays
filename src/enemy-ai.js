@@ -3,6 +3,15 @@
 // Select a legal skill first, then a target independently. This avoids giving
 // four-target skills four times the selection chance of single-target skills.
 const PROFILES=Object.freeze({
+  'Outlaw Duelist':Object.freeze({
+    // Verified *relative skill weights* for DD1 Veteran/Champion Brigand
+    // Cutthroat. Clays uses its own reskinned ability names.
+    turnWeights:Object.freeze({
+      1:Object.freeze({duelist_sweep:7,duelist_uppercut:1,duelist_shank:2,duelist_poke:1}),
+      2:Object.freeze({duelist_sweep:2,duelist_uppercut:1,duelist_shank:6,duelist_poke:1}),
+      later:Object.freeze({duelist_sweep:2,duelist_uppercut:1,duelist_shank:2,duelist_poke:1})
+    })
+  }),
   'Skeleton Swordsman':Object.freeze({targetDesires:Object.freeze([{type:'marked',weight:4}]),skillDesires:Object.freeze([{type:'ally_dead',skill:'skeleton_guard_break',allyProfile:'mage',weight:3}])}),
   'Skeleton Archer':Object.freeze({targetPreference:'rear',targetDesires:Object.freeze([{type:'resistance',stat:'debuff',direction:'low',weight:2,skills:['skeleton_pin_arrow']}])}),
   'Skeleton Court Mage':Object.freeze({skillWeights:Object.freeze({court_curse:3,court_blight:1,enemy_stress:3,enemy_strike:1}),targetPreference:'stressed',skillDesires:Object.freeze([{type:'target_status',skill:'court_curse',status:'blight',weight:2}])}),
@@ -88,7 +97,8 @@ export function chooseEnemyAction(state,actorId,skillIds,random,abilities,availa
     const skill=abilities[key];
     if(!skill)continue;
     const targets=availableTargets(state,actorId,key);
-    const baseWeight=profile.phaseWeights?.[bossPhase(actor)]?.[key]??profile.skillWeights?.[key]??skill.aiWeight??1;
+    const turnWeights=profile.turnWeights?.[(actor?.actionsTaken??0)+1]??profile.turnWeights?.later;
+    const baseWeight=turnWeights?.[key]??profile.phaseWeights?.[bossPhase(actor)]?.[key]??profile.skillWeights?.[key]??skill.aiWeight??1;
     const weight=baseWeight*skillDesireWeight(state,actor,key,targets,profile.skillDesires);
     if(!targets.length||!Number.isFinite(weight)||weight<=0)continue;
     choices.push({key,targets,weight});
