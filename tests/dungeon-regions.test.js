@@ -695,3 +695,36 @@ test('Veteran Warrens generation is seeded, isolated and explicitly provisional'
   }
  }
 });
+
+
+test('Veteran Butcher Cleave applies bleed and healing penalty in combat',()=>{
+ let battle,butcher;
+ for(let seed=1;seed<=200;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague','veteran');
+  const foe=b.units.find(u=>u.enemyProfile==='plagueChopper');
+  if(foe&&availableTargets(b,foe.id,'plague_veteran_butcher_cut').length){battle=b;butcher=foe;break;}
+ }
+ assert.ok(butcher);
+ const targetId=availableTargets(battle,butcher.id,'plague_veteran_butcher_cut')[0];
+ const hero=battle.units.find(u=>u.id===targetId);
+ battle.queue=[butcher.id];
+ takeTurn(battle,butcher.id,'plague_veteran_butcher_cut',targetId,()=>0);
+ assert.ok(hero.effects.some(e=>e.modifiers?.healingReceived===-40));
+ assert.ok(hero.effects.some(e=>e.type==='bleed')||hero.status?.bleed>0||hero.dot?.bleed>0,'Cleave should inflict bleed');
+});
+
+test('Veteran Drummer Weakening Rhythm marks and lowers Dodge',()=>{
+ let battle,drummer;
+ for(let seed=1;seed<=200;seed++){
+  const b=makeGeneratedEncounter(seed*1000003,'patrol','plague','veteran');
+  const foe=b.units.find(u=>u.enemyProfile==='plagueDrummer');
+  if(foe&&availableTargets(b,foe.id,'plague_veteran_drum_debilitation').length){battle=b;drummer=foe;break;}
+ }
+ assert.ok(drummer);
+ const targetId=availableTargets(battle,drummer.id,'plague_veteran_drum_debilitation')[0];
+ const hero=battle.units.find(u=>u.id===targetId);
+ battle.queue=[drummer.id];
+ takeTurn(battle,drummer.id,'plague_veteran_drum_debilitation',targetId,()=>0);
+ assert.ok(hero.marked>0);
+ assert.ok(hero.effects.some(e=>e.modifiers?.dodge===-15));
+});
