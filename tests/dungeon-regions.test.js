@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ENEMY_PROFILES} from '../src/enemy-roster.js';
-import {DUNGEON_REGIONS,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES,regionCurio} from '../src/dungeon-regions.js';
-import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,interactCurio} from '../src/dungeon.js';
+import {DUNGEON_REGIONS,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES,regionCurio,regionHazard} from '../src/dungeon-regions.js';
+import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,interactCurio,scoutCorridor,disarmTrap} from '../src/dungeon.js';
 import {makeGeneratedEncounter,makeUndeadEncounter,availableTargets,takeTurn,rng} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {ABILITIES} from '../src/engine.js';
@@ -114,4 +114,28 @@ test('Warrens curios are region-specific but keep legacy choices and rewards',()
  assert.deepEqual(d.curiosUsed,['gallery']);
  assert.match(d.log.at(-1),/Spore-Covered Cache yields treasure/);
  assert.throws(()=>interactCurio(d,'touch'),/No untouched curio/);
+});
+
+test('Warrens spore snare is stronger in stress but does not change Crypt trap baseline',()=>{
+ assert.deepEqual([regionHazard('crypt').damage,regionHazard('crypt').stress],[2,5]);
+ assert.deepEqual([regionHazard('plague').damage,regionHazard('plague').stress],[2,7]);
+ assert.throws(()=>regionHazard('missing'),/Unknown dungeon region/);
+ // Force a discovered trap and a failed disarm through the existing public API.
+ let verified=false;
+ for(let seed=1;seed<300&&!verified;seed++){
+  const d=createDungeon(seed,{region:'plague'});
+  d.room='watch';d.visited.push('watch');d.torch=0;
+  const record=scoutCorridor(d,'sanctum');
+  if(!record.trapRevealed)continue;
+  beginCorridor(d,'sanctum');
+  for(const hero of d.party)hero.spd=0;
+  const victim=d.party[0],hp=victim.hp,stress=victim.stress;
+  const success=disarmTrap(d,victim.id);
+  if(success)continue;
+  assert.equal(victim.hp,hp-2);
+  assert.equal(victim.stress,stress+7);
+  assert.match(d.log.at(-2),/Spore Snare wounds/);
+  verified=true;
+ }
+ assert.ok(verified,'a failed Warrens trap disarm should be reproducible');
 });
