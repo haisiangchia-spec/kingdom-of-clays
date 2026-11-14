@@ -144,3 +144,26 @@ test('Champion Warrens expedition selection persists and generates Champion comb
  expect(saved.battleTier).toBe('champion');
  expect(saved.foes).toContain('plagueSkiver');
 });
+
+test('Unsupported Champion Crypt selection preserves completed expedition',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const {createDungeon}=await import('./src/dungeon.js');
+  const settlement=createCampaignSettlement();
+  const dungeon=createDungeon(763);
+  dungeon.phase='victory';dungeon.rosterReturned=true;dungeon.townWeekProcessed=true;dungeon.rewardClaimed=true;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,dungeon));
+ });
+ await page.reload();
+ await page.locator('#dungeon-region').selectOption('crypt');
+ await page.locator('#dungeon-tier').selectOption('champion');
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-log')).toContainText('Champion expeditions are currently available only in Blighted Warrens');
+ const persisted=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {phase:expedition.phase,region:expedition.region,tier:expedition.tier,seed:expedition.seed};
+ });
+ expect(persisted).toEqual({phase:'victory',region:'crypt',tier:'apprentice',seed:763});
+});
