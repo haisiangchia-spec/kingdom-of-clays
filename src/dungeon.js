@@ -165,11 +165,12 @@ function encounterSeed(seed,key){
  for(let i=0;i<key.length;i++)h=Math.imul(h^key.charCodeAt(i),16777619)>>>0;
  return h||1;
 }
-export function createDungeon(seed=1,{difficulty='scout',interactiveEvents=false,bonuses={}}={}){
+export function createDungeon(seed=1,{difficulty='scout',interactiveEvents=false,bonuses={},party:rosterParty=null}={}){
  if(!['scout','patrol','gauntlet'].includes(difficulty))throw Error('Unknown dungeon difficulty');
- const party=makeGeneratedEncounter(seed,difficulty).units.filter(u=>u.side==='hero').map(copy);
+ const party=rosterParty?rosterParty.map(copy):makeGeneratedEncounter(seed,difficulty).units.filter(u=>u.side==='hero').map(copy);
+ if(party.length!==4||party.some((u,i)=>u.id!=='h'+(i+1)||u.dead))throw Error('Expedition needs four living ranked heroes');
  const bonusHp=Math.max(0,Math.min(6,Math.trunc(bonuses.heroHp??0)));
- for(const hero of party){hero.maxHp+=bonusHp;hero.hp+=bonusHp;}
+ if(!rosterParty)for(const hero of party){hero.maxHp+=bonusHp;hero.hp+=bonusHp;} // roster party already includes Guild bonus
  const bonusFood=Math.max(0,Math.min(6,Math.trunc(bonuses.food??0)));
  const hungerStressReduction=Math.max(0,Math.min(6,Math.trunc(bonuses.hungerStressReduction??0)));
  return {seed,difficulty,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood},hungerStressReduction,
