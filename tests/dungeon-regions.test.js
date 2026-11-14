@@ -146,5 +146,6 @@ test('Warrens formation validation counts occupied ranks and rejects foreign ene
  assert.throws(()=>validatePlagueFormation([]),/Invalid plague formation/);
  assert.throws(()=>validatePlagueFormation(['cryptDefender']),/Unknown plague enemy/);
  assert.throws(()=>validatePlagueFormation(Array(5).fill('plagueWretch')),/Invalid plague formation/);
+ assert.equal(validatePlagueFormation(['plagueDrummer','plagueWretch','plagueChopper']),3);
  for(const entries of Object.values(PLAGUE_TEMPLATES))assert.ok(validatePlagueFormation(entries)<=4);
 });
