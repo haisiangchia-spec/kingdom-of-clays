@@ -9,7 +9,7 @@ export const TRAIT_EFFECTS=Object.freeze({
  creepingCough:Object.freeze({spd:-2}),
  ashenFever:Object.freeze({accMod:-5,bleedResist:-10})
 });
-export const DISEASE_EXPOSURE_CHANCE=8; // provisional % after eligible crypt enemy hit
+export const DISEASE_EXPOSURE_CHANCE=0; // DD1 crypt defenders/arbalists do not have a disease-on-hit skill
 const diseaseChoices=['creepingCough','ashenFever'];
 const statKeys=['maxHp','accMod','spd','dodge'];
 const resistKeys=['bleedResist'];
@@ -45,11 +45,10 @@ export function reverseTraitBonus(unit){
 export function exposeHeroToDisease(state,attacker,hero,random,skillKey=null){
  if(!state.expeditionEncounter||attacker.side!=='enemy'||hero.side!=='hero'||!hero.rosterId||hero.dead)return false;
  const sourceWretch=attacker.enemyProfile==='plagueWretch'&&skillKey==='plague_vomit';
- const legacyCrypt=['cryptDefender','cryptArbalist'].includes(attacker.enemyProfile);
- if(!sourceWretch&&!legacyCrypt)return false;
- // Wretch Vomit is source-backed at 33%; the earlier Crypt 8% remains
- // explicitly provisional until the underlying monster roster is revised.
- const chance=sourceWretch?33:DISEASE_EXPOSURE_CHANCE;
+ if(!sourceWretch)return false;
+ // The real DD1 Swine Wretch Vomit has a 33% chance to cause disease.
+ // No generic disease proc is added to unlisted enemy attacks.
+ const chance=33;
  if(random()*100>=chance)return false;
  hero.diseases??=[];
  const disease=diseaseChoices[Math.floor(random()*diseaseChoices.length)];
