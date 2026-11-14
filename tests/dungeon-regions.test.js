@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ENEMY_PROFILES} from '../src/enemy-roster.js';
-import {DUNGEON_REGIONS,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES,regionCurio,regionHazard} from '../src/dungeon-regions.js';
+import {DUNGEON_REGIONS,PLAGUE_TABLES,PLAGUE_TEMPLATES,createPlagueEncounterPlan,regionRoomName,REGION_ROOM_NAMES,regionCurio,regionHazard,validatePlagueFormation} from '../src/dungeon-regions.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,interactCurio,scoutCorridor,disarmTrap} from '../src/dungeon.js';
 import {makeGeneratedEncounter,makeUndeadEncounter,availableTargets,takeTurn,rng} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
@@ -138,4 +138,13 @@ test('Warrens spore snare is stronger in stress but does not change Crypt trap b
   verified=true;
  }
  assert.ok(verified,'a failed Warrens trap disarm should be reproducible');
+});
+
+test('Warrens formation validation counts occupied ranks and rejects foreign enemies',()=>{
+ assert.equal(validatePlagueFormation(['plagueChopper','plagueWretch','plagueDrummer']),3);
+ assert.equal(validatePlagueFormation(['plagueChopper','plagueChopper','plagueWretch','plagueDrummer']),4);
+ assert.throws(()=>validatePlagueFormation([]),/Invalid plague formation/);
+ assert.throws(()=>validatePlagueFormation(['cryptDefender']),/Unknown plague enemy/);
+ assert.throws(()=>validatePlagueFormation(Array(5).fill('plagueWretch')),/Invalid plague formation/);
+ for(const entries of Object.values(PLAGUE_TEMPLATES))assert.ok(validatePlagueFormation(entries)<=4);
 });
