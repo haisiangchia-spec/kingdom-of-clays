@@ -866,3 +866,22 @@ test('Warrens tier encounter tables have exact interval boundaries and no cross-
  }
  for(const [tier,table] of Object.entries(tables))assert.equal(JSON.stringify(table),snapshots[tier]);
 });
+
+
+test('Veteran Warrens weighted encounters reproduce configured frequencies without selection bias',()=>{
+ const samples=12000;
+ for(const difficulty of ['scout','patrol','gauntlet']){
+  const table=PLAGUE_VETERAN_TABLES[difficulty];
+  const total=table.reduce((sum,entry)=>sum+entry.weight,0);
+  const observed=Object.fromEntries(table.map(entry=>[entry.id,0]));
+  for(let index=0;index<samples;index++){
+   const result=createPlagueEncounterPlan(difficulty,()=>(index+0.5)/samples,'veteran');
+   observed[result.template]++;
+  }
+  for(const entry of table){
+   const expected=samples*entry.weight/total;
+   assert.ok(Math.abs(observed[entry.id]-expected)<=1,
+    `${difficulty}/${entry.id}: observed ${observed[entry.id]}, expected ${expected}`);
+  }
+ }
+});
