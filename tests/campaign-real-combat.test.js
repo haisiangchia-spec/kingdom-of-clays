@@ -16,7 +16,7 @@ function playEncounter(d,{requireBothSides=false}={}){
  // Dungeon encounters already derive independent seeds from source and serial.
  const battle=dungeonBattle(d);
  const random=rng(battle.seed);
- let actions=0,heroSkillsUsed=0,enemySkillsUsed=0;
+ let actions=0,heroSkillsUsed=0,enemySkillsUsed=0,healsUsed=0;
  while(status(battle)==='ongoing'&&actions++<300){
   if(!currentActor(battle))startRound(battle,random);
   const actor=currentActor(battle);
@@ -48,7 +48,7 @@ function playEncounter(d,{requireBothSides=false}={}){
     return aa.hp/aa.maxHp-bb.hp/bb.maxHp;
    })[0];
    const chosen=heal??offensive??candidates[0];
-   if(chosen){takeTurn(battle,actor.id,chosen.key,chosen.targetId,random);heroSkillsUsed++;}
+   if(chosen){takeTurn(battle,actor.id,chosen.key,chosen.targetId,random);heroSkillsUsed++;if(chosen===heal)healsUsed++;}
    else passActorTurn(battle,actor.id);
   }
  }
@@ -59,7 +59,7 @@ function playEncounter(d,{requireBothSides=false}={}){
  }
  assert.notEqual(status(battle),'ongoing');
  resolveDungeonBattle(d);
- return {outcome:status(battle),actions,heroSkillsUsed,enemySkillsUsed};
+ return {outcome:status(battle),actions,heroSkillsUsed,enemySkillsUsed,healsUsed};
 }
 test('real hero and enemy turns resolve initial dungeon encounters for each tier',()=>{
  const metrics=[];
@@ -114,7 +114,7 @@ function shortestRoute(d,goal){
 function runFullExpedition(seed,questId,tier,region){
  const d=createDungeon(seed,{tier,region,difficulty:'scout',proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
  d.questId=questId;
- let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0;
+ let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0;
  while(d.phase==='explore'||d.phase==='combat'){
   assert.ok(++steps<1000,'expedition stalled: '+questId+' '+seed);
   if(d.phase==='combat'){
@@ -123,6 +123,7 @@ function runFullExpedition(seed,questId,tier,region){
    skills+=report.heroSkillsUsed+report.enemySkillsUsed;
    heroSkills+=report.heroSkillsUsed;
    enemySkills+=report.enemySkillsUsed;
+   heals+=report.healsUsed;
    continue;
   }
   if(d.pendingLoot){leaveLoot(d);continue;}
@@ -139,7 +140,7 @@ function runFullExpedition(seed,questId,tier,region){
  assert.ok(skills>0,'expedition did not execute combat skills');
  assert.equal(d.pendingBattle,null);
  if(d.phase==='victory')assert.ok(questObjectiveProgress(d).every(x=>x.complete));
- return {phase:d.phase,battles,skills,heroSkills,enemySkills,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
+ return {phase:d.phase,battles,skills,heroSkills,enemySkills,heals,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
 }
 test('complete seeded expeditions resolve with actual combat, hunger, loot and navigation',()=>{
  for(const [questId,tier,region] of [
@@ -179,6 +180,7 @@ test('report multi-seed full expedition attrition by quest without arbitrary pas
    defeats:results.filter(r=>r.phase==='defeat').length,
    meanBattles:mean(r=>r.battles),
    meanActions:mean(r=>r.skills),
+   meanHeals:mean(r=>r.heals),
    meanFallen:mean(r=>r.party.filter(h=>h.dead).length),
    meanRemainingHp:mean(r=>r.party.reduce((sum,h)=>sum+Math.max(0,h.hp),0)),
    meanStress:mean(r=>r.party.reduce((sum,h)=>sum+(h.stress??0),0)),
