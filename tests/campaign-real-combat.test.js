@@ -29,9 +29,9 @@ function playEncounter(d,{requireBothSides=false}={}){
   }else{
    const candidates=(HERO_SKILLS[actor.heroClass??actor.name]??[]).flatMap(key=>
     availableTargets(battle,actor.id,key).map(targetId=>({key,targetId})));
-   // A basic survival policy: the Priest heals a wounded ally before attacking.
+   // A basic survival policy: the Priest heals wounded allies, including heroes\n   // at 0 HP on Death's Door, before attacking.
    // Without this, expedition win rates measure an intentionally non-healing bot.
-   const wounded=battle.units.filter(u=>u.side==='hero'&&!u.dead&&u.hp>0&&u.hp<u.maxHp)
+   const wounded=battle.units.filter(u=>u.side==='hero'&&!u.dead&&u.hp<u.maxHp)
     .sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp));
    const heal=(actor.heroClass??actor.name)==='Priest'
     ?wounded.filter(u=>u.hp/u.maxHp<=.65)
