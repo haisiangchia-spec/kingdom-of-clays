@@ -263,7 +263,8 @@ function render(){
    for(const kind of ['weapon','armor']){
     const level=h.equipment?.[kind]??0;
     const cost=100*(level+1);
-    const button=el('button',kind+' '+level+'/5 → '+(level+1)+' · '+cost+' gold',row,()=>{
+    const bonus=kind==='weapon'?'+1–2 DMG, +5 ACC, +1% CRIT':'+3 HP, +2 DODGE';
+    const button=el('button',kind+' '+level+'/5 → '+(level+1)+' · '+cost+' gold · '+bonus,row,()=>{
      try{upgradeHeroEquipment(settlement,h.rosterId,kind);}catch(e){expedition.log.push(e.message);}
      render();
     });
