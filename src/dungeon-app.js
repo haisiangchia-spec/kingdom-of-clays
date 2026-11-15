@@ -157,6 +157,8 @@ function render(){
    marker.className=id===expedition.room?'here':expedition.visited.includes(id)?'seen':'';
    if(expedition.cleared.includes(id))marker.textContent+=' ✓';
  }
+ const currentQuest=availableQuests(settlement).find(q=>q.id===expedition.questId);
+ if(currentQuest)el('p','Objective: '+currentQuest.objective+' · '+currentQuest.name,map);
  const connections=el('div',null,map);
  connections.className='dungeon-connections';
  for(const edge of dungeonCorridors(expedition)){
