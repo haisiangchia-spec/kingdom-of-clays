@@ -5,7 +5,7 @@ test('Blighted Warrens can be selected after quest and selection survives reload
  await page.evaluate(async ()=>{
   const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const {createDungeon}=await import('./src/dungeon.js');
-  const s=createCampaignSettlement();
+  const s=createCampaignSettlement();s.completedExpeditions=1;
   const d=createDungeon(763);d.phase='victory';d.rosterReturned=true;d.townWeekProcessed=true;d.rewardClaimed=true;
   localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(s,d));
  });
