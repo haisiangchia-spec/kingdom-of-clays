@@ -263,6 +263,13 @@ export function advanceCorridor(dungeon){
  }
  return dungeon;
 }
+// Veteran and Champion contracts require clearing the two outposts as well as the shrine.
+// Earlier and standalone expeditions retain their original Sanctum victory condition.
+export function questObjectiveComplete(dungeon){
+ if(!dungeon.cleared.includes('sanctum'))return false;
+ if(!['warrens-veteran','warrens-champion'].includes(dungeon.questId))return true;
+ return dungeon.cleared.includes('watch')&&dungeon.cleared.includes('vault');
+}
 export function resolveDungeonBattle(dungeon){
  if(dungeon.phase!=='combat'||!dungeon.pendingBattle)throw Error('No dungeon combat');
  const result=status(dungeon.pendingBattle.battle);
@@ -281,7 +288,7 @@ export function resolveDungeonBattle(dungeon){
      const room=source.slice(5);
      if(!dungeon.cleared.includes(room))dungeon.cleared.push(room);
    }
-   dungeon.phase=dungeon.cleared.includes('sanctum')?'victory':'explore';
+   dungeon.phase=questObjectiveComplete(dungeon)?'victory':'explore';
    dungeon.log.push('Encounter cleared: '+source);
    if(dungeon.interactiveEvents&&dungeon.phase==='explore'){
      // Distinct source-specific rewards; all provisional Clays amounts.
