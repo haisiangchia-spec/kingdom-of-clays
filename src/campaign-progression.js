@@ -15,6 +15,19 @@ export function campaignProgress(settlement){
  return Object.freeze({milestones,completed:milestones.filter(x=>x.complete).length,
   finished:milestones.every(x=>x.complete)});
 }
+// Read-only progress presentation; does not mutate campaign saves.
+export function campaignMilestoneProgress(settlement){
+ const state=campaignProgress(settlement);
+ const count=settlement?.completedExpeditions??0;
+ return state.milestones.map(goal=>Object.freeze({
+  ...goal,
+  current:goal.required===undefined?(goal.complete?1:0):Math.min(count,goal.required),
+  target:goal.required??1,
+  nextStep:goal.complete?'Completed':goal.id==='first-expedition'?'Finish an expedition':
+   goal.id==='established-company'?'Complete more expeditions':
+   goal.id==='veteran-victory'?'Win a Veteran Warrens quest':'Win a Champion Warrens quest'
+ }));
+}
 export function recordCampaignVictory(settlement,expedition){
  if(expedition?.phase!=='victory'||!expedition.rewardClaimed)throw Error('Claim expedition rewards before recording victory');
  if(!Array.isArray(settlement.campaignVictories))settlement.campaignVictories=[];
