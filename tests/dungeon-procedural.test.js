@@ -69,3 +69,20 @@ test('higher expedition tiers extend seeded corridor travel without changing lay
  }
  assert.ok(Object.values(champion.corridorSteps).every(n=>n>=4&&n<=6));
 });
+
+test('higher-tier procedural maps add reachable optional rooms',()=>{
+ const opts={region:'plague',proceduralBranches:true,variableCorridors:true};
+ for(const [tier,rooms] of [['apprentice',5],['veteran',6],['champion',7]]){
+  const d=createDungeon(207,{...opts,tier});
+  const edges=dungeonCorridors(d);
+  const reached=new Set(['entrance']);
+  for(let i=0;i<rooms;i++)for(const edge of edges){
+   if(reached.has(edge.from))reached.add(edge.to);
+   if(reached.has(edge.to))reached.add(edge.from);
+  }
+  assert.equal(reached.size,rooms);
+  assert.equal(edges.length,rooms);
+  assert.deepEqual(Object.keys(d.corridorSteps).sort(),edges.map(e=>e.id).sort());
+  assert.ok(reached.has('sanctum'));
+ }
+});
