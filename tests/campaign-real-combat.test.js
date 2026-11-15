@@ -37,7 +37,16 @@ function playEncounter(d,{requireBothSides=false}={}){
     ?wounded.filter(u=>u.hp/u.maxHp<=.65)
       .flatMap(u=>candidates.filter(c=>c.key==='greater_heal'&&c.targetId===u.id))[0]
     :null;
-   const offensive=candidates.find(c=>battle.units.find(u=>u.id===c.targetId)?.side==='enemy');
+   // Focus fire on the most wounded reachable enemy instead of always
+   // choosing the first legal attack in a fixed skill/target enumeration.
+   const offensive=candidates.filter(c=>{
+    const target=battle.units.find(u=>u.id===c.targetId);
+    return target?.side==='enemy'&&!target.dead&&!target.corpse;
+   }).sort((a,b)=>{
+    const aa=battle.units.find(u=>u.id===a.targetId);
+    const bb=battle.units.find(u=>u.id===b.targetId);
+    return aa.hp/aa.maxHp-bb.hp/bb.maxHp;
+   })[0];
    const chosen=heal??offensive??candidates[0];
    if(chosen){takeTurn(battle,actor.id,chosen.key,chosen.targetId,random);heroSkillsUsed++;}
    else passActorTurn(battle,actor.id);
