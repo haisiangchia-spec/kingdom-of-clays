@@ -78,3 +78,11 @@ test('next expedition requires collecting victory rewards',()=>{
  assert.equal(canStartNextExpedition({phase:'victory',rewardClaimed:true}).allowed,true);
  assert.equal(canStartNextExpedition({phase:'defeat'}).allowed,true);
 });
+
+test('hero recovery and town week must complete before a replacement expedition',()=>{
+ for(const phase of ['victory','defeat']){
+  assert.match(canStartNextExpedition({phase,rewardClaimed:true,rosterReturned:false,townWeekProcessed:false}).reason,/roster/);
+  assert.match(canStartNextExpedition({phase,rewardClaimed:true,rosterReturned:true,townWeekProcessed:false}).reason,/settlement recovery/);
+  assert.equal(canStartNextExpedition({phase,rewardClaimed:true,rosterReturned:true,townWeekProcessed:true}).allowed,true);
+ }
+});
