@@ -76,8 +76,8 @@ export function regionRoomName(region,roomId){
 }
 
 export const REGION_CURIOS=Object.freeze({
- crypt:Object.freeze({gallery:Object.freeze({name:'Abandoned Reliquary'}),vault:Object.freeze({name:'Sealed Urn'})}),
- plague:Object.freeze({gallery:Object.freeze({name:'Spore-Covered Cache'}),vault:Object.freeze({name:'Diseased Offering'})})
+ crypt:Object.freeze({gallery:Object.freeze({name:'Abandoned Reliquary'}),vault:Object.freeze({name:'Sealed Urn'}),outpost:Object.freeze({name:'Forgotten Supply Chest'}),catacomb:Object.freeze({name:'Ancient Burial Offering'})}),
+ plague:Object.freeze({gallery:Object.freeze({name:'Spore-Covered Cache'}),vault:Object.freeze({name:'Diseased Offering'}),outpost:Object.freeze({name:'Fungal Supply Cache'}),catacomb:Object.freeze({name:'Buried Spore Reliquary'})})
 });
 export function regionCurio(region,roomId){
  const curios=REGION_CURIOS[region];
