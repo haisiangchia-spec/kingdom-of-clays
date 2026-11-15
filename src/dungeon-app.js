@@ -330,7 +330,7 @@ function render(){
    });
    discard.disabled=expedition.phase!=='explore';
  }
- if(expedition.pendingLoot&&expedition.phase==='explore'){
+ if(expedition.pendingLoot&&['explore','victory'].includes(expedition.phase)){
    const pending=expedition.pendingLoot;
    el('p',`Unclaimed reward: ${pending.quantity} ${ITEM_RULES[pending.kind].name}. Free a slot or leave it behind.`,inventory);
    el('button','Collect treasure',inventory,()=>{
