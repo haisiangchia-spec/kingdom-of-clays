@@ -1,5 +1,5 @@
 import {availableQuests,selectQuest} from './quest-board.js';
-import {campaignProgress,campaignMilestoneProgress,completeCampaignExpedition,expeditionUnlock} from './campaign-progression.js';
+import {campaignProgress,campaignMilestoneProgress,completeCampaignExpedition,canStartNextExpedition,expeditionUnlock} from './campaign-progression.js';
 import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,questObjectiveProgress,bonusObjectiveProgress,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
@@ -56,8 +56,9 @@ const el=(tag,text,container,action)=>{
 };
 let selectedQuestId=null;
 function startExpedition(){
- if(expedition&&!['victory','defeat'].includes(expedition.phase)){
-   expedition.log.push('Finish the expedition before starting another');
+ const gate=canStartNextExpedition(expedition);
+ if(!gate.allowed){
+   expedition.log.push(gate.reason);
    render();return;
  }
  let party;
