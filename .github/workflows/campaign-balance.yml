@@ -22,7 +22,7 @@ permissions:
 jobs:
   campaign-balance:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,10 +33,15 @@ jobs:
           mkdir -p test-results
           set -o pipefail
           node --test tests/campaign-real-combat.test.js 2>&1 | tee test-results/campaign-balance.log
+      - name: Run complete regression suite
+        if: success()
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee test-results/full-suite.log
       - name: Upload campaign balance results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: campaign-balance-results
-          path: test-results/campaign-balance.log
+          path: test-results/*.log
           if-no-files-found: warn
