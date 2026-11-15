@@ -50,10 +50,14 @@ jobs:
           if(rows.length===0){
             md+='No full-expedition attrition summaries were produced. Check the test log for failures.\n';
           }else{
-            md+='| Quest | Wins | Defeats | Mean fallen | Mean HP | Mean stress | Food left |\n';
-            md+='|---|---:|---:|---:|---:|---:|---:|\n';
+            md+='| Quest | Wins | Defeats | Mean fallen | Mean HP | Mean stress | Mean heals | Food left |\n';
+            md+='|---|---:|---:|---:|---:|---:|---:|---:|\n';
             for(const r of rows){
-              md+=`| ${r.questId} | ${r.victories}/${r.n} | ${r.defeats} | ${r.meanFallen} | ${r.meanRemainingHp} | ${r.meanStress} | ${r.meanFoodRemaining} |\n`;
+              md+=`| ${r.questId} | ${r.victories}/${r.n} | ${r.defeats} | ${r.meanFallen} | ${r.meanRemainingHp} | ${r.meanStress} | ${r.meanHeals ?? 'n/a'} | ${r.meanFoodRemaining} |\n`;
+            }
+            md+='\\n### Seed-level outcomes\\n\\n';
+            for(const r of rows){
+              md+=`**${r.questId}**: `+(r.outcomes??[]).map(o=>`${o.seed}: ${o.result} (${o.fallen} fallen)`).join(', ' )+'\\n\\n';
             }
             if(rows.length!==6)md+=`\n**Warning:** Expected six quest summaries, found ${rows.length}.\n`;
           }
