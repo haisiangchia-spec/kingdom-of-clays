@@ -5,7 +5,7 @@ import {availableQuests,selectQuest} from '../src/quest-board.js';
 test('quest board gates contracts and assigns distinct difficulty',()=>{
  const s=createCampaignSettlement();
  assert.deepEqual(availableQuests(s).filter(q=>q.unlocked).map(q=>q.id),['crypt-recon']);
- assert.throws(()=>selectQuest(s,'warrens-veteran'),/Complete three/);
+ assert.throws(()=>selectQuest(s,'warrens-veteran'),/Complete one expedition/);
  s.completedExpeditions=3;
  assert.deepEqual(availableQuests(s).filter(q=>q.unlocked).map(q=>q.id),['crypt-recon','warrens-recon','warrens-veteran']);
  assert.equal(selectQuest(s,'warrens-veteran').difficulty,'patrol');
