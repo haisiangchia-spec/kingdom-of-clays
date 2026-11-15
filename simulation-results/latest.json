@@ -1,9 +1,932 @@
 {
   "schemaVersion": 1,
-  "commit": "3787ee711862de62382bd6c77004cf962731ad5c",
-  "runId": "43777223119",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43777223119",
-  "baseline": [],
-  "progressedEquipment": [],
-  "fullyProgressed": []
-}\n
+  "commit": "771618e78a5af418f31ee3113ccfcea9594dfb7f",
+  "runId": "43777358284",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43777358284",
+  "baseline": [
+    {
+      "questId": "crypt-recon",
+      "tier": "apprentice",
+      "region": "crypt",
+      "n": 10,
+      "outcomes": [
+        {
+          "seed": 11,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 1
+        },
+        {
+          "seed": 23,
+          "result": "victory",
+          "battles": 4,
+          "fallen": 0
+        },
+        {
+          "seed": 37,
+          "result": "victory",
+          "battles": 2,
+          "fallen": 0
+        },
+        {
+          "seed": 41,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 53,
+          "result": "victory",
+          "battles": 2,
+          "fallen": 1
+        },
+        {
+          "seed": 67,
+          "result": "defeat",
+          "battles": 3,
+          "fallen": 4
+        },
+        {
+          "seed": 71,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 1
+        },
+        {
+          "seed": 83,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 1
+        },
+        {
+          "seed": 97,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 109,
+          "result": "victory",
+          "battles": 2,
+          "fallen": 0
+        }
+      ],
+      "victories": 9,
+      "defeats": 1,
+      "meanBattles": 2.8,
+      "meanActions": 78.5,
+      "meanHeals": 9.9,
+      "meanTorchesUsed": 0,
+      "meanFoodHeals": 0,
+      "meanSkiverEncounters": 0,
+      "meanFourEnemyEncounters": 0,
+      "meanFallen": 0.8,
+      "meanRemainingHp": 50.1,
+      "meanStress": 38.6,
+      "meanFoodRemaining": 2.4,
+      "meanTorchlight": 67.1,
+      "minRemainingHp": 0,
+      "maxStress": 121
+    },
+    {
+      "questId": "crypt-purge",
+      "tier": "apprentice",
+      "region": "crypt",
+      "n": 10,
+      "outcomes": [
+        {
+          "seed": 11,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 23,
+          "result": "victory",
+          "battles": 4,
+          "fallen": 0
+        },
+        {
+          "seed": 37,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 41,
+          "result": "victory",
+          "battles": 4,
+          "fallen": 0
+        },
+        {
+          "seed": 53,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 67,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 1
+        },
+        {
+          "seed": 71,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 1
+        },
+        {
+          "seed": 83,
+          "result": "defeat",
+          "battles": 4,
+          "fallen": 4
+        },
+        {
+          "seed": 97,
+          "result": "defeat",
+          "battles": 4,
+          "fallen": 4
+        },
+        {
+          "seed": 109,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 1
+        }
+      ],
+      "victories": 8,
+      "defeats": 2,
+      "meanBattles": 3.4,
+      "meanActions": 130.8,
+      "meanHeals": 18.5,
+      "meanTorchesUsed": 0,
+      "meanFoodHeals": 0.2,
+      "meanSkiverEncounters": 0,
+      "meanFourEnemyEncounters": 2.9,
+      "meanFallen": 1.1,
+      "meanRemainingHp": 46.4,
+      "meanStress": 180.7,
+      "meanFoodRemaining": 0.2,
+      "meanTorchlight": 61.8,
+      "minRemainingHp": 0,
+      "maxStress": 320
+    },
+    {
+      "questId": "warrens-recon",
+      "tier": "apprentice",
+      "region": "plague",
+      "n": 10,
+      "outcomes": [
+        {
+          "seed": 11,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 1
+        },
+        {
+          "seed": 23,
+          "result": "victory",
+          "battles": 4,
+          "fallen": 1
+        },
+        {
+          "seed": 37,
+          "result": "victory",
+          "battles": 2,
+          "fallen": 0
+        },
+        {
+          "seed": 41,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 53,
+          "result": "victory",
+          "battles": 2,
+          "fallen": 0
+        },
+        {
+          "seed": 67,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 71,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 83,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 97,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 109,
+          "result": "victory",
+          "battles": 2,
+          "fallen": 0
+        }
+      ],
+      "victories": 10,
+      "defeats": 0,
+      "meanBattles": 2.8,
+      "meanActions": 99,
+      "meanHeals": 10.8,
+      "meanTorchesUsed": 0,
+      "meanFoodHeals": 0,
+      "meanSkiverEncounters": 0,
+      "meanFourEnemyEncounters": 1.9,
+      "meanFallen": 0.2,
+      "meanRemainingHp": 69.2,
+      "meanStress": 226.9,
+      "meanFoodRemaining": 2.4,
+      "meanTorchlight": 67.1,
+      "minRemainingHp": 42,
+      "maxStress": 374
+    },
+    {
+      "questId": "warrens-containment",
+      "tier": "apprentice",
+      "region": "plague",
+      "n": 10,
+      "outcomes": [
+        {
+          "seed": 11,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 1
+        },
+        {
+          "seed": 23,
+          "result": "defeat",
+          "battles": 3,
+          "fallen": 4
+        },
+        {
+          "seed": 37,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 1
+        },
+        {
+          "seed": 41,
+          "result": "defeat",
+          "battles": 4,
+          "fallen": 4
+        },
+        {
+          "seed": 53,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 67,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        },
+        {
+          "seed": 71,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 2
+        },
+        {
+          "seed": 83,
+          "result": "victory",
+          "battles": 4,
+          "fallen": 1
+        },
+        {
+          "seed": 97,
+          "result": "victory",
+          "battles": 4,
+          "fallen": 0
+        },
+        {
+          "seed": 109,
+          "result": "victory",
+          "battles": 3,
+          "fallen": 0
+        }
+      ],
+      "victories": 8,
+      "defeats": 2,
+      "meanBattles": 3.3,
+      "meanActions": 121.3,
+      "meanHeals": 13.3,
+      "meanTorchesUsed": 0,
+      "meanFoodHeals": 0,
+      "meanSkiverEncounters": 0,
+      "meanFourEnemyEncounters": 2.6,
+      "meanFallen": 1.3,
+      "meanRemainingHp": 46.4,
+      "meanStress": 300.4,
+      "meanFoodRemaining": 0,
+      "meanTorchlight": 62.1,
+      "minRemainingHp": 0,
+      "maxStress": 369
+    },
+    {
+      "questId": "warrens-veteran",
+      "tier": "veteran",
+      "region": "plague",
+      "n": 10,
+      "outcomes": [
+        {
+          "seed": 11,
+          "result": "defeat",
+          "battles": 3,
+          "fallen": 4
+        },
+        {
+          "seed": 23,
+          "result": "defeat",
+          "battles": 2,
+          "fallen": 4
+        },
+        {
+          "seed": 37,
+          "result": "defeat",
+          "battles": 2,
+          "fallen": 4
+        },
+        {
+          "seed": 41,
+          "result": "defeat",
+          "battles": 2,
+          "fallen": 4
+        },
+        {
+          "seed": 53,
+          "result": "defeat",
+          "battles": 3,
+          "fallen": 4
+        },
+        {
+          "seed": 67,
+          "result": "defeat",
+          "battles": 2,
+          "fallen": 4
+        },
+        {
+          "seed": 71,
+          "result": "defeat",
+          "battles": 2,
+          "fallen": 4
+        },
+        {
+          "seed": 83,
+          "result": "defeat",
+          "battles": 1,
+          "fallen": 4
+        },
+        {
+          "seed": 97,
+          "result": "defeat",
+          "battles": 1,
+          "fallen": 4
+        },
+        {
+          "seed": 109,
+          "result": "defeat",
+          "battles": 2,
+          "fallen": 4
+        }
+      ],
+      "victories": 0,
+      "defeats": 10,
+      "meanBattles": 2,
+      "meanActions": 73.3,
+      "meanHeals": 7.3,
+      "meanTorchesUsed": 0,
+      "meanFoodHeals": 0.1,
+      "meanSkiverEncounters": 0,
+      "meanFourEnemyEncounters": 1,
+      "meanFallen": 4,
+      "meanRemainingHp": 0,
+      "meanStress": 228.4,
+      "meanFoodRemaining": 2.7,
+      "meanTorchlight": 66,
+      "minRemainingHp": 0,
+      "maxStress": 293
+    },
+    {
+      "questId": "warrens-champion",
+      "tier": "champion",
+      "region": "plague",
+      "n": 10,
+      "outcomes": [
+        {
+          "seed": 11,
+          "result": "defeat",
+          "battles": 1,
+          "fallen": 4
+        },
+        {
+          "seed": 23,
+          "result": "defeat",
+          "battles": 2,
+          "fallen": 4
+        },
+        {
+          "seed": 37,
+          "result": "defeat",
+          "battles": 1,
+          "fallen": 4
+        },
+        {
+          "seed": 41,
+          "result": "defeat",
+          "battles": 1,
+          "fallen": 4
+        },
+        {
+          "seed": 53,
+          "result": "defeat",
+          "battles": 1,
+          "fallen": 4
+        },
+        {
+          "seed": 67,
+          "result": "defeat",
+          "battles": 1,
+          "fallen": 4
+        },
+        {
+          "seed": 71,
+          "result": "defeat",
+          "battles": 1,
+          "fallen": 4
+        },
+        {
+          "seed": 83,
+          "result": "defeat",
+          "battles": 1,
+          "fallen": 4
+        },
+        {
+          "seed": 97,
+          "result": "defeat",
+          "battles": 1,
+          "fallen": 4
+        },
+        {
+          "seed": 109,
+          "result": "defeat",
+          "battles": 1,
+          "fallen": 4
+        }
+      ],
+      "victories": 0,
+      "defeats": 10,
+      "meanBattles": 1.1,
+      "meanActions": 39.3,
+      "meanHeals": 3.4,
+      "meanTorchesUsed": 0,
+      "meanFoodHeals": 0,
+      "meanSkiverEncounters": 0.8,
+      "meanFourEnemyEncounters": 0.1,
+      "meanFallen": 4,
+      "meanRemainingHp": 0,
+      "meanStress": 102.1,
+      "meanFoodRemaining": 7.2,
+      "meanTorchlight": 73.2,
+      "minRemainingHp": 0,
+      "maxStress": 279
+    }
+  ],
+  "progressedEquipment": [
+    {
+      "questId": "warrens-veteran",
+      "tier": "veteran",
+      "level": 3,
+      "n": 10,
+      "victories": 0,
+      "defeats": 10,
+      "meanFallen": 4,
+      "meanRemainingHp": 0.4,
+      "meanStress": 347.4,
+      "outcomes": [
+        {
+          "seed": 11,
+          "result": "defeat",
+          "battles": 4
+        },
+        {
+          "seed": 23,
+          "result": "defeat",
+          "battles": 5
+        },
+        {
+          "seed": 37,
+          "result": "defeat",
+          "battles": 3
+        },
+        {
+          "seed": 41,
+          "result": "defeat",
+          "battles": 3
+        },
+        {
+          "seed": 53,
+          "result": "defeat",
+          "battles": 4
+        },
+        {
+          "seed": 67,
+          "result": "defeat",
+          "battles": 4
+        },
+        {
+          "seed": 71,
+          "result": "defeat",
+          "battles": 4
+        },
+        {
+          "seed": 83,
+          "result": "defeat",
+          "battles": 4
+        },
+        {
+          "seed": 97,
+          "result": "defeat",
+          "battles": 4
+        },
+        {
+          "seed": 109,
+          "result": "defeat",
+          "battles": 4
+        }
+      ]
+    },
+    {
+      "questId": "warrens-champion",
+      "tier": "champion",
+      "level": 5,
+      "n": 10,
+      "victories": 0,
+      "defeats": 10,
+      "meanFallen": 4,
+      "meanRemainingHp": 0.3,
+      "meanStress": 219.9,
+      "outcomes": [
+        {
+          "seed": 11,
+          "result": "defeat",
+          "battles": 3
+        },
+        {
+          "seed": 23,
+          "result": "defeat",
+          "battles": 3
+        },
+        {
+          "seed": 37,
+          "result": "defeat",
+          "battles": 2
+        },
+        {
+          "seed": 41,
+          "result": "defeat",
+          "battles": 2
+        },
+        {
+          "seed": 53,
+          "result": "defeat",
+          "battles": 2
+        },
+        {
+          "seed": 67,
+          "result": "defeat",
+          "battles": 2
+        },
+        {
+          "seed": 71,
+          "result": "defeat",
+          "battles": 2
+        },
+        {
+          "seed": 83,
+          "result": "defeat",
+          "battles": 3
+        },
+        {
+          "seed": 97,
+          "result": "defeat",
+          "battles": 1
+        },
+        {
+          "seed": 109,
+          "result": "defeat",
+          "battles": 3
+        }
+      ]
+    }
+  ],
+  "fullyProgressed": [
+    {
+      "questId": "warrens-veteran",
+      "tier": "veteran",
+      "level": 3,
+      "n": 10,
+      "wins": 3,
+      "defeats": 7,
+      "upgraded": [
+        "Swordsman:heavy_slash:2",
+        "Swordsman:heavy_slash:3",
+        "Swordsman:countering_advance:2",
+        "Swordsman:countering_advance:3",
+        "Warrior:crushing_strike:2",
+        "Warrior:crushing_strike:3",
+        "Warrior:sweeping_assault:2",
+        "Warrior:sweeping_assault:3",
+        "Hunter:eagle_eye_shot:2",
+        "Hunter:eagle_eye_shot:3",
+        "Hunter:hunters_mark:2",
+        "Hunter:hunters_mark:3",
+        "Priest:greater_heal:2",
+        "Priest:greater_heal:3",
+        "Priest:group_healing:2",
+        "Priest:group_healing:3"
+      ],
+      "meanBattles": 4,
+      "meanSkiverEncounters": 0,
+      "meanFourEnemyEncounters": 1.7,
+      "meanTorchesUsed": 0.2,
+      "meanFoodHeals": 0,
+      "meanHeroSkills": 59.5,
+      "meanEnemySkills": 50.3,
+      "meanRemainingHp": 12.8,
+      "meanDeaths": 3,
+      "outcomes": [
+        {
+          "seed": 11,
+          "phase": "defeat",
+          "battles": 3,
+          "skivers": 0,
+          "fourEnemy": 1,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 23,
+          "phase": "defeat",
+          "battles": 4,
+          "skivers": 0,
+          "fourEnemy": 1,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 37,
+          "phase": "defeat",
+          "battles": 3,
+          "skivers": 0,
+          "fourEnemy": 1,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 41,
+          "phase": "defeat",
+          "battles": 4,
+          "skivers": 0,
+          "fourEnemy": 3,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 53,
+          "phase": "victory",
+          "battles": 4,
+          "skivers": 0,
+          "fourEnemy": 2,
+          "torches": 1,
+          "foodHeals": 0,
+          "deaths": 1
+        },
+        {
+          "seed": 67,
+          "phase": "defeat",
+          "battles": 4,
+          "skivers": 0,
+          "fourEnemy": 2,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 71,
+          "phase": "victory",
+          "battles": 4,
+          "skivers": 0,
+          "fourEnemy": 2,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 0
+        },
+        {
+          "seed": 83,
+          "phase": "defeat",
+          "battles": 5,
+          "skivers": 0,
+          "fourEnemy": 2,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 97,
+          "phase": "defeat",
+          "battles": 5,
+          "skivers": 0,
+          "fourEnemy": 2,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 109,
+          "phase": "victory",
+          "battles": 4,
+          "skivers": 0,
+          "fourEnemy": 1,
+          "torches": 1,
+          "foodHeals": 0,
+          "deaths": 1
+        }
+      ]
+    },
+    {
+      "questId": "warrens-champion",
+      "tier": "champion",
+      "level": 5,
+      "n": 10,
+      "wins": 0,
+      "defeats": 10,
+      "upgraded": [
+        "Swordsman:heavy_slash:2",
+        "Swordsman:heavy_slash:3",
+        "Swordsman:heavy_slash:4",
+        "Swordsman:heavy_slash:5",
+        "Swordsman:countering_advance:2",
+        "Swordsman:countering_advance:3",
+        "Swordsman:countering_advance:4",
+        "Swordsman:countering_advance:5",
+        "Warrior:crushing_strike:2",
+        "Warrior:crushing_strike:3",
+        "Warrior:crushing_strike:4",
+        "Warrior:crushing_strike:5",
+        "Warrior:sweeping_assault:2",
+        "Warrior:sweeping_assault:3",
+        "Warrior:sweeping_assault:4",
+        "Warrior:sweeping_assault:5",
+        "Hunter:eagle_eye_shot:2",
+        "Hunter:eagle_eye_shot:3",
+        "Hunter:eagle_eye_shot:4",
+        "Hunter:eagle_eye_shot:5",
+        "Hunter:hunters_mark:2",
+        "Hunter:hunters_mark:3",
+        "Hunter:hunters_mark:4",
+        "Hunter:hunters_mark:5",
+        "Priest:greater_heal:2",
+        "Priest:greater_heal:3",
+        "Priest:greater_heal:4",
+        "Priest:greater_heal:5",
+        "Priest:group_healing:2",
+        "Priest:group_healing:3",
+        "Priest:group_healing:4",
+        "Priest:group_healing:5"
+      ],
+      "meanBattles": 2.6,
+      "meanSkiverEncounters": 1.8,
+      "meanFourEnemyEncounters": 0.2,
+      "meanTorchesUsed": 0,
+      "meanFoodHeals": 0.9,
+      "meanHeroSkills": 28.3,
+      "meanEnemySkills": 27.1,
+      "meanRemainingHp": 0.4,
+      "meanDeaths": 4,
+      "outcomes": [
+        {
+          "seed": 11,
+          "phase": "defeat",
+          "battles": 3,
+          "skivers": 2,
+          "fourEnemy": 0,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 23,
+          "phase": "defeat",
+          "battles": 3,
+          "skivers": 2,
+          "fourEnemy": 0,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 37,
+          "phase": "defeat",
+          "battles": 2,
+          "skivers": 2,
+          "fourEnemy": 0,
+          "torches": 0,
+          "foodHeals": 1,
+          "deaths": 4
+        },
+        {
+          "seed": 41,
+          "phase": "defeat",
+          "battles": 2,
+          "skivers": 2,
+          "fourEnemy": 0,
+          "torches": 0,
+          "foodHeals": 4,
+          "deaths": 4
+        },
+        {
+          "seed": 53,
+          "phase": "defeat",
+          "battles": 2,
+          "skivers": 2,
+          "fourEnemy": 1,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 67,
+          "phase": "defeat",
+          "battles": 4,
+          "skivers": 2,
+          "fourEnemy": 0,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 71,
+          "phase": "defeat",
+          "battles": 2,
+          "skivers": 2,
+          "fourEnemy": 1,
+          "torches": 0,
+          "foodHeals": 4,
+          "deaths": 4
+        },
+        {
+          "seed": 83,
+          "phase": "defeat",
+          "battles": 3,
+          "skivers": 2,
+          "fourEnemy": 0,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 97,
+          "phase": "defeat",
+          "battles": 2,
+          "skivers": 2,
+          "fourEnemy": 0,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        },
+        {
+          "seed": 109,
+          "phase": "defeat",
+          "battles": 3,
+          "skivers": 0,
+          "fourEnemy": 0,
+          "torches": 0,
+          "foodHeals": 0,
+          "deaths": 4
+        }
+      ]
+    }
+  ]
+}
