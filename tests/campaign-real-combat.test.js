@@ -5,6 +5,7 @@ import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeon
 import {makeGeneratedEncounter,rng,status,startRound,currentActor,prepareActorTurn,availableTargets,takeTurn,passActorTurn,ABILITIES} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {leaveLoot} from '../src/inventory.js';
+import {QUESTS} from '../src/quest-board.js';
 
 import {createCampaignSettlement} from '../src/settlement.js';
 import {prepareRosterParty,upgradeHeroEquipment,upgradeHeroSkill} from '../src/hero-roster.js';
@@ -151,7 +152,11 @@ function shortestRoute(d,goal){
  throw Error('Unreachable quest objective '+goal);
 }
 function runFullExpedition(seed,questId,tier,region,{party=null}={}){
- const d=createDungeon(seed,{tier,region,difficulty:'scout',proceduralBranches:true,variableCorridors:true,interactiveEvents:true,...(party?{party}:{})});
+ const quest=QUESTS.find(q=>q.id===questId);
+ assert.ok(quest,'Unknown quest in expedition simulation: '+questId);
+ assert.equal(quest.tier,tier);
+ assert.equal(quest.region,region);
+ const d=createDungeon(seed,{tier,region,difficulty:quest.difficulty,proceduralBranches:true,variableCorridors:true,interactiveEvents:true,...(party?{party}:{})});
  d.questId=questId;
  let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0,skiverEncounters=0,fourEnemyEncounters=0;
  while(d.phase==='explore'||d.phase==='combat'){
