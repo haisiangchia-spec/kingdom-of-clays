@@ -1,5 +1,5 @@
 import {availableQuests,selectQuest} from './quest-board.js';
-import {campaignProgress,campaignMilestoneProgress,recordCampaignVictory,expeditionUnlock} from './campaign-progression.js';
+import {campaignProgress,campaignMilestoneProgress,completeCampaignExpedition,expeditionUnlock} from './campaign-progression.js';
 import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,questObjectiveProgress,bonusObjectiveProgress,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
@@ -342,7 +342,7 @@ function render(){
    const reward=expeditionRewardSummary(expedition);
    el('p',`Settlement rewards: ${reward.totalGold} gold (including gems), ${reward.crests} crests, ${reward.deeds} deeds, ${reward.trinkets} trinkets.`,inventory);
    if(!expedition.rewardClaimed)el('button','Return rewards to settlement',inventory,()=>{
-     try{claimExpeditionRewards(expedition,settlement);settlement.completedExpeditions++;recordCampaignVictory(settlement,expedition);}catch(error){expedition.log.push(error.message);}
+     try{completeCampaignExpedition(settlement,expedition);}catch(error){expedition.log.push(error.message);}
      render();
    });
    else el('p','Rewards transferred to the settlement ✓',inventory);
