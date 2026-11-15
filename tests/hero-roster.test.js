@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCampaignSettlement,normalizeCampaignSettlement,encodeCampaignSave,decodeCampaignSave,expeditionBonuses,upgradeFacility} from '../src/settlement.js';
 import {createDungeon} from '../src/dungeon.js';
 import {claimExpeditionRewards} from '../src/inventory.js';
-import {HERO_CLASSES,ROSTER_CAPACITY,RECRUITMENT_COST,RESURRECTION_COST,createHeroRoster,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,validateHeroRoster} from '../src/hero-roster.js';
+import {HERO_CLASSES,ROSTER_CAPACITY,RECRUITMENT_COST,RESURRECTION_COST,createHeroRoster,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,upgradeHeroSkill,validateHeroRoster} from '../src/hero-roster.js';
 
 test('initial four heroes have persistent IDs, classes, and independent combat units',()=>{
  const s=createCampaignSettlement();
@@ -191,4 +191,23 @@ test('equipment upgrades require Resolve and persist through roster party prepar
  assert.equal(restored.roster[0].unit.dmgMax,original.max+2);
  hero.level=1;
  assert.throws(()=>upgradeHeroEquipment(settlement,hero.rosterId,'weapon'),/Resolve level too low/);
+});
+
+test('verified hero skill upgrades are Resolve-gated, paid, persistent, and used by prepared parties',()=>{
+ const settlement=createCampaignSettlement();
+ const hero=settlement.roster.find(h=>h.heroClass==='Swordsman');
+ const id=hero.rosterId;
+ settlement.gold=1000;
+ assert.throws(()=>upgradeHeroSkill(settlement,id,'heavy_slash'),/Resolve level/);
+ hero.level=3;
+ const before=settlement.gold;
+ assert.deepEqual(upgradeHeroSkill(settlement,id,'heavy_slash'),{rosterId:id,skillId:'heavy_slash',level:2,cost:75});
+ assert.equal(settlement.gold,before-75);
+ assert.deepEqual(upgradeHeroSkill(settlement,id,'heavy_slash'),{rosterId:id,skillId:'heavy_slash',level:3,cost:150});
+ assert.throws(()=>upgradeHeroSkill(settlement,id,'heavy_slash'),/Resolve level/);
+ assert.throws(()=>upgradeHeroSkill(settlement,id,'plague_skiver_roast'),/Unknown hero skill|Skill does not belong/);
+ const party=prepareRosterParty(settlement);
+ assert.equal(party.find(u=>u.rosterId===id).skillLevels.heavy_slash,3);
+ const restored=decodeCampaignSave(encodeCampaignSave(settlement,null)).settlement;
+ assert.equal(restored.roster.find(h=>h.rosterId===id).unit.skillLevels.heavy_slash,3);
 });
