@@ -88,6 +88,29 @@ test('real hero and enemy turns resolve initial dungeon encounters for each tier
  }
 });
 
+test('successive expedition encounters receive distinct reproducible combat seeds',()=>{
+ const collect=()=>{
+  const d=createDungeon(223,{difficulty:'scout',region:'crypt'});
+  beginCorridor(d,'gallery');
+  advanceCorridor(d);
+  assert.equal(d.phase,'combat');
+  const first=dungeonBattle(d).seed;
+  // The test needs only the second encounter seed, not a simulated victory.
+  // Clearing the first encounter lets us exercise normal dungeon progression.
+  const battle=dungeonBattle(d);
+  for(const enemy of battle.units.filter(u=>u.side==='enemy'))enemy.dead=true;
+  resolveDungeonBattle(d);
+  while(d.pendingTravel)advanceCorridor(d);
+  beginCorridor(d,'watch');
+  while(d.phase==='explore'&&d.pendingTravel)advanceCorridor(d);
+  assert.equal(d.phase,'combat','expected a second encounter');
+  const second=dungeonBattle(d).seed;
+  assert.notEqual(first,second,'two encounters reused the same combat seed');
+  return [first,second];
+ };
+ assert.deepEqual(collect(),collect(),'encounter seed sequence changed across replays');
+});
+
 test('seeded real-turn encounters replay deterministically across tiers',()=>{
  for(const [tier,region] of [['apprentice','crypt'],['apprentice','plague'],['veteran','plague'],['champion','plague']]){
   const run=()=>{
