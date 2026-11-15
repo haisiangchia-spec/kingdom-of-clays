@@ -1,3 +1,4 @@
+import {claimExpeditionRewards} from './inventory.js';
 // Clays-original campaign progression. DD1 combat rules remain unchanged.
 // Completion is a persistent campaign goal, not a claim of DD1 quest parity.
 export const CAMPAIGN_MILESTONES=Object.freeze([
@@ -52,4 +53,19 @@ export function expeditionUnlock(settlement,region,tier){
  if(tier==='veteran'&&!established)return Object.freeze({unlocked:false,reason:'Complete three expeditions to unlock Veteran quests'});
  if(tier==='champion'&&!veteran)return Object.freeze({unlocked:false,reason:'Win a Veteran Blighted Warrens expedition to unlock Champion quests'});
  return Object.freeze({unlocked:true,reason:''});
+}
+
+// One entry point for settlement rewards and campaign completion. Validate the
+// milestone before mutating either object; duplicate button clicks are rejected.
+export function completeCampaignExpedition(settlement,expedition){
+ if(expedition?.phase!=='victory'||expedition.rewardClaimed)throw Error('Expedition must be an unclaimed victory');
+ if(!Number.isSafeInteger(settlement?.completedExpeditions)||settlement.completedExpeditions<0)throw Error('Invalid expedition count');
+ if(!Array.isArray(settlement.campaignVictories))throw Error('Invalid campaign victories');
+ if(!Array.isArray(expedition.log))throw Error('Invalid expedition log');
+ if(!['crypt','plague'].includes(expedition.region)||!['apprentice','veteran','champion'].includes(expedition.tier))throw Error('Invalid expedition region or tier');
+ if(expedition.pendingLoot)throw Error('Resolve pending loot before settlement transfer');
+ const report=claimExpeditionRewards(expedition,settlement);
+ settlement.completedExpeditions++;
+ recordCampaignVictory(settlement,expedition);
+ return {report,progress:campaignProgress(settlement)};
 }
