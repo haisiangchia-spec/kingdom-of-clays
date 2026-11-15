@@ -117,6 +117,21 @@ jobs:
             progressedEquipment:extract('Progressed full expedition attrition'),
             fullyProgressed:extract('Fully progressed expedition attrition')
           };
+          // Refuse to replace the last useful report with an empty or partial parse.
+          const expectedQuests=['crypt-recon','crypt-purge','warrens-recon','warrens-containment','warrens-veteran','warrens-champion'];
+          const expectedProgressed=['warrens-veteran','warrens-champion'];
+          for(const [label,rows,expected] of [
+            ['baseline',result.baseline,expectedQuests],
+            ['progressedEquipment',result.progressedEquipment,expectedProgressed],
+            ['fullyProgressed',result.fullyProgressed,expectedProgressed]
+          ]){
+            const ids=rows.map(row=>row.questId);
+            if(ids.length!==expected.length||new Set(ids).size!==ids.length||
+               expected.some(id=>!ids.includes(id))||
+               rows.some(row=>row.n!==10||!Array.isArray(row.outcomes)||row.outcomes.length!==10)){
+              throw Error('Incomplete simulation report: '+label+' ('+ids.join(', ')+')');
+            }
+          }
           fs.writeFileSync('simulation-results/latest.json',JSON.stringify(result,null,2)+'\n');
           NODE
           git config user.name 'github-actions[bot]'
