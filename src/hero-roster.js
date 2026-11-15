@@ -230,8 +230,8 @@ export function upgradeHeroSkill(settlement,rosterId,skillId){
  if(current>=5)throw Error('Skill already at maximum level');
  const next=current+1;
  if(next>hero.level)throw Error('Resolve level too low for skill upgrade');
+ if(ABILITIES[skillId].classId!==hero.unit.classId)throw Error('Skill does not belong to hero class');
  const definition=resolveSkillDefinition(ABILITIES,skillId,next);
- if(definition.classId!==hero.unit.classId)throw Error('Skill does not belong to hero class');
  const cost=75*current;
  if(!integer(settlement.gold)||settlement.gold<cost)throw Error('Insufficient gold for skill upgrade');
  settlement.gold-=cost;
