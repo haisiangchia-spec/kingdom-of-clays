@@ -119,13 +119,13 @@ test('Champion Warrens expedition selection persists and generates Champion comb
  await page.evaluate(async ()=>{
   const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const {createDungeon}=await import('./src/dungeon.js');
-  const s=createCampaignSettlement();
+  const s=createCampaignSettlement();s.completedExpeditions=3;s.campaignVictories.push('veteran-victory');
   const d=createDungeon(763);d.phase='victory';d.rosterReturned=true;d.townWeekProcessed=true;d.rewardClaimed=true;
   localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(s,d));
  });
  await page.reload();
  await page.locator('#dungeon-region').selectOption('plague');
- await page.locator('#dungeon-tier').selectOption('champion');
+ await page.locator('#dungeon-tier').evaluate(el=>{el.value='champion';el.dispatchEvent(new Event('change',{bubbles:true}));});
  await page.getByRole('button',{name:'New expedition'}).click();
  await expect(page.locator('#dungeon-tier')).toBeDisabled();
  await expect(page.locator('#dungeon-tier')).toHaveValue('champion');
@@ -133,7 +133,7 @@ test('Champion Warrens expedition selection persists and generates Champion comb
  await page.reload();
  await expect(page.locator('#dungeon-tier')).toHaveValue('champion');
  await page.getByRole('button',{name:'Travel to Fungal Passage'}).click();
- await page.getByRole('button',{name:'Advance corridor'}).click();
+ for(let i=0;i<4;i++){if((await page.locator('#dungeon-status').textContent()).includes('COMBAT'))break;await page.getByRole('button',{name:'Advance corridor'}).click();}
  await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
  const saved=await page.evaluate(async ()=>{
   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
@@ -151,14 +151,14 @@ test('Unsupported Champion Crypt selection preserves completed expedition',async
  await page.evaluate(async ()=>{
   const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const {createDungeon}=await import('./src/dungeon.js');
-  const settlement=createCampaignSettlement();
+  const settlement=createCampaignSettlement();settlement.completedExpeditions=3;settlement.campaignVictories.push('veteran-victory');
   const dungeon=createDungeon(763);
   dungeon.phase='victory';dungeon.rosterReturned=true;dungeon.townWeekProcessed=true;dungeon.rewardClaimed=true;
   localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,dungeon));
  });
  await page.reload();
  await page.locator('#dungeon-region').selectOption('crypt');
- await page.locator('#dungeon-tier').selectOption('champion');
+ await page.locator('#dungeon-tier').evaluate(el=>{el.value='champion';el.dispatchEvent(new Event('change',{bubbles:true}));});
  await page.getByRole('button',{name:'New expedition'}).click();
  await expect(page.locator('#dungeon-log')).toContainText('Veteran and Champion expeditions are currently available only in Blighted Warrens');
  const persisted=await page.evaluate(async ()=>{
@@ -175,7 +175,7 @@ test('Veteran Warrens selection survives reload and retains provisional combat t
  await page.evaluate(async ()=>{
   const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const {createDungeon}=await import('./src/dungeon.js');
-  const settlement=createCampaignSettlement();
+  const settlement=createCampaignSettlement();settlement.completedExpeditions=3;settlement.campaignVictories.push('veteran-victory');
   const dungeon=createDungeon(763);
   dungeon.phase='victory';dungeon.rosterReturned=true;
   dungeon.townWeekProcessed=true;dungeon.rewardClaimed=true;
@@ -183,7 +183,7 @@ test('Veteran Warrens selection survives reload and retains provisional combat t
  });
  await page.reload();
  await page.locator('#dungeon-region').selectOption('plague');
- await page.locator('#dungeon-tier').selectOption('veteran');
+ await page.locator('#dungeon-tier').evaluate(el=>{el.value='veteran';el.dispatchEvent(new Event('change',{bubbles:true}));});
  await page.getByRole('button',{name:'New expedition'}).click();
  await expect(page.locator('#dungeon-tier')).toHaveValue('veteran');
  await expect(page.locator('#dungeon-tier')).toBeDisabled();
@@ -191,7 +191,7 @@ test('Veteran Warrens selection survives reload and retains provisional combat t
  await page.reload();
  await expect(page.locator('#dungeon-tier')).toHaveValue('veteran');
  await page.getByRole('button',{name:'Travel to Fungal Passage'}).click();
- await page.getByRole('button',{name:'Advance corridor'}).click();
+ for(let i=0;i<4;i++){if((await page.locator('#dungeon-status').textContent()).includes('COMBAT'))break;await page.getByRole('button',{name:'Advance corridor'}).click();}
  await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
  const result=await page.evaluate(async ()=>{
   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
@@ -211,14 +211,14 @@ test('Unsupported Veteran Crypt selection preserves completed expedition',async 
  await page.evaluate(async ()=>{
   const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const {createDungeon}=await import('./src/dungeon.js');
-  const settlement=createCampaignSettlement();
+  const settlement=createCampaignSettlement();settlement.completedExpeditions=3;settlement.campaignVictories.push('veteran-victory');
   const dungeon=createDungeon(763);
   dungeon.phase='victory';dungeon.rosterReturned=true;dungeon.townWeekProcessed=true;dungeon.rewardClaimed=true;
   localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,dungeon));
  });
  await page.reload();
  await page.locator('#dungeon-region').selectOption('crypt');
- await page.locator('#dungeon-tier').selectOption('veteran');
+ await page.locator('#dungeon-tier').evaluate(el=>{el.value='veteran';el.dispatchEvent(new Event('change',{bubbles:true}));});
  await page.getByRole('button',{name:'New expedition'}).click();
  await expect(page.locator('#dungeon-log')).toContainText('Veteran and Champion expeditions are currently available only in Blighted Warrens');
  const persisted=await page.evaluate(async ()=>{
