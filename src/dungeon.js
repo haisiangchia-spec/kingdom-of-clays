@@ -65,7 +65,7 @@ function triggerHazard(dungeon,edge){
 // Scouting previews the existing seeded encounter/trap rolls (not DD1 odds).
 export function scoutCorridor(dungeon,to){
  if(dungeon.phase!=='explore'||dungeon.pendingTravel)throw Error('Scouting requires a free room');
- const edge=DUNGEON_CORRIDORS.find(e=>(e.from===dungeon.room&&e.to===to)||(e.to===dungeon.room&&e.from===to));
+ const edge=dungeonCorridors(dungeon).find(e=>(e.from===dungeon.room&&e.to===to)||(e.to===dungeon.room&&e.from===to));
  if(!edge)throw Error('Destination is not adjacent');
  const record=dungeon.corridors[edge.id]??{traversals:0,encounterCleared:false};
  if(record.scouted)throw Error('Corridor already scouted');
@@ -167,7 +167,16 @@ function encounterSeed(seed,key){
  for(let i=0;i<key.length;i++)h=Math.imul(h^key.charCodeAt(i),16777619)>>>0;
  return h||1;
 }
-export function createDungeon(seed=1,{difficulty='scout',region='crypt',tier='apprentice',interactiveEvents=false,variableCorridors=false,bonuses={},party:rosterParty=null}={}){
+// Seeded optional branch: keeps every room connected and the Sanctum reachable.
+// The reference five-room map remains unchanged when procedural mode is off.
+export function dungeonCorridors(dungeon){
+ if(!dungeon.proceduralBranches)return DUNGEON_CORRIDORS;
+ const branch=dungeon.seed%2===0;
+ return Object.freeze(DUNGEON_CORRIDORS.filter(edge=>edge.id!=='vault-sanctum').concat([
+  branch?Object.freeze({id:'entrance-vault',from:'entrance',to:'vault',steps:2}):DUNGEON_CORRIDORS.find(edge=>edge.id==='vault-sanctum')
+ ]));
+}
+export function createDungeon(seed=1,{difficulty='scout',region='crypt',tier='apprentice',interactiveEvents=false,variableCorridors=false,proceduralBranches=false,bonuses={},party:rosterParty=null}={}){
  if(!['scout','patrol','gauntlet'].includes(difficulty))throw Error('Unknown dungeon difficulty');
  if(!['crypt','plague'].includes(region))throw Error('Unknown dungeon region');
  if(!['apprentice','veteran','champion'].includes(tier))throw Error('Unknown dungeon tier');
@@ -178,18 +187,19 @@ export function createDungeon(seed=1,{difficulty='scout',region='crypt',tier='ap
  if(!rosterParty)for(const hero of party){hero.maxHp+=bonusHp;hero.hp+=bonusHp;} // roster party already includes Guild bonus
  const bonusFood=Math.max(0,Math.min(6,Math.trunc(bonuses.food??0)));
  const hungerStressReduction=Math.max(0,Math.min(6,Math.trunc(bonuses.hungerStressReduction??0)));
- const corridorSteps=variableCorridors?Object.fromEntries(DUNGEON_CORRIDORS.map(edge=>[edge.id,2+Math.floor(rng(encounterSeed(seed,'length:'+edge.id))()*3)])):null;
- return {seed,difficulty,region,tier,corridorSteps,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood},hungerStressReduction,
+ const layout=proceduralBranches?dungeonCorridors({seed,proceduralBranches}):DUNGEON_CORRIDORS;
+ const corridorSteps=variableCorridors?Object.fromEntries(layout.map(edge=>[edge.id,2+Math.floor(rng(encounterSeed(seed,'length:'+edge.id))()*3)])):null;
+ return {seed,difficulty,region,tier,proceduralBranches,corridorSteps,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood},hungerStressReduction,
   pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,inventory:[],pendingLoot:null,battleSerial:0,phase:'explore',log:['Entered '+regionRoomName(region,'entrance')]};
 }
 export function adjacentRooms(dungeon){
  if(dungeon.phase!=='explore'||dungeon.pendingTravel)return [];
- return DUNGEON_CORRIDORS.filter(e=>e.from===dungeon.room||e.to===dungeon.room)
+ return dungeonCorridors(dungeon).filter(e=>e.from===dungeon.room||e.to===dungeon.room)
   .map(e=>({room:keyFor(e,dungeon.room),corridor:e.id}));
 }
 export function beginCorridor(dungeon,to){
  if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingHunger||dungeon.pendingLoot)throw Error('Exploration is blocked');
- const edge=DUNGEON_CORRIDORS.find(e=>(e.from===dungeon.room&&e.to===to)||(e.to===dungeon.room&&e.from===to));
+ const edge=dungeonCorridors(dungeon).find(e=>(e.from===dungeon.room&&e.to===to)||(e.to===dungeon.room&&e.from===to));
  if(!edge)throw Error('Destination is not adjacent');
  dungeon.pendingTravel={from:dungeon.room,to,corridor:edge.id,progress:0,steps:dungeon.corridorSteps?.[edge.id]??edge.steps};
  dungeon.log.push('Travel towards '+DUNGEON_ROOMS[to].name);
@@ -218,7 +228,7 @@ export function advanceCorridor(dungeon){
    return dungeon;
  }
  const trip=dungeon.pendingTravel;
- const edge=DUNGEON_CORRIDORS.find(e=>e.id===trip.corridor);
+ const edge=dungeonCorridors(dungeon).find(e=>e.id===trip.corridor);
  trip.progress++;
  dungeon.stepsTaken++;
  dungeon.torch=Math.max(0,dungeon.torch-1); // provisional travel torch cost
