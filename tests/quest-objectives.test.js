@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon,questObjectiveComplete} from '../src/dungeon.js';
+import {createDungeon,questObjectiveComplete,questObjectiveProgress} from '../src/dungeon.js';
 test('reconnaissance completes upon securing the Sanctum',()=>{
  const d=createDungeon(12);
  assert.equal(questObjectiveComplete(d),false);
@@ -16,4 +16,16 @@ test('Veteran and Champion require both outposts and the Sanctum',()=>{
   d.cleared.push('vault');assert.equal(questObjectiveComplete(d),true);
   assert.equal(questObjectiveComplete(structuredClone(d)),true);
  }
+});
+
+test('quest checklist tracks cleared rooms and preserves completion on reload',()=>{
+ const d=createDungeon(33,{region:'plague',tier:'veteran'});
+ d.questId='warrens-veteran';
+ assert.deepEqual(questObjectiveProgress(d).map(g=>g.room),['watch','vault','sanctum']);
+ assert.equal(questObjectiveProgress(d).filter(g=>g.complete).length,0);
+ d.cleared=['vault','sanctum'];
+ assert.deepEqual(questObjectiveProgress(structuredClone(d)).map(g=>g.complete),[false,true,true]);
+ assert.equal(questObjectiveComplete(d),false);
+ d.cleared.push('watch');
+ assert.equal(questObjectiveComplete(d),true);
 });
