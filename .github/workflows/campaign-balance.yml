@@ -101,7 +101,7 @@ jobs:
           const log=fs.existsSync('test-results/campaign-balance.log')?fs.readFileSync('test-results/campaign-balance.log','utf8'):'';
           function extract(label){
             const entries=[];
-            for(const line of log.split('\\n')){
+            for(const line of log.split('\n')){
               const index=line.indexOf('# '+label+' ');
               if(index<0)continue;
               try{entries.push(JSON.parse(line.slice(index+label.length+3)));}catch{}
@@ -117,7 +117,7 @@ jobs:
             progressedEquipment:extract('Progressed full expedition attrition'),
             fullyProgressed:extract('Fully progressed expedition attrition')
           };
-          fs.writeFileSync('simulation-results/latest.json',JSON.stringify(result,null,2)+'\\n');
+          fs.writeFileSync('simulation-results/latest.json',JSON.stringify(result,null,2)+'\n');
           NODE
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
