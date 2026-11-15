@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
-import {campaignProgress,campaignMilestoneProgress,expeditionUnlock,recordCampaignVictory,completeCampaignExpedition} from '../src/campaign-progression.js';
+import {campaignProgress,campaignMilestoneProgress,expeditionUnlock,recordCampaignVictory,completeCampaignExpedition,canStartNextExpedition} from '../src/campaign-progression.js';
 import {availableQuests,selectQuest} from '../src/quest-board.js';
 
 test('campaign starts with only Apprentice Crypt quests available',()=>{
@@ -68,4 +68,13 @@ test('pending loot prevents reward claim and milestone advancement',()=>{
  assert.equal(settlement.completedExpeditions,0);
  assert.deepEqual(settlement.campaignVictories,[]);
  assert.equal(expedition.rewardClaimed,false);
+});
+
+test('next expedition requires collecting victory rewards',()=>{
+ assert.equal(canStartNextExpedition(null).allowed,true);
+ assert.equal(canStartNextExpedition({phase:'explore'}).allowed,false);
+ assert.equal(canStartNextExpedition({phase:'combat'}).allowed,false);
+ assert.equal(canStartNextExpedition({phase:'victory',rewardClaimed:false}).allowed,false);
+ assert.equal(canStartNextExpedition({phase:'victory',rewardClaimed:true}).allowed,true);
+ assert.equal(canStartNextExpedition({phase:'defeat'}).allowed,true);
 });
