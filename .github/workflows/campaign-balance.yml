@@ -1,0 +1,42 @@
+name: Campaign balance regression
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - '.github/workflows/campaign-balance.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - '.github/workflows/campaign-balance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  campaign-balance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run campaign encounter and full expedition simulations
+        run: |
+          mkdir -p test-results
+          set -o pipefail
+          node --test tests/campaign-real-combat.test.js 2>&1 | tee test-results/campaign-balance.log
+      - name: Upload campaign balance results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: campaign-balance-results
+          path: test-results/campaign-balance.log
+          if-no-files-found: warn
