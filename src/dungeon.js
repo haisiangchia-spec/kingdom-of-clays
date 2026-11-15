@@ -241,7 +241,7 @@ function startBattle(dungeon,source,difficulty){
  const enemyUnits=battle.units.filter(u=>u.side==='enemy');
  battle.units=[...dungeon.party.map(copy),...enemyUnits];
  battle.torch=dungeon.torch;
- battle.log.unshift('Dungeon encounter: '+source+(source==='room:outpost'||source==='room:catacomb'?' ('+roomDanger+' patrol variant)':''));
+ battle.log.unshift('Dungeon encounter: '+source+(source==='room:outpost'||source==='room:catacomb'?' ('+roomDanger+' encounter)':''));
  dungeon.pendingBattle={source,battle};
  dungeon.phase='combat';
  dungeon.log.push('An encounter blocks the way: '+source);
