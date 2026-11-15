@@ -221,3 +221,18 @@ test('report multi-seed full expedition attrition by quest without arbitrary pas
   console.log('Full expedition attrition',JSON.stringify(report));
  }
 });
+
+// Progression audit: these simulations currently instantiate fresh encounter
+// templates rather than the persistent roster. Keep that distinction explicit
+// so late-tier balance results are not mistaken for upgraded-party outcomes.
+test('late-tier balance fixture uses unprogressed baseline heroes',()=>{
+ for(const tier of ['veteran','champion']){
+  const dungeon=createDungeon(223,{tier,region:'plague',difficulty:'scout'});
+  const baseline=createDungeon(223,{tier:'apprentice',region:'plague',difficulty:'scout'});
+  assert.deepEqual(dungeon.party.map(h=>({hp:h.hp,maxHp:h.maxHp,dmgMin:h.dmgMin,dmgMax:h.dmgMax,skillLevels:h.skillLevels})),
+   baseline.party.map(h=>({hp:h.hp,maxHp:h.maxHp,dmgMin:h.dmgMin,dmgMax:h.dmgMax,skillLevels:h.skillLevels})),
+   'late-tier fixture unexpectedly changed hero combat readiness');
+  assert.ok(dungeon.party.every(h=>h.rosterId===undefined),
+   'late-tier fixture unexpectedly uses persistent roster heroes');
+ }
+});
