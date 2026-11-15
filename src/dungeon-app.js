@@ -1,6 +1,6 @@
 import {availableQuests,selectQuest} from './quest-board.js';
 import {campaignProgress,recordCampaignVictory,expeditionUnlock} from './campaign-progression.js';
-import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,questObjectiveProgress,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
+import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,questObjectiveProgress,bonusObjectiveProgress,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
@@ -163,6 +163,10 @@ function render(){
  if(currentQuest)el('p','Objective: '+currentQuest.objective+' · '+currentQuest.name,map);
  for(const goal of questObjectiveProgress(expedition)){
   const line=el('p',(goal.complete?'✓ ':'○ ')+regionRoomName(expedition.region??'crypt',goal.room),map);
+  if(goal.complete)line.className='seen';
+ }
+ for(const goal of bonusObjectiveProgress(expedition)){
+  const line=el('p',(goal.complete?'✓ ':'◇ ')+'Optional: '+regionRoomName(expedition.region??'crypt',goal.room)+' — '+goal.reward.quantity+' '+goal.reward.kind,map);
   if(goal.complete)line.className='seen';
  }
  const connections=el('div',null,map);
