@@ -92,13 +92,15 @@ function shortestRoute(d,goal){
 function runFullExpedition(seed,questId,tier,region){
  const d=createDungeon(seed,{tier,region,difficulty:'scout',proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
  d.questId=questId;
- let steps=0,battles=0,skills=0;
+ let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0;
  while(d.phase==='explore'||d.phase==='combat'){
   assert.ok(++steps<1000,'expedition stalled: '+questId+' '+seed);
   if(d.phase==='combat'){
    const report=playEncounter(d);
    battles++;
    skills+=report.heroSkillsUsed+report.enemySkillsUsed;
+   heroSkills+=report.heroSkillsUsed;
+   enemySkills+=report.enemySkillsUsed;
    continue;
   }
   if(d.pendingLoot){leaveLoot(d);continue;}
@@ -115,7 +117,7 @@ function runFullExpedition(seed,questId,tier,region){
  assert.ok(skills>0,'expedition did not execute combat skills');
  assert.equal(d.pendingBattle,null);
  if(d.phase==='victory')assert.ok(questObjectiveProgress(d).every(x=>x.complete));
- return {phase:d.phase,battles,skills,steps,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
+ return {phase:d.phase,battles,skills,heroSkills,enemySkills,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
 }
 test('complete seeded expeditions resolve with actual combat, hunger, loot and navigation',()=>{
  for(const [questId,tier,region] of [
@@ -129,5 +131,35 @@ test('complete seeded expeditions resolve with actual combat, hunger, loot and n
   const first=runFullExpedition(151,questId,tier,region);
   assert.deepEqual(runFullExpedition(151,questId,tier,region),first,'full expedition replay diverged: '+questId);
   console.log('Full expedition baseline',JSON.stringify({questId,...first}));
+ }
+});
+
+test('report multi-seed full expedition attrition by quest without arbitrary pass thresholds',()=>{
+ const quests=[
+  ['crypt-recon','apprentice','crypt'],
+  ['crypt-purge','apprentice','crypt'],
+  ['warrens-recon','apprentice','plague'],
+  ['warrens-containment','apprentice','plague'],
+  ['warrens-veteran','veteran','plague'],
+  ['warrens-champion','champion','plague']
+ ];
+ const seeds=[11,23,37,41,53,67,71,83,97,109];
+ for(const [questId,tier,region] of quests){
+  const results=seeds.map(seed=>runFullExpedition(seed,questId,tier,region));
+  const mean=fn=>Number((results.reduce((sum,r)=>sum+fn(r),0)/results.length).toFixed(2));
+  const report={
+   questId,tier,region,n:results.length,
+   victories:results.filter(r=>r.phase==='victory').length,
+   defeats:results.filter(r=>r.phase==='defeat').length,
+   meanBattles:mean(r=>r.battles),
+   meanActions:mean(r=>r.skills),
+   meanFallen:mean(r=>r.party.filter(h=>h.dead).length),
+   meanRemainingHp:mean(r=>r.party.reduce((sum,h)=>sum+Math.max(0,h.hp),0)),
+   meanStress:mean(r=>r.party.reduce((sum,h)=>sum+(h.stress??0),0)),
+   meanFoodRemaining:mean(r=>r.food),
+   meanTorchlight:mean(r=>r.torch)
+  };
+  assert.equal(report.victories+report.defeats,report.n);
+  console.log('Full expedition attrition',JSON.stringify(report));
  }
 });
