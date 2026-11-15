@@ -5,6 +5,7 @@ export const QUESTS=Object.freeze([
  Object.freeze({id:'crypt-recon',region:'crypt',tier:'apprentice',name:'Ashen Crypt Reconnaissance',objective:'Secure the Forgotten Sanctum',difficulty:'scout'}),
  Object.freeze({id:'crypt-purge',region:'crypt',tier:'apprentice',name:'Ashen Crypt Purge',objective:'Defeat the Watch and Vault guardians',difficulty:'patrol'}),
  Object.freeze({id:'warrens-recon',region:'plague',tier:'apprentice',name:'Blighted Warrens Reconnaissance',objective:'Secure the Rotting Shrine',difficulty:'scout'}),
+ Object.freeze({id:'warrens-containment',region:'plague',tier:'apprentice',name:'Warrens Containment',objective:'Eliminate the Watch and Vault infestation',difficulty:'patrol'}),
  Object.freeze({id:'warrens-veteran',region:'plague',tier:'veteran',name:'Veteran Warrens Expedition',objective:'Secure both outposts and the Rotting Shrine against Veteran enemies',difficulty:'patrol'}),
  Object.freeze({id:'warrens-champion',region:'plague',tier:'champion',name:'Champion Warrens Expedition',objective:'Secure both outposts and the Rotting Shrine against Champion enemies',difficulty:'gauntlet'})
 ]);
