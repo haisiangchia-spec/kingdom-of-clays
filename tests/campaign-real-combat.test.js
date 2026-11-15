@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,dungeonCorridors,questObjectiveProgress,resolveHunger} from '../src/dungeon.js';
-import {rng,status,startRound,currentActor,prepareActorTurn,availableTargets,takeTurn,passActorTurn,ABILITIES} from '../src/engine.js';
+import {makeGeneratedEncounter,rng,status,startRound,currentActor,prepareActorTurn,availableTargets,takeTurn,passActorTurn,ABILITIES} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {leaveLoot} from '../src/inventory.js';
 
@@ -285,5 +285,25 @@ test('report full expedition attrition with upgraded persistent roster parties',
    outcomes:results.map((r,i)=>({seed:seeds[i],result:r.phase,battles:r.battles}))};
   assert.equal(report.victories+report.defeats,report.n);
   console.log('Progressed full expedition attrition',JSON.stringify(report));
+ }
+});
+
+test('audit tier encounter composition and enemy action economy without modifying balance',()=>{
+ for(const tier of ['apprentice','veteran','champion']){
+  const counts={},actions={},hp={};
+  for(const seed of [11,23,37,41,53,67,71,83,97,109]){
+   const encounter=createDungeon(seed,{tier,region:'plague',difficulty:'scout'});
+   const battle=createDungeon(seed,{tier,region:'plague',difficulty:'scout'});
+   // Generate a seeded combat encounter directly, independently of travel.
+   const generated=makeGeneratedEncounter(seed,'scout','plague',tier);
+   for(const enemy of generated.units.filter(u=>u.side==='enemy')){
+    const name=enemy.name;
+    counts[name]=(counts[name]??0)+1;
+    actions[name]=(actions[name]??0)+(enemy.actionsPerRound??1);
+    hp[name]=(hp[name]??0)+enemy.maxHp;
+   }
+   assert.equal(encounter.party.length,battle.party.length);
+  }
+  console.log('Tier enemy composition audit',JSON.stringify({tier,counts,actions,hp}));
  }
 });
