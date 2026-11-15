@@ -219,7 +219,8 @@ export function beginCorridor(dungeon,to){
 }
 function startBattle(dungeon,source,difficulty){
  const seed=encounterSeed(dungeon.seed,source+'|'+dungeon.battleSerial++);
- const battle=dungeon.region==='plague'?makeGeneratedEncounter(seed,difficulty,'plague',dungeon.tier??'apprentice'):(source==='room:vault'?makeUndeadEncounter(seed,'blightWretch'):makeGeneratedEncounter(seed,difficulty));
+ const roomDanger=source==='room:catacomb'?'gauntlet':source==='room:outpost'?'patrol':difficulty;
+ const battle=dungeon.region==='plague'?makeGeneratedEncounter(seed,roomDanger,'plague',dungeon.tier??'apprentice'):(source==='room:vault'?makeUndeadEncounter(seed,'blightWretch'):makeGeneratedEncounter(seed,roomDanger));
  battle.expeditionEncounter=true; // guards extra disease rolls outside the combat lab
  const enemyUnits=battle.units.filter(u=>u.side==='enemy');
  battle.units=[...dungeon.party.map(copy),...enemyUnits];
@@ -307,6 +308,8 @@ export function resolveDungeonBattle(dungeon){
        'corridor:gallery-watch':['bust',3],
        'corridor:gallery-vault':['bust',3],
        'room:vault':['gem',2],
+       'room:outpost':['crest',5],
+       'room:catacomb':['gem',4],
        'corridor:watch-sanctum':['deed',2],
        'corridor:vault-sanctum':['deed',2]
      };
