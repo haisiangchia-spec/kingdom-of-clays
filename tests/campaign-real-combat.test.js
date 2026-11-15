@@ -147,10 +147,14 @@ test('report multi-seed full expedition attrition by quest without arbitrary pas
  ];
  const seeds=[11,23,37,41,53,67,71,83,97,109];
  for(const [questId,tier,region] of quests){
-  const results=seeds.map(seed=>runFullExpedition(seed,questId,tier,region));
+  const results=seeds.map(seed=>{
+   try{return {seed,...runFullExpedition(seed,questId,tier,region)};}
+   catch(error){throw new Error('Full expedition simulation failed for '+questId+' seed '+seed+': '+error.message,{cause:error});}
+  });
   const mean=fn=>Number((results.reduce((sum,r)=>sum+fn(r),0)/results.length).toFixed(2));
   const report={
    questId,tier,region,n:results.length,
+   outcomes:results.map(r=>({seed:r.seed,result:r.phase,battles:r.battles,fallen:r.party.filter(h=>h.dead).length})),
    victories:results.filter(r=>r.phase==='victory').length,
    defeats:results.filter(r=>r.phase==='defeat').length,
    meanBattles:mean(r=>r.battles),
@@ -159,7 +163,9 @@ test('report multi-seed full expedition attrition by quest without arbitrary pas
    meanRemainingHp:mean(r=>r.party.reduce((sum,h)=>sum+Math.max(0,h.hp),0)),
    meanStress:mean(r=>r.party.reduce((sum,h)=>sum+(h.stress??0),0)),
    meanFoodRemaining:mean(r=>r.food),
-   meanTorchlight:mean(r=>r.torch)
+   meanTorchlight:mean(r=>r.torch),
+   minRemainingHp:Math.min(...results.map(r=>r.party.reduce((sum,h)=>sum+Math.max(0,h.hp),0))),
+   maxStress:Math.max(...results.map(r=>r.party.reduce((sum,h)=>sum+(h.stress??0),0)))
   };
   assert.equal(report.victories+report.defeats,report.n);
   console.log('Full expedition attrition',JSON.stringify(report));
