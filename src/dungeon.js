@@ -9,7 +9,9 @@ export const DUNGEON_ROOMS=Object.freeze({
  gallery:Object.freeze({name:'Ashen Gallery',x:1,y:1,encounter:false}),
  watch:Object.freeze({name:'Guard Post',x:2,y:0,encounter:true}),
  vault:Object.freeze({name:'Relic Vault',x:2,y:2,encounter:true}),
- sanctum:Object.freeze({name:'Forgotten Sanctum',x:3,y:1,encounter:true,objective:true})
+ sanctum:Object.freeze({name:'Forgotten Sanctum',x:3,y:1,encounter:true,objective:true}),
+ outpost:Object.freeze({name:'Forsaken Outpost',x:1,y:3,encounter:true}),
+ catacomb:Object.freeze({name:'Collapsed Catacomb',x:3,y:3,encounter:true})
 });
 export const DUNGEON_CORRIDORS=Object.freeze([
  Object.freeze({id:'entrance-gallery',from:'entrance',to:'gallery',steps:2,forcedEncounter:true}),
@@ -180,7 +182,10 @@ export function dungeonCorridors(dungeon){
   DUNGEON_CORRIDORS.find(edge=>edge.id==='vault-sanctum')
  ];
  const choice=alternatives[Math.abs(dungeon.seed)%alternatives.length];
- return Object.freeze(DUNGEON_CORRIDORS.filter(edge=>edge.id!=='vault-sanctum').concat([Object.freeze(choice)]));
+ const edges=DUNGEON_CORRIDORS.filter(edge=>edge.id!=='vault-sanctum').concat([Object.freeze(choice)]);
+ if(dungeon.tier==='veteran'||dungeon.tier==='champion')edges.push(Object.freeze({id:'gallery-outpost',from:'gallery',to:'outpost',steps:2}));
+ if(dungeon.tier==='champion')edges.push(Object.freeze({id:'outpost-catacomb',from:'outpost',to:'catacomb',steps:2}));
+ return Object.freeze(edges);
 }
 export function createDungeon(seed=1,{difficulty='scout',region='crypt',tier='apprentice',interactiveEvents=false,variableCorridors=false,proceduralBranches=false,bonuses={},party:rosterParty=null}={}){
  if(!['scout','patrol','gauntlet'].includes(difficulty))throw Error('Unknown dungeon difficulty');
@@ -193,7 +198,7 @@ export function createDungeon(seed=1,{difficulty='scout',region='crypt',tier='ap
  if(!rosterParty)for(const hero of party){hero.maxHp+=bonusHp;hero.hp+=bonusHp;} // roster party already includes Guild bonus
  const bonusFood=Math.max(0,Math.min(6,Math.trunc(bonuses.food??0)));
  const hungerStressReduction=Math.max(0,Math.min(6,Math.trunc(bonuses.hungerStressReduction??0)));
- const layout=proceduralBranches?dungeonCorridors({seed,proceduralBranches}):DUNGEON_CORRIDORS;
+ const layout=proceduralBranches?dungeonCorridors({seed,proceduralBranches,tier}):DUNGEON_CORRIDORS;
  const lengthBonus=tier==='champion'?2:tier==='veteran'?1:0;
  const corridorSteps=variableCorridors?Object.fromEntries(layout.map(edge=>[edge.id,2+lengthBonus+Math.floor(rng(encounterSeed(seed,'length:'+edge.id))()*3)])):null;
  return {seed,difficulty,region,tier,proceduralBranches,corridorSteps,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood},hungerStressReduction,
