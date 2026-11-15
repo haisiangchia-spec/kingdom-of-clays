@@ -1,7 +1,7 @@
 import {ENEMY_SKILLS} from '../src/enemy-skills.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,dungeonCorridors,questObjectiveProgress,resolveHunger} from '../src/dungeon.js';
+import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,dungeonCorridors,questObjectiveProgress,resolveHunger,useProvision} from '../src/dungeon.js';
 import {makeGeneratedEncounter,rng,status,startRound,currentActor,prepareActorTurn,availableTargets,takeTurn,passActorTurn,ABILITIES} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {leaveLoot} from '../src/inventory.js';
@@ -159,7 +159,7 @@ function runFullExpedition(seed,questId,tier,region,{party=null}={}){
  const d=createDungeon(seed,{tier,region,difficulty:quest.difficulty,proceduralBranches:true,variableCorridors:true,interactiveEvents:true,...(party?{party}:{})});
  assert.equal(d.difficulty,quest.difficulty,'expedition difficulty did not match quest board');
  d.questId=questId;
- let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0,skiverEncounters=0,fourEnemyEncounters=0;
+ let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0,torchesUsed=0,skiverEncounters=0,fourEnemyEncounters=0;
  while(d.phase==='explore'||d.phase==='combat'){
   assert.ok(++steps<1000,'expedition stalled: '+questId+' '+seed);
   if(d.phase==='combat'){
@@ -175,6 +175,9 @@ function runFullExpedition(seed,questId,tier,region,{party=null}={}){
   }
   if(d.pendingLoot){leaveLoot(d);continue;}
   if(d.pendingHunger){resolveHunger(d,(d.supplies.food??0)>=4?'eat':'skip');continue;}
+  // The benchmark player uses purchased torches before entering dark corridors.
+  // Otherwise late-tier survival is confounded by avoidable low-light penalties.
+  if((d.supplies.torch??0)>0&&d.torch<=50){useProvision(d,'torch');torchesUsed++;continue;}
   if(d.pendingTravel){advanceCorridor(d);continue;}
   const objective=questObjectiveProgress(d).find(x=>!x.complete);
   assert.ok(objective,'no incomplete objectives while still exploring');
@@ -187,7 +190,7 @@ function runFullExpedition(seed,questId,tier,region,{party=null}={}){
  assert.ok(skills>0,'expedition did not execute combat skills');
  assert.equal(d.pendingBattle,null);
  if(d.phase==='victory')assert.ok(questObjectiveProgress(d).every(x=>x.complete));
- return {phase:d.phase,difficulty:quest.difficulty,battles,skills,heroSkills,enemySkills,heals,skiverEncounters,fourEnemyEncounters,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
+ return {phase:d.phase,difficulty:quest.difficulty,battles,skills,heroSkills,enemySkills,heals,torchesUsed,skiverEncounters,fourEnemyEncounters,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
 }
 test('expedition benchmark uses each quest difficulty, not the default scout setting',()=>{
  for(const quest of QUESTS){
@@ -235,6 +238,7 @@ test('report multi-seed full expedition attrition by quest without arbitrary pas
    meanBattles:mean(r=>r.battles),
    meanActions:mean(r=>r.skills),
    meanHeals:mean(r=>r.heals),
+   meanTorchesUsed:mean(r=>r.torchesUsed),
    meanSkiverEncounters:mean(r=>r.skiverEncounters),
    meanFourEnemyEncounters:mean(r=>r.fourEnemyEncounters),
    meanFallen:mean(r=>r.party.filter(h=>h.dead).length),
