@@ -63,6 +63,21 @@ export function completeCampaignExpedition(settlement,expedition){
  if(!Array.isArray(settlement.campaignVictories))throw Error('Invalid campaign victories');
  if(!Array.isArray(expedition.log))throw Error('Invalid expedition log');
  if(!['crypt','plague'].includes(expedition.region)||!['apprentice','veteran','champion'].includes(expedition.tier))throw Error('Invalid expedition region or tier');
+ if(expedition.questId!==undefined){
+  const contracts={
+   'crypt-recon':['crypt','apprentice'],
+   'crypt-purge':['crypt','apprentice'],
+   'warrens-recon':['plague','apprentice'],
+   'warrens-containment':['plague','apprentice'],
+   'warrens-veteran':['plague','veteran'],
+   'warrens-champion':['plague','champion']
+  };
+  const expected=contracts[expedition.questId];
+  if(!expected||expected[0]!==expedition.region||expected[1]!==expedition.tier)throw Error('Expedition quest does not match region and tier');
+  const objectives=['crypt-purge','warrens-containment'].includes(expedition.questId)?['watch','vault']:
+   ['warrens-veteran','warrens-champion'].includes(expedition.questId)?['watch','vault','sanctum']:['sanctum'];
+  if(!Array.isArray(expedition.cleared)||objectives.some(room=>!expedition.cleared.includes(room)))throw Error('Expedition quest objectives are incomplete');
+ }
  if(expedition.pendingLoot)throw Error('Resolve pending loot before settlement transfer');
  const report=claimExpeditionRewards(expedition,settlement);
  settlement.completedExpeditions++;
