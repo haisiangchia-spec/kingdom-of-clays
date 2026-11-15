@@ -186,8 +186,15 @@ function runFullExpedition(seed,questId,tier,region,{party=null}={}){
  assert.ok(skills>0,'expedition did not execute combat skills');
  assert.equal(d.pendingBattle,null);
  if(d.phase==='victory')assert.ok(questObjectiveProgress(d).every(x=>x.complete));
- return {phase:d.phase,battles,skills,heroSkills,enemySkills,heals,skiverEncounters,fourEnemyEncounters,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
+ return {phase:d.phase,difficulty:quest.difficulty,battles,skills,heroSkills,enemySkills,heals,skiverEncounters,fourEnemyEncounters,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
 }
+test('expedition benchmark uses each quest difficulty, not the default scout setting',()=>{
+ for(const quest of QUESTS){
+  const result=runFullExpedition(151,quest.id,quest.tier,quest.region);
+  assert.equal(result.difficulty,quest.difficulty,'incorrect benchmark difficulty for '+quest.id);
+ }
+});
+
 test('complete seeded expeditions resolve with actual combat, hunger, loot and navigation',()=>{
  for(const [questId,tier,region] of [
   ['crypt-recon','apprentice','crypt'],
