@@ -37,6 +37,7 @@ function playEncounter(d){
  return {outcome:status(battle),actions};
 }
 test('real hero and enemy turns resolve initial dungeon encounters for each tier',()=>{
+ const metrics=[];
  for(const [tier,region] of [['apprentice','crypt'],['apprentice','plague'],['veteran','plague'],['champion','plague']]){
   for(const seed of [11,23,37]){
    const d=createDungeon(seed,{tier,region,difficulty:'scout'});
@@ -45,8 +46,16 @@ test('real hero and enemy turns resolve initial dungeon encounters for each tier
    assert.equal(d.phase,'combat',tier+' '+region+' '+seed);
    const report=playEncounter(d);
    assert.ok(['victory','defeat'].includes(report.outcome));
+   metrics.push({tier,region,seed,outcome:report.outcome,actions:report.actions,fallen:d.party.filter(h=>h.dead).length,remainingHp:d.party.reduce((sum,h)=>sum+Math.max(0,h.hp),0),stress:d.party.reduce((sum,h)=>sum+(h.stress??0),0)});
    assert.equal(d.pendingBattle,null);
    assert.ok(['explore','victory','defeat'].includes(d.phase));
   }
+ }
+ // Report descriptive encounter metrics without asserting arbitrary win-rate targets.
+ // These are a simple fixed-policy bot, not representative player performance.
+ for(const [tier,region] of [['apprentice','crypt'],['apprentice','plague'],['veteran','plague'],['champion','plague']]){
+  const sample=metrics.filter(m=>m.tier===tier&&m.region===region);
+  const mean=key=>Number((sample.reduce((total,m)=>total+m[key],0)/sample.length).toFixed(2));
+  console.log('Encounter baseline',JSON.stringify({tier,region,n:sample.length,wins:sample.filter(m=>m.outcome==='victory').length,meanActions:mean('actions'),meanFallen:mean('fallen'),meanRemainingHp:mean('remainingHp'),meanStress:mean('stress')}));
  }
 });
