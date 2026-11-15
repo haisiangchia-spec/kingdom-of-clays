@@ -6,6 +6,7 @@ import {makeGeneratedEncounter,rng,status,startRound,currentActor,prepareActorTu
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {leaveLoot} from '../src/inventory.js';
 import {QUESTS} from '../src/quest-board.js';
+import {hitChance,effectiveCombatStats} from '../src/dd1-math.js';
 
 import {createCampaignSettlement} from '../src/settlement.js';
 import {prepareRosterParty,upgradeHeroEquipment,upgradeHeroSkill} from '../src/hero-roster.js';
@@ -277,6 +278,19 @@ test('late-tier balance fixture uses unprogressed baseline heroes',()=>{
   assert.ok(dungeon.party.every(h=>h.rosterId===undefined),
    'late-tier fixture unexpectedly uses persistent roster heroes');
  }
+});
+
+test('equipment upgrades improve actual hit probability against evasive enemies',()=>{
+ const settlement=createCampaignSettlement();
+ settlement.gold=100000;
+ const hero=settlement.roster[0];
+ hero.level=5;
+ const before=hitChance({accuracy:85,accModifier:effectiveCombatStats(hero.unit).accuracy,dodge:31.25});
+ for(let i=0;i<5;i++)upgradeHeroEquipment(settlement,hero.rosterId,'weapon');
+ const after=hitChance({accuracy:85,accModifier:effectiveCombatStats(hero.unit).accuracy,dodge:31.25});
+ assert.ok(after>before,'weapon progression must affect real combat hit chance');
+ assert.ok(after<=100,'hit chance must remain capped');
+ assert.equal(effectiveCombatStats(hero.unit).accuracy,25);
 });
 
 test('veteran and champion progression fixtures carry upgraded persistent roster stats',()=>{
