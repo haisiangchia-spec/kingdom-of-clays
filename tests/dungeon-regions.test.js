@@ -948,3 +948,23 @@ test('optional rooms provide region-specific curios without changing legacy curi
  assert.equal(regionCurio('crypt','gallery').name,'Abandoned Reliquary');
  assert.equal(regionCurio('plague','vault').name,'Diseased Offering');
 });
+
+test('Champion gauntlet balance trial lowers four-enemy frequency without touching other tiers',()=>{
+ const weightedCount=table=>table.reduce((n,entry)=>n+entry.weight,0);
+ const fourWeight=table=>table.filter(entry=>PLAGUE_TEMPLATES[entry.id].length===4)
+   .reduce((n,entry)=>n+entry.weight,0);
+ const champion=PLAGUE_CHAMPION_TABLES.gauntlet;
+ assert.equal(weightedCount(champion),17);
+ assert.equal(fourWeight(champion),2);
+ assert.equal(champion.filter(entry=>PLAGUE_TEMPLATES[entry.id].length===3)
+   .reduce((n,entry)=>n+entry.weight,0),15);
+ assert.equal(PLAGUE_VETERAN_TABLES.gauntlet.reduce((n,e)=>n+e.weight,0),15);
+ assert.equal(PLAGUE_TABLES.gauntlet.reduce((n,e)=>n+e.weight,0),15);
+ let sampledFour=0;
+ for(let i=0;i<1700;i++){
+  const plan=createPlagueEncounterPlan('gauntlet',()=>(i+.5)/1700,'champion');
+  if(plan.profiles.length===4)sampledFour++;
+  assert.ok(plan.profiles.includes('plagueSkiver'));
+ }
+ assert.equal(sampledFour,200);
+});
