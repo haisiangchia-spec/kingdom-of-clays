@@ -184,9 +184,10 @@ function render(){
  const campaign=campaignProgress(settlement);
  el('h3','Quest Board',settlementPanel);
  for(const quest of availableQuests(settlement)){
-  const row=el('div',quest.name+' — '+quest.objective+(quest.unlocked?'':' (LOCKED: '+quest.reason+')'),settlementPanel);
+  const selected=quest.id===selectedQuestId&&quest.region===$('dungeon-region').value&&quest.tier===$('dungeon-tier').value;
+  const row=el('div',(selected?'✓ SELECTED · ':'')+quest.name+' — '+quest.objective+(quest.unlocked?'':' (LOCKED: '+quest.reason+')'),settlementPanel);
   row.className='dungeon-unit';
-  if(quest.unlocked){const choose=el('button','Select quest',row,()=>{
+  if(quest.unlocked){const choose=el('button',selected?'Selected':'Select quest',row,()=>{
    selectedQuestId=quest.id;$('dungeon-region').value=quest.region;$('dungeon-tier').value=quest.tier;render();
   });choose.disabled=!['victory','defeat'].includes(expedition.phase);}
  }
