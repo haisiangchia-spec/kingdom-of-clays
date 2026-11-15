@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {auditMashSource,requireCompleteMashAudit,buildMashEncounterCandidate} from '../src/dd1-mash-validation.js';
+import {auditMashSource,requireCompleteMashAudit,buildMashEncounterCandidate,sampleMashEncounterCandidate} from '../src/dd1-mash-validation.js';
 const source='hall: .chance 3 .types swine_reaver_B swine_marcher_B\nroom: .chance 2 .types swine_wretch_B';
 const provenance={sourceId:'fixture:synthetic',gameVersion:'test-only'};
 test('DD1 mash audit retains encounter kinds, relative weights and provenance',()=>{
@@ -41,4 +41,17 @@ test('DD1 encounter candidate preserves hall/room contexts, weights and line pro
  assert.ok(Object.isFrozen(candidate.groups.hall));
  assert.ok(Object.isFrozen(candidate.groups.hall[0].profiles));
  assert.throws(()=>buildMashEncounterCandidate(audit,{}),/Missing monster mapping/);
+});
+
+test('DD1 candidate sampler uses context-specific weight boundaries',()=>{
+ const map={swine_reaver_B:'plagueChopper',swine_marcher_B:'plagueDrummer',swine_wretch_B:'plagueWretch'};
+ const input='hall: .chance 3 .types swine_reaver_B\nhall: .chance 1 .types swine_marcher_B\nroom: .chance 7 .types swine_wretch_B';
+ const candidate=buildMashEncounterCandidate(auditMashSource(input,{...provenance,monsterMap:map}),map);
+ assert.equal(sampleMashEncounterCandidate(candidate,'hall',()=>0).line,1);
+ assert.equal(sampleMashEncounterCandidate(candidate,'hall',()=>0.749).line,1);
+ assert.equal(sampleMashEncounterCandidate(candidate,'hall',()=>0.75).line,2);
+ assert.equal(sampleMashEncounterCandidate(candidate,'hall',()=>0.999).line,2);
+ assert.equal(sampleMashEncounterCandidate(candidate,'room',()=>0.999).line,3);
+ assert.throws(()=>sampleMashEncounterCandidate(candidate,'boss',()=>0),/Unknown or empty/);
+ for(const value of [-0.1,1,NaN,Infinity])assert.throws(()=>sampleMashEncounterCandidate(candidate,'hall',()=>value),/random/);
 });
