@@ -1,6 +1,6 @@
 import {availableQuests,selectQuest} from './quest-board.js';
 import {campaignProgress,recordCampaignVictory,expeditionUnlock} from './campaign-progression.js';
-import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
+import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
@@ -156,6 +156,14 @@ function render(){
    const marker=el('span',regionRoomName(expedition.region??'crypt',id),map);
    marker.className=id===expedition.room?'here':expedition.visited.includes(id)?'seen':'';
    if(expedition.cleared.includes(id))marker.textContent+=' ✓';
+ }
+ const connections=el('div',null,map);
+ connections.className='dungeon-connections';
+ for(const edge of dungeonCorridors(expedition)){
+  const steps=expedition.corridorSteps?.[edge.id]??edge.steps;
+  const explored=(expedition.corridors[edge.id]?.traversals??0)>0;
+  const line=el('p',(explored?'✓ ':'· ')+regionRoomName(expedition.region??'crypt',edge.from)+' ↔ '+regionRoomName(expedition.region??'crypt',edge.to)+' ('+steps+' steps)',connections);
+  if(explored)line.className='seen';
  }
  const settlementPanel=$('settlement-panel');settlementPanel.replaceChildren();
  const campaign=campaignProgress(settlement);
