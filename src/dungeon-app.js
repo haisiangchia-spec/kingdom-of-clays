@@ -1,4 +1,4 @@
-import {campaignProgress,recordCampaignVictory} from './campaign-progression.js';
+import {campaignProgress,recordCampaignVictory,expeditionUnlock} from './campaign-progression.js';
 import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
@@ -67,6 +67,8 @@ function startExpedition(){
   if(expedition){expedition.log.push('Veteran and Champion expeditions are currently available only in Blighted Warrens');render();}
   return;
  }
+ const unlock=expeditionUnlock(settlement,region,tier);
+ if(!unlock.unlocked){if(expedition){expedition.log.push(unlock.reason);render();}return;}
  const seed=(Math.floor(Math.random()*0xffffffff)>>>0)||1;
  expedition=createDungeon(seed,{difficulty:'scout',region,tier,interactiveEvents:true,bonuses:expeditionBonuses(settlement),party});
  expedition.randomCalls=0;
@@ -133,6 +135,16 @@ function render(){
  $('dungeon-region').disabled=!['victory','defeat'].includes(expedition.phase);
  $('dungeon-tier').disabled=!['victory','defeat'].includes(expedition.phase);
  $('dungeon-tier').value=expedition.tier??'apprentice';
+ for(const option of $('dungeon-tier').options){
+  const state=expeditionUnlock(settlement,$('dungeon-region').value,option.value);
+  option.disabled=!state.unlocked;
+  option.title=state.reason;
+ }
+ for(const option of $('dungeon-region').options){
+  const state=expeditionUnlock(settlement,option.value,'apprentice');
+  option.disabled=!state.unlocked;
+  option.title=state.reason;
+ }
  const map=$('dungeon-rooms');map.replaceChildren();
  for(const [id,room] of Object.entries(DUNGEON_ROOMS)){
    const marker=el('span',regionRoomName(expedition.region??'crypt',id),map);
