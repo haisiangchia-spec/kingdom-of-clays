@@ -159,7 +159,7 @@ function runFullExpedition(seed,questId,tier,region,{party=null}={}){
  const d=createDungeon(seed,{tier,region,difficulty:quest.difficulty,proceduralBranches:true,variableCorridors:true,interactiveEvents:true,...(party?{party}:{})});
  assert.equal(d.difficulty,quest.difficulty,'expedition difficulty did not match quest board');
  d.questId=questId;
- let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0,torchesUsed=0,skiverEncounters=0,fourEnemyEncounters=0;
+ let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0,torchesUsed=0,foodHeals=0,skiverEncounters=0,fourEnemyEncounters=0;
  while(d.phase==='explore'||d.phase==='combat'){
   assert.ok(++steps<1000,'expedition stalled: '+questId+' '+seed);
   if(d.phase==='combat'){
@@ -175,6 +175,15 @@ function runFullExpedition(seed,questId,tier,region,{party=null}={}){
   }
   if(d.pendingLoot){leaveLoot(d);continue;}
   if(d.pendingHunger){resolveHunger(d,(d.supplies.food??0)>=4?'eat':'skip');continue;}
+  // Reserve four rations for the next hunger check; spend only surplus food
+  // to rescue a critically wounded hero between fights.
+  const critical=d.party.filter(h=>!h.dead&&h.hp<=2&&h.hp<h.maxHp)
+    .sort((a,b)=>a.hp-b.hp)[0];
+  if(critical&&(d.supplies.food??0)>4){
+   useProvision(d,'food',critical.id);
+   foodHeals++;
+   continue;
+  }
   // The benchmark player uses purchased torches before entering dark corridors.
   // Otherwise late-tier survival is confounded by avoidable low-light penalties.
   if((d.supplies.torch??0)>0&&d.torch<=50){useProvision(d,'torch');torchesUsed++;continue;}
@@ -190,7 +199,7 @@ function runFullExpedition(seed,questId,tier,region,{party=null}={}){
  assert.ok(skills>0,'expedition did not execute combat skills');
  assert.equal(d.pendingBattle,null);
  if(d.phase==='victory')assert.ok(questObjectiveProgress(d).every(x=>x.complete));
- return {phase:d.phase,difficulty:quest.difficulty,battles,skills,heroSkills,enemySkills,heals,torchesUsed,skiverEncounters,fourEnemyEncounters,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
+ return {phase:d.phase,difficulty:quest.difficulty,battles,skills,heroSkills,enemySkills,heals,torchesUsed,foodHeals,skiverEncounters,fourEnemyEncounters,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
 }
 test('expedition benchmark uses each quest difficulty, not the default scout setting',()=>{
  for(const quest of QUESTS){
@@ -239,6 +248,7 @@ test('report multi-seed full expedition attrition by quest without arbitrary pas
    meanActions:mean(r=>r.skills),
    meanHeals:mean(r=>r.heals),
    meanTorchesUsed:mean(r=>r.torchesUsed),
+   meanFoodHeals:mean(r=>r.foodHeals),
    meanSkiverEncounters:mean(r=>r.skiverEncounters),
    meanFourEnemyEncounters:mean(r=>r.fourEnemyEncounters),
    meanFallen:mean(r=>r.party.filter(h=>h.dead).length),
