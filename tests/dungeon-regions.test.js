@@ -936,3 +936,15 @@ test('Every Veteran weighted formation spawns its exact roster with tier-specifi
   }
  }
 });
+
+test('optional rooms provide region-specific curios without changing legacy curio names',()=>{
+ for(const room of ['outpost','catacomb']){
+  const crypt=regionCurio('crypt',room);
+  const plague=regionCurio('plague',room);
+  assert.ok(crypt?.name);
+  assert.ok(plague?.name);
+  assert.notEqual(crypt.name,plague.name);
+ }
+ assert.equal(regionCurio('crypt','gallery').name,'Abandoned Reliquary');
+ assert.equal(regionCurio('plague','vault').name,'Diseased Offering');
+});
