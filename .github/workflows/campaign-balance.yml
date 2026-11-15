@@ -67,22 +67,22 @@ jobs:
           }
           // Separate fully progressed Veteran/Champion results from baseline runs.
           const progressed=[];
-          for(const line of log.split('\\n')){
-            const match=line.match(/Fully progressed expedition attrition\\s+(\\{.*\\})/);
+          for(const line of log.split('\n')){
+            const match=line.match(/Fully progressed expedition attrition\s+(\{.*\})/);
             if(!match)continue;
             try{progressed.push(JSON.parse(match[1]));}catch{}
           }
-          md+='\\n### Fully progressed Veteran and Champion expeditions\\n\\n';
+          md+='\n### Fully progressed Veteran and Champion expeditions\n\n';
           if(!progressed.length){
-            md+='No fully progressed expedition results were produced. Check the test log.\\n';
+            md+='No fully progressed expedition results were produced. Check the test log.\n';
           }else{
-            md+='| Quest | Wins | Defeats | Battles | Skiver fights | Four-enemy fights | Torches | Food heals | Deaths |\\n';
-            md+='|---|---:|---:|---:|---:|---:|---:|---:|---:|\\n';
+            md+='| Quest | Wins | Defeats | Battles | Skiver fights | Four-enemy fights | Torches | Food heals | Deaths |\n';
+            md+='|---|---:|---:|---:|---:|---:|---:|---:|---:|\n';
             for(const r of progressed){
-              md+=`| ${r.questId} | ${r.wins}/${r.n} | ${r.defeats} | ${r.meanBattles} | ${r.meanSkiverEncounters} | ${r.meanFourEnemyEncounters} | ${r.meanTorchesUsed} | ${r.meanFoodHeals} | ${r.meanDeaths} |\\n`;
-              md+='\\n**'+r.questId+' seed outcomes:** '+(r.outcomes??[]).map(o=>`${o.seed}: ${o.phase} (${o.battles} battles, ${o.deaths} deaths)`).join(', ')+'\\n';
+              md+=`| ${r.questId} | ${r.wins}/${r.n} | ${r.defeats} | ${r.meanBattles} | ${r.meanSkiverEncounters} | ${r.meanFourEnemyEncounters} | ${r.meanTorchesUsed} | ${r.meanFoodHeals} | ${r.meanDeaths} |\n`;
+              md+='\n**'+r.questId+' seed outcomes:** '+(r.outcomes??[]).map(o=>`${o.seed}: ${o.phase} (${o.battles} battles, ${o.deaths} deaths)`).join(', ')+'\n';
             }
-            if(progressed.length!==2)md+='\\n**Warning:** Expected two progressed quest summaries, found '+progressed.length+'.\\n';
+            if(progressed.length!==2)md+='\n**Warning:** Expected two progressed quest summaries, found '+progressed.length+'.\n';
           }
           fs.writeFileSync('test-results/campaign-summary.md',md);
           if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,md);
