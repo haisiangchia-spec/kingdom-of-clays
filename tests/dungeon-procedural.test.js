@@ -54,3 +54,18 @@ test('all four procedural layouts are distinct, connected and repeatable',()=>{
  }
  assert.equal(new Set(layouts).size,4);
 });
+
+test('higher expedition tiers extend seeded corridor travel without changing layout',()=>{
+ const opts={region:'plague',proceduralBranches:true,variableCorridors:true};
+ const apprentice=createDungeon(204,{...opts,tier:'apprentice'});
+ const veteran=createDungeon(204,{...opts,tier:'veteran'});
+ const champion=createDungeon(204,{...opts,tier:'champion'});
+ assert.deepEqual(dungeonCorridors(apprentice),dungeonCorridors(veteran));
+ assert.deepEqual(dungeonCorridors(veteran),dungeonCorridors(champion));
+ for(const edge of dungeonCorridors(apprentice)){
+  const id=edge.id;
+  assert.equal(veteran.corridorSteps[id],apprentice.corridorSteps[id]+1);
+  assert.equal(champion.corridorSteps[id],apprentice.corridorSteps[id]+2);
+ }
+ assert.ok(Object.values(champion.corridorSteps).every(n=>n>=4&&n<=6));
+});
