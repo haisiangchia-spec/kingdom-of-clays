@@ -88,7 +88,7 @@ test('dungeon region persists and creates plague squads without changing default
 });
 
 test('regional room labels cover every room without altering stable map identifiers',()=>{
- const rooms=['entrance','gallery','watch','vault','sanctum'];
+ const rooms=['entrance','gallery','watch','vault','sanctum','outpost','catacomb'];
  for(const region of ['crypt','plague']){
   assert.deepEqual(Object.keys(REGION_ROOM_NAMES[region]),rooms);
   for(const id of rooms)assert.equal(typeof regionRoomName(region,id),'string');
