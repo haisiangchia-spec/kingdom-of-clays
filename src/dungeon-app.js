@@ -9,6 +9,7 @@ import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitH
 import {TREATMENTS,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
 import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits,sanitariumTreatmentCost,sanitariumWardBookings} from './sanitarium.js';
 import {DUNGEON_REGIONS,regionRoomName,regionCurio} from './dungeon-regions.js';
+import {availableVerifiedLevels} from './skill-progression.js';
 import {SANITARIUM_UPGRADE_TREES,sanitariumUpgradeLevels,nextSanitariumUpgradeCost,upgradeSanitarium,sanitariumWardCapacity} from './sanitarium-upgrades.js';
 
 const $=id=>document.getElementById(id);
@@ -274,12 +275,14 @@ function render(){
    for(const skillId of HERO_SKILLS[h.heroClass]??[]){
     const level=u.skillLevels?.[skillId]??1;
     const cost=75*level;
+    const verified=availableVerifiedLevels(skillId).includes(level+1);
     const button=el('button',skillId.replaceAll('_',' ')+' '+level+'/5 → '+(level+1)+' · '+cost+' gold',row,()=>{
      try{upgradeHeroSkill(settlement,h.rosterId,skillId);}catch(e){expedition.log.push(e.message);}
      render();
     });
-    button.disabled=!townAvailable||townUnavailable(settlement,h.rosterId)||level>=5||level+1>h.level||settlement.gold<cost;
+    button.disabled=!townAvailable||townUnavailable(settlement,h.rosterId)||!verified||level>=5||level+1>h.level||settlement.gold<cost;
     if(level>=5)button.textContent=skillId.replaceAll('_',' ')+' MAX (5)';
+    else if(!verified)button.textContent=skillId.replaceAll('_',' ')+' · next level unavailable';
    }
   }
   if(townAvailable&&settlement.town.week>=4&&!u.dead&&!townUnavailable(settlement,h.rosterId)){
