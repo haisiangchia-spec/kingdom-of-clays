@@ -263,12 +263,16 @@ export function advanceCorridor(dungeon){
  }
  return dungeon;
 }
+// Ordered checklist for the active contract; safe for older saves without questId.
+export function questObjectiveProgress(dungeon){
+ const required=['warrens-veteran','warrens-champion'].includes(dungeon.questId)
+  ?['watch','vault','sanctum']:['sanctum'];
+ return required.map(room=>({room,complete:dungeon.cleared.includes(room)}));
+}
 // Veteran and Champion contracts require clearing the two outposts as well as the shrine.
 // Earlier and standalone expeditions retain their original Sanctum victory condition.
 export function questObjectiveComplete(dungeon){
- if(!dungeon.cleared.includes('sanctum'))return false;
- if(!['warrens-veteran','warrens-champion'].includes(dungeon.questId))return true;
- return dungeon.cleared.includes('watch')&&dungeon.cleared.includes('vault');
+ return questObjectiveProgress(dungeon).every(goal=>goal.complete);
 }
 export function resolveDungeonBattle(dungeon){
  if(dungeon.phase!=='combat'||!dungeon.pendingBattle)throw Error('No dungeon combat');
