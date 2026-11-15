@@ -211,3 +211,24 @@ test('verified hero skill upgrades are Resolve-gated, paid, persistent, and used
  const restored=decodeCampaignSave(encodeCampaignSave(settlement,null)).settlement;
  assert.equal(restored.roster.find(h=>h.rosterId===id).unit.skillLevels.heavy_slash,3);
 });
+
+test('equipment combat bonuses persist through campaign save and expedition return',()=>{
+ const settlement=createCampaignSettlement();
+ settlement.gold=100000;
+ const hero=settlement.roster[0];
+ hero.level=3;
+ for(let i=0;i<3;i++){
+  upgradeHeroEquipment(settlement,hero.rosterId,'weapon');
+  upgradeHeroEquipment(settlement,hero.rosterId,'armor');
+ }
+ const expected={accMod:hero.unit.accMod,crit:hero.unit.crit,dodge:hero.unit.dodge,
+  dmgMin:hero.unit.dmgMin,dmgMax:hero.unit.dmgMax,maxHp:hero.unit.maxHp};
+ const saved=decodeCampaignSave(encodeCampaignSave(settlement,null)).settlement;
+ const loaded=saved.roster.find(h=>h.rosterId===hero.rosterId);
+ for(const [key,value] of Object.entries(expected))assert.equal(loaded.unit[key],value,'save lost '+key);
+ const expedition=createDungeon(181,{region:'plague',tier:'veteran',difficulty:'patrol',party:prepareRosterParty(saved)});
+ expedition.phase='defeat';
+ returnPartyToRoster(saved,expedition);
+ const returned=saved.roster.find(h=>h.rosterId===hero.rosterId);
+ for(const [key,value] of Object.entries(expected))assert.equal(returned.unit[key],value,'expedition return lost '+key);
+});
