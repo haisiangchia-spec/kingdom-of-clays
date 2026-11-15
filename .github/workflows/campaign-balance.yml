@@ -63,7 +63,7 @@ jobs:
             if(unwinnable.length)md+='\n**Balance warning:** No victories in sampled seeds for: '+unwinnable.map(r=>r.questId).join(', ')+'. This is a diagnostic, not proof that a quest is impossible.\n';
             const allWins=rows.filter(r=>r.victories===r.n);
             if(allWins.length)md+='\n**Balance note:** Every sampled seed won for: '+allWins.map(r=>r.questId).join(', ')+'. Consider testing harder tactics and larger samples.\n';
-            if(rows.length!==6)md+=`\\n**Warning:** Expected six quest summaries, found ${rows.length}.\\n`;
+            if(rows.length!==6)md+=`\n**Warning:** Expected six quest summaries, found ${rows.length}.\n`;
           }
           fs.writeFileSync('test-results/campaign-summary.md',md);
           if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,md);
