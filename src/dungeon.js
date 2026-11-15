@@ -173,6 +173,14 @@ function encounterSeed(seed,key){
 // The reference five-room map remains unchanged when procedural mode is off.
 // Seeded encounter variants for the new side rooms. Deterministic per expedition
 // and room, so reloads cannot reroll the encounter tier.
+// Clays-original optional room loot, seeded independently from encounter selection.
+// A given expedition always awards the same resource type and quantity for each room.
+export function optionalRoomReward(dungeon,room){
+ if(!['outpost','catacomb'].includes(room))throw Error('Not an optional reward room');
+ const roll=rng(encounterSeed(dungeon.seed,'room-loot:'+room))();
+ if(room==='outpost')return roll<.5?{kind:'crest',quantity:4}:{kind:'bust',quantity:3};
+ return roll<.5?{kind:'gem',quantity:3}:{kind:'deed',quantity:4};
+}
 export function optionalRoomDifficulty(dungeon,room){
  if(!['outpost','catacomb'].includes(room))throw Error('Not an optional encounter room');
  const roll=rng(encounterSeed(dungeon.seed,'room-variant:'+room))();
@@ -316,12 +324,12 @@ export function resolveDungeonBattle(dungeon){
        'corridor:gallery-watch':['bust',3],
        'corridor:gallery-vault':['bust',3],
        'room:vault':['gem',2],
-       'room:outpost':['crest',5],
-       'room:catacomb':['gem',4],
        'corridor:watch-sanctum':['deed',2],
        'corridor:vault-sanctum':['deed',2]
      };
-     const [kind,quantity]=drops[source]??['gold',50];
+     const reward=source==='room:outpost'||source==='room:catacomb'
+      ?optionalRoomReward(dungeon,source.slice(5)):null;
+     const [kind,quantity]=reward?[reward.kind,reward.quantity]:(drops[source]??['gold',50]);
      offerLoot(dungeon,kind,quantity);
    }
 
