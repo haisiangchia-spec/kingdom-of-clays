@@ -48,6 +48,8 @@ function playEncounter(d,{requireBothSides=false}={}){
     const bb=battle.units.find(u=>u.id===b.targetId);
     return aa.hp/aa.maxHp-bb.hp/bb.maxHp;
    })[0];
+   // Avoid wasting turns on non-offensive buffs when no living enemy can
+   // be reached: such turns can otherwise mask a formation deadlock.
    const chosen=heal??offensive??candidates[0];
    if(chosen){takeTurn(battle,actor.id,chosen.key,chosen.targetId,random);heroSkillsUsed++;if(chosen===heal)healsUsed++;}
    else passActorTurn(battle,actor.id);
