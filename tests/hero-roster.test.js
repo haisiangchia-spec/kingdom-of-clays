@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCampaignSettlement,normalizeCampaignSettlement,encodeCampaignSave,decodeCampaignSave,expeditionBonuses,upgradeFacility} from '../src/settlement.js';
 import {createDungeon} from '../src/dungeon.js';
 import {claimExpeditionRewards} from '../src/inventory.js';
-import {HERO_CLASSES,ROSTER_CAPACITY,RECRUITMENT_COST,RESURRECTION_COST,createHeroRoster,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,validateHeroRoster} from '../src/hero-roster.js';
+import {HERO_CLASSES,ROSTER_CAPACITY,RECRUITMENT_COST,RESURRECTION_COST,createHeroRoster,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,validateHeroRoster} from '../src/hero-roster.js';
 
 test('initial four heroes have persistent IDs, classes, and independent combat units',()=>{
  const s=createCampaignSettlement();
@@ -169,4 +169,25 @@ test('Veteran and Champion victories award tier-scaled Resolve XP once',()=>{
   assert.equal(returnPartyToRoster(settlement,expedition),false);
   assert.equal(settlement.roster[0].xp,expected);
  }
+});
+
+test('equipment upgrades require Resolve and persist through roster party preparation and saves',()=>{
+ const settlement=createCampaignSettlement();
+ settlement.gold=1000;
+ const hero=settlement.roster[0];
+ const original={min:hero.unit.dmgMin,max:hero.unit.dmgMax,hp:hero.unit.maxHp};
+ assert.throws(()=>upgradeHeroEquipment(settlement,hero.rosterId,'weapon'),/Resolve level too low/);
+ hero.level=2;
+ assert.deepEqual(upgradeHeroEquipment(settlement,hero.rosterId,'weapon'),{rosterId:hero.rosterId,kind:'weapon',level:1,cost:100});
+ assert.deepEqual(upgradeHeroEquipment(settlement,hero.rosterId,'armor'),{rosterId:hero.rosterId,kind:'armor',level:1,cost:100});
+ assert.equal(hero.unit.dmgMin,original.min+1);
+ assert.equal(hero.unit.dmgMax,original.max+2);
+ assert.equal(hero.unit.maxHp,original.hp+3);
+ const prepared=prepareRosterParty(settlement)[0];
+ assert.equal(prepared.dmgMin,original.min+1);
+ assert.equal(prepared.maxHp,original.hp+3);
+ const restored=decodeCampaignSave(encodeCampaignSave(settlement,null)).settlement;
+ assert.deepEqual(restored.roster[0].equipment,{weapon:1,armor:1});
+ assert.equal(restored.roster[0].unit.dmgMax,original.max+2);
+ assert.throws(()=>upgradeHeroEquipment(settlement,hero.rosterId,'weapon'),/Resolve level too low/);
 });
