@@ -39,7 +39,7 @@ function playEncounter(d){
 test('real hero and enemy turns resolve initial dungeon encounters for each tier',()=>{
  const metrics=[];
  for(const [tier,region] of [['apprentice','crypt'],['apprentice','plague'],['veteran','plague'],['champion','plague']]){
-  for(const seed of [11,23,37]){
+  for(const seed of [11,23,37,41,53,67,71,83,97,109]){
    const d=createDungeon(seed,{tier,region,difficulty:'scout'});
    beginCorridor(d,'gallery');
    advanceCorridor(d);
