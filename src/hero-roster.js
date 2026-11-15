@@ -206,9 +206,15 @@ export function upgradeHeroEquipment(settlement,rosterId,kind){
  settlement.gold-=cost;
  hero.equipment={weapon:hero.equipment?.weapon??0,armor:hero.equipment?.armor??0,[kind]:level+1};
  if(kind==='weapon'){
+  // Provisional Clays progression: higher-tier weapons improve hit and crit
+  // consistency as well as raw damage against evasive Veteran/Champion foes.
   hero.unit.dmgMin+=1;
   hero.unit.dmgMax+=2;
+  hero.unit.accMod=(hero.unit.accMod??0)+5;
+  hero.unit.crit=(hero.unit.crit??0)+1;
  }else{
+  // Provisional armor dodge scaling complements the existing HP increase.
+  hero.unit.dodge=(hero.unit.dodge??0)+2;
   hero.unit.maxHp+=3;
   hero.unit.hp=Math.min(hero.unit.maxHp,hero.unit.hp+3);
  }
