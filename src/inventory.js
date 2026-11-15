@@ -70,7 +70,7 @@ export function leaveLoot(d){
  return d;
 }
 export function discardInventoryStack(d,id){
- if(d.phase!=='explore')throw Error('Cannot discard items during combat');
+ if(!['explore','victory'].includes(d.phase))throw Error('Cannot discard items during combat');
  if(typeof id!=='string')throw Error('Invalid inventory slot');
  const stacks=inventoryStacks(d),found=stacks.find(s=>s.id===id);
  if(!found)throw Error('Inventory slot not found');
