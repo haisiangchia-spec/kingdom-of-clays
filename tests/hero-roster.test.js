@@ -215,20 +215,24 @@ test('verified hero skill upgrades are Resolve-gated, paid, persistent, and used
 test('equipment combat bonuses persist through campaign save and expedition return',()=>{
  const settlement=createCampaignSettlement();
  settlement.gold=100000;
- const hero=settlement.roster[0];
- hero.level=3;
- for(let i=0;i<3;i++){
-  upgradeHeroEquipment(settlement,hero.rosterId,'weapon');
-  upgradeHeroEquipment(settlement,hero.rosterId,'armor');
+ const expected=new Map();
+ for(const hero of settlement.roster){
+  hero.level=3;
+  for(let i=0;i<3;i++){
+   upgradeHeroEquipment(settlement,hero.rosterId,'weapon');
+   upgradeHeroEquipment(settlement,hero.rosterId,'armor');
+  }
+  expected.set(hero.rosterId,{accMod:hero.unit.accMod,crit:hero.unit.crit,dodge:hero.unit.dodge,
+   dmgMin:hero.unit.dmgMin,dmgMax:hero.unit.dmgMax,maxHp:hero.unit.maxHp});
  }
- const expected={accMod:hero.unit.accMod,crit:hero.unit.crit,dodge:hero.unit.dodge,
-  dmgMin:hero.unit.dmgMin,dmgMax:hero.unit.dmgMax,maxHp:hero.unit.maxHp};
  const saved=decodeCampaignSave(encodeCampaignSave(settlement,null)).settlement;
- const loaded=saved.roster.find(h=>h.rosterId===hero.rosterId);
- for(const [key,value] of Object.entries(expected))assert.equal(loaded.unit[key],value,'save lost '+key);
+ for(const hero of saved.roster){
+  for(const [key,value] of Object.entries(expected.get(hero.rosterId)))assert.equal(hero.unit[key],value,'save lost '+hero.heroClass+' '+key);
+ }
  const expedition=createDungeon(181,{region:'plague',tier:'veteran',difficulty:'patrol',party:prepareRosterParty(saved)});
  expedition.phase='defeat';
  returnPartyToRoster(saved,expedition);
- const returned=saved.roster.find(h=>h.rosterId===hero.rosterId);
- for(const [key,value] of Object.entries(expected))assert.equal(returned.unit[key],value,'expedition return lost '+key);
+ for(const hero of saved.roster){
+  for(const [key,value] of Object.entries(expected.get(hero.rosterId)))assert.equal(hero.unit[key],value,'expedition return lost '+hero.heroClass+' '+key);
+ }
 });
