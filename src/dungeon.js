@@ -292,6 +292,15 @@ export function questObjectiveProgress(dungeon){
   ?['watch','vault','sanctum']:['sanctum'];
  return required.map(room=>({room,complete:dungeon.cleared.includes(room)}));
 }
+// Optional room objectives are tracked separately from the required quest contract.
+// They remain optional, so clearing the Sanctum can still finish the expedition.
+export function bonusObjectiveProgress(dungeon){
+ if(!dungeon.proceduralBranches)return [];
+ const rooms=dungeon.tier==='champion'?['outpost','catacomb']:
+  dungeon.tier==='veteran'?['outpost']:[];
+ return rooms.map(room=>({room,complete:dungeon.cleared.includes(room),
+  reward:optionalRoomReward(dungeon,room)}));
+}
 // Veteran and Champion contracts require clearing the two outposts as well as the shrine.
 // Earlier and standalone expeditions retain their original Sanctum victory condition.
 export function questObjectiveComplete(dungeon){
