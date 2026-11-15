@@ -54,6 +54,7 @@ const el=(tag,text,container,action)=>{
  if(container)container.append(node);
  return node;
 };
+let selectedQuestId=null;
 function startExpedition(){
  if(expedition&&!['victory','defeat'].includes(expedition.phase)){
    expedition.log.push('Finish the expedition before starting another');
@@ -70,7 +71,9 @@ function startExpedition(){
  }
  const unlock=expeditionUnlock(settlement,region,tier);
  if(!unlock.unlocked){if(expedition){expedition.log.push(unlock.reason);render();}return;}
- const quest=selectQuest(settlement,availableQuests(settlement).find(q=>q.region===region&&q.tier===tier)?.id);
+ const chosen=availableQuests(settlement).find(q=>q.id===selectedQuestId&&q.region===region&&q.tier===tier&&q.unlocked)
+  ??availableQuests(settlement).find(q=>q.region===region&&q.tier===tier&&q.unlocked);
+ const quest=selectQuest(settlement,chosen?.id);
  const seed=(Math.floor(Math.random()*0xffffffff)>>>0)||1;
  expedition=createDungeon(seed,{difficulty:quest.difficulty,region,tier,interactiveEvents:true,variableCorridors:true,proceduralBranches:true,bonuses:expeditionBonuses(settlement),party});
  expedition.questId=quest.id;
@@ -184,7 +187,7 @@ function render(){
   const row=el('div',quest.name+' — '+quest.objective+(quest.unlocked?'':' (LOCKED: '+quest.reason+')'),settlementPanel);
   row.className='dungeon-unit';
   if(quest.unlocked){const choose=el('button','Select quest',row,()=>{
-   $('dungeon-region').value=quest.region;$('dungeon-tier').value=quest.tier;render();
+   selectedQuestId=quest.id;$('dungeon-region').value=quest.region;$('dungeon-tier').value=quest.tier;render();
   });choose.disabled=!['victory','defeat'].includes(expedition.phase);}
  }
 
