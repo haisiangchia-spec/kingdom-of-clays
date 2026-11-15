@@ -328,7 +328,7 @@ function render(){
      try{discardInventoryStack(expedition,stack.id);}catch(error){expedition.log.push(error.message);}
      render();
    });
-   discard.disabled=expedition.phase!=='explore';
+   discard.disabled=!['explore','victory'].includes(expedition.phase);
  }
  if(expedition.pendingLoot&&['explore','victory'].includes(expedition.phase)){
    const pending=expedition.pendingLoot;
