@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon,beginCorridor,DUNGEON_CORRIDORS,dungeonCorridors,optionalRoomDifficulty} from '../src/dungeon.js';
+import {createDungeon,beginCorridor,DUNGEON_CORRIDORS,dungeonCorridors,optionalRoomDifficulty,optionalRoomReward} from '../src/dungeon.js';
 test('procedural corridor lengths are deterministic, bounded and persist in save-shaped state',()=>{
  const a=createDungeon(123,{variableCorridors:true});
  const b=createDungeon(123,{variableCorridors:true});
@@ -101,4 +101,20 @@ test('optional-room encounter variants are seeded and include both threat levels
  assert.deepEqual([...found.outpost].sort(),['gauntlet','patrol']);
  assert.deepEqual([...found.catacomb].sort(),['gauntlet','patrol']);
  assert.throws(()=>optionalRoomDifficulty(createDungeon(1),'sanctum'),/Not an optional/);
+});
+
+test('optional-room loot varies by seed but survives save and reload',()=>{
+ const kinds={outpost:new Set(),catacomb:new Set()};
+ for(let seed=1;seed<=40;seed++){
+  const d=createDungeon(seed,{region:'plague',tier:'champion',proceduralBranches:true});
+  for(const room of ['outpost','catacomb']){
+   const reward=optionalRoomReward(d,room);
+   assert.deepEqual(reward,optionalRoomReward(structuredClone(d),room));
+   assert.ok(Number.isInteger(reward.quantity)&&reward.quantity>0);
+   kinds[room].add(reward.kind);
+  }
+ }
+ assert.deepEqual([...kinds.outpost].sort(),['bust','crest']);
+ assert.deepEqual([...kinds.catacomb].sort(),['deed','gem']);
+ assert.throws(()=>optionalRoomReward(createDungeon(1),'vault'),/Not an optional/);
 });
