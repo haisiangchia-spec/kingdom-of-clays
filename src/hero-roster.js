@@ -185,3 +185,31 @@ export function unequipTrinket(settlement,rosterId){
  hero.equippedTrinket=null;
  return hero;
 }
+
+/**
+ * Upgrade a hero's equipment with persistent combat-stat improvements.
+ * Equipment is purchased separately from Resolve XP; Resolve caps upgrade tier.
+ * Costs and stat increments are provisional Clays campaign values.
+ */
+export function upgradeHeroEquipment(settlement,rosterId,kind){
+ checkRoster(settlement);
+ if(!['weapon','armor'].includes(kind))throw Error('Unknown equipment type');
+ const hero=settlement.roster.find(h=>h.rosterId===rosterId);
+ if(!hero||hero.unit.dead)throw Error('Hero is unavailable');
+ const level=hero.equipment?.[kind]??0;
+ if(!integer(level)||level>5)throw Error('Invalid equipment level');
+ if(level>=5)throw Error('Equipment already at maximum level');
+ if(level>=hero.level)throw Error('Resolve level too low for equipment upgrade');
+ const cost=100*(level+1);
+ if(!integer(settlement.gold)||settlement.gold<cost)throw Error('Insufficient gold for equipment upgrade');
+ settlement.gold-=cost;
+ hero.equipment={weapon:hero.equipment?.weapon??0,armor:hero.equipment?.armor??0,[kind]:level+1};
+ if(kind==='weapon'){
+  hero.unit.dmgMin+=1;
+  hero.unit.dmgMax+=2;
+ }else{
+  hero.unit.maxHp+=3;
+  hero.unit.hp=Math.min(hero.unit.maxHp,hero.unit.hp+3);
+ }
+ return {rosterId,kind,level:level+1,cost};
+}
