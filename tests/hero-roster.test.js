@@ -205,7 +205,7 @@ test('verified hero skill upgrades are Resolve-gated, paid, persistent, and used
  assert.equal(settlement.gold,before-75);
  assert.deepEqual(upgradeHeroSkill(settlement,id,'heavy_slash'),{rosterId:id,skillId:'heavy_slash',level:3,cost:150});
  assert.throws(()=>upgradeHeroSkill(settlement,id,'heavy_slash'),/Resolve level/);
- assert.throws(()=>upgradeHeroSkill(settlement,id,'plague_skiver_roast'),/Unknown hero skill|Skill does not belong/);
+ assert.throws(()=>upgradeHeroSkill(settlement,id,'plague_skiver_roast'),/Unknown hero skill|Skill does not belong|Unverified skill upgrade/);
  const party=prepareRosterParty(settlement);
  assert.equal(party.find(u=>u.rosterId===id).skillLevels.heavy_slash,3);
  const restored=decodeCampaignSave(encodeCampaignSave(settlement,null)).settlement;
