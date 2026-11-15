@@ -61,11 +61,11 @@ export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random
 export const REGION_ROOM_NAMES=Object.freeze({
  crypt:Object.freeze({
   entrance:'Crypt Entrance',gallery:'Ashen Gallery',watch:'Guard Post',
-  vault:'Relic Vault',sanctum:'Forgotten Sanctum'
+  vault:'Relic Vault',sanctum:'Forgotten Sanctum',outpost:'Forsaken Outpost',catacomb:'Collapsed Catacomb'
  }),
  plague:Object.freeze({
   entrance:'Warrens Entrance',gallery:'Fungal Passage',watch:'Butcher Post',
-  vault:'Plague Cache',sanctum:'Rotting Shrine'
+  vault:'Plague Cache',sanctum:'Rotting Shrine',outpost:'Spore Watchtower',catacomb:'Buried Fungal Den'
  })
 });
 export function regionRoomName(region,roomId){
