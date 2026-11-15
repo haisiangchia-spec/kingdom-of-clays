@@ -293,6 +293,22 @@ test('equipment upgrades improve actual hit probability against evasive enemies'
  assert.equal(effectiveCombatStats(hero.unit).accuracy,25);
 });
 
+test('armor upgrades improve actual dodge protection against Champion attacks',()=>{
+ const settlement=createCampaignSettlement();
+ settlement.gold=100000;
+ const hero=settlement.roster[0];
+ hero.level=5;
+ const enemyAccuracy=95;
+ const baseDodge=hero.unit.dodge;
+ const before=hitChance({accuracy:enemyAccuracy,dodge:baseDodge});
+ for(let i=0;i<5;i++)upgradeHeroEquipment(settlement,hero.rosterId,'armor');
+ const after=hitChance({accuracy:enemyAccuracy,dodge:hero.unit.dodge});
+ assert.equal(hero.unit.dodge,baseDodge+10);
+ assert.ok(Number.isFinite(hero.unit.dodge));
+ assert.ok(after<before,'armor dodge upgrades must lower real enemy hit chance');
+ assert.ok(after>=5,'enemy hit chance must respect minimum hit cap');
+});
+
 test('veteran and champion progression fixtures carry upgraded persistent roster stats',()=>{
  for(const [tier,level] of [['veteran',3],['champion',5]]){
   const settlement=createCampaignSettlement();
