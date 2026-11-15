@@ -330,7 +330,7 @@ test('report higher-tier expedition attrition with equipment and verified skill 
     for(let target=2;target<=level;target++){
      try{upgradeHeroSkill(settlement,hero.rosterId,skillId);upgraded.push(hero.heroClass+':'+skillId+':'+target);}
      catch(error){
-      if(!/No verified|not verified|Unknown skill|not available/.test(error.message))throw error;
+      if(!/Unverified skill upgrade|No verified|not verified|Unknown skill|not available/.test(error.message))throw error;
       break;
      }
     }
