@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon,beginCorridor,DUNGEON_CORRIDORS,dungeonCorridors} from '../src/dungeon.js';
+import {createDungeon,beginCorridor,DUNGEON_CORRIDORS,dungeonCorridors,optionalRoomDifficulty} from '../src/dungeon.js';
 test('procedural corridor lengths are deterministic, bounded and persist in save-shaped state',()=>{
  const a=createDungeon(123,{variableCorridors:true});
  const b=createDungeon(123,{variableCorridors:true});
@@ -85,4 +85,20 @@ test('higher-tier procedural maps add reachable optional rooms',()=>{
   assert.deepEqual(Object.keys(d.corridorSteps).sort(),edges.map(e=>e.id).sort());
   assert.ok(reached.has('sanctum'));
  }
+});
+
+test('optional-room encounter variants are seeded and include both threat levels',()=>{
+ const found={outpost:new Set(),catacomb:new Set()};
+ for(let seed=1;seed<=40;seed++){
+  const d=createDungeon(seed,{region:'plague',tier:'champion',proceduralBranches:true});
+  for(const room of ['outpost','catacomb']){
+   const variant=optionalRoomDifficulty(d,room);
+   assert.equal(variant,optionalRoomDifficulty(structuredClone(d),room));
+   assert.ok(['patrol','gauntlet'].includes(variant));
+   found[room].add(variant);
+  }
+ }
+ assert.deepEqual([...found.outpost].sort(),['gauntlet','patrol']);
+ assert.deepEqual([...found.catacomb].sort(),['gauntlet','patrol']);
+ assert.throws(()=>optionalRoomDifficulty(createDungeon(1),'sanctum'),/Not an optional/);
 });
