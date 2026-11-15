@@ -20,7 +20,7 @@ function walk(dungeon,room){
  assert.equal(dungeon.room,room);
 }
 test('connected dungeon graph has valid bidirectional corridors and no orphaned rooms',()=>{
- assert.equal(Object.keys(DUNGEON_ROOMS).length,5);
+ assert.equal(Object.keys(DUNGEON_ROOMS).length,7);
  assert.equal(DUNGEON_CORRIDORS.length,5);
  for(const edge of DUNGEON_CORRIDORS){
   assert.ok(DUNGEON_ROOMS[edge.from]);assert.ok(DUNGEON_ROOMS[edge.to]);
