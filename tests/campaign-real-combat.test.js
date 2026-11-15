@@ -20,6 +20,7 @@ function playEncounter(d,{requireBothSides=false}={}){
  // Dungeon encounters already derive independent seeds from source and serial.
  const battle=dungeonBattle(d);
  const random=rng(battle.seed);
+ const enemyComposition=battle.units.filter(u=>u.side==='enemy').map(u=>u.enemyProfile??u.name);
  let actions=0,heroSkillsUsed=0,enemySkillsUsed=0,healsUsed=0;
  while(status(battle)==='ongoing'&&actions++<300){
   if(!currentActor(battle))startRound(battle,random);
@@ -72,7 +73,7 @@ function playEncounter(d,{requireBothSides=false}={}){
  }
  assert.notEqual(status(battle),'ongoing');
  resolveDungeonBattle(d);
- return {outcome:status(battle),actions,heroSkillsUsed,enemySkillsUsed,healsUsed};
+ return {outcome:status(battle),actions,heroSkillsUsed,enemySkillsUsed,healsUsed,enemyComposition};
 }
 test('real hero and enemy turns resolve initial dungeon encounters for each tier',()=>{
  const metrics=[];
@@ -152,11 +153,13 @@ function shortestRoute(d,goal){
 function runFullExpedition(seed,questId,tier,region,{party=null}={}){
  const d=createDungeon(seed,{tier,region,difficulty:'scout',proceduralBranches:true,variableCorridors:true,interactiveEvents:true,...(party?{party}:{})});
  d.questId=questId;
- let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0;
+ let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0,skiverEncounters=0,fourEnemyEncounters=0;
  while(d.phase==='explore'||d.phase==='combat'){
   assert.ok(++steps<1000,'expedition stalled: '+questId+' '+seed);
   if(d.phase==='combat'){
    const report=playEncounter(d);
+   if(report.enemyComposition.includes('plagueSkiver'))skiverEncounters++;
+   if(report.enemyComposition.length===4)fourEnemyEncounters++;
    battles++;
    skills+=report.heroSkillsUsed+report.enemySkillsUsed;
    heroSkills+=report.heroSkillsUsed;
@@ -178,7 +181,7 @@ function runFullExpedition(seed,questId,tier,region,{party=null}={}){
  assert.ok(skills>0,'expedition did not execute combat skills');
  assert.equal(d.pendingBattle,null);
  if(d.phase==='victory')assert.ok(questObjectiveProgress(d).every(x=>x.complete));
- return {phase:d.phase,battles,skills,heroSkills,enemySkills,heals,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
+ return {phase:d.phase,battles,skills,heroSkills,enemySkills,heals,skiverEncounters,fourEnemyEncounters,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
 }
 test('complete seeded expeditions resolve with actual combat, hunger, loot and navigation',()=>{
  for(const [questId,tier,region] of [
@@ -219,6 +222,8 @@ test('report multi-seed full expedition attrition by quest without arbitrary pas
    meanBattles:mean(r=>r.battles),
    meanActions:mean(r=>r.skills),
    meanHeals:mean(r=>r.heals),
+   meanSkiverEncounters:mean(r=>r.skiverEncounters),
+   meanFourEnemyEncounters:mean(r=>r.fourEnemyEncounters),
    meanFallen:mean(r=>r.party.filter(h=>h.dead).length),
    meanRemainingHp:mean(r=>r.party.reduce((sum,h)=>sum+Math.max(0,h.hp),0)),
    meanStress:mean(r=>r.party.reduce((sum,h)=>sum+(h.stress??0),0)),
@@ -347,6 +352,8 @@ test('report higher-tier expedition attrition with equipment and verified skill 
   const wins=results.filter(r=>r.phase==='victory').length;
   console.log('Fully progressed expedition attrition',JSON.stringify({questId,tier,level,n:seeds.length,wins,defeats:seeds.length-wins,upgraded,
    meanBattles:Number((results.reduce((n,r)=>n+r.battles,0)/results.length).toFixed(2)),
+   meanSkiverEncounters:Number((results.reduce((n,r)=>n+r.skiverEncounters,0)/results.length).toFixed(2)),
+   meanFourEnemyEncounters:Number((results.reduce((n,r)=>n+r.fourEnemyEncounters,0)/results.length).toFixed(2)),
    outcomes:results.map((r,i)=>({seed:seeds[i],phase:r.phase,battles:r.battles}))}));
   assert.equal(results.length,seeds.length);
  }
