@@ -157,6 +157,7 @@ function runFullExpedition(seed,questId,tier,region,{party=null}={}){
  assert.equal(quest.tier,tier);
  assert.equal(quest.region,region);
  const d=createDungeon(seed,{tier,region,difficulty:quest.difficulty,proceduralBranches:true,variableCorridors:true,interactiveEvents:true,...(party?{party}:{})});
+ assert.equal(d.difficulty,quest.difficulty,'expedition difficulty did not match quest board');
  d.questId=questId;
  let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0,skiverEncounters=0,fourEnemyEncounters=0;
  while(d.phase==='explore'||d.phase==='combat'){
