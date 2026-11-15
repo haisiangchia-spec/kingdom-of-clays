@@ -194,7 +194,8 @@ export function createDungeon(seed=1,{difficulty='scout',region='crypt',tier='ap
  const bonusFood=Math.max(0,Math.min(6,Math.trunc(bonuses.food??0)));
  const hungerStressReduction=Math.max(0,Math.min(6,Math.trunc(bonuses.hungerStressReduction??0)));
  const layout=proceduralBranches?dungeonCorridors({seed,proceduralBranches}):DUNGEON_CORRIDORS;
- const corridorSteps=variableCorridors?Object.fromEntries(layout.map(edge=>[edge.id,2+Math.floor(rng(encounterSeed(seed,'length:'+edge.id))()*3)])):null;
+ const lengthBonus=tier==='champion'?2:tier==='veteran'?1:0;
+ const corridorSteps=variableCorridors?Object.fromEntries(layout.map(edge=>[edge.id,2+lengthBonus+Math.floor(rng(encounterSeed(seed,'length:'+edge.id))()*3)])):null;
  return {seed,difficulty,region,tier,proceduralBranches,corridorSteps,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood},hungerStressReduction,
   pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,inventory:[],pendingLoot:null,battleSerial:0,phase:'explore',log:['Entered '+regionRoomName(region,'entrance')]};
 }
