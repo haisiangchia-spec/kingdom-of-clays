@@ -44,3 +44,13 @@ test('bonus objectives reveal optional rooms and deterministic rewards without g
  }
  assert.deepEqual(bonusObjectiveProgress(createDungeon(52)),[]);
 });
+
+test('Ashen Crypt Purge requires Watch and Vault but not Sanctum',()=>{
+ const d=createDungeon(19,{region:'crypt',tier:'apprentice'});
+ d.questId='crypt-purge';
+ assert.deepEqual(questObjectiveProgress(d).map(x=>x.room),['watch','vault']);
+ d.cleared=['sanctum'];assert.equal(questObjectiveComplete(d),false);
+ d.cleared.push('watch');assert.equal(questObjectiveComplete(d),false);
+ d.cleared.push('vault');assert.equal(questObjectiveComplete(d),true);
+ assert.equal(questObjectiveComplete(structuredClone(d)),true);
+});
