@@ -6,7 +6,7 @@ import {makeGeneratedEncounter,rng,status,startRound,currentActor,prepareActorTu
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {leaveLoot} from '../src/inventory.js';
 import {QUESTS} from '../src/quest-board.js';
-import {hitChance,effectiveCombatStats} from '../src/dd1-math.js';
+import {hitChance,effectiveCombatStats,criticalChance} from '../src/dd1-math.js';
 
 import {createCampaignSettlement} from '../src/settlement.js';
 import {prepareRosterParty,upgradeHeroEquipment,upgradeHeroSkill} from '../src/hero-roster.js';
@@ -291,6 +291,19 @@ test('equipment upgrades improve actual hit probability against evasive enemies'
  assert.ok(after>before,'weapon progression must affect real combat hit chance');
  assert.ok(after<=100,'hit chance must remain capped');
  assert.equal(effectiveCombatStats(hero.unit).accuracy,25);
+});
+
+test('weapon upgrades improve actual critical hit probability',()=>{
+ const settlement=createCampaignSettlement();
+ settlement.gold=100000;
+ const hero=settlement.roster[0];
+ hero.level=5;
+ const baseCrit=hero.unit.crit;
+ const before=criticalChance({baseCrit});
+ for(let i=0;i<5;i++)upgradeHeroEquipment(settlement,hero.rosterId,'weapon');
+ const after=criticalChance({baseCrit:hero.unit.crit});
+ assert.equal(hero.unit.crit,baseCrit+5);
+ assert.equal(after-before,5,'weapon crit progression must reach combat crit calculation');
 });
 
 test('armor upgrades improve actual dodge protection against Champion attacks',()=>{
