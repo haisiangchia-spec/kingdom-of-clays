@@ -26,8 +26,16 @@ function playEncounter(d,{requireBothSides=false}={}){
   }else{
    const candidates=(HERO_SKILLS[actor.heroClass??actor.name]??[]).flatMap(key=>
     availableTargets(battle,actor.id,key).map(targetId=>({key,targetId})));
+   // A basic survival policy: the Priest heals a wounded ally before attacking.
+   // Without this, expedition win rates measure an intentionally non-healing bot.
+   const wounded=battle.units.filter(u=>u.side==='hero'&&!u.dead&&u.hp>0&&u.hp<u.maxHp)
+    .sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp));
+   const heal=(actor.heroClass??actor.name)==='Priest'
+    ?wounded.filter(u=>u.hp/u.maxHp<=.65)
+      .flatMap(u=>candidates.filter(c=>c.key==='greater_heal'&&c.targetId===u.id))[0]
+    :null;
    const offensive=candidates.find(c=>battle.units.find(u=>u.id===c.targetId)?.side==='enemy');
-   const chosen=offensive??candidates[0];
+   const chosen=heal??offensive??candidates[0];
    if(chosen){takeTurn(battle,actor.id,chosen.key,chosen.targetId,random);heroSkillsUsed++;}
    else passActorTurn(battle,actor.id);
   }
