@@ -152,7 +152,9 @@ function render(){
   option.title=state.reason;
  }
  const map=$('dungeon-rooms');map.replaceChildren();
+ const activeRooms=new Set(['entrance',...dungeonCorridors(expedition).flatMap(e=>[e.from,e.to])]);
  for(const [id,room] of Object.entries(DUNGEON_ROOMS)){
+   if(!activeRooms.has(id))continue;
    const marker=el('span',regionRoomName(expedition.region??'crypt',id),map);
    marker.className=id===expedition.room?'here':expedition.visited.includes(id)?'seen':'';
    if(expedition.cleared.includes(id))marker.textContent+=' ✓';
