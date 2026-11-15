@@ -73,6 +73,8 @@ export function completeCampaignExpedition(settlement,expedition){
 // Prevent abandoning unclaimed victory spoils by starting a new expedition.
 export function canStartNextExpedition(expedition){
  if(!expedition)return Object.freeze({allowed:true,reason:''});
+ if(['victory','defeat'].includes(expedition.phase)&&expedition.rosterReturned===false)return Object.freeze({allowed:false,reason:'Return expedition heroes to the roster before starting another expedition'});
+ if(['victory','defeat'].includes(expedition.phase)&&expedition.townWeekProcessed===false)return Object.freeze({allowed:false,reason:'Finish settlement recovery before starting another expedition'});
  if(expedition.phase==='defeat')return Object.freeze({allowed:true,reason:''});
  if(expedition.phase==='victory')return expedition.rewardClaimed?
   Object.freeze({allowed:true,reason:''}):
