@@ -1,3 +1,4 @@
+import {availableQuests,selectQuest} from './quest-board.js';
 import {campaignProgress,recordCampaignVictory,expeditionUnlock} from './campaign-progression.js';
 import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
@@ -69,8 +70,10 @@ function startExpedition(){
  }
  const unlock=expeditionUnlock(settlement,region,tier);
  if(!unlock.unlocked){if(expedition){expedition.log.push(unlock.reason);render();}return;}
+ const quest=selectQuest(settlement,availableQuests(settlement).find(q=>q.region===region&&q.tier===tier)?.id);
  const seed=(Math.floor(Math.random()*0xffffffff)>>>0)||1;
- expedition=createDungeon(seed,{difficulty:'scout',region,tier,interactiveEvents:true,bonuses:expeditionBonuses(settlement),party});
+ expedition=createDungeon(seed,{difficulty:quest.difficulty,region,tier,interactiveEvents:true,bonuses:expeditionBonuses(settlement),party});
+ expedition.questId=quest.id;
  expedition.randomCalls=0;
  bindRandom();
  preparedId=null;chosenSkill=null;
@@ -153,6 +156,15 @@ function render(){
  }
  const settlementPanel=$('settlement-panel');settlementPanel.replaceChildren();
  const campaign=campaignProgress(settlement);
+ el('h3','Quest Board',settlementPanel);
+ for(const quest of availableQuests(settlement)){
+  const row=el('div',quest.name+' — '+quest.objective+(quest.unlocked?'':' (LOCKED: '+quest.reason+')'),settlementPanel);
+  row.className='dungeon-unit';
+  if(quest.unlocked){const choose=el('button','Select quest',row,()=>{
+   $('dungeon-region').value=quest.region;$('dungeon-tier').value=quest.tier;render();
+  });choose.disabled=!['victory','defeat'].includes(expedition.phase);}
+ }
+
  el('h3',campaign.finished?'Campaign Complete — Champion of Clays':'Campaign Objectives',settlementPanel);
  for(const goal of campaign.milestones)el('p',(goal.complete?'✓ ':'○ ')+goal.name+' — '+goal.description,settlementPanel);
  el('p',`Treasury: ${settlement.gold} gold · ${settlement.crests} crests · ${settlement.deeds} deeds · ${settlement.trinkets.length} trinkets · ${settlement.completedExpeditions} completed · ${settlement.busts??0} busts`,settlementPanel);
