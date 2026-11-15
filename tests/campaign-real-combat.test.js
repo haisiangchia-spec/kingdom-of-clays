@@ -11,7 +11,7 @@ const HERO_SKILLS={
  Hunter:['eagle_eye_shot','hunters_mark'],
  Priest:['greater_heal','group_healing','sacred_strike']
 };
-function playEncounter(d){
+function playEncounter(d,{requireBothSides=false}={}){
  const battle=dungeonBattle(d),random=rng(d.seed^0x9e3779b9);
  let actions=0,heroSkillsUsed=0,enemySkillsUsed=0;
  while(status(battle)==='ongoing'&&actions++<300){
@@ -33,8 +33,10 @@ function playEncounter(d){
   }
  }
  assert.ok(actions<300,'combat exceeded action budget');
- assert.ok(heroSkillsUsed>0,'hero bot never used a skill');
- assert.ok(enemySkillsUsed>0,'enemy AI never used a skill');
+ if(requireBothSides){
+  assert.ok(heroSkillsUsed>0,'hero bot never used a skill');
+  assert.ok(enemySkillsUsed>0,'enemy AI never used a skill');
+ }
  assert.notEqual(status(battle),'ongoing');
  resolveDungeonBattle(d);
  return {outcome:status(battle),actions,heroSkillsUsed,enemySkillsUsed};
@@ -47,7 +49,7 @@ test('real hero and enemy turns resolve initial dungeon encounters for each tier
    beginCorridor(d,'gallery');
    advanceCorridor(d);
    assert.equal(d.phase,'combat',tier+' '+region+' '+seed);
-   const report=playEncounter(d);
+   const report=playEncounter(d,{requireBothSides:true});
    assert.ok(['victory','defeat'].includes(report.outcome));
    metrics.push({tier,region,seed,outcome:report.outcome,actions:report.actions,heroSkillsUsed:report.heroSkillsUsed,enemySkillsUsed:report.enemySkillsUsed,fallen:d.party.filter(h=>h.dead).length,remainingHp:d.party.reduce((sum,h)=>sum+Math.max(0,h.hp),0),stress:d.party.reduce((sum,h)=>sum+(h.stress??0),0)});
    assert.equal(d.pendingBattle,null);
@@ -70,7 +72,7 @@ test('seeded real-turn encounters replay deterministically across tiers',()=>{
    beginCorridor(d,'gallery');
    advanceCorridor(d);
    assert.equal(d.phase,'combat');
-   const report=playEncounter(d);
+   const report=playEncounter(d,{requireBothSides:true});
    return {report,phase:d.phase,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead})),pendingBattle:d.pendingBattle};
   };
   assert.deepEqual(run(),run(),tier+' '+region+' replay diverged');
