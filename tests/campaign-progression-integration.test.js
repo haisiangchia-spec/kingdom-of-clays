@@ -86,3 +86,18 @@ test('hero recovery and town week must complete before a replacement expedition'
   assert.equal(canStartNextExpedition({phase,rewardClaimed:true,rosterReturned:true,townWeekProcessed:true}).allowed,true);
  }
 });
+
+test('campaign victory claim validates actual quest objectives and tier',()=>{
+ const settlement=createCampaignSettlement();
+ const expedition={phase:'victory',questId:'warrens-veteran',region:'plague',tier:'veteran',cleared:['watch','vault'],rewardClaimed:false,pendingLoot:null,inventory:[],log:[]};
+ assert.throws(()=>completeCampaignExpedition(settlement,expedition),/objectives are incomplete/);
+ assert.equal(settlement.completedExpeditions,0);
+ assert.equal(expedition.rewardClaimed,false);
+ expedition.cleared.push('sanctum');
+ expedition.tier='champion';
+ assert.throws(()=>completeCampaignExpedition(settlement,expedition),/does not match/);
+ expedition.tier='veteran';
+ completeCampaignExpedition(settlement,expedition);
+ assert.deepEqual(settlement.campaignVictories,['veteran-victory']);
+ assert.equal(settlement.completedExpeditions,1);
+});
