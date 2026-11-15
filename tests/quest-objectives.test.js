@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon,questObjectiveComplete,questObjectiveProgress} from '../src/dungeon.js';
+import {createDungeon,questObjectiveComplete,questObjectiveProgress,bonusObjectiveProgress} from '../src/dungeon.js';
 test('reconnaissance completes upon securing the Sanctum',()=>{
  const d=createDungeon(12);
  assert.equal(questObjectiveComplete(d),false);
@@ -28,4 +28,19 @@ test('quest checklist tracks cleared rooms and preserves completion on reload',(
  assert.equal(questObjectiveComplete(d),false);
  d.cleared.push('watch');
  assert.equal(questObjectiveComplete(d),true);
+});
+
+test('bonus objectives reveal optional rooms and deterministic rewards without gating victory',()=>{
+ for(const [tier,expected] of [['apprentice',[]],['veteran',['outpost']],['champion',['outpost','catacomb']]]){
+  const d=createDungeon(52,{region:'plague',tier,proceduralBranches:true});
+  assert.deepEqual(bonusObjectiveProgress(d).map(x=>x.room),expected);
+  assert.deepEqual(bonusObjectiveProgress(d),bonusObjectiveProgress(structuredClone(d)));
+  d.cleared=['watch','vault','sanctum'];
+  d.questId=tier==='champion'?'warrens-champion':'warrens-veteran';
+  assert.equal(questObjectiveComplete(d),true);
+  assert.ok(bonusObjectiveProgress(d).every(x=>!x.complete));
+  d.cleared.push(...expected);
+  assert.ok(bonusObjectiveProgress(d).every(x=>x.complete));
+ }
+ assert.deepEqual(bonusObjectiveProgress(createDungeon(52)),[]);
 });
