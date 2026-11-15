@@ -61,7 +61,7 @@ jobs:
           if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,md);
           NODE
       - name: Run complete regression suite
-        if: success()
+        if: always()
         run: |
           set -o pipefail
           npm test 2>&1 | tee test-results/full-suite.log
