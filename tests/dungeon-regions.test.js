@@ -252,7 +252,7 @@ test('Champion Warrens generator includes Skiver while Apprentice never does',()
   for(let seed=1;seed<=40;seed++){
    const champion=makeGeneratedEncounter(seed*1000003,difficulty,'plague','champion');
    assert.equal(champion.encounterPlan.tier,'champion');
-   assert.ok(champion.units.some(u=>u.enemyProfile==='plagueSkiver'));
+   if(difficulty!=='gauntlet')assert.ok(champion.units.some(u=>u.enemyProfile==='plagueSkiver'));
    assert.ok([3,4].includes(champion.encounterPlan.slots),'Champion formations may occupy three or four ranks');
    const apprentice=makeGeneratedEncounter(seed*1000003,difficulty,'plague');
    assert.ok(!apprentice.units.some(u=>u.enemyProfile==='plagueSkiver'));
@@ -313,7 +313,7 @@ test('all six Champion Warrens templates are reachable with legal enemy actions'
    seen.add(plan.template);
    assert.equal(plan.tier,'champion');
    assert.equal(plan.slots,['plagueChampionFullPatrol','plagueChampionDrumGuard'].includes(plan.template)?4:3);
-   assert.ok(plan.profiles.includes('plagueSkiver'));
+   if(plan.template!=='plagueChampionRelief')assert.ok(plan.profiles.includes('plagueSkiver'));
    for(const foe of battle.units.filter(u=>u.side==='enemy')){
     const action=chooseEnemyAction(battle,foe.id,foe.enemySkills,()=>.37,ABILITIES,availableTargets);
     assert.ok(action,plan.template+' has no legal action for '+foe.name);
@@ -322,7 +322,7 @@ test('all six Champion Warrens templates are reachable with legal enemy actions'
   }
  }
  assert.deepEqual([...seen].sort(),[
-  'plagueChampionAmbush','plagueChampionDrumGuard','plagueChampionEscort','plagueChampionFullPatrol','plagueChampionGuard','plagueChampionSkirmish'
+  'plagueChampionAmbush','plagueChampionDrumGuard','plagueChampionEscort','plagueChampionFullPatrol','plagueChampionGuard','plagueChampionRelief','plagueChampionSkirmish'
  ]);
 });
 
@@ -353,7 +353,7 @@ test('Champion encounter weights map deterministic rolls to the expected formati
    const plan=createPlagueEncounterPlan(difficulty,()=>midpoint,'champion');
    assert.equal(plan.template,entry.id);
    assert.equal(plan.tier,'champion');
-   assert.ok(plan.profiles.includes('plagueSkiver'));
+   assert.equal(plan.profiles.includes('plagueSkiver'),entry.id!=='plagueChampionRelief');
    cumulative+=entry.weight;
   }
   assert.equal(cumulative,total);
@@ -954,19 +954,21 @@ test('Champion gauntlet balance trial lowers four-enemy frequency without touchi
  const fourWeight=table=>table.filter(entry=>PLAGUE_TEMPLATES[entry.id].length===4)
    .reduce((n,entry)=>n+entry.weight,0);
  const champion=PLAGUE_CHAMPION_TABLES.gauntlet;
- assert.equal(weightedCount(champion),17);
+ assert.equal(weightedCount(champion),23);
  assert.equal(fourWeight(champion),2);
  assert.equal(champion.filter(entry=>PLAGUE_TEMPLATES[entry.id].length===3)
-   .reduce((n,entry)=>n+entry.weight,0),15);
+   .reduce((n,entry)=>n+entry.weight,0),21);
  assert.equal(PLAGUE_VETERAN_TABLES.gauntlet.reduce((n,e)=>n+e.weight,0),15);
  assert.equal(PLAGUE_TABLES.gauntlet.reduce((n,e)=>n+e.weight,0),15);
  let sampledFour=0;
- for(let i=0;i<1700;i++){
-  const plan=createPlagueEncounterPlan('gauntlet',()=>(i+.5)/1700,'champion');
+ let sampledRelief=0;
+ for(let i=0;i<2300;i++){
+  const plan=createPlagueEncounterPlan('gauntlet',()=>(i+.5)/2300,'champion');
   if(plan.profiles.length===4)sampledFour++;
-  assert.ok(plan.profiles.includes('plagueSkiver'));
+  if(plan.template==='plagueChampionRelief')sampledRelief++;
  }
  assert.equal(sampledFour,200);
+ assert.equal(sampledRelief,600);
 });
 
 test('Veteran patrol trial increases three-enemy encounters without changing Apprentice patrol',()=>{
