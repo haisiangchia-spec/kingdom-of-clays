@@ -30,7 +30,8 @@ export const PLAGUE_TABLES=Object.freeze({
 // the DD1 Veteran formation distribution is independently verified.
 export const PLAGUE_VETERAN_TABLES=Object.freeze({
  scout:Object.freeze([{id:'plagueScouts',weight:5},{id:'plagueRaid',weight:2},{id:'plagueHookRaid',weight:2},{id:'plagueHookPack',weight:1}]),
- patrol:Object.freeze([{id:'plagueScouts',weight:2},{id:'plagueRaid',weight:5},{id:'plagueMarch',weight:2},{id:'plagueHookRaid',weight:2},{id:'plagueHookPack',weight:1}]),
+ // Clays-provisional Veteran balance trial: reduce four-enemy patrols.
+ patrol:Object.freeze([{id:'plagueScouts',weight:7},{id:'plagueRaid',weight:2},{id:'plagueMarch',weight:1},{id:'plagueHookRaid',weight:1},{id:'plagueHookPack',weight:1}]),
  gauntlet:Object.freeze([{id:'plagueRaid',weight:4},{id:'plagueMarch',weight:3},{id:'plagueAmbush',weight:3},{id:'plagueHookRaid',weight:3},{id:'plagueHookPack',weight:2}])
 });
 export const PLAGUE_CHAMPION_TABLES=Object.freeze({
