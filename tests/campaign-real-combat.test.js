@@ -61,3 +61,17 @@ test('real hero and enemy turns resolve initial dungeon encounters for each tier
   console.log('Encounter baseline',JSON.stringify({tier,region,n:sample.length,wins:sample.filter(m=>m.outcome==='victory').length,meanActions:mean('actions'),meanHeroSkills:mean('heroSkillsUsed'),meanEnemySkills:mean('enemySkillsUsed'),meanFallen:mean('fallen'),meanRemainingHp:mean('remainingHp'),meanStress:mean('stress')}));
  }
 });
+
+test('seeded real-turn encounters replay deterministically across tiers',()=>{
+ for(const [tier,region] of [['apprentice','crypt'],['apprentice','plague'],['veteran','plague'],['champion','plague']]){
+  const run=()=>{
+   const d=createDungeon(137,{tier,region,difficulty:'scout'});
+   beginCorridor(d,'gallery');
+   advanceCorridor(d);
+   assert.equal(d.phase,'combat');
+   const report=playEncounter(d);
+   return {report,phase:d.phase,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead})),pendingBattle:d.pendingBattle};
+  };
+  assert.deepEqual(run(),run(),tier+' '+region+' replay diverged');
+ }
+});
