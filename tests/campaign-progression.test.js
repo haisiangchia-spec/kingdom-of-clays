@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
-import {campaignProgress,recordCampaignVictory,expeditionUnlock} from '../src/campaign-progression.js';
+import {campaignProgress,recordCampaignVictory,expeditionUnlock,campaignMilestoneProgress} from '../src/campaign-progression.js';
 test('Clays campaign milestones persist across save and load',()=>{
  const settlement=createCampaignSettlement();
  assert.equal(campaignProgress(settlement).completed,0);
@@ -37,4 +37,18 @@ test('Campaign unlocks advance from Crypt to Warrens, Veteran, then Champion',()
  assert.equal(expeditionUnlock(settlement,'plague','champion').unlocked,true);
  assert.equal(expeditionUnlock(settlement,'crypt','champion').unlocked,false);
  assert.equal(expeditionUnlock(settlement,'unknown','apprentice').unlocked,false);
+});
+
+test('campaign milestone counters show bounded progress and useful next steps',()=>{
+ const settlement={completedExpeditions:2,campaignVictories:[]};
+ const goals=campaignMilestoneProgress(settlement);
+ assert.equal(goals.find(x=>x.id==='first-expedition').current,1);
+ assert.equal(goals.find(x=>x.id==='established-company').current,2);
+ assert.equal(goals.find(x=>x.id==='established-company').target,3);
+ assert.equal(goals.find(x=>x.id==='established-company').complete,false);
+ assert.match(goals.find(x=>x.id==='veteran-victory').nextStep,/Veteran/);
+ settlement.completedExpeditions=9;
+ settlement.campaignVictories=['veteran-victory'];
+ assert.equal(campaignMilestoneProgress(settlement).find(x=>x.id==='established-company').current,3);
+ assert.equal(campaignMilestoneProgress(settlement).find(x=>x.id==='veteran-victory').current,1);
 });
