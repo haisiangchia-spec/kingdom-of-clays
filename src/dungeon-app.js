@@ -137,7 +137,10 @@ function render(){
  $('dungeon-status').textContent=`${DUNGEON_REGIONS[expedition.region??'crypt'].name} · ${(expedition.tier??'apprentice').toUpperCase()} · ${regionRoomName(expedition.region??'crypt',expedition.room)} · ${expedition.phase.toUpperCase()} · Torch ${expedition.torch} (${torchBand(expedition.torch)}) · Seed ${expedition.seed}`;
  $('dungeon-region').disabled=!['victory','defeat'].includes(expedition.phase);
  $('dungeon-tier').disabled=!['victory','defeat'].includes(expedition.phase);
- $('dungeon-tier').value=expedition.tier??'apprentice';
+ if(!['victory','defeat'].includes(expedition.phase)){
+  $('dungeon-tier').value=expedition.tier??'apprentice';
+  $('dungeon-region').value=expedition.region??'crypt';
+ }
  for(const option of $('dungeon-tier').options){
   const state=expeditionUnlock(settlement,$('dungeon-region').value,option.value);
   option.disabled=!state.unlocked;
