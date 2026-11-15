@@ -4,8 +4,8 @@ import {expeditionUnlock} from './campaign-progression.js';
 export const QUESTS=Object.freeze([
  Object.freeze({id:'crypt-recon',region:'crypt',tier:'apprentice',name:'Ashen Crypt Reconnaissance',objective:'Secure the Forgotten Sanctum',difficulty:'scout'}),
  Object.freeze({id:'warrens-recon',region:'plague',tier:'apprentice',name:'Blighted Warrens Reconnaissance',objective:'Secure the Rotting Shrine',difficulty:'scout'}),
- Object.freeze({id:'warrens-veteran',region:'plague',tier:'veteran',name:'Veteran Warrens Expedition',objective:'Secure the Rotting Shrine against Veteran enemies',difficulty:'patrol'}),
- Object.freeze({id:'warrens-champion',region:'plague',tier:'champion',name:'Champion Warrens Expedition',objective:'Secure the Rotting Shrine against Champion enemies',difficulty:'gauntlet'})
+ Object.freeze({id:'warrens-veteran',region:'plague',tier:'veteran',name:'Veteran Warrens Expedition',objective:'Secure both outposts and the Rotting Shrine against Veteran enemies',difficulty:'patrol'}),
+ Object.freeze({id:'warrens-champion',region:'plague',tier:'champion',name:'Champion Warrens Expedition',objective:'Secure both outposts and the Rotting Shrine against Champion enemies',difficulty:'gauntlet'})
 ]);
 export function availableQuests(settlement){
  return QUESTS.map(quest=>Object.freeze({...quest,...expeditionUnlock(settlement,quest.region,quest.tier)}));
