@@ -10,7 +10,7 @@ function withFixtures(fn){
  const dir=mkdtempSync(join(tmpdir(),'clays-mash-'));
  try{
   const mash=join(dir,'warrens.3.mash.darkest'),map=join(dir,'map.json');
-  writeFileSync(mash,'hall: .chance 3 .types swine_reaver_B swine_marcher_B\\nroom: .chance 2 .types swine_wretch_B\\n');
+  writeFileSync(mash,'hall: .chance 3 .types swine_reaver_B swine_marcher_B\nroom: .chance 2 .types swine_wretch_B\n');
   writeFileSync(map,JSON.stringify({swine_reaver_B:'plagueChopper',swine_marcher_B:'plagueDrummer',swine_wretch_B:'plagueWretch'}));
   return fn({mash,map});
  }finally{rmSync(dir,{recursive:true,force:true});}
