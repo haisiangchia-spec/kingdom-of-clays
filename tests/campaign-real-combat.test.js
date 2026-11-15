@@ -12,7 +12,11 @@ const HERO_SKILLS={
  Priest:['greater_heal','group_healing','sacred_strike']
 };
 function playEncounter(d,{requireBothSides=false}={}){
- const battle=dungeonBattle(d),random=rng(d.seed^0x9e3779b9);
+ // Distinct, reproducible RNG streams for each encounter within an expedition.
+ // Reusing the same seed for every battle biases the measured attrition.
+ const battle=dungeonBattle(d);
+ const serial=d.battleSerial??0;
+ const random=rng(((d.seed>>>0)^Math.imul(serial,0x9e3779b1)^0x9e3779b9)>>>0);
  let actions=0,heroSkillsUsed=0,enemySkillsUsed=0;
  while(status(battle)==='ongoing'&&actions++<300){
   if(!currentActor(battle))startRound(battle,random);
