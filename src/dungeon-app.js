@@ -72,7 +72,7 @@ function startExpedition(){
  if(!unlock.unlocked){if(expedition){expedition.log.push(unlock.reason);render();}return;}
  const quest=selectQuest(settlement,availableQuests(settlement).find(q=>q.region===region&&q.tier===tier)?.id);
  const seed=(Math.floor(Math.random()*0xffffffff)>>>0)||1;
- expedition=createDungeon(seed,{difficulty:quest.difficulty,region,tier,interactiveEvents:true,bonuses:expeditionBonuses(settlement),party});
+ expedition=createDungeon(seed,{difficulty:quest.difficulty,region,tier,interactiveEvents:true,variableCorridors:true,bonuses:expeditionBonuses(settlement),party});
  expedition.questId=quest.id;
  expedition.randomCalls=0;
  bindRandom();
