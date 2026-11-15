@@ -15,7 +15,7 @@ export const CAMPAIGN_SAVE_VERSION=1;
 const safeNumber=x=>Number.isSafeInteger(x)&&x>=0;
 const isObject=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 export function createCampaignSettlement(){
- return initSanitarium(initTown(setupHeroRoster({...createSettlement(),busts:0,facilities:{market:0,guild:0,temple:0},completedExpeditions:0})));
+ return initSanitarium(initTown(setupHeroRoster({...createSettlement(),busts:0,facilities:{market:0,guild:0,temple:0},completedExpeditions:0,campaignVictories:[]})));
 }
 export function normalizeCampaignSettlement(input){
  if(!isObject(input))throw Error('Invalid settlement');
@@ -33,6 +33,10 @@ export function normalizeCampaignSettlement(input){
   const level=fields[key]??0;
   if(!safeNumber(level)||level>rule.maxLevel)throw Error('Invalid facility level');
   base.facilities[key]=level;
+ }
+ if(input.campaignVictories!==undefined){
+  if(!Array.isArray(input.campaignVictories)||input.campaignVictories.some(x=>!['veteran-victory','champion-victory'].includes(x))||new Set(input.campaignVictories).size!==input.campaignVictories.length)throw Error('Invalid campaign victories');
+  base.campaignVictories=[...input.campaignVictories];
  }
  if(input.completedExpeditions!==undefined){
   if(!safeNumber(input.completedExpeditions))throw Error('Invalid expedition count');
