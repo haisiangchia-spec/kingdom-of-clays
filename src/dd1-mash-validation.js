@@ -53,3 +53,21 @@ export function buildMashEncounterCandidate(audit,monsterMap){
  return Object.freeze({sourceId:audit.sourceId,gameVersion:audit.gameVersion,
   groups:Object.freeze(Object.fromEntries(Object.entries(groups).map(([kind,entries])=>[kind,Object.freeze(entries)])))});
 }
+
+
+// A candidate is intentionally not a live encounter table. This selector
+// supports deterministic audit sampling without collapsing hall/room weights.
+export function sampleMashEncounterCandidate(candidate,kind,random=Math.random){
+ const entries=candidate?.groups?.[kind];
+ if(!Array.isArray(entries)||entries.length===0)throw Error('Unknown or empty DD1 mash encounter context: '+kind);
+ const roll=random();
+ if(!Number.isFinite(roll)||roll<0||roll>=1)throw Error('Encounter random must be in [0,1)');
+ const total=entries.reduce((sum,entry)=>sum+entry.weight,0);
+ if(!Number.isFinite(total)||total<=0||entries.some(entry=>!Number.isFinite(entry.weight)||entry.weight<=0))throw Error('Invalid DD1 mash weights');
+ let remaining=roll*total;
+ for(const entry of entries){
+  remaining-=entry.weight;
+  if(remaining<0)return entry;
+ }
+ return entries.at(-1);
+}
