@@ -298,6 +298,9 @@ test('veteran and champion progression fixtures carry upgraded persistent roster
    assert.equal(dungeon.party[i].dmgMin,baseline.party[i].dmgMin+level);
    assert.equal(dungeon.party[i].dmgMax,baseline.party[i].dmgMax+level*2);
    assert.equal(dungeon.party[i].maxHp,baseline.party[i].maxHp+level*3);
+   assert.equal(dungeon.party[i].accMod,baseline.party[i].accMod+level*5);
+   assert.equal(dungeon.party[i].crit,baseline.party[i].crit+level);
+   assert.equal(dungeon.party[i].dodge,baseline.party[i].dodge+level*2);
   }
  }
 });
