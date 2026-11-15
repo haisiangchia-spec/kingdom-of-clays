@@ -158,3 +158,15 @@ test('dead and living retirement differ in equipment handling',()=>{
  dismissHero(s,'r2');
  assert.equal(s.trinkets.length,1,'dead hero loses the worn charm');
 });
+
+test('Veteran and Champion victories award tier-scaled Resolve XP once',()=>{
+ for(const [tier,expected] of [['veteran',4],['champion',8]]){
+  const settlement=createCampaignSettlement();
+  const expedition=createDungeon(1201,{party:prepareRosterParty(settlement),region:'plague',tier});
+  expedition.phase='victory';
+  assert.equal(returnPartyToRoster(settlement,expedition),true);
+  assert.equal(settlement.roster[0].xp,expected);
+  assert.equal(returnPartyToRoster(settlement,expedition),false);
+  assert.equal(settlement.roster[0].xp,expected);
+ }
+});
