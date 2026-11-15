@@ -18,7 +18,7 @@ if(!mashPath||!mappingPath||!gameVersion){
    entryCount:audit.entries.length,groups:audit.groups,unresolved:audit.unresolved,
    invalidFormations:audit.invalidFormations};
   if(audit.ready)report.candidate=buildMashEncounterCandidate(audit,monsterMap);
-  process.stdout.write(JSON.stringify(report,null,2)+'\\n');
+  process.stdout.write(JSON.stringify(report,null,2)+String.fromCharCode(10));
   if(!audit.ready)process.exitCode=1;
  }catch(error){
   console.error('Mash audit failed: '+error.message);
