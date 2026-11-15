@@ -1,3 +1,4 @@
+import {campaignProgress,recordCampaignVictory} from './campaign-progression.js';
 import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
@@ -139,6 +140,9 @@ function render(){
    if(expedition.cleared.includes(id))marker.textContent+=' ✓';
  }
  const settlementPanel=$('settlement-panel');settlementPanel.replaceChildren();
+ const campaign=campaignProgress(settlement);
+ el('h3',campaign.finished?'Campaign Complete — Champion of Clays':'Campaign Objectives',settlementPanel);
+ for(const goal of campaign.milestones)el('p',(goal.complete?'✓ ':'○ ')+goal.name+' — '+goal.description,settlementPanel);
  el('p',`Treasury: ${settlement.gold} gold · ${settlement.crests} crests · ${settlement.deeds} deeds · ${settlement.trinkets.length} trinkets · ${settlement.completedExpeditions} completed · ${settlement.busts??0} busts`,settlementPanel);
  for(const [id,facility] of Object.entries(SETTLEMENT_FACILITIES)){
   const level=settlement.facilities[id];
@@ -287,7 +291,7 @@ function render(){
    const reward=expeditionRewardSummary(expedition);
    el('p',`Settlement rewards: ${reward.totalGold} gold (including gems), ${reward.crests} crests, ${reward.deeds} deeds, ${reward.trinkets} trinkets.`,inventory);
    if(!expedition.rewardClaimed)el('button','Return rewards to settlement',inventory,()=>{
-     try{claimExpeditionRewards(expedition,settlement);settlement.completedExpeditions++;}catch(error){expedition.log.push(error.message);}
+     try{claimExpeditionRewards(expedition,settlement);settlement.completedExpeditions++;recordCampaignVictory(settlement,expedition);}catch(error){expedition.log.push(error.message);}
      render();
    });
    else el('p','Rewards transferred to the settlement ✓',inventory);
