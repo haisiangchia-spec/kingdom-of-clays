@@ -54,3 +54,13 @@ test('Ashen Crypt Purge requires Watch and Vault but not Sanctum',()=>{
  d.cleared.push('vault');assert.equal(questObjectiveComplete(d),true);
  assert.equal(questObjectiveComplete(structuredClone(d)),true);
 });
+
+test('Warrens Containment requires Watch and Vault but not Sanctum',()=>{
+ const d=createDungeon(21,{region:'plague',tier:'apprentice'});
+ d.questId='warrens-containment';
+ assert.deepEqual(questObjectiveProgress(d).map(x=>x.room),['watch','vault']);
+ d.cleared=['sanctum'];assert.equal(questObjectiveComplete(d),false);
+ d.cleared.push('vault');assert.equal(questObjectiveComplete(d),false);
+ d.cleared.push('watch');assert.equal(questObjectiveComplete(d),true);
+ assert.equal(questObjectiveComplete(structuredClone(d)),true);
+});
