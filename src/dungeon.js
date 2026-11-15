@@ -288,7 +288,8 @@ export function advanceCorridor(dungeon){
 }
 // Ordered checklist for the active contract; safe for older saves without questId.
 export function questObjectiveProgress(dungeon){
- const required=['warrens-veteran','warrens-champion'].includes(dungeon.questId)
+ const required=dungeon.questId==='crypt-purge'?['watch','vault']:
+  ['warrens-veteran','warrens-champion'].includes(dungeon.questId)
   ?['watch','vault','sanctum']:['sanctum'];
  return required.map(room=>({room,complete:dungeon.cleared.includes(room)}));
 }
