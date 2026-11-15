@@ -25,3 +25,18 @@ export function recordCampaignVictory(settlement,expedition){
  }
  return campaignProgress(settlement);
 }
+
+// Clays-original quest unlocks, independent of DD1 combat balancing.
+export function expeditionUnlock(settlement,region,tier){
+ if(!['crypt','plague'].includes(region))return Object.freeze({unlocked:false,reason:'Unknown region'});
+ if(!['apprentice','veteran','champion'].includes(tier))return Object.freeze({unlocked:false,reason:'Unknown tier'});
+ if(region==='crypt'&&tier!=='apprentice')return Object.freeze({unlocked:false,reason:'Only Apprentice Ashen Crypt is implemented'});
+ const progress=campaignProgress(settlement);
+ const first=progress.milestones.find(x=>x.id==='first-expedition').complete;
+ const established=progress.milestones.find(x=>x.id==='established-company').complete;
+ const veteran=progress.milestones.find(x=>x.id==='veteran-victory').complete;
+ if(region==='plague'&&!first)return Object.freeze({unlocked:false,reason:'Complete one expedition to unlock Blighted Warrens'});
+ if(tier==='veteran'&&!established)return Object.freeze({unlocked:false,reason:'Complete three expeditions to unlock Veteran quests'});
+ if(tier==='champion'&&!veteran)return Object.freeze({unlocked:false,reason:'Win a Veteran Blighted Warrens expedition to unlock Champion quests'});
+ return Object.freeze({unlocked:true,reason:''});
+}
