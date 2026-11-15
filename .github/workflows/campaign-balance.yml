@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   campaign-balance:
@@ -92,6 +92,40 @@ jobs:
         run: |
           set -o pipefail
           npm test 2>&1 | tee test-results/full-suite.log
+      - name: Publish machine-readable simulation results
+        if: always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p simulation-results
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const log=fs.existsSync('test-results/campaign-balance.log')?fs.readFileSync('test-results/campaign-balance.log','utf8'):'';
+          function extract(label){
+            const entries=[];
+            for(const line of log.split('\\n')){
+              const index=line.indexOf('# '+label+' ');
+              if(index<0)continue;
+              try{entries.push(JSON.parse(line.slice(index+label.length+3)));}catch{}
+            }
+            return entries;
+          }
+          const result={
+            schemaVersion:1,
+            commit:process.env.GITHUB_SHA,
+            runId:process.env.GITHUB_RUN_ID,
+            runUrl:`https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
+            baseline:extract('Full expedition attrition'),
+            progressedEquipment:extract('Progressed full expedition attrition'),
+            fullyProgressed:extract('Fully progressed expedition attrition')
+          };
+          fs.writeFileSync('simulation-results/latest.json',JSON.stringify(result,null,2)+'\\n');
+          NODE
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add simulation-results/latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: publish campaign simulation results for run ${GITHUB_RUN_ID} [skip ci]"
+            git push origin HEAD:main
+          fi
       - name: Upload campaign balance results
         if: always()
         uses: actions/upload-artifact@v4
