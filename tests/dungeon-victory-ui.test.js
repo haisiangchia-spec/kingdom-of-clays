@@ -10,3 +10,8 @@ test('dungeon UI exposes pending treasure actions on victory screen',()=>{
  assert.match(source,/el\('button','Collect treasure'/);
  assert.match(source,/el\('button','Leave treasure'/);
 });
+
+test('victory screen permits discarding a stack to free space for final loot',()=>{
+ const source=readFileSync(new URL('../src/dungeon-app.js',import.meta.url),'utf8');
+ assert.match(source,/discard\.disabled=!\['explore','victory'\]\.includes\(expedition\.phase\)/);
+});
