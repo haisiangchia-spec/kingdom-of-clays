@@ -327,8 +327,9 @@ export function resolveDungeonBattle(dungeon){
    }
    dungeon.phase=questObjectiveComplete(dungeon)?'victory':'explore';
    dungeon.log.push('Encounter cleared: '+source);
-   if(dungeon.interactiveEvents&&dungeon.phase==='explore'){
-     // Distinct source-specific rewards; all provisional Clays amounts.
+   if(dungeon.interactiveEvents){
+     // Distinct source-specific rewards, including the final victory encounter.
+     // All amounts are provisional Clays balancing values.
      const drops={
        'room:watch':['crest',3],
        'corridor:gallery-watch':['bust',3],
