@@ -69,3 +69,13 @@ export function completeCampaignExpedition(settlement,expedition){
  recordCampaignVictory(settlement,expedition);
  return {report,progress:campaignProgress(settlement)};
 }
+
+// Prevent abandoning unclaimed victory spoils by starting a new expedition.
+export function canStartNextExpedition(expedition){
+ if(!expedition)return Object.freeze({allowed:true,reason:''});
+ if(expedition.phase==='defeat')return Object.freeze({allowed:true,reason:''});
+ if(expedition.phase==='victory')return expedition.rewardClaimed?
+  Object.freeze({allowed:true,reason:''}):
+  Object.freeze({allowed:false,reason:'Return expedition rewards to the settlement before starting another expedition'});
+ return Object.freeze({allowed:false,reason:'Finish the expedition before starting another'});
+}
