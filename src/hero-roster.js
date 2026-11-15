@@ -142,7 +142,9 @@ export function returnPartyToRoster(settlement,expedition){
   hero.unit=copyUnit;
   hero.diseases=[...(copyUnit.diseases??hero.diseases??[])];
   if(!hero.unit.dead&&expedition.phase==='victory'){
-   hero.xp+=2; // Apprentice short mission: 2 Resolve XP (DD1)
+   // Clays campaign balancing: higher-tier quests advance Resolve faster.
+   const resolveXp={apprentice:2,veteran:4,champion:8};
+   hero.xp+=resolveXp[expedition.tier??'apprentice']??2;
    const thresholds=[0,2,8,14,24,36,48];
    hero.level=thresholds.reduce((lvl,required,i)=>hero.xp>=required?i:lvl,0);
   }
