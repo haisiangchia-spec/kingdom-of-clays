@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
-import {campaignProgress,campaignMilestoneProgress,expeditionUnlock,recordCampaignVictory} from '../src/campaign-progression.js';
+import {campaignProgress,campaignMilestoneProgress,expeditionUnlock,recordCampaignVictory,completeCampaignExpedition} from '../src/campaign-progression.js';
 import {availableQuests,selectQuest} from '../src/quest-board.js';
 
 test('campaign starts with only Apprentice Crypt quests available',()=>{
@@ -46,4 +46,26 @@ test('invalid regions and tiers cannot unlock',()=>{
  assert.equal(expeditionUnlock(s,'unknown','apprentice').unlocked,false);
  assert.equal(expeditionUnlock(s,'plague','unknown').unlocked,false);
  assert.equal(expeditionUnlock(s,'crypt','champion').unlocked,false);
+});
+
+test('claiming an expedition pays rewards and advances progress exactly once',()=>{
+ const settlement=createCampaignSettlement();
+ const expedition={phase:'victory',region:'crypt',tier:'apprentice',rewardClaimed:false,pendingLoot:null,inventory:[{kind:'gold',quantity:120},{kind:'crest',quantity:2}],log:[]};
+ const goldBefore=settlement.gold;
+ const result=completeCampaignExpedition(settlement,expedition);
+ assert.equal(result.report.totalGold,120);
+ assert.equal(settlement.gold,goldBefore+120);
+ assert.equal(settlement.completedExpeditions,1);
+ assert.equal(result.progress.milestones[0].complete,true);
+ assert.throws(()=>completeCampaignExpedition(settlement,expedition),/unclaimed victory/);
+ assert.equal(settlement.completedExpeditions,1);
+ assert.equal(settlement.gold,goldBefore+120);
+});
+test('pending loot prevents reward claim and milestone advancement',()=>{
+ const settlement=createCampaignSettlement();
+ const expedition={phase:'victory',region:'plague',tier:'veteran',rewardClaimed:false,pendingLoot:{kind:'gold',quantity:10},inventory:[],log:[]};
+ assert.throws(()=>completeCampaignExpedition(settlement,expedition),/pending loot/);
+ assert.equal(settlement.completedExpeditions,0);
+ assert.deepEqual(settlement.campaignVictories,[]);
+ assert.equal(expedition.rewardClaimed,false);
 });
