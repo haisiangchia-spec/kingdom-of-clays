@@ -29,9 +29,9 @@ function resolveEvents(d){
  if(d.phase==='combat')clearBattle(d);
 }
 test('all quest objectives are reachable through seeded procedural routes',()=>{
- for(const [tier,questId] of [['apprentice','warrens-containment'],['veteran','warrens-veteran'],['champion','warrens-champion']]){
+ for(const [tier,questId,region] of [['apprentice','crypt-recon','crypt'],['apprentice','crypt-purge','crypt'],['apprentice','warrens-recon','plague'],['apprentice','warrens-containment','plague'],['veteran','warrens-veteran','plague'],['champion','warrens-champion','plague']]){
   for(let seed=1;seed<=12;seed++){
-   const d=createDungeon(seed,{region:'plague',tier,difficulty:'patrol',proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
+   const d=createDungeon(seed,{region,tier,difficulty:'patrol',proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
    d.questId=questId;
    let actions=0;
    while(d.phase==='explore'&&actions++<500){
