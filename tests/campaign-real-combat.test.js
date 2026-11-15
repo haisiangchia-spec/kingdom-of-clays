@@ -1,3 +1,4 @@
+import {ENEMY_SKILLS} from '../src/enemy-skills.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,dungeonCorridors,questObjectiveProgress,resolveHunger} from '../src/dungeon.js';
@@ -343,4 +344,19 @@ test('report higher-tier expedition attrition with equipment and verified skill 
    outcomes:results.map((r,i)=>({seed:seeds[i],phase:r.phase,battles:r.battles}))}));
   assert.equal(results.length,seeds.length);
  }
+});
+
+test('audit Champion Skiver multi-target burst without changing combat rules',()=>{
+ const skills=['plague_skiver_roast','plague_skiver_cripple','plague_skiver_flight'];
+ const attacks=skills.map(id=>{
+  const skill=ENEMY_SKILLS[id];
+  assert.ok(skill,'Missing enemy skill '+id);
+  return {id,name:skill.name,min:skill.damageMin,max:skill.damageMax,
+   targetMode:skill.targetMode??'single',status:skill.status?.type??null,
+   debuff:Boolean(skill.debuff),accuracy:skill.acc};
+ });
+ const volley=attacks.find(a=>a.id==='plague_skiver_cripple');
+ assert.equal(volley.targetMode,'all');
+ assert.equal(volley.status,'blight');
+ console.log('Champion Skiver burst audit',JSON.stringify(attacks));
 });
