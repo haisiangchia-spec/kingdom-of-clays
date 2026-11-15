@@ -6,7 +6,7 @@ import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {leaveLoot} from '../src/inventory.js';
 
 import {createCampaignSettlement} from '../src/settlement.js';
-import {prepareRosterParty,upgradeHeroEquipment} from '../src/hero-roster.js';
+import {prepareRosterParty,upgradeHeroEquipment,upgradeHeroSkill} from '../src/hero-roster.js';
 
 const HERO_SKILLS={
  Swordsman:['heavy_slash','countering_advance','battle_shout','guardian_parry','riposte_stance','swordmasters_orders','steadfast_resolve'],
@@ -305,5 +305,42 @@ test('audit tier encounter composition and enemy action economy without modifyin
    assert.equal(encounter.party.length,battle.party.length);
   }
   console.log('Tier enemy composition audit',JSON.stringify({tier,counts,actions,hp}));
+ }
+});
+
+test('report higher-tier expedition attrition with equipment and verified skill upgrades',()=>{
+ const seeds=[11,23,37,41,53,67,71,83,97,109];
+ const skillsByClass={
+  Swordsman:['heavy_slash','countering_advance'],
+  Warrior:['crushing_strike','sweeping_assault'],
+  Hunter:['eagle_eye_shot','hunters_mark'],
+  Priest:['greater_heal','group_healing']
+ };
+ for(const [questId,tier,level] of [['warrens-veteran','veteran',3],['warrens-champion','champion',5]]){
+  const settlement=createCampaignSettlement();
+  settlement.gold=100000;
+  const upgraded=[];
+  for(const hero of settlement.roster){
+   hero.level=level;
+   for(let i=0;i<level;i++){
+    upgradeHeroEquipment(settlement,hero.rosterId,'weapon');
+    upgradeHeroEquipment(settlement,hero.rosterId,'armor');
+   }
+   for(const skillId of skillsByClass[hero.heroClass]??[]){
+    for(let target=2;target<=level;target++){
+     try{upgradeHeroSkill(settlement,hero.rosterId,skillId);upgraded.push(hero.heroClass+':'+skillId+':'+target);}
+     catch(error){
+      if(!/No verified|not verified|Unknown skill|not available/.test(error.message))throw error;
+      break;
+     }
+    }
+   }
+  }
+  const results=seeds.map(seed=>runFullExpedition(seed,questId,tier,'plague',{party:prepareRosterParty(settlement)}));
+  const wins=results.filter(r=>r.phase==='victory').length;
+  console.log('Fully progressed expedition attrition',JSON.stringify({questId,tier,level,n:seeds.length,wins,defeats:seeds.length-wins,upgraded,
+   meanBattles:Number((results.reduce((n,r)=>n+r.battles,0)/results.length).toFixed(2)),
+   outcomes:results.map((r,i)=>({seed:seeds[i],phase:r.phase,battles:r.battles}))}));
+  assert.equal(results.length,seeds.length);
  }
 });
