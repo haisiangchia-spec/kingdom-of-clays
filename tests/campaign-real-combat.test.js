@@ -142,8 +142,8 @@ function shortestRoute(d,goal){
  }
  throw Error('Unreachable quest objective '+goal);
 }
-function runFullExpedition(seed,questId,tier,region){
- const d=createDungeon(seed,{tier,region,difficulty:'scout',proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
+function runFullExpedition(seed,questId,tier,region,{party=null}={}){
+ const d=createDungeon(seed,{tier,region,difficulty:'scout',proceduralBranches:true,variableCorridors:true,interactiveEvents:true,...(party?{party}:{})});
  d.questId=questId;
  let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0;
  while(d.phase==='explore'||d.phase==='combat'){
@@ -260,5 +260,30 @@ test('veteran and champion progression fixtures carry upgraded persistent roster
    assert.equal(dungeon.party[i].dmgMax,baseline.party[i].dmgMax+level*2);
    assert.equal(dungeon.party[i].maxHp,baseline.party[i].maxHp+level*3);
   }
+ }
+});
+
+test('report full expedition attrition with upgraded persistent roster parties',()=>{
+ const seeds=[11,23,37,41,53,67,71,83,97,109];
+ for(const [questId,tier,level] of [['warrens-veteran','veteran',3],['warrens-champion','champion',5]]){
+  const settlement=createCampaignSettlement();
+  settlement.gold=100000;
+  for(const hero of settlement.roster){
+   hero.level=level;
+   for(let i=0;i<level;i++){
+    upgradeHeroEquipment(settlement,hero.rosterId,'weapon');
+    upgradeHeroEquipment(settlement,hero.rosterId,'armor');
+   }
+  }
+  const results=seeds.map(seed=>runFullExpedition(seed,questId,tier,'plague',{party:prepareRosterParty(settlement)}));
+  const victories=results.filter(r=>r.phase==='victory').length;
+  const mean=fn=>Number((results.reduce((sum,r)=>sum+fn(r),0)/results.length).toFixed(2));
+  const report={questId,tier,level,n:results.length,victories,defeats:results.length-victories,
+   meanFallen:mean(r=>r.party.filter(h=>h.dead).length),
+   meanRemainingHp:mean(r=>r.party.reduce((sum,h)=>sum+Math.max(0,h.hp),0)),
+   meanStress:mean(r=>r.party.reduce((sum,h)=>sum+h.stress,0)),
+   outcomes:results.map((r,i)=>({seed:seeds[i],result:r.phase,battles:r.battles}))};
+  assert.equal(report.victories+report.defeats,report.n);
+  console.log('Progressed full expedition attrition',JSON.stringify(report));
  }
 });
