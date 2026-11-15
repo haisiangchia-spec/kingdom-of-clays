@@ -395,12 +395,8 @@ test('audit tier encounter composition and enemy action economy without modifyin
 
 test('report higher-tier expedition attrition with equipment and verified skill upgrades',()=>{
  const seeds=[11,23,37,41,53,67,71,83,97,109];
- const skillsByClass={
-  Swordsman:['heavy_slash','countering_advance'],
-  Warrior:['crushing_strike','sweeping_assault'],
-  Hunter:['eagle_eye_shot','hunters_mark'],
-  Priest:['greater_heal','group_healing']
- };
+ // Upgrade every skill the benchmark bot can actually select, not just two per class.
+ const skillsByClass=HERO_SKILLS;
  for(const [questId,tier,level] of [['warrens-veteran','veteran',3],['warrens-champion','champion',5]]){
   const settlement=createCampaignSettlement();
   settlement.gold=100000;
@@ -421,7 +417,25 @@ test('report higher-tier expedition attrition with equipment and verified skill 
     }
    }
   }
-  const results=seeds.map(seed=>runFullExpedition(seed,questId,tier,'plague',{party:prepareRosterParty(settlement)}));
+  // Each seed is an independent, fully recovered expedition, not a continuation
+  // of the previous seed's injuries, deaths, or stress.
+  for(const hero of settlement.roster){
+   assert.equal(hero.equipment.weapon,level);
+   assert.equal(hero.equipment.armor,level);
+   hero.unit.hp=hero.unit.maxHp;
+   hero.unit.stress=0;
+   hero.unit.dead=false;
+   for(const skillId of skillsByClass[hero.heroClass]??[]){
+    assert.ok((hero.unit.skillLevels?.[skillId]??1)>=1,'missing usable skill '+skillId);
+   }
+  }
+  const freshParty=()=>prepareRosterParty(settlement);
+  for(const hero of freshParty()){
+   assert.equal(hero.hp,hero.maxHp,'benchmark hero is not fully healed');
+   assert.equal(hero.stress,0,'benchmark hero starts with stress');
+   assert.equal(hero.dead,false,'benchmark hero starts dead');
+  }
+  const results=seeds.map(seed=>runFullExpedition(seed,questId,tier,'plague',{party:freshParty()}));
   const wins=results.filter(r=>r.phase==='victory').length;
   console.log('Fully progressed expedition attrition',JSON.stringify({questId,tier,level,n:seeds.length,wins,defeats:seeds.length-wins,upgraded,
    meanBattles:Number((results.reduce((n,r)=>n+r.battles,0)/results.length).toFixed(2)),
