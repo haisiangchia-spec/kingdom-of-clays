@@ -1,5 +1,5 @@
 import {availableQuests,selectQuest} from './quest-board.js';
-import {campaignProgress,recordCampaignVictory,expeditionUnlock} from './campaign-progression.js';
+import {campaignProgress,campaignMilestoneProgress,recordCampaignVictory,expeditionUnlock} from './campaign-progression.js';
 import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,questObjectiveProgress,bonusObjectiveProgress,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
@@ -189,7 +189,7 @@ function render(){
  }
 
  el('h3',campaign.finished?'Campaign Complete — Champion of Clays':'Campaign Objectives',settlementPanel);
- for(const goal of campaign.milestones)el('p',(goal.complete?'✓ ':'○ ')+goal.name+' — '+goal.description,settlementPanel);
+ for(const goal of campaignMilestoneProgress(settlement))el('p',(goal.complete?'✓ ':'○ ')+goal.name+' — '+goal.description+' ('+goal.current+'/'+goal.target+')'+(goal.complete?'':' · Next: '+goal.nextStep),settlementPanel);
  el('p',`Treasury: ${settlement.gold} gold · ${settlement.crests} crests · ${settlement.deeds} deeds · ${settlement.trinkets.length} trinkets · ${settlement.completedExpeditions} completed · ${settlement.busts??0} busts`,settlementPanel);
  for(const [id,facility] of Object.entries(SETTLEMENT_FACILITIES)){
   const level=settlement.facilities[id];
