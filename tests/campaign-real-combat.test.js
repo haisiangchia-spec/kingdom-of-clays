@@ -12,7 +12,7 @@ const HERO_SKILLS={
 };
 function playEncounter(d){
  const battle=dungeonBattle(d),random=rng(d.seed^0x9e3779b9);
- let actions=0;
+ let actions=0,heroSkillsUsed=0,enemySkillsUsed=0;
  while(status(battle)==='ongoing'&&actions++<300){
   if(!currentActor(battle))startRound(battle,random);
   const actor=currentActor(battle);
@@ -20,21 +20,23 @@ function playEncounter(d){
   if(prepareActorTurn(battle,actor.id,random)!=='ready')continue;
   if(actor.side==='enemy'){
    const action=chooseEnemyAction(battle,actor.id,actor.enemySkills??[],random,ABILITIES,availableTargets);
-   if(action)takeTurn(battle,actor.id,action.key,action.targetId,random);
+   if(action){takeTurn(battle,actor.id,action.key,action.targetId,random);enemySkillsUsed++;}
    else passActorTurn(battle,actor.id);
   }else{
    const candidates=(HERO_SKILLS[actor.heroClass??actor.name]??[]).flatMap(key=>
     availableTargets(battle,actor.id,key).map(targetId=>({key,targetId})));
    const offensive=candidates.find(c=>battle.units.find(u=>u.id===c.targetId)?.side==='enemy');
    const chosen=offensive??candidates[0];
-   if(chosen)takeTurn(battle,actor.id,chosen.key,chosen.targetId,random);
+   if(chosen){takeTurn(battle,actor.id,chosen.key,chosen.targetId,random);heroSkillsUsed++;}
    else passActorTurn(battle,actor.id);
   }
  }
  assert.ok(actions<300,'combat exceeded action budget');
+ assert.ok(heroSkillsUsed>0,'hero bot never used a skill');
+ assert.ok(enemySkillsUsed>0,'enemy AI never used a skill');
  assert.notEqual(status(battle),'ongoing');
  resolveDungeonBattle(d);
- return {outcome:status(battle),actions};
+ return {outcome:status(battle),actions,heroSkillsUsed,enemySkillsUsed};
 }
 test('real hero and enemy turns resolve initial dungeon encounters for each tier',()=>{
  const metrics=[];
@@ -46,7 +48,7 @@ test('real hero and enemy turns resolve initial dungeon encounters for each tier
    assert.equal(d.phase,'combat',tier+' '+region+' '+seed);
    const report=playEncounter(d);
    assert.ok(['victory','defeat'].includes(report.outcome));
-   metrics.push({tier,region,seed,outcome:report.outcome,actions:report.actions,fallen:d.party.filter(h=>h.dead).length,remainingHp:d.party.reduce((sum,h)=>sum+Math.max(0,h.hp),0),stress:d.party.reduce((sum,h)=>sum+(h.stress??0),0)});
+   metrics.push({tier,region,seed,outcome:report.outcome,actions:report.actions,heroSkillsUsed:report.heroSkillsUsed,enemySkillsUsed:report.enemySkillsUsed,fallen:d.party.filter(h=>h.dead).length,remainingHp:d.party.reduce((sum,h)=>sum+Math.max(0,h.hp),0),stress:d.party.reduce((sum,h)=>sum+(h.stress??0),0)});
    assert.equal(d.pendingBattle,null);
    assert.ok(['explore','victory','defeat'].includes(d.phase));
   }
@@ -56,6 +58,6 @@ test('real hero and enemy turns resolve initial dungeon encounters for each tier
  for(const [tier,region] of [['apprentice','crypt'],['apprentice','plague'],['veteran','plague'],['champion','plague']]){
   const sample=metrics.filter(m=>m.tier===tier&&m.region===region);
   const mean=key=>Number((sample.reduce((total,m)=>total+m[key],0)/sample.length).toFixed(2));
-  console.log('Encounter baseline',JSON.stringify({tier,region,n:sample.length,wins:sample.filter(m=>m.outcome==='victory').length,meanActions:mean('actions'),meanFallen:mean('fallen'),meanRemainingHp:mean('remainingHp'),meanStress:mean('stress')}));
+  console.log('Encounter baseline',JSON.stringify({tier,region,n:sample.length,wins:sample.filter(m=>m.outcome==='victory').length,meanActions:mean('actions'),meanHeroSkills:mean('heroSkillsUsed'),meanEnemySkills:mean('enemySkillsUsed'),meanFallen:mean('fallen'),meanRemainingHp:mean('remainingHp'),meanStress:mean('stress')}));
  }
 });
