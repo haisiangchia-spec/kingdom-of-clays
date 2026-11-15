@@ -171,6 +171,14 @@ function encounterSeed(seed,key){
 }
 // Seeded optional branch: keeps every room connected and the Sanctum reachable.
 // The reference five-room map remains unchanged when procedural mode is off.
+// Seeded encounter variants for the new side rooms. Deterministic per expedition
+// and room, so reloads cannot reroll the encounter tier.
+export function optionalRoomDifficulty(dungeon,room){
+ if(!['outpost','catacomb'].includes(room))throw Error('Not an optional encounter room');
+ const roll=rng(encounterSeed(dungeon.seed,'room-variant:'+room))();
+ if(room==='outpost')return roll<.25?'gauntlet':'patrol';
+ return roll<.25?'patrol':'gauntlet';
+}
 export function dungeonCorridors(dungeon){
  if(!dungeon.proceduralBranches)return DUNGEON_CORRIDORS;
  // Four connected five-room topologies, selected reproducibly by seed.
@@ -219,13 +227,13 @@ export function beginCorridor(dungeon,to){
 }
 function startBattle(dungeon,source,difficulty){
  const seed=encounterSeed(dungeon.seed,source+'|'+dungeon.battleSerial++);
- const roomDanger=source==='room:catacomb'?'gauntlet':source==='room:outpost'?'patrol':difficulty;
+ const roomDanger=source==='room:catacomb'||source==='room:outpost'?optionalRoomDifficulty(dungeon,source.slice(5)):difficulty;
  const battle=dungeon.region==='plague'?makeGeneratedEncounter(seed,roomDanger,'plague',dungeon.tier??'apprentice'):(source==='room:vault'?makeUndeadEncounter(seed,'blightWretch'):makeGeneratedEncounter(seed,roomDanger));
  battle.expeditionEncounter=true; // guards extra disease rolls outside the combat lab
  const enemyUnits=battle.units.filter(u=>u.side==='enemy');
  battle.units=[...dungeon.party.map(copy),...enemyUnits];
  battle.torch=dungeon.torch;
- battle.log.unshift('Dungeon encounter: '+source);
+ battle.log.unshift('Dungeon encounter: '+source+(source==='room:outpost'||source==='room:catacomb'?' ('+roomDanger+' patrol variant)':''));
  dungeon.pendingBattle={source,battle};
  dungeon.phase='combat';
  dungeon.log.push('An encounter blocks the way: '+source);
