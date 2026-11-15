@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle} from '../src/dungeon.js';
+import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,dungeonCorridors,questObjectiveProgress,resolveHunger} from '../src/dungeon.js';
 import {rng,status,startRound,currentActor,prepareActorTurn,availableTargets,takeTurn,passActorTurn,ABILITIES} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
+import {leaveLoot} from '../src/inventory.js';
 
 const HERO_SKILLS={
  Swordsman:['heavy_slash','countering_advance','battle_shout','guardian_parry','riposte_stance','swordmasters_orders','steadfast_resolve'],
@@ -73,5 +74,60 @@ test('seeded real-turn encounters replay deterministically across tiers',()=>{
    return {report,phase:d.phase,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead})),pendingBattle:d.pendingBattle};
   };
   assert.deepEqual(run(),run(),tier+' '+region+' replay diverged');
+ }
+});
+
+function shortestRoute(d,goal){
+ const queue=[[d.room]],seen=new Set([d.room]);
+ while(queue.length){
+  const path=queue.shift(),at=path.at(-1);
+  if(at===goal)return path.slice(1);
+  for(const edge of dungeonCorridors(d)){
+   const next=edge.from===at?edge.to:edge.to===at?edge.from:null;
+   if(next&&!seen.has(next)){seen.add(next);queue.push([...path,next]);}
+  }
+ }
+ throw Error('Unreachable quest objective '+goal);
+}
+function runFullExpedition(seed,questId,tier,region){
+ const d=createDungeon(seed,{tier,region,difficulty:'scout',proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
+ d.questId=questId;
+ let steps=0,battles=0,skills=0;
+ while(d.phase==='explore'||d.phase==='combat'){
+  assert.ok(++steps<1000,'expedition stalled: '+questId+' '+seed);
+  if(d.phase==='combat'){
+   const report=playEncounter(d);
+   battles++;
+   skills+=report.heroSkillsUsed+report.enemySkillsUsed;
+   continue;
+  }
+  if(d.pendingLoot){leaveLoot(d);continue;}
+  if(d.pendingHunger){resolveHunger(d,(d.supplies.food??0)>=4?'eat':'skip');continue;}
+  if(d.pendingTravel){advanceCorridor(d);continue;}
+  const objective=questObjectiveProgress(d).find(x=>!x.complete);
+  assert.ok(objective,'no incomplete objectives while still exploring');
+  const path=shortestRoute(d,objective.room);
+  assert.ok(path.length,'objective room is current room but not complete');
+  beginCorridor(d,path[0]);
+ }
+ assert.ok(['victory','defeat'].includes(d.phase));
+ assert.ok(battles>0,'expedition skipped combat');
+ assert.ok(skills>0,'expedition did not execute combat skills');
+ assert.equal(d.pendingBattle,null);
+ if(d.phase==='victory')assert.ok(questObjectiveProgress(d).every(x=>x.complete));
+ return {phase:d.phase,battles,skills,steps,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
+}
+test('complete seeded expeditions resolve with actual combat, hunger, loot and navigation',()=>{
+ for(const [questId,tier,region] of [
+  ['crypt-recon','apprentice','crypt'],
+  ['crypt-purge','apprentice','crypt'],
+  ['warrens-recon','apprentice','plague'],
+  ['warrens-containment','apprentice','plague'],
+  ['warrens-veteran','veteran','plague'],
+  ['warrens-champion','champion','plague']
+ ]){
+  const first=runFullExpedition(151,questId,tier,region);
+  assert.deepEqual(runFullExpedition(151,questId,tier,region),first,'full expedition replay diverged: '+questId);
+  console.log('Full expedition baseline',JSON.stringify({questId,...first}));
  }
 });
