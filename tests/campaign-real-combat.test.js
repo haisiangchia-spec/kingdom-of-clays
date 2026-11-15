@@ -38,8 +38,11 @@ function playEncounter(d,{requireBothSides=false}={}){
    // Without this, expedition win rates measure an intentionally non-healing bot.
    const wounded=battle.units.filter(u=>u.side==='hero'&&!u.dead&&u.hp<u.maxHp)
     .sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp));
+   const groupHeal=(actor.heroClass??actor.name)==='Priest'&&
+     wounded.filter(u=>u.hp/u.maxHp<=.70).length>=3
+      ?candidates.find(c=>c.key==='group_healing'):null;
    const heal=(actor.heroClass??actor.name)==='Priest'
-    ?wounded.filter(u=>u.hp/u.maxHp<=.65)
+    ?groupHeal??wounded.filter(u=>u.hp/u.maxHp<=.65)
       .flatMap(u=>candidates.filter(c=>c.key==='greater_heal'&&c.targetId===u.id))[0]
     :null;
    // Focus fire on the most wounded reachable enemy instead of always
@@ -50,7 +53,10 @@ function playEncounter(d,{requireBothSides=false}={}){
    }).sort((a,b)=>{
     const aa=battle.units.find(u=>u.id===a.targetId);
     const bb=battle.units.find(u=>u.id===b.targetId);
-    return aa.hp/aa.maxHp-bb.hp/bb.maxHp;
+    // Prioritize the Champion Skiver's dangerous party-wide blight,
+    // then finish off weakened enemies to reduce incoming actions.
+    const priority=u=>u.enemyProfile==='plagueSkiver'||u.profileId==='plagueSkiver'||u.name==='Blight Javelineer'?1:0;
+    return priority(bb)-priority(aa)||aa.hp/aa.maxHp-bb.hp/bb.maxHp;
    })[0];
    // Avoid wasting turns on non-offensive buffs when no living enemy can
    // be reached: such turns can otherwise mask a formation deadlock.
