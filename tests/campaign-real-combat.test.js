@@ -5,6 +5,9 @@ import {rng,status,startRound,currentActor,prepareActorTurn,availableTargets,tak
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {leaveLoot} from '../src/inventory.js';
 
+import {createCampaignSettlement} from '../src/settlement.js';
+import {prepareRosterParty,upgradeHeroEquipment} from '../src/hero-roster.js';
+
 const HERO_SKILLS={
  Swordsman:['heavy_slash','countering_advance','battle_shout','guardian_parry','riposte_stance','swordmasters_orders','steadfast_resolve'],
  Warrior:['crushing_strike','sweeping_assault','concussive_blow','iron_fortress','warrior_recovery','charging_blade','rallying_roar'],
@@ -234,5 +237,28 @@ test('late-tier balance fixture uses unprogressed baseline heroes',()=>{
    'late-tier fixture unexpectedly changed hero combat readiness');
   assert.ok(dungeon.party.every(h=>h.rosterId===undefined),
    'late-tier fixture unexpectedly uses persistent roster heroes');
+ }
+});
+
+test('veteran and champion progression fixtures carry upgraded persistent roster stats',()=>{
+ for(const [tier,level] of [['veteran',3],['champion',5]]){
+  const settlement=createCampaignSettlement();
+  settlement.gold=100000;
+  for(const hero of settlement.roster){
+   hero.level=level;
+   for(let i=0;i<level;i++){
+    upgradeHeroEquipment(settlement,hero.rosterId,'weapon');
+    upgradeHeroEquipment(settlement,hero.rosterId,'armor');
+   }
+  }
+  const party=prepareRosterParty(settlement);
+  const dungeon=createDungeon(223,{tier,region:'plague',difficulty:'scout',party});
+  const baseline=createDungeon(223,{tier,region:'plague',difficulty:'scout'});
+  for(let i=0;i<4;i++){
+   assert.equal(dungeon.party[i].rosterLevel,level);
+   assert.equal(dungeon.party[i].dmgMin,baseline.party[i].dmgMin+level);
+   assert.equal(dungeon.party[i].dmgMax,baseline.party[i].dmgMax+level*2);
+   assert.equal(dungeon.party[i].maxHp,baseline.party[i].maxHp+level*3);
+  }
  }
 });
