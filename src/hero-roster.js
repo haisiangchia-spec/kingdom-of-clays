@@ -2,7 +2,8 @@
 // Classes, recruitment costs, XP and resurrection are CLAYS prototypes,
 // not validated DD1 roster/economy values. Resurrection is a deliberate
 // user-approved departure from ordinary DD1 permadeath.
-import {makeBattle} from './engine.js';
+import {makeBattle,ABILITIES} from './engine.js';
+import {resolveSkillDefinition} from './skill-progression.js';
 import {ensureTraits,sanitariumUnavailable} from './sanitarium.js';
 import {traitBonus,applyTraitBonus,reverseTraitBonus} from './trait-effects.js';
 
@@ -212,4 +213,29 @@ export function upgradeHeroEquipment(settlement,rosterId,kind){
   hero.unit.hp=Math.min(hero.unit.maxHp,hero.unit.hp+3);
  }
  return {rosterId,kind,level:level+1,cost};
+}
+
+/**
+ * Purchase a verified skill upgrade for a persistent hero.
+ * Resolve limits the maximum rank; purchases are retained in campaign saves.
+ * Gold prices are provisional Clays economy values.
+ */
+export function upgradeHeroSkill(settlement,rosterId,skillId){
+ checkRoster(settlement);
+ const hero=settlement.roster.find(h=>h.rosterId===rosterId);
+ if(!hero||hero.unit.dead)throw Error('Hero is unavailable');
+ if(typeof skillId!=='string'||!Object.hasOwn(ABILITIES,skillId))throw Error('Unknown hero skill');
+ const current=hero.unit.skillLevels?.[skillId]??1;
+ if(!integer(current)||current<1||current>5)throw Error('Invalid skill level');
+ if(current>=5)throw Error('Skill already at maximum level');
+ const next=current+1;
+ if(next>hero.level)throw Error('Resolve level too low for skill upgrade');
+ const definition=resolveSkillDefinition(ABILITIES,skillId,next);
+ if(definition.classId!==hero.unit.classId)throw Error('Skill does not belong to hero class');
+ const cost=75*current;
+ if(!integer(settlement.gold)||settlement.gold<cost)throw Error('Insufficient gold for skill upgrade');
+ settlement.gold-=cost;
+ hero.unit.skillLevels??={};
+ hero.unit.skillLevels[skillId]=next;
+ return {rosterId,skillId,level:next,cost};
 }
