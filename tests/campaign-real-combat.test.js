@@ -102,8 +102,10 @@ test('successive expedition encounters receive distinct reproducible combat seed
   resolveDungeonBattle(d);
   while(d.pendingTravel)advanceCorridor(d);
   beginCorridor(d,'watch');
+  // This corridor may trigger a random encounter before reaching the room.
+  // If it does not, the watch room guarantees the next battle.
   while(d.phase==='explore'&&d.pendingTravel)advanceCorridor(d);
-  assert.equal(d.phase,'combat','expected a second encounter');
+  assert.equal(d.phase,'combat','expected corridor or watch-room encounter');
   const second=dungeonBattle(d).seed;
   assert.notEqual(first,second,'two encounters reused the same combat seed');
   return [first,second];
