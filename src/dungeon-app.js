@@ -5,7 +5,7 @@ import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,avai
 import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
 import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
-import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment} from './hero-roster.js';
+import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,upgradeHeroSkill} from './hero-roster.js';
 import {TREATMENTS,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
 import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits,sanitariumTreatmentCost,sanitariumWardBookings} from './sanitarium.js';
 import {DUNGEON_REGIONS,regionRoomName,regionCurio} from './dungeon-regions.js';
@@ -268,6 +268,18 @@ function render(){
     });
     button.disabled=!townAvailable||townUnavailable(settlement,h.rosterId)||level>=5||level>=h.level||settlement.gold<cost;
     if(level>=5)button.textContent=kind+' MAX (5)';
+   }
+  }
+  if(!u.dead){
+   for(const skillId of HERO_SKILLS[h.heroClass]??[]){
+    const level=u.skillLevels?.[skillId]??1;
+    const cost=75*level;
+    const button=el('button',skillId.replaceAll('_',' ')+' '+level+'/5 → '+(level+1)+' · '+cost+' gold',row,()=>{
+     try{upgradeHeroSkill(settlement,h.rosterId,skillId);}catch(e){expedition.log.push(e.message);}
+     render();
+    });
+    button.disabled=!townAvailable||townUnavailable(settlement,h.rosterId)||level>=5||level+1>h.level||settlement.gold<cost;
+    if(level>=5)button.textContent=skillId.replaceAll('_',' ')+' MAX (5)';
    }
   }
   if(townAvailable&&settlement.town.week>=4&&!u.dead&&!townUnavailable(settlement,h.rosterId)){
