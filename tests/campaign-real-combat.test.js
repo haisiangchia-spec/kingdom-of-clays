@@ -398,7 +398,13 @@ test('report higher-tier expedition attrition with equipment and verified skill 
    meanBattles:Number((results.reduce((n,r)=>n+r.battles,0)/results.length).toFixed(2)),
    meanSkiverEncounters:Number((results.reduce((n,r)=>n+r.skiverEncounters,0)/results.length).toFixed(2)),
    meanFourEnemyEncounters:Number((results.reduce((n,r)=>n+r.fourEnemyEncounters,0)/results.length).toFixed(2)),
-   outcomes:results.map((r,i)=>({seed:seeds[i],phase:r.phase,battles:r.battles}))}));
+   meanTorchesUsed:Number((results.reduce((n,r)=>n+r.torchesUsed,0)/results.length).toFixed(2)),
+   meanFoodHeals:Number((results.reduce((n,r)=>n+r.foodHeals,0)/results.length).toFixed(2)),
+   meanHeroSkills:Number((results.reduce((n,r)=>n+r.heroSkills,0)/results.length).toFixed(2)),
+   meanEnemySkills:Number((results.reduce((n,r)=>n+r.enemySkills,0)/results.length).toFixed(2)),
+   meanRemainingHp:Number((results.reduce((n,r)=>n+r.party.reduce((hp,h)=>hp+Math.max(0,h.hp),0),0)/results.length).toFixed(2)),
+   meanDeaths:Number((results.reduce((n,r)=>n+r.party.filter(h=>h.dead).length,0)/results.length).toFixed(2)),
+   outcomes:results.map((r,i)=>({seed:seeds[i],phase:r.phase,battles:r.battles,skivers:r.skiverEncounters,fourEnemy:r.fourEnemyEncounters,torches:r.torchesUsed,foodHeals:r.foodHeals,deaths:r.party.filter(h=>h.dead).length}))}));
   assert.equal(results.length,seeds.length);
  }
 });
