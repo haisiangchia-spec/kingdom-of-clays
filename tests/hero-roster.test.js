@@ -189,5 +189,6 @@ test('equipment upgrades require Resolve and persist through roster party prepar
  const restored=decodeCampaignSave(encodeCampaignSave(settlement,null)).settlement;
  assert.deepEqual(restored.roster[0].equipment,{weapon:1,armor:1});
  assert.equal(restored.roster[0].unit.dmgMax,original.max+2);
+ hero.level=1;
  assert.throws(()=>upgradeHeroEquipment(settlement,hero.rosterId,'weapon'),/Resolve level too low/);
 });
