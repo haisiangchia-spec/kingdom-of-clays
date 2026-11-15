@@ -171,10 +171,16 @@ function encounterSeed(seed,key){
 // The reference five-room map remains unchanged when procedural mode is off.
 export function dungeonCorridors(dungeon){
  if(!dungeon.proceduralBranches)return DUNGEON_CORRIDORS;
- const branch=dungeon.seed%2===0;
- return Object.freeze(DUNGEON_CORRIDORS.filter(edge=>edge.id!=='vault-sanctum').concat([
-  branch?Object.freeze({id:'entrance-vault',from:'entrance',to:'vault',steps:2}):DUNGEON_CORRIDORS.find(edge=>edge.id==='vault-sanctum')
- ]));
+ // Four connected five-room topologies, selected reproducibly by seed.
+ // The entrance-gallery route always exists; both side rooms and the Sanctum remain reachable.
+ const alternatives=[
+  {id:'entrance-vault',from:'entrance',to:'vault',steps:2},
+  {id:'gallery-sanctum',from:'gallery',to:'sanctum',steps:2},
+  {id:'entrance-watch',from:'entrance',to:'watch',steps:2},
+  DUNGEON_CORRIDORS.find(edge=>edge.id==='vault-sanctum')
+ ];
+ const choice=alternatives[Math.abs(dungeon.seed)%alternatives.length];
+ return Object.freeze(DUNGEON_CORRIDORS.filter(edge=>edge.id!=='vault-sanctum').concat([Object.freeze(choice)]));
 }
 export function createDungeon(seed=1,{difficulty='scout',region='crypt',tier='apprentice',interactiveEvents=false,variableCorridors=false,proceduralBranches=false,bonuses={},party:rosterParty=null}={}){
  if(!['scout','patrol','gauntlet'].includes(difficulty))throw Error('Unknown dungeon difficulty');
