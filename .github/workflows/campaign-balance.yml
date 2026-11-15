@@ -33,6 +33,33 @@ jobs:
           mkdir -p test-results
           set -o pipefail
           node --test tests/campaign-real-combat.test.js 2>&1 | tee test-results/campaign-balance.log
+      - name: Summarize expedition outcomes
+        if: always()
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const file='test-results/campaign-balance.log';
+          const log=fs.existsSync(file)?fs.readFileSync(file,'utf8'):'';
+          const rows=[];
+          for(const line of log.split('\\n')){
+            const match=line.match(/Full expedition attrition\\s+(\\{.*\\})/);
+            if(!match)continue;
+            try{rows.push(JSON.parse(match[1]));}catch{}
+          }
+          let md='## Campaign balance results\\n\\n';
+          if(rows.length===0){
+            md+='No full-expedition attrition summaries were produced. Check the test log for failures.\\n';
+          }else{
+            md+='| Quest | Wins | Defeats | Mean fallen | Mean HP | Mean stress | Food left |\\n';
+            md+='|---|---:|---:|---:|---:|---:|---:|\\n';
+            for(const r of rows){
+              md+=`| ${r.questId} | ${r.victories}/${r.n} | ${r.defeats} | ${r.meanFallen} | ${r.meanRemainingHp} | ${r.meanStress} | ${r.meanFoodRemaining} |\\n`;
+            }
+            if(rows.length!==6)md+=`\\n**Warning:** Expected six quest summaries, found ${rows.length}.\\n`;
+          }
+          fs.writeFileSync('test-results/campaign-summary.md',md);
+          if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,md);
+          NODE
       - name: Run complete regression suite
         if: success()
         run: |
@@ -43,5 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: campaign-balance-results
-          path: test-results/*.log
+          path: |
+            test-results/*.log
+            test-results/campaign-summary.md
           if-no-files-found: warn
