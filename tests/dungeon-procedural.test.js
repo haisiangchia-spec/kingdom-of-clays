@@ -36,3 +36,21 @@ test('seeded branches change room connectivity but preserve reachable objective'
  }
  assert.equal(dungeonCorridors(createDungeon(124)).length,DUNGEON_CORRIDORS.length);
 });
+
+test('all four procedural layouts are distinct, connected and repeatable',()=>{
+ const layouts=[];
+ for(let seed=120;seed<124;seed++){
+  const d=createDungeon(seed,{proceduralBranches:true,variableCorridors:true});
+  const edges=dungeonCorridors(d);
+  assert.equal(edges.length,5);
+  assert.deepEqual(edges,dungeonCorridors(createDungeon(seed,{proceduralBranches:true})));
+  const reached=new Set(['entrance']);
+  for(let pass=0;pass<5;pass++)for(const edge of edges){
+   if(reached.has(edge.from))reached.add(edge.to);
+   if(reached.has(edge.to))reached.add(edge.from);
+  }
+  assert.deepEqual([...reached].sort(),['entrance','gallery','sanctum','vault','watch']);
+  layouts.push(edges.map(e=>e.id).sort().join('|'));
+ }
+ assert.equal(new Set(layouts).size,4);
+});
