@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "commit": "7f96708c9bd4e4152fbc8d6e58452d72311da900",
-  "runId": "43784036004",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43784036004",
+  "commit": "f59305a558aefb1945f2cd55dcf6648ffddb98ec",
+  "runId": "43784551780",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43784551780",
   "baseline": [
     {
       "questId": "crypt-recon",
@@ -349,7 +349,7 @@
         {
           "seed": 11,
           "result": "defeat",
-          "battles": 3,
+          "battles": 4,
           "fallen": 4
         },
         {
@@ -361,7 +361,7 @@
         {
           "seed": 37,
           "result": "defeat",
-          "battles": 2,
+          "battles": 3,
           "fallen": 4
         },
         {
@@ -379,19 +379,19 @@
         {
           "seed": 67,
           "result": "defeat",
-          "battles": 2,
+          "battles": 3,
           "fallen": 4
         },
         {
           "seed": 71,
           "result": "defeat",
-          "battles": 2,
+          "battles": 3,
           "fallen": 4
         },
         {
           "seed": 83,
           "result": "defeat",
-          "battles": 1,
+          "battles": 4,
           "fallen": 4
         },
         {
@@ -403,26 +403,26 @@
         {
           "seed": 109,
           "result": "defeat",
-          "battles": 2,
+          "battles": 3,
           "fallen": 4
         }
       ],
       "victories": 0,
       "defeats": 10,
-      "meanBattles": 2,
-      "meanActions": 75.5,
-      "meanHeals": 7.5,
+      "meanBattles": 2.8,
+      "meanActions": 99.4,
+      "meanHeals": 9.6,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 2.6,
+      "meanFoodHeals": 1.4,
       "meanSkiverEncounters": 0,
-      "meanFourEnemyEncounters": 1,
+      "meanFourEnemyEncounters": 1.3,
       "meanFallen": 4,
       "meanRemainingHp": 0,
-      "meanStress": 236.7,
-      "meanFoodRemaining": 1.8,
-      "meanTorchlight": 65.8,
+      "meanStress": 320.8,
+      "meanFoodRemaining": 1,
+      "meanTorchlight": 61,
       "minRemainingHp": 0,
-      "maxStress": 337
+      "maxStress": 597
     },
     {
       "questId": "warrens-champion",
@@ -433,7 +433,7 @@
         {
           "seed": 11,
           "result": "defeat",
-          "battles": 1,
+          "battles": 2,
           "fallen": 4
         },
         {
@@ -475,7 +475,7 @@
         {
           "seed": 83,
           "result": "defeat",
-          "battles": 1,
+          "battles": 2,
           "fallen": 4
         },
         {
@@ -493,20 +493,20 @@
       ],
       "victories": 0,
       "defeats": 10,
-      "meanBattles": 1.1,
-      "meanActions": 36.7,
-      "meanHeals": 3.3,
+      "meanBattles": 1.3,
+      "meanActions": 53.4,
+      "meanHeals": 5,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 0.4,
-      "meanSkiverEncounters": 0.8,
-      "meanFourEnemyEncounters": 0.1,
+      "meanFoodHeals": 1.2,
+      "meanSkiverEncounters": 0.4,
+      "meanFourEnemyEncounters": 0.7,
       "meanFallen": 4,
       "meanRemainingHp": 0,
-      "meanStress": 106.6,
-      "meanFoodRemaining": 7.2,
-      "meanTorchlight": 73.2,
+      "meanStress": 173.1,
+      "meanFoodRemaining": 5.6,
+      "meanTorchlight": 71.4,
       "minRemainingHp": 0,
-      "maxStress": 277
+      "maxStress": 368
     }
   ],
   "progressedEquipment": [
@@ -515,26 +515,26 @@
       "tier": "veteran",
       "level": 3,
       "n": 10,
-      "victories": 0,
-      "defeats": 10,
-      "meanFallen": 4,
-      "meanRemainingHp": 0.8,
-      "meanStress": 372.6,
+      "victories": 7,
+      "defeats": 3,
+      "meanFallen": 1.7,
+      "meanRemainingHp": 40.7,
+      "meanStress": 371.7,
       "outcomes": [
         {
           "seed": 11,
-          "result": "defeat",
+          "result": "victory",
           "battles": 5
         },
         {
           "seed": 23,
-          "result": "defeat",
-          "battles": 4
+          "result": "victory",
+          "battles": 6
         },
         {
           "seed": 37,
-          "result": "defeat",
-          "battles": 3
+          "result": "victory",
+          "battles": 4
         },
         {
           "seed": 41,
@@ -548,18 +548,18 @@
         },
         {
           "seed": 67,
-          "result": "defeat",
+          "result": "victory",
           "battles": 4
         },
         {
           "seed": 71,
-          "result": "defeat",
+          "result": "victory",
           "battles": 4
         },
         {
           "seed": 83,
-          "result": "defeat",
-          "battles": 3
+          "result": "victory",
+          "battles": 6
         },
         {
           "seed": 97,
@@ -568,7 +568,7 @@
         },
         {
           "seed": 109,
-          "result": "defeat",
+          "result": "victory",
           "battles": 4
         }
       ]
@@ -581,8 +581,8 @@
       "victories": 0,
       "defeats": 10,
       "meanFallen": 4,
-      "meanRemainingHp": 1.2,
-      "meanStress": 250.4,
+      "meanRemainingHp": 0.7,
+      "meanStress": 321.5,
       "outcomes": [
         {
           "seed": 11,
@@ -592,12 +592,12 @@
         {
           "seed": 23,
           "result": "defeat",
-          "battles": 3
+          "battles": 4
         },
         {
           "seed": 37,
           "result": "defeat",
-          "battles": 2
+          "battles": 4
         },
         {
           "seed": 41,
@@ -607,7 +607,7 @@
         {
           "seed": 53,
           "result": "defeat",
-          "battles": 2
+          "battles": 3
         },
         {
           "seed": 67,
@@ -622,7 +622,7 @@
         {
           "seed": 83,
           "result": "defeat",
-          "battles": 3
+          "battles": 4
         },
         {
           "seed": 97,
@@ -643,8 +643,8 @@
       "tier": "veteran",
       "level": 3,
       "n": 10,
-      "wins": 5,
-      "defeats": 5,
+      "wins": 8,
+      "defeats": 2,
       "upgraded": [
         "Swordsman:heavy_slash:2",
         "Swordsman:heavy_slash:3",
@@ -685,26 +685,26 @@
         "Priest:sacred_strike:2",
         "Priest:sacred_strike:3"
       ],
-      "meanBattles": 4.1,
+      "meanBattles": 4.2,
       "meanSkiverEncounters": 0,
-      "meanFourEnemyEncounters": 1.8,
-      "meanTorchesUsed": 0.2,
-      "meanFoodHeals": 1.9,
-      "meanCampsUsed": 0,
-      "meanCurativesUsed": 2,
-      "meanHeroSkills": 63,
-      "meanEnemySkills": 52.1,
-      "meanRemainingHp": 14.8,
-      "meanDeaths": 2.7,
+      "meanFourEnemyEncounters": 2.3,
+      "meanTorchesUsed": 0.1,
+      "meanFoodHeals": 0.8,
+      "meanCampsUsed": 0.8,
+      "meanCurativesUsed": 1.9,
+      "meanHeroSkills": 56.1,
+      "meanEnemySkills": 42.7,
+      "meanRemainingHp": 45,
+      "meanDeaths": 1.5,
       "outcomes": [
         {
           "seed": 11,
-          "phase": "defeat",
+          "phase": "victory",
           "battles": 5,
           "skivers": 0,
           "fourEnemy": 2,
           "torches": 0,
-          "foodHeals": 4,
+          "foodHeals": 0,
           "encounters": [
             {
               "battle": 1,
@@ -715,11 +715,11 @@
                 "plagueDrummer"
               ],
               "hpBefore": 151,
-              "hpAfter": 97,
+              "hpAfter": 134,
               "fallen": 0,
-              "heroActions": 22,
-              "enemyActions": 18,
-              "heals": 5
+              "heroActions": 10,
+              "enemyActions": 9,
+              "heals": 1
             },
             {
               "battle": 2,
@@ -728,12 +728,12 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 105,
-              "hpAfter": 111,
+              "hpBefore": 151,
+              "hpAfter": 125,
               "fallen": 0,
-              "heroActions": 16,
-              "enemyActions": 12,
-              "heals": 4
+              "heroActions": 13,
+              "enemyActions": 8,
+              "heals": 1
             },
             {
               "battle": 3,
@@ -742,12 +742,12 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 75,
-              "hpAfter": 63,
+              "hpBefore": 89,
+              "hpAfter": 85,
               "fallen": 0,
-              "heroActions": 11,
-              "enemyActions": 7,
-              "heals": 1
+              "heroActions": 13,
+              "enemyActions": 6,
+              "heals": 3
             },
             {
               "battle": 4,
@@ -756,53 +756,50 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 63,
-              "hpAfter": 59,
+              "hpBefore": 85,
+              "hpAfter": 74,
               "fallen": 0,
-              "heroActions": 14,
-              "enemyActions": 9,
-              "heals": 4
+              "heroActions": 11,
+              "enemyActions": 7,
+              "heals": 2
             },
             {
               "battle": 5,
               "enemies": [
                 "plagueChopper",
                 "plagueChopper",
-                "plagueWretch",
+                "plagueDrummer",
                 "plagueDrummer"
               ],
-              "hpBefore": 49,
-              "hpAfter": 0,
-              "fallen": 4,
-              "heroActions": 5,
-              "enemyActions": 15,
-              "heals": 0
+              "hpBefore": 62,
+              "hpAfter": 59,
+              "fallen": 0,
+              "heroActions": 16,
+              "enemyActions": 13,
+              "heals": 4
             }
           ],
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 42,
-            "heroSkills": 22,
-            "enemySkills": 18,
-            "heals": 5,
+            "actions": 20,
+            "heroSkills": 10,
+            "enemySkills": 9,
+            "heals": 1,
             "hpBefore": 151,
-            "hpAfter": 97,
+            "hpAfter": 134,
             "fallen": 0,
             "heroSkillsUsed": {
-              "heavy_slash": 6,
-              "greater_heal": 3,
-              "crushing_strike": 6,
-              "hunters_mark": 2,
-              "group_healing": 2,
-              "eagle_eye_shot": 3
+              "heavy_slash": 3,
+              "hunters_mark": 1,
+              "greater_heal": 2,
+              "crushing_strike": 3,
+              "eagle_eye_shot": 1
             },
             "enemySkillsUsed": {
-              "plague_veteran_drum_debilitation": 2,
-              "plague_veteran_hook_slash": 6,
-              "plague_veteran_vomit": 4,
-              "plague_veteran_ball_chain": 2,
-              "plague_veteran_drum_doom": 3,
-              "plague_veteran_butcher_cut": 1
+              "plague_drum_debilitation": 3,
+              "plague_hook_slash": 3,
+              "plague_vomit": 2,
+              "plague_ball_chain": 1
             }
           },
           "firstEnemyComposition": [
@@ -814,17 +811,17 @@
           "finalEnemyComposition": [
             "plagueChopper",
             "plagueChopper",
-            "plagueWretch",
+            "plagueDrummer",
             "plagueDrummer"
           ],
-          "deaths": 4
+          "deaths": 0
         },
         {
           "seed": 23,
-          "phase": "defeat",
-          "battles": 4,
+          "phase": "victory",
+          "battles": 5,
           "skivers": 0,
-          "fourEnemy": 1,
+          "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 4,
           "encounters": [
@@ -847,15 +844,15 @@
               "enemies": [
                 "plagueChopper",
                 "plagueChopper",
-                "plagueWretch",
+                "plagueDrummer",
                 "plagueDrummer"
               ],
-              "hpBefore": 117,
-              "hpAfter": 71,
+              "hpBefore": 139,
+              "hpAfter": 129,
               "fallen": 0,
-              "heroActions": 23,
-              "enemyActions": 19,
-              "heals": 6
+              "heroActions": 17,
+              "enemyActions": 9,
+              "heals": 1
             },
             {
               "battle": 3,
@@ -864,25 +861,40 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 59,
-              "hpAfter": 49,
-              "fallen": 1,
-              "heroActions": 13,
-              "enemyActions": 9,
+              "hpBefore": 105,
+              "hpAfter": 117,
+              "fallen": 0,
+              "heroActions": 9,
+              "enemyActions": 5,
               "heals": 2
             },
             {
               "battle": 4,
               "enemies": [
                 "plagueChopper",
+                "plagueChopper",
+                "plagueDrummer",
+                "plagueDrummer"
+              ],
+              "hpBefore": 105,
+              "hpAfter": 24,
+              "fallen": 2,
+              "heroActions": 20,
+              "enemyActions": 21,
+              "heals": 4
+            },
+            {
+              "battle": 5,
+              "enemies": [
+                "plagueChopper",
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 43,
+              "hpBefore": 24,
               "hpAfter": 0,
-              "fallen": 4,
-              "heroActions": 6,
-              "enemyActions": 12,
+              "fallen": 3,
+              "heroActions": 9,
+              "enemyActions": 11,
               "heals": 0
             }
           ],
@@ -920,30 +932,31 @@
             "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 4
+          "deaths": 3
         },
         {
           "seed": 37,
           "phase": "victory",
           "battles": 4,
           "skivers": 0,
-          "fourEnemy": 1,
+          "fourEnemy": 3,
           "torches": 0,
-          "foodHeals": 4,
+          "foodHeals": 0,
           "encounters": [
             {
               "battle": 1,
               "enemies": [
                 "plagueChopper",
+                "plagueChopper",
                 "plagueWretch",
                 "plagueDrummer"
               ],
               "hpBefore": 151,
-              "hpAfter": 105,
+              "hpAfter": 143,
               "fallen": 0,
-              "heroActions": 18,
-              "enemyActions": 9,
-              "heals": 2
+              "heroActions": 14,
+              "enemyActions": 10,
+              "heals": 1
             },
             {
               "battle": 2,
@@ -953,12 +966,12 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 101,
-              "hpAfter": 76,
+              "hpBefore": 143,
+              "hpAfter": 124,
               "fallen": 0,
-              "heroActions": 21,
-              "enemyActions": 17,
-              "heals": 4
+              "heroActions": 12,
+              "enemyActions": 8,
+              "heals": 1
             },
             {
               "battle": 3,
@@ -967,70 +980,72 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 52,
-              "hpAfter": 43,
+              "hpBefore": 100,
+              "hpAfter": 77,
               "fallen": 0,
-              "heroActions": 14,
-              "enemyActions": 8,
+              "heroActions": 13,
+              "enemyActions": 6,
               "heals": 3
             },
             {
               "battle": 4,
               "enemies": [
                 "plagueChopper",
+                "plagueChopper",
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 19,
-              "hpAfter": 30,
-              "fallen": 0,
-              "heroActions": 15,
-              "enemyActions": 8,
-              "heals": 4
+              "hpBefore": 56,
+              "hpAfter": 49,
+              "fallen": 1,
+              "heroActions": 13,
+              "enemyActions": 13,
+              "heals": 2
             }
           ],
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 28,
-            "heroSkills": 18,
-            "enemySkills": 9,
-            "heals": 2,
+            "actions": 24,
+            "heroSkills": 14,
+            "enemySkills": 10,
+            "heals": 1,
             "hpBefore": 151,
-            "hpAfter": 105,
+            "hpAfter": 143,
             "fallen": 0,
             "heroSkillsUsed": {
               "greater_heal": 4,
-              "eagle_eye_shot": 2,
-              "heavy_slash": 5,
-              "crushing_strike": 4,
-              "hunters_mark": 3
+              "eagle_eye_shot": 4,
+              "heavy_slash": 3,
+              "crushing_strike": 3
             },
             "enemySkillsUsed": {
-              "plague_veteran_drum_debilitation": 3,
-              "plague_veteran_butcher_cut": 2,
-              "plague_veteran_vomit": 1,
-              "plague_veteran_ball_chain": 1,
-              "plague_veteran_drum_doom": 2
+              "plague_vomit": 2,
+              "plague_drum_debilitation": 3,
+              "plague_butcher_cut": 2,
+              "plague_ball_chain": 2,
+              "plague_drum_doom": 1
             }
           },
           "firstEnemyComposition": [
+            "plagueChopper",
             "plagueChopper",
             "plagueWretch",
             "plagueDrummer"
           ],
           "finalEnemyComposition": [
             "plagueChopper",
+            "plagueChopper",
             "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 0
+          "deaths": 1
         },
         {
           "seed": 41,
           "phase": "defeat",
-          "battles": 4,
+          "battles": 3,
           "skivers": 0,
-          "fourEnemy": 3,
+          "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
           "encounters": [
@@ -1056,12 +1071,12 @@
                 "plagueDrummer",
                 "plagueDrummer"
               ],
-              "hpBefore": 125,
-              "hpAfter": 77,
-              "fallen": 0,
-              "heroActions": 25,
+              "hpBefore": 139,
+              "hpAfter": 60,
+              "fallen": 1,
+              "heroActions": 21,
               "enemyActions": 19,
-              "heals": 6
+              "heals": 3
             },
             {
               "battle": 3,
@@ -1071,26 +1086,11 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 77,
-              "hpAfter": 39,
-              "fallen": 1,
-              "heroActions": 26,
-              "enemyActions": 25,
-              "heals": 6
-            },
-            {
-              "battle": 4,
-              "enemies": [
-                "plagueChopper",
-                "plagueSlasher",
-                "plagueWretch",
-                "plagueDrummer"
-              ],
-              "hpBefore": 33,
-              "hpAfter": 0,
-              "fallen": 4,
-              "heroActions": 9,
-              "enemyActions": 21,
+              "hpBefore": 48,
+              "hpAfter": 2,
+              "fallen": 3,
+              "heroActions": 10,
+              "enemyActions": 18,
               "heals": 0
             }
           ],
@@ -1125,7 +1125,7 @@
           ],
           "finalEnemyComposition": [
             "plagueChopper",
-            "plagueSlasher",
+            "plagueChopper",
             "plagueWretch",
             "plagueDrummer"
           ],
@@ -1137,7 +1137,7 @@
           "battles": 4,
           "skivers": 0,
           "fourEnemy": 2,
-          "torches": 1,
+          "torches": 0,
           "foodHeals": 0,
           "encounters": [
             {
@@ -1162,12 +1162,12 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 120,
-              "hpAfter": 105,
+              "hpBefore": 139,
+              "hpAfter": 132,
               "fallen": 0,
-              "heroActions": 15,
-              "enemyActions": 10,
-              "heals": 4
+              "heroActions": 10,
+              "enemyActions": 5,
+              "heals": 0
             },
             {
               "battle": 3,
@@ -1176,27 +1176,27 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 81,
-              "hpAfter": 72,
+              "hpBefore": 108,
+              "hpAfter": 82,
               "fallen": 0,
               "heroActions": 15,
-              "enemyActions": 7,
-              "heals": 3
+              "enemyActions": 8,
+              "heals": 4
             },
             {
               "battle": 4,
               "enemies": [
                 "plagueChopper",
                 "plagueChopper",
-                "plagueWretch",
+                "plagueDrummer",
                 "plagueDrummer"
               ],
-              "hpBefore": 48,
-              "hpAfter": 31,
+              "hpBefore": 60,
+              "hpAfter": 51,
               "fallen": 1,
-              "heroActions": 24,
-              "enemyActions": 23,
-              "heals": 8
+              "heroActions": 17,
+              "enemyActions": 18,
+              "heals": 6
             }
           ],
           "firstEncounter": {
@@ -1229,7 +1229,7 @@
           "finalEnemyComposition": [
             "plagueChopper",
             "plagueChopper",
-            "plagueWretch",
+            "plagueDrummer",
             "plagueDrummer"
           ],
           "deaths": 1
@@ -1261,16 +1261,16 @@
               "battle": 2,
               "enemies": [
                 "plagueChopper",
-                "plagueChopper",
-                "plagueDrummer",
+                "plagueSlasher",
+                "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 108,
-              "hpAfter": 78,
-              "fallen": 1,
-              "heroActions": 20,
-              "enemyActions": 19,
-              "heals": 5
+              "hpBefore": 127,
+              "hpAfter": 118,
+              "fallen": 0,
+              "heroActions": 12,
+              "enemyActions": 7,
+              "heals": 1
             },
             {
               "battle": 3,
@@ -1279,26 +1279,26 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 60,
-              "hpAfter": 59,
-              "fallen": 1,
-              "heroActions": 17,
-              "enemyActions": 10,
-              "heals": 6
+              "hpBefore": 94,
+              "hpAfter": 119,
+              "fallen": 0,
+              "heroActions": 7,
+              "enemyActions": 3,
+              "heals": 2
             },
             {
               "battle": 4,
               "enemies": [
                 "plagueChopper",
                 "plagueChopper",
-                "plagueWretch",
+                "plagueDrummer",
                 "plagueDrummer"
               ],
-              "hpBefore": 57,
-              "hpAfter": 0,
-              "fallen": 3,
-              "heroActions": 19,
-              "enemyActions": 24,
+              "hpBefore": 117,
+              "hpAfter": 111,
+              "fallen": 0,
+              "heroActions": 14,
+              "enemyActions": 10,
               "heals": 2
             }
           ],
@@ -1334,10 +1334,10 @@
           "finalEnemyComposition": [
             "plagueChopper",
             "plagueChopper",
-            "plagueWretch",
+            "plagueDrummer",
             "plagueDrummer"
           ],
-          "deaths": 3
+          "deaths": 0
         },
         {
           "seed": 71,
@@ -1367,16 +1367,16 @@
               "battle": 2,
               "enemies": [
                 "plagueChopper",
-                "plagueChopper",
-                "plagueDrummer",
+                "plagueSlasher",
+                "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 137,
-              "hpAfter": 86,
+              "hpBefore": 139,
+              "hpAfter": 121,
               "fallen": 0,
-              "heroActions": 17,
-              "enemyActions": 14,
-              "heals": 3
+              "heroActions": 16,
+              "enemyActions": 11,
+              "heals": 1
             },
             {
               "battle": 3,
@@ -1385,12 +1385,12 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 62,
-              "hpAfter": 64,
+              "hpBefore": 97,
+              "hpAfter": 83,
               "fallen": 0,
-              "heroActions": 15,
-              "enemyActions": 9,
-              "heals": 4
+              "heroActions": 18,
+              "enemyActions": 12,
+              "heals": 5
             },
             {
               "battle": 4,
@@ -1399,12 +1399,12 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 64,
-              "hpAfter": 63,
+              "hpBefore": 83,
+              "hpAfter": 58,
               "fallen": 0,
-              "heroActions": 14,
-              "enemyActions": 8,
-              "heals": 3
+              "heroActions": 9,
+              "enemyActions": 7,
+              "heals": 2
             }
           ],
           "firstEncounter": {
@@ -1444,15 +1444,30 @@
         },
         {
           "seed": 83,
-          "phase": "defeat",
+          "phase": "victory",
           "battles": 4,
           "skivers": 0,
-          "fourEnemy": 2,
+          "fourEnemy": 3,
           "torches": 0,
-          "foodHeals": 3,
+          "foodHeals": 0,
           "encounters": [
             {
               "battle": 1,
+              "enemies": [
+                "plagueChopper",
+                "plagueSlasher",
+                "plagueWretch",
+                "plagueDrummer"
+              ],
+              "hpBefore": 151,
+              "hpAfter": 135,
+              "fallen": 0,
+              "heroActions": 12,
+              "enemyActions": 6,
+              "heals": 0
+            },
+            {
+              "battle": 2,
               "enemies": [
                 "plagueChopper",
                 "plagueChopper",
@@ -1460,26 +1475,11 @@
                 "plagueDrummer"
               ],
               "hpBefore": 151,
-              "hpAfter": 93,
+              "hpAfter": 131,
               "fallen": 0,
-              "heroActions": 18,
-              "enemyActions": 12,
-              "heals": 2
-            },
-            {
-              "battle": 2,
-              "enemies": [
-                "plagueChopper",
-                "plagueChopper",
-                "plagueWretch",
-                "plagueDrummer"
-              ],
-              "hpBefore": 99,
-              "hpAfter": 81,
-              "fallen": 0,
-              "heroActions": 23,
-              "enemyActions": 18,
-              "heals": 6
+              "heroActions": 14,
+              "enemyActions": 9,
+              "heals": 1
             },
             {
               "battle": 3,
@@ -1488,71 +1488,72 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 57,
-              "hpAfter": 41,
-              "fallen": 1,
+              "hpBefore": 95,
+              "hpAfter": 82,
+              "fallen": 0,
               "heroActions": 15,
-              "enemyActions": 9,
-              "heals": 2
+              "enemyActions": 8,
+              "heals": 4
             },
             {
               "battle": 4,
               "enemies": [
-                "plagueChopper",
+                "plagueSlasher",
+                "plagueSlasher",
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 35,
-              "hpAfter": 0,
-              "fallen": 4,
-              "heroActions": 4,
-              "enemyActions": 12,
+              "hpBefore": 80,
+              "hpAfter": 67,
+              "fallen": 1,
+              "heroActions": 9,
+              "enemyActions": 7,
               "heals": 0
             }
           ],
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 31,
-            "heroSkills": 18,
-            "enemySkills": 12,
-            "heals": 2,
+            "actions": 18,
+            "heroSkills": 12,
+            "enemySkills": 6,
+            "heals": 0,
             "hpBefore": 151,
-            "hpAfter": 93,
+            "hpAfter": 135,
             "fallen": 0,
             "heroSkillsUsed": {
-              "heavy_slash": 5,
-              "greater_heal": 2,
-              "hunters_mark": 3,
-              "crushing_strike": 4,
-              "eagle_eye_shot": 2,
-              "group_healing": 2
+              "heavy_slash": 3,
+              "greater_heal": 3,
+              "hunters_mark": 1,
+              "crushing_strike": 3,
+              "eagle_eye_shot": 2
             },
             "enemySkillsUsed": {
-              "plague_veteran_drum_debilitation": 6,
-              "plague_veteran_butcher_cut": 3,
-              "plague_veteran_ball_chain": 2,
-              "plague_veteran_drum_doom": 1
+              "plague_vomit": 1,
+              "plague_drum_debilitation": 1,
+              "plague_hook_slash": 3,
+              "plague_drum_doom": 1
             }
           },
           "firstEnemyComposition": [
             "plagueChopper",
-            "plagueChopper",
-            "plagueDrummer",
-            "plagueDrummer"
-          ],
-          "finalEnemyComposition": [
-            "plagueChopper",
+            "plagueSlasher",
             "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 4
+          "finalEnemyComposition": [
+            "plagueSlasher",
+            "plagueSlasher",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "deaths": 1
         },
         {
           "seed": 97,
           "phase": "defeat",
-          "battles": 4,
+          "battles": 5,
           "skivers": 0,
-          "fourEnemy": 2,
+          "fourEnemy": 3,
           "torches": 0,
           "foodHeals": 4,
           "encounters": [
@@ -1578,12 +1579,12 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 88,
-              "hpAfter": 102,
+              "hpBefore": 108,
+              "hpAfter": 94,
               "fallen": 1,
               "heroActions": 16,
               "enemyActions": 10,
-              "heals": 3
+              "heals": 0
             },
             {
               "battle": 3,
@@ -1592,12 +1593,12 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 84,
-              "hpAfter": 47,
+              "hpBefore": 76,
+              "hpAfter": 90,
               "fallen": 1,
-              "heroActions": 12,
-              "enemyActions": 9,
-              "heals": 4
+              "heroActions": 8,
+              "enemyActions": 6,
+              "heals": 3
             },
             {
               "battle": 4,
@@ -1607,11 +1608,26 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 41,
+              "hpBefore": 81,
+              "hpAfter": 16,
+              "fallen": 2,
+              "heroActions": 18,
+              "enemyActions": 21,
+              "heals": 3
+            },
+            {
+              "battle": 5,
+              "enemies": [
+                "plagueChopper",
+                "plagueChopper",
+                "plagueWretch",
+                "plagueDrummer"
+              ],
+              "hpBefore": 13,
               "hpAfter": 0,
               "fallen": 4,
-              "heroActions": 3,
-              "enemyActions": 13,
+              "heroActions": 1,
+              "enemyActions": 7,
               "heals": 0
             }
           ],
@@ -1647,7 +1663,7 @@
           ],
           "finalEnemyComposition": [
             "plagueChopper",
-            "plagueSlasher",
+            "plagueChopper",
             "plagueWretch",
             "plagueDrummer"
           ],
@@ -1658,7 +1674,7 @@
           "phase": "victory",
           "battles": 4,
           "skivers": 0,
-          "fourEnemy": 1,
+          "fourEnemy": 2,
           "torches": 1,
           "foodHeals": 0,
           "encounters": [
@@ -1670,9 +1686,9 @@
                 "plagueDrummer"
               ],
               "hpBefore": 151,
-              "hpAfter": 121,
+              "hpAfter": 140,
               "fallen": 0,
-              "heroActions": 12,
+              "heroActions": 10,
               "enemyActions": 6,
               "heals": 0
             },
@@ -1683,64 +1699,65 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 121,
-              "hpAfter": 114,
+              "hpBefore": 140,
+              "hpAfter": 94,
               "fallen": 0,
-              "heroActions": 11,
-              "enemyActions": 6,
+              "heroActions": 14,
+              "enemyActions": 8,
               "heals": 2
             },
             {
               "battle": 3,
               "enemies": [
                 "plagueChopper",
+                "plagueChopper",
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 90,
-              "hpAfter": 71,
-              "fallen": 0,
-              "heroActions": 15,
-              "enemyActions": 12,
-              "heals": 3
+              "hpBefore": 72,
+              "hpAfter": 80,
+              "fallen": 1,
+              "heroActions": 16,
+              "enemyActions": 16,
+              "heals": 5
             },
             {
               "battle": 4,
               "enemies": [
                 "plagueChopper",
                 "plagueChopper",
-                "plagueWretch",
+                "plagueDrummer",
                 "plagueDrummer"
               ],
-              "hpBefore": 47,
-              "hpAfter": 24,
-              "fallen": 3,
-              "heroActions": 16,
-              "enemyActions": 22,
-              "heals": 2
+              "hpBefore": 62,
+              "hpAfter": 55,
+              "fallen": 1,
+              "heroActions": 18,
+              "enemyActions": 19,
+              "heals": 5
             }
           ],
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 18,
-            "heroSkills": 12,
+            "actions": 17,
+            "heroSkills": 10,
             "enemySkills": 6,
             "heals": 0,
             "hpBefore": 151,
-            "hpAfter": 121,
+            "hpAfter": 140,
             "fallen": 0,
             "heroSkillsUsed": {
-              "eagle_eye_shot": 2,
-              "crushing_strike": 3,
+              "eagle_eye_shot": 1,
+              "crushing_strike": 2,
               "greater_heal": 3,
               "heavy_slash": 3,
               "hunters_mark": 1
             },
             "enemySkillsUsed": {
-              "plague_veteran_vomit": 1,
-              "plague_veteran_drum_debilitation": 2,
-              "plague_veteran_butcher_cut": 2,
-              "plague_veteran_drum_doom": 1
+              "plague_vomit": 1,
+              "plague_drum_debilitation": 1,
+              "plague_ball_chain": 2,
+              "plague_drum_doom": 2
             }
           },
           "firstEnemyComposition": [
@@ -1751,10 +1768,10 @@
           "finalEnemyComposition": [
             "plagueChopper",
             "plagueChopper",
-            "plagueWretch",
+            "plagueDrummer",
             "plagueDrummer"
           ],
-          "deaths": 3
+          "deaths": 1
         }
       ]
     },
@@ -1763,8 +1780,8 @@
       "tier": "champion",
       "level": 5,
       "n": 10,
-      "wins": 0,
-      "defeats": 10,
+      "wins": 4,
+      "defeats": 6,
       "upgraded": [
         "Swordsman:heavy_slash:2",
         "Swordsman:heavy_slash:3",
@@ -1843,40 +1860,41 @@
         "Priest:sacred_strike:4",
         "Priest:sacred_strike:5"
       ],
-      "meanBattles": 2.8,
-      "meanSkiverEncounters": 1.6,
-      "meanFourEnemyEncounters": 0.2,
-      "meanTorchesUsed": 0,
-      "meanFoodHeals": 3.6,
-      "meanCampsUsed": 0,
+      "meanBattles": 3.7,
+      "meanSkiverEncounters": 0.8,
+      "meanFourEnemyEncounters": 2.1,
+      "meanTorchesUsed": 0.2,
+      "meanFoodHeals": 2.6,
+      "meanCampsUsed": 0.6,
       "meanCurativesUsed": 1.6,
-      "meanHeroSkills": 32.9,
-      "meanEnemySkills": 29.8,
-      "meanRemainingHp": 0.2,
-      "meanDeaths": 4,
+      "meanHeroSkills": 48.1,
+      "meanEnemySkills": 39.9,
+      "meanRemainingHp": 20.1,
+      "meanDeaths": 2.9,
       "outcomes": [
         {
           "seed": 11,
           "phase": "defeat",
-          "battles": 3,
-          "skivers": 2,
-          "fourEnemy": 0,
+          "battles": 5,
+          "skivers": 1,
+          "fourEnemy": 2,
           "torches": 0,
-          "foodHeals": 4,
+          "foodHeals": 0,
           "encounters": [
             {
               "battle": 1,
               "enemies": [
-                "plagueDrummer",
-                "plagueChopper",
-                "plagueSkiver"
+                "plagueSlasher",
+                "plagueSlasher",
+                "plagueWretch",
+                "plagueDrummer"
               ],
               "hpBefore": 175,
-              "hpAfter": 81,
+              "hpAfter": 151,
               "fallen": 0,
-              "heroActions": 15,
-              "enemyActions": 10,
-              "heals": 1
+              "heroActions": 12,
+              "enemyActions": 8,
+              "heals": 0
             },
             {
               "battle": 2,
@@ -1885,12 +1903,12 @@
                 "plagueSlasher",
                 "plagueDrummer"
               ],
-              "hpBefore": 77,
-              "hpAfter": 78,
+              "hpBefore": 163,
+              "hpAfter": 150,
               "fallen": 0,
               "heroActions": 13,
-              "enemyActions": 8,
-              "heals": 3
+              "enemyActions": 6,
+              "heals": 1
             },
             {
               "battle": 3,
@@ -1899,58 +1917,85 @@
                 "plagueWretch",
                 "plagueSkiver"
               ],
-              "hpBefore": 43,
+              "hpBefore": 114,
+              "hpAfter": 78,
+              "fallen": 0,
+              "heroActions": 16,
+              "enemyActions": 12,
+              "heals": 4
+            },
+            {
+              "battle": 4,
+              "enemies": [
+                "plagueChopper",
+                "plagueSlasher",
+                "plagueDrummer"
+              ],
+              "hpBefore": 78,
+              "hpAfter": 27,
+              "fallen": 0,
+              "heroActions": 13,
+              "enemyActions": 9,
+              "heals": 2
+            },
+            {
+              "battle": 5,
+              "enemies": [
+                "plagueChopper",
+                "plagueWretch",
+                "plagueWretch",
+                "plagueDrummer"
+              ],
+              "hpBefore": 15,
               "hpAfter": 0,
               "fallen": 4,
-              "heroActions": 6,
+              "heroActions": 4,
               "enemyActions": 13,
-              "heals": 0
+              "heals": 1
             }
           ],
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 27,
-            "heroSkills": 15,
-            "enemySkills": 10,
-            "heals": 1,
+            "actions": 20,
+            "heroSkills": 12,
+            "enemySkills": 8,
+            "heals": 0,
             "hpBefore": 175,
-            "hpAfter": 81,
+            "hpAfter": 151,
             "fallen": 0,
             "heroSkillsUsed": {
-              "heavy_slash": 5,
-              "eagle_eye_shot": 3,
-              "greater_heal": 1,
-              "crushing_strike": 4,
+              "heavy_slash": 3,
               "hunters_mark": 1,
-              "group_healing": 1
+              "greater_heal": 3,
+              "crushing_strike": 3,
+              "eagle_eye_shot": 2
             },
             "enemySkillsUsed": {
-              "plague_champion_drum_debilitation": 2,
-              "plague_champion_butcher_cut": 1,
-              "plague_skiver_roast": 1,
-              "plague_skiver_cripple": 1,
-              "plague_champion_ball_chain": 2,
-              "plague_champion_drum_doom": 3
+              "plague_veteran_drum_debilitation": 2,
+              "plague_veteran_hook_slash": 5,
+              "plague_veteran_vomit": 1
             }
           },
           "firstEnemyComposition": [
-            "plagueDrummer",
-            "plagueChopper",
-            "plagueSkiver"
+            "plagueSlasher",
+            "plagueSlasher",
+            "plagueWretch",
+            "plagueDrummer"
           ],
           "finalEnemyComposition": [
             "plagueChopper",
             "plagueWretch",
-            "plagueSkiver"
+            "plagueWretch",
+            "plagueDrummer"
           ],
           "deaths": 4
         },
         {
           "seed": 23,
-          "phase": "defeat",
-          "battles": 4,
+          "phase": "victory",
+          "battles": 5,
           "skivers": 1,
-          "fourEnemy": 0,
+          "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 1,
           "encounters": [
@@ -1971,43 +2016,59 @@
             {
               "battle": 2,
               "enemies": [
-                "plagueWretch",
+                "plagueChopper",
                 "plagueSlasher",
-                "plagueSkiver"
+                "plagueWretch",
+                "plagueDrummer"
               ],
-              "hpBefore": 105,
-              "hpAfter": 77,
+              "hpBefore": 139,
+              "hpAfter": 111,
               "fallen": 0,
               "heroActions": 12,
               "enemyActions": 11,
-              "heals": 3
+              "heals": 2
             },
             {
               "battle": 3,
               "enemies": [
                 "plagueChopper",
-                "plagueSlasher",
+                "plagueChopper",
+                "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 65,
-              "hpAfter": 23,
-              "fallen": 1,
-              "heroActions": 10,
-              "enemyActions": 7,
-              "heals": 0
+              "hpBefore": 115,
+              "hpAfter": 113,
+              "fallen": 0,
+              "heroActions": 14,
+              "enemyActions": 10,
+              "heals": 2
             },
             {
               "battle": 4,
+              "enemies": [
+                "plagueWretch",
+                "plagueSlasher",
+                "plagueSkiver"
+              ],
+              "hpBefore": 101,
+              "hpAfter": 93,
+              "fallen": 0,
+              "heroActions": 17,
+              "enemyActions": 12,
+              "heals": 5
+            },
+            {
+              "battle": 5,
               "enemies": [
                 "plagueChopper",
                 "plagueSlasher",
                 "plagueDrummer"
               ],
-              "hpBefore": 17,
-              "hpAfter": 0,
-              "fallen": 4,
-              "heroActions": 2,
-              "enemyActions": 5,
+              "hpBefore": 81,
+              "hpAfter": 7,
+              "fallen": 2,
+              "heroActions": 9,
+              "enemyActions": 11,
               "heals": 0
             }
           ],
@@ -2044,82 +2105,113 @@
             "plagueSlasher",
             "plagueDrummer"
           ],
-          "deaths": 4
+          "deaths": 2
         },
         {
           "seed": 37,
-          "phase": "defeat",
-          "battles": 2,
-          "skivers": 2,
-          "fourEnemy": 0,
-          "torches": 0,
+          "phase": "victory",
+          "battles": 4,
+          "skivers": 0,
+          "fourEnemy": 3,
+          "torches": 1,
           "foodHeals": 4,
           "encounters": [
             {
               "battle": 1,
               "enemies": [
                 "plagueChopper",
-                "plagueWretch",
-                "plagueSkiver"
+                "plagueChopper",
+                "plagueDrummer",
+                "plagueDrummer"
               ],
               "hpBefore": 175,
-              "hpAfter": 86,
+              "hpAfter": 114,
               "fallen": 0,
-              "heroActions": 17,
-              "enemyActions": 11,
-              "heals": 4
+              "heroActions": 19,
+              "enemyActions": 14,
+              "heals": 3
             },
             {
               "battle": 2,
               "enemies": [
-                "plagueDrummer",
-                "plagueChopper",
-                "plagueSkiver"
+                "plagueSlasher",
+                "plagueSlasher",
+                "plagueWretch",
+                "plagueDrummer"
               ],
-              "hpBefore": 82,
-              "hpAfter": 0,
-              "fallen": 4,
-              "heroActions": 12,
-              "enemyActions": 14,
-              "heals": 1
+              "hpBefore": 110,
+              "hpAfter": 131,
+              "fallen": 0,
+              "heroActions": 15,
+              "enemyActions": 9,
+              "heals": 4
+            },
+            {
+              "battle": 3,
+              "enemies": [
+                "plagueChopper",
+                "plagueSlasher",
+                "plagueDrummer"
+              ],
+              "hpBefore": 95,
+              "hpAfter": 66,
+              "fallen": 0,
+              "heroActions": 14,
+              "enemyActions": 9,
+              "heals": 3
+            },
+            {
+              "battle": 4,
+              "enemies": [
+                "plagueChopper",
+                "plagueChopper",
+                "plagueDrummer",
+                "plagueDrummer"
+              ],
+              "hpBefore": 42,
+              "hpAfter": 19,
+              "fallen": 2,
+              "heroActions": 13,
+              "enemyActions": 15,
+              "heals": 2
             }
           ],
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 31,
-            "heroSkills": 17,
-            "enemySkills": 11,
-            "heals": 4,
+            "actions": 35,
+            "heroSkills": 19,
+            "enemySkills": 14,
+            "heals": 3,
             "hpBefore": 175,
-            "hpAfter": 86,
+            "hpAfter": 114,
             "fallen": 0,
             "heroSkillsUsed": {
-              "eagle_eye_shot": 2,
-              "heavy_slash": 5,
-              "crushing_strike": 3,
-              "group_healing": 4,
-              "hunters_mark": 2,
-              "charging_blade": 1
+              "greater_heal": 4,
+              "eagle_eye_shot": 3,
+              "heavy_slash": 6,
+              "crushing_strike": 5,
+              "hunters_mark": 1
             },
             "enemySkillsUsed": {
-              "plague_skiver_cripple": 1,
-              "plague_champion_ball_chain": 3,
-              "plague_champion_vomit": 4,
-              "plague_skiver_roast": 1,
-              "plague_champion_butcher_cut": 2
+              "plague_veteran_drum_doom": 4,
+              "plague_veteran_drum_debilitation": 6,
+              "plague_veteran_ball_chain": 2,
+              "plague_veteran_butcher_cut": 2
             }
           },
           "firstEnemyComposition": [
             "plagueChopper",
-            "plagueWretch",
-            "plagueSkiver"
+            "plagueChopper",
+            "plagueDrummer",
+            "plagueDrummer"
           ],
           "finalEnemyComposition": [
-            "plagueDrummer",
             "plagueChopper",
-            "plagueSkiver"
+            "plagueChopper",
+            "plagueDrummer",
+            "plagueDrummer"
           ],
-          "deaths": 4
+          "deaths": 2
         },
         {
           "seed": 41,
@@ -2198,10 +2290,10 @@
         {
           "seed": 53,
           "phase": "defeat",
-          "battles": 2,
-          "skivers": 2,
-          "fourEnemy": 1,
-          "torches": 0,
+          "battles": 4,
+          "skivers": 1,
+          "fourEnemy": 2,
+          "torches": 1,
           "foodHeals": 4,
           "encounters": [
             {
@@ -2221,17 +2313,46 @@
             {
               "battle": 2,
               "enemies": [
-                "plagueChopper",
                 "plagueSlasher",
-                "plagueDrummer",
-                "plagueSkiver"
+                "plagueSlasher",
+                "plagueWretch",
+                "plagueDrummer"
               ],
               "hpBefore": 99,
+              "hpAfter": 99,
+              "fallen": 0,
+              "heroActions": 12,
+              "enemyActions": 9,
+              "heals": 3
+            },
+            {
+              "battle": 3,
+              "enemies": [
+                "plagueChopper",
+                "plagueSlasher",
+                "plagueDrummer"
+              ],
+              "hpBefore": 63,
+              "hpAfter": 49,
+              "fallen": 0,
+              "heroActions": 13,
+              "enemyActions": 8,
+              "heals": 2
+            },
+            {
+              "battle": 4,
+              "enemies": [
+                "plagueChopper",
+                "plagueSlasher",
+                "plagueWretch",
+                "plagueDrummer"
+              ],
+              "hpBefore": 22,
               "hpAfter": 0,
               "fallen": 4,
-              "heroActions": 7,
-              "enemyActions": 16,
-              "heals": 1
+              "heroActions": 5,
+              "enemyActions": 11,
+              "heals": 0
             }
           ],
           "firstEncounter": {
@@ -2268,17 +2389,17 @@
           "finalEnemyComposition": [
             "plagueChopper",
             "plagueSlasher",
-            "plagueDrummer",
-            "plagueSkiver"
+            "plagueWretch",
+            "plagueDrummer"
           ],
           "deaths": 4
         },
         {
           "seed": 67,
-          "phase": "defeat",
-          "battles": 3,
-          "skivers": 1,
-          "fourEnemy": 0,
+          "phase": "victory",
+          "battles": 4,
+          "skivers": 0,
+          "fourEnemy": 3,
           "torches": 0,
           "foodHeals": 3,
           "encounters": [
@@ -2299,30 +2420,47 @@
             {
               "battle": 2,
               "enemies": [
-                "plagueWretch",
+                "plagueChopper",
                 "plagueSlasher",
-                "plagueSkiver"
+                "plagueWretch",
+                "plagueDrummer"
               ],
               "hpBefore": 109,
-              "hpAfter": 90,
+              "hpAfter": 119,
               "fallen": 0,
-              "heroActions": 14,
-              "enemyActions": 9,
-              "heals": 4
+              "heroActions": 13,
+              "enemyActions": 8,
+              "heals": 3
             },
             {
               "battle": 3,
               "enemies": [
                 "plagueChopper",
-                "plagueSlasher",
+                "plagueChopper",
+                "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 55,
-              "hpAfter": 0,
-              "fallen": 4,
-              "heroActions": 10,
-              "enemyActions": 16,
-              "heals": 1
+              "hpBefore": 83,
+              "hpAfter": 96,
+              "fallen": 0,
+              "heroActions": 17,
+              "enemyActions": 12,
+              "heals": 4
+            },
+            {
+              "battle": 4,
+              "enemies": [
+                "plagueChopper",
+                "plagueSlasher",
+                "plagueWretch",
+                "plagueDrummer"
+              ],
+              "hpBefore": 82,
+              "hpAfter": 81,
+              "fallen": 0,
+              "heroActions": 17,
+              "enemyActions": 14,
+              "heals": 4
             }
           ],
           "firstEncounter": {
@@ -2355,16 +2493,17 @@
           "finalEnemyComposition": [
             "plagueChopper",
             "plagueSlasher",
+            "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 4
+          "deaths": 0
         },
         {
           "seed": 71,
           "phase": "defeat",
           "battles": 2,
-          "skivers": 2,
-          "fourEnemy": 1,
+          "skivers": 1,
+          "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 4,
           "encounters": [
@@ -2386,15 +2525,16 @@
             {
               "battle": 2,
               "enemies": [
-                "plagueWretch",
+                "plagueChopper",
                 "plagueSlasher",
-                "plagueSkiver"
+                "plagueWretch",
+                "plagueDrummer"
               ],
               "hpBefore": 2,
               "hpAfter": 2,
               "fallen": 4,
-              "heroActions": 5,
-              "enemyActions": 13,
+              "heroActions": 1,
+              "enemyActions": 8,
               "heals": 0
             }
           ],
@@ -2432,94 +2572,117 @@
             "plagueSkiver"
           ],
           "finalEnemyComposition": [
-            "plagueWretch",
+            "plagueChopper",
             "plagueSlasher",
-            "plagueSkiver"
+            "plagueWretch",
+            "plagueDrummer"
           ],
           "deaths": 4
         },
         {
           "seed": 83,
           "phase": "defeat",
-          "battles": 3,
-          "skivers": 2,
-          "fourEnemy": 0,
+          "battles": 4,
+          "skivers": 1,
+          "fourEnemy": 3,
           "torches": 0,
-          "foodHeals": 4,
+          "foodHeals": 2,
           "encounters": [
             {
               "battle": 1,
               "enemies": [
-                "plagueDrummer",
                 "plagueChopper",
-                "plagueSkiver"
+                "plagueSlasher",
+                "plagueWretch",
+                "plagueDrummer"
               ],
               "hpBefore": 175,
-              "hpAfter": 102,
+              "hpAfter": 126,
               "fallen": 0,
               "heroActions": 16,
-              "enemyActions": 10,
+              "enemyActions": 13,
               "heals": 2
             },
             {
               "battle": 2,
               "enemies": [
-                "plagueWretch",
+                "plagueChopper",
                 "plagueSlasher",
-                "plagueSkiver"
+                "plagueWretch",
+                "plagueDrummer"
               ],
-              "hpBefore": 98,
-              "hpAfter": 78,
-              "fallen": 1,
-              "heroActions": 15,
-              "enemyActions": 10,
+              "hpBefore": 147,
+              "hpAfter": 135,
+              "fallen": 0,
+              "heroActions": 17,
+              "enemyActions": 11,
               "heals": 3
             },
             {
               "battle": 3,
               "enemies": [
                 "plagueChopper",
-                "plagueSlasher",
-                "plagueDrummer"
+                "plagueWretch",
+                "plagueSkiver"
               ],
-              "hpBefore": 60,
-              "hpAfter": 0,
-              "fallen": 4,
-              "heroActions": 8,
+              "hpBefore": 126,
+              "hpAfter": 10,
+              "fallen": 3,
+              "heroActions": 12,
               "enemyActions": 14,
               "heals": 1
+            },
+            {
+              "battle": 4,
+              "enemies": [
+                "plagueSlasher",
+                "plagueSlasher",
+                "plagueWretch",
+                "plagueDrummer"
+              ],
+              "hpBefore": 5,
+              "hpAfter": 0,
+              "fallen": 4,
+              "heroActions": 1,
+              "enemyActions": 3,
+              "heals": 0
             }
           ],
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 31,
+            "actions": 30,
             "heroSkills": 16,
-            "enemySkills": 10,
+            "enemySkills": 13,
             "heals": 2,
             "hpBefore": 175,
-            "hpAfter": 102,
+            "hpAfter": 126,
             "fallen": 0,
             "heroSkillsUsed": {
               "heavy_slash": 5,
-              "greater_heal": 3,
-              "crushing_strike": 5,
-              "eagle_eye_shot": 3
+              "greater_heal": 4,
+              "hunters_mark": 1,
+              "crushing_strike": 4,
+              "eagle_eye_shot": 2
             },
             "enemySkillsUsed": {
-              "plague_skiver_roast": 2,
-              "plague_champion_drum_debilitation": 2,
-              "plague_champion_ball_chain": 5,
-              "plague_champion_drum_doom": 1
+              "plague_veteran_vomit": 3,
+              "plague_veteran_drum_doom": 2,
+              "plague_veteran_hook_slash": 5,
+              "plague_veteran_ball_chain": 1,
+              "plague_veteran_drum_debilitation": 1,
+              "plague_veteran_butcher_cut": 1
             }
           },
           "firstEnemyComposition": [
-            "plagueDrummer",
-            "plagueChopper",
-            "plagueSkiver"
-          ],
-          "finalEnemyComposition": [
             "plagueChopper",
             "plagueSlasher",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueSlasher",
+            "plagueSlasher",
+            "plagueWretch",
             "plagueDrummer"
           ],
           "deaths": 4
@@ -2527,9 +2690,9 @@
         {
           "seed": 97,
           "phase": "defeat",
-          "battles": 4,
-          "skivers": 2,
-          "fourEnemy": 0,
+          "battles": 3,
+          "skivers": 1,
+          "fourEnemy": 1,
           "torches": 0,
           "foodHeals": 4,
           "encounters": [
@@ -2565,28 +2728,15 @@
               "battle": 3,
               "enemies": [
                 "plagueChopper",
-                "plagueSlasher",
+                "plagueChopper",
+                "plagueWretch",
                 "plagueDrummer"
               ],
               "hpBefore": 66,
-              "hpAfter": 29,
-              "fallen": 1,
-              "heroActions": 9,
-              "enemyActions": 8,
-              "heals": 0
-            },
-            {
-              "battle": 4,
-              "enemies": [
-                "plagueDrummer",
-                "plagueChopper",
-                "plagueSkiver"
-              ],
-              "hpBefore": 17,
               "hpAfter": 0,
               "fallen": 4,
-              "heroActions": 1,
-              "enemyActions": 5,
+              "heroActions": 8,
+              "enemyActions": 15,
               "heals": 0
             }
           ],
@@ -2624,34 +2774,36 @@
             "plagueSkiver"
           ],
           "finalEnemyComposition": [
-            "plagueDrummer",
             "plagueChopper",
-            "plagueSkiver"
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
           ],
           "deaths": 4
         },
         {
           "seed": 109,
-          "phase": "defeat",
-          "battles": 3,
+          "phase": "victory",
+          "battles": 4,
           "skivers": 0,
-          "fourEnemy": 0,
+          "fourEnemy": 3,
           "torches": 0,
-          "foodHeals": 4,
+          "foodHeals": 0,
           "encounters": [
             {
               "battle": 1,
               "enemies": [
                 "plagueChopper",
-                "plagueSlasher",
+                "plagueChopper",
+                "plagueWretch",
                 "plagueDrummer"
               ],
               "hpBefore": 175,
-              "hpAfter": 107,
+              "hpAfter": 124,
               "fallen": 0,
-              "heroActions": 13,
-              "enemyActions": 9,
-              "heals": 1
+              "heroActions": 16,
+              "enemyActions": 11,
+              "heals": 2
             },
             {
               "battle": 2,
@@ -2660,62 +2812,80 @@
                 "plagueSlasher",
                 "plagueDrummer"
               ],
-              "hpBefore": 103,
-              "hpAfter": 50,
-              "fallen": 1,
-              "heroActions": 19,
-              "enemyActions": 11,
-              "heals": 6
+              "hpBefore": 157,
+              "hpAfter": 138,
+              "fallen": 0,
+              "heroActions": 8,
+              "enemyActions": 4,
+              "heals": 1
             },
             {
               "battle": 3,
               "enemies": [
                 "plagueChopper",
-                "plagueSlasher",
+                "plagueChopper",
+                "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 29,
-              "hpAfter": 0,
-              "fallen": 4,
-              "heroActions": 2,
-              "enemyActions": 6,
-              "heals": 0
+              "hpBefore": 102,
+              "hpAfter": 90,
+              "fallen": 0,
+              "heroActions": 14,
+              "enemyActions": 11,
+              "heals": 3
+            },
+            {
+              "battle": 4,
+              "enemies": [
+                "plagueChopper",
+                "plagueWretch",
+                "plagueWretch",
+                "plagueDrummer"
+              ],
+              "hpBefore": 58,
+              "hpAfter": 92,
+              "fallen": 1,
+              "heroActions": 17,
+              "enemyActions": 16,
+              "heals": 6
             }
           ],
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 25,
-            "heroSkills": 13,
-            "enemySkills": 9,
-            "heals": 1,
+            "actions": 28,
+            "heroSkills": 16,
+            "enemySkills": 11,
+            "heals": 2,
             "hpBefore": 175,
-            "hpAfter": 107,
+            "hpAfter": 124,
             "fallen": 0,
             "heroSkillsUsed": {
-              "eagle_eye_shot": 2,
+              "eagle_eye_shot": 4,
               "crushing_strike": 4,
-              "greater_heal": 2,
+              "greater_heal": 3,
               "heavy_slash": 4,
               "hunters_mark": 1
             },
             "enemySkillsUsed": {
-              "plague_champion_hook_slash": 4,
-              "plague_champion_drum_debilitation": 1,
-              "plague_champion_ball_chain": 3,
-              "plague_champion_butcher_cut": 1
+              "plague_veteran_drum_doom": 5,
+              "plague_veteran_vomit": 2,
+              "plague_veteran_butcher_cut": 2,
+              "plague_veteran_ball_chain": 2
             }
           },
           "firstEnemyComposition": [
             "plagueChopper",
-            "plagueSlasher",
+            "plagueChopper",
+            "plagueWretch",
             "plagueDrummer"
           ],
           "finalEnemyComposition": [
             "plagueChopper",
-            "plagueSlasher",
+            "plagueWretch",
+            "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 4
+          "deaths": 1
         }
       ]
     }
