@@ -72,6 +72,7 @@ export function campMeal(dungeon,food=4){
  if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingBattle||
     dungeon.room==='entrance'||!dungeon.cleared.includes(dungeon.room))
   throw Error('Camping requires a cleared room outside the entrance');
+ if(dungeon.pendingLoot||dungeon.pendingHunger)throw Error('Resolve pending expedition event before camping');
  if((dungeon.firewood??0)<1)throw Error('No firewood remaining');
  if(![0,2,4,8].includes(food))throw Error('Choose a valid camping meal');
  const living=dungeon.party.filter(hero=>!hero.dead);
