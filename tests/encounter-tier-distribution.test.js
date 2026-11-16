@@ -42,3 +42,23 @@ test('Apprentice encounters remain Apprentice',()=>{
   assert.equal(battle.encounterTier,'apprentice');
  }
 });
+
+test('successive campaign-tier encounters retain combat readiness and deterministic saves across seeds',()=>{
+ for(const [tier,lower] of [['apprentice','apprentice'],['veteran','apprentice'],['champion','veteran']]){
+  for(let seed=1;seed<=40;seed++){
+   const dungeon=createDungeon(seed,{region:'plague',tier});
+   beginCorridor(dungeon,'gallery');
+   advanceCorridor(dungeon);
+   assert.equal(dungeon.phase,'combat');
+   const battle=dungeonBattle(dungeon);
+   assert.ok([tier,lower].includes(battle.encounterTier));
+   assert.equal(battle.expeditionTier,tier);
+   assert.ok(battle.units.some(u=>u.side==='enemy'&&!u.dead&&u.hp>0));
+   assert.ok(battle.units.some(u=>u.side==='hero'&&!u.dead&&u.hp>0));
+   const saved=JSON.parse(JSON.stringify(dungeon));
+   assert.equal(saved.pendingBattle.battle.encounterPlan.tier,battle.encounterTier);
+   assert.deepEqual(saved.pendingBattle.battle.units.map(u=>[u.id,u.hp,u.dead]),
+    dungeon.pendingBattle.battle.units.map(u=>[u.id,u.hp,u.dead]));
+  }
+ }
+});
