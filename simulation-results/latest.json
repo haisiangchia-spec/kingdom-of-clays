@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "commit": "bfae3fb190bff138fea28904ca6ad2df42b87644",
-  "runId": "43781960740",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43781960740",
+  "commit": "2108a274b22c971df017ae781d569ff881258b28",
+  "runId": "43783503107",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43783503107",
   "baseline": [
     {
       "questId": "crypt-recon",
@@ -692,10 +692,10 @@
       "meanFoodHeals": 1.9,
       "meanCampsUsed": 0.1,
       "meanCurativesUsed": 2,
-      "meanHeroSkills": 63.8,
-      "meanEnemySkills": 50.3,
-      "meanRemainingHp": 17.6,
-      "meanDeaths": 2.3,
+      "meanHeroSkills": 64.5,
+      "meanEnemySkills": 51,
+      "meanRemainingHp": 19.1,
+      "meanDeaths": 2.5,
       "outcomes": [
         {
           "seed": 11,
@@ -1070,8 +1070,8 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 78,
-              "hpAfter": 89,
+              "hpBefore": 97,
+              "hpAfter": 102,
               "fallen": 0,
               "heroActions": 13,
               "enemyActions": 7,
@@ -1084,11 +1084,11 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 65,
-              "hpAfter": 59,
+              "hpBefore": 78,
+              "hpAfter": 72,
               "fallen": 0,
               "heroActions": 17,
-              "enemyActions": 11,
+              "enemyActions": 10,
               "heals": 5
             },
             {
@@ -1098,12 +1098,12 @@
                 "plagueWretch",
                 "plagueDrummer"
               ],
-              "hpBefore": 47,
-              "hpAfter": 28,
-              "fallen": 0,
-              "heroActions": 13,
-              "enemyActions": 10,
-              "heals": 2
+              "hpBefore": 60,
+              "hpAfter": 43,
+              "fallen": 2,
+              "heroActions": 20,
+              "enemyActions": 18,
+              "heals": 3
             }
           ],
           "firstEncounter": {
@@ -1140,7 +1140,7 @@
             "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 0
+          "deaths": 2
         },
         {
           "seed": 53,
@@ -1855,14 +1855,14 @@
         "Priest:sacred_strike:5"
       ],
       "meanBattles": 2.8,
-      "meanSkiverEncounters": 1.6,
+      "meanSkiverEncounters": 1.7,
       "meanFourEnemyEncounters": 0.2,
       "meanTorchesUsed": 0,
       "meanFoodHeals": 3.6,
-      "meanCampsUsed": 0,
+      "meanCampsUsed": 0.1,
       "meanCurativesUsed": 1.6,
-      "meanHeroSkills": 32.9,
-      "meanEnemySkills": 29.8,
+      "meanHeroSkills": 33.7,
+      "meanEnemySkills": 30.5,
       "meanRemainingHp": 0.2,
       "meanDeaths": 4,
       "outcomes": [
@@ -1960,7 +1960,7 @@
           "seed": 23,
           "phase": "defeat",
           "battles": 4,
-          "skivers": 1,
+          "skivers": 2,
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 1,
@@ -2000,25 +2000,25 @@
                 "plagueSlasher",
                 "plagueDrummer"
               ],
-              "hpBefore": 65,
-              "hpAfter": 23,
-              "fallen": 1,
-              "heroActions": 10,
-              "enemyActions": 7,
-              "heals": 0
+              "hpBefore": 83,
+              "hpAfter": 61,
+              "fallen": 0,
+              "heroActions": 11,
+              "enemyActions": 8,
+              "heals": 2
             },
             {
               "battle": 4,
               "enemies": [
-                "plagueChopper",
+                "plagueWretch",
                 "plagueSlasher",
-                "plagueDrummer"
+                "plagueSkiver"
               ],
-              "hpBefore": 17,
+              "hpBefore": 52,
               "hpAfter": 0,
-              "fallen": 4,
-              "heroActions": 2,
-              "enemyActions": 5,
+              "fallen": 3,
+              "heroActions": 9,
+              "enemyActions": 11,
               "heals": 0
             }
           ],
@@ -2051,9 +2051,9 @@
             "plagueDrummer"
           ],
           "finalEnemyComposition": [
-            "plagueChopper",
+            "plagueWretch",
             "plagueSlasher",
-            "plagueDrummer"
+            "plagueSkiver"
           ],
           "deaths": 4
         },
