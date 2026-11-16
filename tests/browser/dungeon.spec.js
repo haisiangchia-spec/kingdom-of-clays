@@ -229,9 +229,9 @@ test('browser completes a multi-room expedition and claims its victory rewards',
    const state=await page.evaluate(async ()=>{
     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
     const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
-    return {room:expedition.room,phase:expedition.phase,pendingTravel:!!expedition.pendingTravel};
+    return {room:expedition.room,phase:expedition.phase,pendingTravel:!!expedition.pendingTravel,pendingLoot:!!expedition.pendingLoot,pendingHunger:!!expedition.pendingHunger};
    });
-   if(!state.pendingTravel&&state.phase==='explore'){arrived=true;break;}
+   if(!state.pendingTravel&&state.phase==='explore'&&!state.pendingLoot&&!state.pendingHunger){arrived=true;break;}
    if(state.phase==='combat'){
     await page.evaluate(async ()=>{
      const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
