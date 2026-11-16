@@ -243,7 +243,7 @@ test('campaign can recover from a failed expedition without granting progress or
  ({settlement}=decodeCampaignSave(encodeCampaignSave(settlement,defeat)));
  assert.equal(settlement.town.week,afterDefeatWeek);
  assert.equal(selectQuest(settlement,'crypt-recon').unlocked,true);
- assert.equal(selectQuest(settlement,'warrens-recon').unlocked,false);
+ assert.equal(expeditionUnlock(settlement,'plague','apprentice').unlocked,false);
  const recoveryParty=prepareRosterParty(settlement);
  assert.equal(recoveryParty.length,4);
  const recovery=createDungeon(1402,{region:'crypt',tier:'apprentice',party:recoveryParty,interactiveEvents:true});
