@@ -596,6 +596,16 @@ test('browser travels onward after resolving its first corridor fight through co
     const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
     return {phase:expedition.phase,room:expedition.room};
    });
+   if(completion.room==='sanctum'){
+    expect(['victory','combat','explore']).toContain(completion.phase);
+    const state=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {cleared:expedition.cleared,questId:expedition.questId,phase:expedition.phase};
+    });
+    expect(state.questId).toBe('crypt-recon');
+    if(state.phase==='victory')expect(state.cleared).toContain('sanctum');
+   }
    if(completion.phase==='victory'){
     for(let pending=0;pending<15;pending++){
      const collect=page.getByRole('button',{name:'Collect treasure'});
