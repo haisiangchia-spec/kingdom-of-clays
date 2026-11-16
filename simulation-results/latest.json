@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "commit": "c6ad22ed3c740efcc7cf91c43e783062acd9bc92",
-  "runId": "43779735997",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43779735997",
+  "commit": "c567a0ef6222d6883d68f9f3b5f318106bae69b0",
+  "runId": "43779815234",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43779815234",
   "baseline": [
     {
       "questId": "crypt-recon",
@@ -643,8 +643,8 @@
       "tier": "veteran",
       "level": 3,
       "n": 10,
-      "wins": 5,
-      "defeats": 5,
+      "wins": 6,
+      "defeats": 4,
       "upgraded": [
         "Swordsman:heavy_slash:2",
         "Swordsman:heavy_slash:3",
@@ -685,16 +685,17 @@
         "Priest:sacred_strike:2",
         "Priest:sacred_strike:3"
       ],
-      "meanBattles": 4.1,
+      "meanBattles": 4.2,
       "meanSkiverEncounters": 0,
       "meanFourEnemyEncounters": 1.8,
       "meanTorchesUsed": 0.2,
       "meanFoodHeals": 0,
       "meanCampsUsed": 0.5,
-      "meanHeroSkills": 60.8,
-      "meanEnemySkills": 49.3,
-      "meanRemainingHp": 16.4,
-      "meanDeaths": 2.4,
+      "meanCurativesUsed": 1.8,
+      "meanHeroSkills": 66.1,
+      "meanEnemySkills": 53.5,
+      "meanRemainingHp": 15.7,
+      "meanDeaths": 2.5,
       "outcomes": [
         {
           "seed": 11,
@@ -719,7 +720,7 @@
         {
           "seed": 37,
           "phase": "defeat",
-          "battles": 3,
+          "battles": 4,
           "skivers": 0,
           "fourEnemy": 1,
           "torches": 0,
@@ -748,13 +749,13 @@
         },
         {
           "seed": 67,
-          "phase": "defeat",
+          "phase": "victory",
           "battles": 4,
           "skivers": 0,
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
-          "deaths": 4
+          "deaths": 3
         },
         {
           "seed": 71,
@@ -794,7 +795,7 @@
           "fourEnemy": 1,
           "torches": 1,
           "foodHeals": 0,
-          "deaths": 1
+          "deaths": 3
         }
       ]
     },
@@ -889,8 +890,9 @@
       "meanTorchesUsed": 0,
       "meanFoodHeals": 0.8,
       "meanCampsUsed": 0,
-      "meanHeroSkills": 32.1,
-      "meanEnemySkills": 27.8,
+      "meanCurativesUsed": 1.6,
+      "meanHeroSkills": 33.1,
+      "meanEnemySkills": 29,
       "meanRemainingHp": 0.4,
       "meanDeaths": 4,
       "outcomes": [
