@@ -700,6 +700,16 @@ test('browser travels onward after resolving its first corridor fight through co
     expect(milestone.champion).toBe(false);
     expect(milestone.apprentice).toBeGreaterThan(0);
     await expect(page.locator('#settlement-panel')).toContainText('Campaign Objectives');
+    await expect(page.locator('#settlement-panel')).toContainText('1/1');
+    const lockedQuest=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {availableQuests}=await import('/src/quest-board.js');
+     const {settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return availableQuests(settlement).filter(q=>q.tier!=='apprentice').map(q=>({tier:q.tier,unlocked:q.unlocked}));
+    });
+    expect(lockedQuest.some(q=>q.tier==='veteran')).toBe(true);
+    expect(lockedQuest.some(q=>q.tier==='champion')).toBe(true);
+    expect(lockedQuest.every(q=>!q.unlocked)).toBe(true);
    }
   }
  }
