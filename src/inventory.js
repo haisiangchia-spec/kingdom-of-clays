@@ -7,6 +7,10 @@ export const ITEM_RULES=Object.freeze({
  food:Object.freeze({name:'Food',stack:4}),
  torch:Object.freeze({name:'Torch',stack:2}),
  holyWater:Object.freeze({name:'Holy Water',stack:1}),
+ antivenom:Object.freeze({name:'Antivenom',stack:6}),
+ bandage:Object.freeze({name:'Bandage',stack:6}),
+ medicinalHerbs:Object.freeze({name:'Medicinal Herbs',stack:6}),
+ laudanum:Object.freeze({name:'Laudanum',stack:6}),
  gold:Object.freeze({name:'Gold',stack:100,value:1}),
  gem:Object.freeze({name:'Moonstone',stack:3,value:125}),
  crest:Object.freeze({name:'Crest',stack:6}),
@@ -21,7 +25,7 @@ function sourceQuantity(d,kind){
 }
 export function inventoryStacks(d){
  const items=[];
- for(const kind of ['food','torch','holyWater']){
+ for(const kind of ['food','torch','holyWater','antivenom','bandage','medicinalHerbs','laudanum']){
   let qty=sourceQuantity(d,kind),index=0;
   while(qty>0){const n=Math.min(qty,ITEM_RULES[kind].stack);items.push({kind,quantity:n,id:kind+':'+index++});qty-=n;}
  }
