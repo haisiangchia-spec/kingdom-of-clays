@@ -25,6 +25,7 @@ function playEncounter(d,{requireBothSides=false}={}){
  const enemyComposition=battle.units.filter(u=>u.side==='enemy').map(u=>u.enemyProfile??u.name);
  const startingHeroHp=battle.units.filter(u=>u.side==='hero').reduce((n,u)=>n+Math.max(0,u.hp),0);
  let actions=0,heroSkillsUsed=0,enemySkillsUsed=0,healsUsed=0;
+ const heroSkillCounts={},enemySkillCounts={};
  while(status(battle)==='ongoing'&&actions++<300){
   if(!currentActor(battle))startRound(battle,random);
   const actor=currentActor(battle);
@@ -32,7 +33,7 @@ function playEncounter(d,{requireBothSides=false}={}){
   if(prepareActorTurn(battle,actor.id,random)!=='ready')continue;
   if(actor.side==='enemy'){
    const action=chooseEnemyAction(battle,actor.id,actor.enemySkills??[],random,ABILITIES,availableTargets);
-   if(action){takeTurn(battle,actor.id,action.key,action.targetId,random);enemySkillsUsed++;}
+   if(action){takeTurn(battle,actor.id,action.key,action.targetId,random);enemySkillsUsed++;enemySkillCounts[action.key]=(enemySkillCounts[action.key]??0)+1;}
    else passActorTurn(battle,actor.id);
   }else{
    const candidates=(HERO_SKILLS[actor.heroClass??actor.name]??[]).flatMap(key=>
@@ -65,7 +66,7 @@ function playEncounter(d,{requireBothSides=false}={}){
    // Avoid wasting turns on non-offensive buffs when no living enemy can
    // be reached: such turns can otherwise mask a formation deadlock.
    const chosen=heal??offensive??candidates[0];
-   if(chosen){takeTurn(battle,actor.id,chosen.key,chosen.targetId,random);heroSkillsUsed++;if(chosen===heal)healsUsed++;}
+   if(chosen){takeTurn(battle,actor.id,chosen.key,chosen.targetId,random);heroSkillsUsed++;heroSkillCounts[chosen.key]=(heroSkillCounts[chosen.key]??0)+1;if(chosen===heal)healsUsed++;}
    else passActorTurn(battle,actor.id);
   }
  }
@@ -76,7 +77,7 @@ function playEncounter(d,{requireBothSides=false}={}){
  }
  assert.notEqual(status(battle),'ongoing');
  resolveDungeonBattle(d);
- return {outcome:status(battle),actions,heroSkillsUsed,enemySkillsUsed,healsUsed,enemyComposition,startingHeroHp,
+ return {outcome:status(battle),actions,heroSkillsUsed,enemySkillsUsed,healsUsed,enemyComposition,heroSkillCounts,enemySkillCounts,startingHeroHp,
   endingHeroHp:battle.units.filter(u=>u.side==='hero').reduce((n,u)=>n+Math.max(0,u.hp),0),
   fallenHeroes:battle.units.filter(u=>u.side==='hero'&&u.dead).length};
 }
@@ -176,7 +177,7 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
   assert.ok(++steps<1000,'expedition stalled: '+questId+' '+seed);
   if(d.phase==='combat'){
    const report=playEncounter(d);
-   if(!firstEnemyComposition){firstEnemyComposition=report.enemyComposition;firstEncounterReport={outcome:report.outcome,actions:report.actions,heroSkills:report.heroSkillsUsed,enemySkills:report.enemySkillsUsed,heals:report.healsUsed,hpBefore:report.startingHeroHp,hpAfter:report.endingHeroHp,fallen:report.fallenHeroes};}
+   if(!firstEnemyComposition){firstEnemyComposition=report.enemyComposition;firstEncounterReport={outcome:report.outcome,actions:report.actions,heroSkills:report.heroSkillsUsed,enemySkills:report.enemySkillsUsed,heals:report.healsUsed,hpBefore:report.startingHeroHp,hpAfter:report.endingHeroHp,fallen:report.fallenHeroes,heroSkillsUsed:report.heroSkillCounts,enemySkillsUsed:report.enemySkillCounts};}
    finalEnemyComposition=report.enemyComposition;
    if(report.enemyComposition.includes('plagueSkiver'))skiverEncounters++;
    if(report.enemyComposition.length===4)fourEnemyEncounters++;
