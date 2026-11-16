@@ -216,9 +216,9 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
     if(wounded.length){useCampSkill(d,'sanctuary');useCampSkill(d,'fieldDressing',wounded[0].id);}
     finishCamp(d);continue;}
   }
-  // Reserve four rations for the next hunger check; spend only surplus food
-  // to rescue a critically wounded hero between fights.
-  const critical=d.party.filter(h=>!h.dead&&h.hp<=2&&h.hp<h.maxHp)
+  // Provisional benchmark policy: use spare rations before another fight
+  // when a hero falls below half HP, retaining four for the next hunger check.
+  const critical=d.party.filter(h=>!h.dead&&h.hp<=Math.floor(h.maxHp/2)&&h.hp<h.maxHp)
     .sort((a,b)=>a.hp-b.hp)[0];
   if(critical&&(d.supplies.food??0)>4){
    useProvision(d,'food',critical.id);
