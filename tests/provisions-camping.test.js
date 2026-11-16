@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon,useProvision,campMeal} from '../src/dungeon.js';
+import {createDungeon,useProvision,campMeal,useCampSkill,finishCamp} from '../src/dungeon.js';
 
 test('curative supplies remove only their corresponding conditions',()=>{
  const d=createDungeon(1);
@@ -31,4 +31,20 @@ test('camping requires cleared room, firewood and food and grants meal benefits'
  assert.equal(d.torch,100);
  assert.ok(d.party.every(h=>h.stress===15));
  assert.throws(()=>campMeal(d,2),/firewood/);
+});
+
+test('camp respite is bounded and sanctuary suppresses nighttime ambush',()=>{
+ const d=createDungeon(123,{difficulty:'patrol'});
+ d.room='gallery';d.cleared.push('gallery');d.supplies.food=8;
+ d.party[0].stress=30;d.party[0].hp-=8;
+ campMeal(d,8);
+ assert.equal(d.camp.respite,12);
+ useCampSkill(d,'sanctuary');
+ assert.equal(d.camp.respite,8);
+ useCampSkill(d,'encouragement',d.party[0].id);
+ assert.equal(d.party[0].stress,5);
+ assert.equal(d.camp.respite,6);
+ assert.deepEqual(finishCamp(d),{ambushed:false});
+ assert.equal(d.camp,null);
+ assert.throws(()=>useCampSkill(d,'sanctuary'),/No active camp/);
 });
