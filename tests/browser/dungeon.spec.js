@@ -563,6 +563,34 @@ test('browser travels onward after resolving its first corridor fight through co
     });
     expect(restoredPhase).toBe(afterBattle);
    }
+   const finalApproach=await page.evaluate(async ()=>{
+    const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+    const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+    return {phase:expedition.phase,room:expedition.room};
+   });
+   if(finalApproach.phase==='explore'&&finalApproach.room!=='sanctum'){
+    for(let step=0;step<20;step++){
+     const state=await page.evaluate(async ()=>{
+      const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+      const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+      return {phase:expedition.phase,room:expedition.room};
+     });
+     if(state.phase!=='explore'||state.room==='sanctum')break;
+     const collect=page.getByRole('button',{name:'Collect treasure'});
+     const hunger=page.getByRole('button',{name:'Eat four food'});
+     const advance=page.getByRole('button',{name:'Advance corridor'});
+     if(await collect.count())await collect.click();
+     else if(await hunger.count())await hunger.click();
+     else if(await advance.count())await advance.click();
+     else throw Error('Objective corridor has no available continuation action');
+    }
+    const destination=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {phase:expedition.phase,room:expedition.room};
+    });
+    expect(destination.room==='sanctum'||destination.phase==='combat'||destination.phase==='victory').toBe(true);
+   }
   }
  }
 });
