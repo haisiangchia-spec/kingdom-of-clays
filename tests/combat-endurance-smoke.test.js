@@ -5,12 +5,38 @@ import {chooseEnemyAction} from '../src/enemy-ai.js';
 
 // Deliberately modest: real combat turns, not fabricated expedition victories.
 // Report survival metrics without setting a balance threshold prematurely.
-const heroSkills={
- swordsman:['heavy_slash','countering_advance'],
- warrior:['crushing_strike','sweeping_assault'],
- hunter:['sniper_shot','aimed_shot'],
- priest:['smite','judgement']
-};
+// Tactical test driver: prioritise emergency healing, then low-HP enemies.
+// This is a deterministic simulation policy, not a change to player combat rules.
+function chooseHeroAction(battle,actor){
+ const allies=battle.units.filter(u=>u.side==='hero'&&!u.dead);
+ const enemies=battle.units.filter(u=>u.side==='enemy'&&!u.dead&&!u.corpse);
+ const wounded=[...allies].filter(u=>u.hp<u.maxHp).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp);
+ const healing=actor.classId==='priest'?['greater_heal','group_healing']:
+  actor.classId==='warrior'?['warrior_recovery']:
+  actor.classId==='hunter'?['field_dressing']:[];
+ if(wounded.length&&wounded[0].hp/wounded[0].maxHp<0.4){
+  for(const key of healing){
+   const targets=availableTargets(battle,actor.id,key);
+   if(key==='group_healing'&&allies.filter(u=>u.hp/u.maxHp<0.65).length<2)continue;
+   const target=wounded.find(u=>targets.includes(u.id));
+   if(target)return {key,targetId:target.id};
+  }
+ }
+ const skills=Object.entries(ABILITIES).filter(([,skill])=>skill.classId===actor.classId&&
+  !['heal','groupHeal','stressHeal','guard','partyBuff','selfBuff','mark','debuffAll'].includes(skill.kind));
+ let best=null;
+ for(const [key,skill] of skills){
+  const targets=availableTargets(battle,actor.id,key);
+  for(const target of enemies){
+   if(!targets.includes(target.id))continue;
+   const score=(1-target.hp/target.maxHp)*30+(target.hp<=8?12:0)+
+    (skill.status?.type==='stun'&&!target.stun?8:0)+(skill.mod??0)*12+
+    (skill.acc??85)*0.03;
+   if(!best||score>best.score)best={key,targetId:target.id,score};
+  }
+ }
+ return best&&{key:best.key,targetId:best.targetId};
+}
 function fight(seed,tier){
  const battle=makeGeneratedEncounter(seed,'patrol','plague',tier);
  const random=rng(seed+100000);
@@ -24,12 +50,7 @@ function fight(seed,tier){
   if(actor.side==='enemy'){
    action=chooseEnemyAction(battle,actor.id,actor.enemySkills??[],random,ABILITIES,availableTargets);
   }else{
-   const candidates=[...(heroSkills[actor.classId]??[]),...Object.keys(ABILITIES).filter(k=>ABILITIES[k].classId===actor.classId)];
-   for(const key of candidates){
-    const targets=availableTargets(battle,actor.id,key);
-    const enemy=targets.find(id=>battle.units.some(u=>u.id===id&&u.side==='enemy'&&!u.dead));
-    if(enemy){action={key,targetId:enemy};break;}
-   }
+   action=chooseHeroAction(battle,actor);
   }
   if(action)takeTurn(battle,actor.id,action.key,action.targetId,random);
   else passActorTurn(battle,actor.id);
