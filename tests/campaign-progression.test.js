@@ -205,3 +205,21 @@ test('five claimed expeditions complete the campaign with real reward transfers,
  assert.deepEqual(settlement.campaignVictories,['veteran-victory','champion-victory']);
  assert.equal(settlement.completedExpeditions,5);
 });
+
+test('unsupported Crypt Veteran and Champion victories cannot claim rewards or alter progress',()=>{
+ for(const tier of ['veteran','champion']){
+  const settlement=createCampaignSettlement();
+  const expedition=createDungeon(901,{region:'crypt',tier:'apprentice',interactiveEvents:true});
+  expedition.region='crypt';
+  expedition.tier=tier;
+  expedition.phase='victory';
+  expedition.cleared=['sanctum'];
+  offerLoot(expedition,'gold',100);
+  collectLoot(expedition);
+  assert.throws(()=>completeCampaignExpedition(settlement,expedition),/Only Apprentice Ashen Crypt/);
+  assert.equal(expedition.rewardClaimed,false);
+  assert.equal(settlement.completedExpeditions,0);
+  assert.equal(settlement.gold,0);
+  assert.deepEqual(settlement.campaignVictories,[]);
+ }
+});
