@@ -793,6 +793,23 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
  await expect(page.locator('#settlement-panel')).toContainText('✓ SELECTED · Champion Warrens Expedition');
  await expect(page.locator('#dungeon-region')).toHaveValue('plague');
  await expect(page.locator('#dungeon-tier')).toHaveValue('champion');
+ await page.getByRole('button',{name:'New expedition'}).click();
+ const launchedChampion=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {quest:expedition.questId,region:expedition.region,tier:expedition.tier,
+   room:expedition.room,party:expedition.party.length,completed:settlement.completedExpeditions};
+ });
+ expect(launchedChampion).toEqual({quest:'warrens-champion',region:'plague',
+  tier:'champion',room:'entrance',party:4,completed:3});
+ await expect(page.locator('#dungeon-status')).toContainText('Warrens Entrance');
+ await page.reload();
+ const restoredChampion=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {quest:expedition.questId,region:expedition.region,tier:expedition.tier,room:expedition.room};
+ });
+ expect(restoredChampion).toEqual({quest:'warrens-champion',region:'plague',tier:'champion',room:'entrance'});
  await expect(page.locator('#settlement-panel')).toContainText('Veteran Trial');
  await expect(page.locator('#settlement-panel')).toContainText('1/1');
  await page.reload();
