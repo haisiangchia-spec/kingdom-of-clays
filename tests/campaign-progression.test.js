@@ -4,6 +4,7 @@ import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave} from '..
 import {campaignProgress,recordCampaignVictory,expeditionUnlock,campaignMilestoneProgress,canStartNextExpedition} from '../src/campaign-progression.js';
 import {prepareRosterParty,returnPartyToRoster} from '../src/hero-roster.js';
 import {advanceTownWeek} from '../src/town-week.js';
+import {createDungeon} from '../src/dungeon.js';
 test('Clays campaign milestones persist across save and load',()=>{
  const settlement=createCampaignSettlement();
  assert.equal(campaignProgress(settlement).completed,0);
@@ -71,8 +72,12 @@ test('complete campaign progression survives repeated settlement save/load trans
 test('expedition return, town-week recovery, and next-quest gate survive reload',()=>{
  let settlement=createCampaignSettlement();
  const party=prepareRosterParty(settlement);
- const expedition={phase:'victory',tier:'apprentice',region:'crypt',party,
-  rosterReturned:false,townWeekProcessed:false,rewardClaimed:false,traitsProcessed:true};
+ const expedition=createDungeon(127,{tier:'apprentice',region:'crypt',party});
+ expedition.phase='victory';
+ expedition.rosterReturned=false;
+ expedition.townWeekProcessed=false;
+ expedition.rewardClaimed=false;
+ expedition.traitsProcessed=true;
  assert.equal(canStartNextExpedition(expedition).allowed,false);
  assert.equal(returnPartyToRoster(settlement,expedition),true);
  assert.equal(returnPartyToRoster(settlement,expedition),false);
