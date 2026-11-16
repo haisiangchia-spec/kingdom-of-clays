@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "commit": "8640a9cfda01fe3435317a48047fb72628db9888",
-  "runId": "43780195383",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43780195383",
+  "commit": "5cdfe9648ea55e3b2863b970ff573db54968b991",
+  "runId": "43780293873",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43780293873",
   "baseline": [
     {
       "questId": "crypt-recon",
@@ -705,6 +705,16 @@
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 42,
+            "heroSkills": 22,
+            "enemySkills": 18,
+            "heals": 5,
+            "hpBefore": 151,
+            "hpAfter": 97,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueSlasher",
@@ -727,6 +737,16 @@
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 22,
+            "heroSkills": 13,
+            "enemySkills": 8,
+            "heals": 1,
+            "hpBefore": 151,
+            "hpAfter": 109,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueWretch",
@@ -748,6 +768,16 @@
           "fourEnemy": 1,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 28,
+            "heroSkills": 18,
+            "enemySkills": 9,
+            "heals": 2,
+            "hpBefore": 151,
+            "hpAfter": 105,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueWretch",
@@ -768,6 +798,16 @@
           "fourEnemy": 1,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 19,
+            "heroSkills": 11,
+            "enemySkills": 7,
+            "heals": 0,
+            "hpBefore": 151,
+            "hpAfter": 125,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueWretch",
@@ -788,6 +828,16 @@
           "fourEnemy": 2,
           "torches": 1,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 28,
+            "heroSkills": 16,
+            "enemySkills": 11,
+            "heals": 1,
+            "hpBefore": 151,
+            "hpAfter": 120,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueWretch",
@@ -809,6 +859,16 @@
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 26,
+            "heroSkills": 16,
+            "enemySkills": 9,
+            "heals": 1,
+            "hpBefore": 151,
+            "hpAfter": 108,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueWretch",
@@ -830,6 +890,16 @@
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 19,
+            "heroSkills": 11,
+            "enemySkills": 8,
+            "heals": 0,
+            "hpBefore": 151,
+            "hpAfter": 137,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueSlasher",
             "plagueSlasher",
@@ -851,6 +921,16 @@
           "fourEnemy": 3,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 31,
+            "heroSkills": 18,
+            "enemySkills": 12,
+            "heals": 2,
+            "hpBefore": 151,
+            "hpAfter": 93,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueChopper",
@@ -873,6 +953,16 @@
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 41,
+            "heroSkills": 24,
+            "enemySkills": 17,
+            "heals": 5,
+            "hpBefore": 151,
+            "hpAfter": 80,
+            "fallen": 1
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueSlasher",
@@ -895,6 +985,16 @@
           "fourEnemy": 1,
           "torches": 1,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 18,
+            "heroSkills": 12,
+            "enemySkills": 6,
+            "heals": 0,
+            "hpBefore": 151,
+            "hpAfter": 121,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueWretch",
@@ -1015,6 +1115,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 27,
+            "heroSkills": 15,
+            "enemySkills": 10,
+            "heals": 1,
+            "hpBefore": 175,
+            "hpAfter": 81,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueDrummer",
             "plagueChopper",
@@ -1035,6 +1145,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 22,
+            "heroSkills": 14,
+            "enemySkills": 7,
+            "heals": 4,
+            "hpBefore": 175,
+            "hpAfter": 115,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueSlasher",
@@ -1055,6 +1175,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 31,
+            "heroSkills": 17,
+            "enemySkills": 11,
+            "heals": 4,
+            "hpBefore": 175,
+            "hpAfter": 86,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueWretch",
@@ -1075,6 +1205,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 30,
+            "heroSkills": 19,
+            "enemySkills": 10,
+            "heals": 4,
+            "hpBefore": 175,
+            "hpAfter": 81,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueWretch",
@@ -1095,6 +1235,16 @@
           "fourEnemy": 1,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 32,
+            "heroSkills": 17,
+            "enemySkills": 12,
+            "heals": 4,
+            "hpBefore": 175,
+            "hpAfter": 103,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueWretch",
@@ -1116,6 +1266,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 20,
+            "heroSkills": 12,
+            "enemySkills": 7,
+            "heals": 2,
+            "hpBefore": 175,
+            "hpAfter": 115,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueSlasher",
@@ -1136,6 +1296,16 @@
           "fourEnemy": 1,
           "torches": 0,
           "foodHeals": 4,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 42,
+            "heroSkills": 18,
+            "enemySkills": 19,
+            "heals": 2,
+            "hpBefore": 175,
+            "hpAfter": 0,
+            "fallen": 2
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueSlasher",
@@ -1157,6 +1327,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 31,
+            "heroSkills": 16,
+            "enemySkills": 10,
+            "heals": 2,
+            "hpBefore": 175,
+            "hpAfter": 102,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueDrummer",
             "plagueChopper",
@@ -1177,6 +1357,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 34,
+            "heroSkills": 21,
+            "enemySkills": 10,
+            "heals": 4,
+            "hpBefore": 175,
+            "hpAfter": 114,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueDrummer",
             "plagueChopper",
@@ -1197,6 +1387,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 25,
+            "heroSkills": 13,
+            "enemySkills": 9,
+            "heals": 1,
+            "hpBefore": 175,
+            "hpAfter": 107,
+            "fallen": 0
+          },
           "firstEnemyComposition": [
             "plagueChopper",
             "plagueSlasher",
