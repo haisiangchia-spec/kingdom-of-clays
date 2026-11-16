@@ -30,6 +30,8 @@ test('camping requires cleared room, firewood and food and grants meal benefits'
  assert.equal(d.supplies.food,4);
  assert.equal(d.torch,100);
  assert.ok(d.party.every(h=>h.stress===15));
+ assert.throws(()=>campMeal(d,2),/camp before camping/);
+ finishCamp(d);
  assert.throws(()=>campMeal(d,2),/firewood/);
 });
 
