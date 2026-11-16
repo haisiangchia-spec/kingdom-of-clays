@@ -839,6 +839,40 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
  expect(championBattle.enemies).toBeGreaterThan(0);
  await page.reload();
  await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+ // Resolve the opening Champion encounter with real hero actions, without
+ // changing combat outcomes or the approved encounter distribution.
+ let championTurns=0;
+ while(championTurns++<120){
+  const state=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+   return {phase:expedition.phase,
+    enemies:expedition.pendingBattle?.battle?.units.filter(u=>u.side==='enemy'&&!u.dead&&!u.corpse).map(u=>u.name)??[]};
+  });
+  if(state.phase!=='combat')break;
+  let acted=false;
+  for(const skill of await page.locator('#dungeon-combat button[aria-pressed]').all()){
+   await skill.click();
+   for(const enemy of state.enemies){
+    const target=page.locator('#dungeon-combat button').filter({hasText:enemy});
+    if(await target.count()){
+     await target.first().click();
+     acted=true;break;
+    }
+   }
+   if(acted)break;
+  }
+  if(!acted)await page.getByRole('button',{name:'Pass turn'}).click();
+ }
+ expect(championTurns).toBeLessThan(121);
+ const championOutcome=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {phase:expedition.phase,encounterCleared:expedition.corridors['entrance-gallery']?.encounterCleared??false};
+ });
+ expect(['explore','defeat']).toContain(championOutcome.phase);
+ if(championOutcome.phase==='explore')expect(championOutcome.encounterCleared).toBe(true);
+ await page.reload();
 
  // Exercise the objective checklist across saved room clearances without
  // bypassing the normal browser launch and quest-selection flow.
@@ -880,7 +914,7 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
    championRecorded:settlement.campaignVictories.includes('champion-victory'),
    campaignFinished:campaignProgress(settlement).finished};
  });
- expect(beforeVictory).toEqual({phase:'combat',claimed:undefined,
+ expect(beforeVictory).toMatchObject({claimed:undefined,
   championRecorded:false,campaignFinished:false});
  await expect(page.locator('#settlement-panel')).toContainText('Veteran Trial');
  await expect(page.locator('#settlement-panel')).toContainText('1/1');
