@@ -124,3 +124,35 @@ test('changing region immediately refreshes unlocked Veteran tier in browser',as
  });
  expect(state).toEqual({region:'plague',tier:'veteran',questId:'warrens-veteran',phase:'explore'});
 });
+
+test('Champion unlock enables tier selector and launches final campaign quest',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave,encodeCampaignSave}=await import('/src/settlement.js');
+  const state=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  state.settlement.completedExpeditions=3;
+  state.settlement.campaignVictories=['veteran-victory'];
+  state.expedition.phase='victory';
+  state.expedition.rewardClaimed=true;
+  state.expedition.rosterReturned=true;
+  state.expedition.townWeekProcessed=true;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(state.settlement,state.expedition));
+ });
+ await page.reload();
+ await expect(page.locator('#dungeon-tier option[value="champion"]')).toBeDisabled();
+ await page.locator('#dungeon-region').selectOption('plague');
+ await expect(page.locator('#dungeon-tier option[value="champion"]')).toBeEnabled();
+ await page.locator('#dungeon-tier').selectOption('champion');
+ await page.getByRole('button',{name:'New expedition'}).click();
+ const state=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('/src/settlement.js');
+  const {expedition,settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {region:expedition.region,tier:expedition.tier,questId:expedition.questId,
+   phase:expedition.phase,completedExpeditions:settlement.completedExpeditions};
+ });
+ expect(state).toEqual({region:'plague',tier:'champion',questId:'warrens-champion',
+  phase:'explore',completedExpeditions:3});
+ await page.reload();
+ await expect(page.locator('#dungeon-status')).toContainText('CHAMPION');
+ await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
+});
