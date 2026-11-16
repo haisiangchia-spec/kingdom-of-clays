@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
-import {campaignProgress,recordCampaignVictory,expeditionUnlock,campaignMilestoneProgress} from '../src/campaign-progression.js';
+import {campaignProgress,recordCampaignVictory,expeditionUnlock,campaignMilestoneProgress,canStartNextExpedition} from '../src/campaign-progression.js';
+import {prepareRosterParty,returnPartyToRoster} from '../src/hero-roster.js';
+import {advanceTownWeek} from '../src/town-week.js';
 test('Clays campaign milestones persist across save and load',()=>{
  const settlement=createCampaignSettlement();
  assert.equal(campaignProgress(settlement).completed,0);
@@ -64,6 +66,28 @@ test('complete campaign progression survives repeated settlement save/load trans
  assert.equal(campaignProgress(settlement).completed,4);
  assert.equal(settlement.completedExpeditions,5);
  assert.deepEqual(settlement.campaignVictories,['veteran-victory','champion-victory']);
+});
+
+test('expedition return, town-week recovery, and next-quest gate survive reload',()=>{
+ let settlement=createCampaignSettlement();
+ const party=prepareRosterParty(settlement);
+ const expedition={phase:'victory',tier:'apprentice',region:'crypt',party,
+  rosterReturned:false,townWeekProcessed:false,rewardClaimed:false,traitsProcessed:true};
+ assert.equal(canStartNextExpedition(expedition).allowed,false);
+ assert.equal(returnPartyToRoster(settlement,expedition),true);
+ assert.equal(returnPartyToRoster(settlement,expedition),false);
+ assert.equal(canStartNextExpedition(expedition).allowed,false);
+ const weekBefore=settlement.town.week;
+ assert.equal(advanceTownWeek(settlement,expedition),true);
+ assert.equal(advanceTownWeek(settlement,expedition),false);
+ assert.equal(settlement.town.week,weekBefore+1);
+ assert.equal(canStartNextExpedition(expedition).allowed,false);
+ expedition.rewardClaimed=true;
+ assert.equal(canStartNextExpedition(expedition).allowed,true);
+ ({settlement}=decodeCampaignSave(encodeCampaignSave(settlement,expedition)));
+ assert.equal(settlement.town.week,weekBefore+1);
+ assert.equal(settlement.roster.length,4);
+ assert.equal(prepareRosterParty(settlement).length,4);
 });
 
 test('campaign milestone counters show bounded progress and useful next steps',()=>{
