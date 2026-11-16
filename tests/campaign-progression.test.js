@@ -39,6 +39,33 @@ test('Campaign unlocks advance from Crypt to Warrens, Veteran, then Champion',()
  assert.equal(expeditionUnlock(settlement,'unknown','apprentice').unlocked,false);
 });
 
+test('complete campaign progression survives repeated settlement save/load transitions',()=>{
+ let settlement=createCampaignSettlement();
+ const persist=()=>{settlement=decodeCampaignSave(encodeCampaignSave(settlement,null)).settlement;};
+ const win=(region,tier)=>{
+  settlement.completedExpeditions++;
+  recordCampaignVictory(settlement,{phase:'victory',rewardClaimed:true,region,tier});
+  persist();
+ };
+ assert.equal(campaignProgress(settlement).finished,false);
+ assert.equal(expeditionUnlock(settlement,'plague','apprentice').unlocked,false);
+ win('crypt','apprentice');
+ assert.equal(expeditionUnlock(settlement,'plague','apprentice').unlocked,true);
+ win('plague','apprentice');
+ assert.equal(expeditionUnlock(settlement,'plague','veteran').unlocked,false);
+ win('crypt','apprentice');
+ assert.equal(expeditionUnlock(settlement,'plague','veteran').unlocked,true);
+ assert.equal(expeditionUnlock(settlement,'plague','champion').unlocked,false);
+ win('plague','veteran');
+ assert.equal(expeditionUnlock(settlement,'plague','champion').unlocked,true);
+ assert.equal(campaignProgress(settlement).finished,false);
+ win('plague','champion');
+ assert.equal(campaignProgress(settlement).finished,true);
+ assert.equal(campaignProgress(settlement).completed,4);
+ assert.equal(settlement.completedExpeditions,5);
+ assert.deepEqual(settlement.campaignVictories,['veteran-victory','champion-victory']);
+});
+
 test('campaign milestone counters show bounded progress and useful next steps',()=>{
  const settlement={completedExpeditions:2,campaignVictories:[]};
  const goals=campaignMilestoneProgress(settlement);
