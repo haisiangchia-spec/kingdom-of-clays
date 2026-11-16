@@ -63,6 +63,7 @@ export function completeCampaignExpedition(settlement,expedition){
  if(!Array.isArray(settlement.campaignVictories))throw Error('Invalid campaign victories');
  if(!Array.isArray(expedition.log))throw Error('Invalid expedition log');
  if(!['crypt','plague'].includes(expedition.region)||!['apprentice','veteran','champion'].includes(expedition.tier))throw Error('Invalid expedition region or tier');
+ if(expedition.region==='crypt'&&expedition.tier!=='apprentice')throw Error('Only Apprentice Ashen Crypt expeditions are supported');
  if(expedition.questId!==undefined){
   const contracts={
    'crypt-recon':['crypt','apprentice'],
