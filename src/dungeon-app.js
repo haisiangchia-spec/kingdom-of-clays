@@ -1,6 +1,6 @@
 import {availableQuests,selectQuest} from './quest-board.js';
 import {campaignProgress,campaignMilestoneProgress,completeCampaignExpedition,canStartNextExpedition,expeditionUnlock} from './campaign-progression.js';
-import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,questObjectiveProgress,bonusObjectiveProgress,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,campMeal,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
+import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,questObjectiveProgress,bonusObjectiveProgress,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,campMeal,useCampSkill,finishCamp,CAMP_SKILLS,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
@@ -436,7 +436,29 @@ function render(){
      render();
    });
    torchButton.disabled=expedition.supplies.torch<=0||expedition.torch>=100;
-   if((expedition.firewood??0)>0){
+   if(expedition.camp){
+     el('p','Camping respite remaining: '+expedition.camp.respite,supplies);
+     for(const [key,skill] of Object.entries(CAMP_SKILLS)){
+       if(skill.preventAmbush){
+         const button=el('button',skill.name+' ('+skill.cost+' respite)',supplies,()=>{
+           try{useCampSkill(expedition,key);}catch(error){expedition.log.push(error.message);}
+           render();
+         });
+         button.disabled=expedition.camp.respite<skill.cost;
+       }else for(const hero of expedition.party.filter(h=>!h.dead)){
+         const button=el('button',skill.name+' → '+hero.name+' ('+skill.cost+')',supplies,()=>{
+           try{useCampSkill(expedition,key,hero.id);}catch(error){expedition.log.push(error.message);}
+           render();
+         });
+         button.disabled=expedition.camp.respite<skill.cost;
+       }
+     }
+     el('button','Finish camp',supplies,()=>{
+       try{finishCamp(expedition);}catch(error){expedition.log.push(error.message);}
+       render();
+     });
+   }
+   if(!expedition.camp&&(expedition.firewood??0)>0){
      const camping=el('button','Camp: 8-food feast (+25% HP, -10 stress)',supplies,()=>{
        try{campMeal(expedition,8);}catch(error){expedition.log.push(error.message);}
        render();
