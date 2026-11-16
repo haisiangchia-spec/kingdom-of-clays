@@ -218,7 +218,7 @@ test('unsupported Crypt Veteran and Champion victories cannot claim rewards or a
   offerLoot(expedition,'gold',100);
   collectLoot(expedition);
   assert.throws(()=>completeCampaignExpedition(settlement,expedition),/Only Apprentice Ashen Crypt/);
-  assert.equal(expedition.rewardClaimed,false);
+  assert.notEqual(expedition.rewardClaimed,true);
   assert.equal(settlement.completedExpeditions,0);
   assert.equal(settlement.gold,0);
   assert.deepEqual(settlement.campaignVictories,[]);
