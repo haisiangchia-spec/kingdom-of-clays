@@ -280,3 +280,45 @@ test('browser completes a multi-room expedition and claims its victory rewards',
  await page.getByRole('button',{name:'New expedition'}).click();
  await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
 });
+
+test('browser resolves an entire corridor battle using only player combat controls',async ({page})=>{
+ test.setTimeout(90000);
+ await page.goto('/dungeon.html');
+ await page.getByRole('button',{name:'Travel to Ashen Gallery'}).click();
+ await page.getByRole('button',{name:'Advance corridor'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+ let turns=0;
+ while(turns++<120){
+  const phase=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   return decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY)).expedition.phase;
+  });
+  if(phase!=='combat')break;
+  const enemyNames=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+   return expedition.pendingBattle.battle.units.filter(u=>u.side==='enemy'&&!u.dead&&!u.corpse).map(u=>u.name);
+  });
+  let acted=false;
+  for(const skill of await page.locator('#dungeon-combat button[aria-pressed]').all()){
+   await skill.click();
+   for(const enemy of enemyNames){
+    const target=page.locator('#dungeon-combat button').filter({hasText:enemy});
+    if(await target.count()){
+     await target.first().click();
+     acted=true;break;
+    }
+   }
+   if(acted)break;
+  }
+  if(!acted)await page.getByRole('button',{name:'Pass turn'}).click();
+ }
+ expect(turns).toBeLessThan(121);
+ const result=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {phase:expedition.phase,cleared:expedition.corridors['entrance-gallery']?.encounterCleared??false};
+ });
+ expect(['explore','defeat','victory']).toContain(result.phase);
+ if(result.phase==='explore')expect(result.cleared).toBe(true);
+});
