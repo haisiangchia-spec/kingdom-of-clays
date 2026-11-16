@@ -132,3 +132,27 @@ test('browser defeat returns survivors to town and permits a new expedition afte
  await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
  await expect(page.locator('#dungeon-party .dungeon-unit')).toHaveCount(4);
 });
+
+test('browser exploration resumes mid-corridor after reload without resetting progress',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.getByRole('button',{name:'Travel to Ashen Gallery'}).click();
+ await expect(page.getByRole('button',{name:'Advance corridor'})).toBeVisible();
+ const before=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {seed:expedition.seed,from:expedition.pendingTravel.from,to:expedition.pendingTravel.to,
+   progress:expedition.pendingTravel.progress,steps:expedition.pendingTravel.steps};
+ });
+ expect(before).toMatchObject({from:'entrance',to:'gallery',progress:0});
+ await page.reload();
+ await expect(page.getByRole('button',{name:'Advance corridor'})).toBeVisible();
+ const after=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {seed:expedition.seed,from:expedition.pendingTravel.from,to:expedition.pendingTravel.to,
+   progress:expedition.pendingTravel.progress,steps:expedition.pendingTravel.steps};
+ });
+ expect(after).toEqual(before);
+ await page.getByRole('button',{name:'Advance corridor'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+});
