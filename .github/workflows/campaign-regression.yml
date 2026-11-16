@@ -118,6 +118,7 @@ jobs:
           FOCUSED: ${{ steps.focused.outcome }}
           FULL: ${{ steps.full.outcome }}
           ENDURANCE: ${{ steps.endurance.outcome }}
+          MULTI_TIER: ${{ steps.multi_tier.outcome }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           title="Automated campaign verification status"
@@ -171,6 +172,8 @@ jobs:
         env:
           FOCUSED: ${{ steps.focused.outcome }}
           FULL: ${{ steps.full.outcome }}
+          ENDURANCE: ${{ steps.endurance.outcome }}
+          MULTI_TIER: ${{ steps.multi_tier.outcome }}
         run: |
           test "$FOCUSED" = success
           test "$FULL" = success
