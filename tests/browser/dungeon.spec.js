@@ -121,6 +121,13 @@ test('browser defeat returns survivors to town and permits a new expedition afte
    processed:expedition.townWeekProcessed,week:settlement.town.week};
  });
  expect(state).toMatchObject({dead:true,returned:true,processed:true,week:2});
+ await page.locator('#hero-roster button').filter({hasText:/Recruit /}).first().click();
+ const replacement=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('/src/settlement.js');
+  const {settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return settlement.roster.at(-1).rosterId;
+ });
+ await page.locator('#hero-roster select').first().selectOption(replacement);
  await page.getByRole('button',{name:'New expedition'}).click();
  await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
  await expect(page.locator('#dungeon-party .dungeon-unit')).toHaveCount(4);
