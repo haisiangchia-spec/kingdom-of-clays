@@ -493,7 +493,7 @@ function render(){
        try{campMeal(expedition,8);}catch(error){expedition.log.push(error.message);}
        render();
      });
-     camping.disabled=expedition.room==='entrance'||!expedition.cleared.includes(expedition.room)||
+     camping.disabled=expedition.room==='entrance'||!(expedition.cleared.includes(expedition.room)||DUNGEON_ROOMS[expedition.room]?.encounter===false)||
        !!expedition.pendingTravel||!!expedition.pendingLoot||!!expedition.pendingHunger||
        expedition.supplies.food<8;
    }
