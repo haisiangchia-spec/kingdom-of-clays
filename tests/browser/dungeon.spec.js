@@ -1082,6 +1082,50 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
       watchCleared:expedition.cleared.includes('watch')};
     });
     expect(persistedBacktrack).toEqual(backtrack);
+    for(let step=0;step<12;step++){
+     const state=await page.evaluate(async ()=>{
+      const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+      const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+      return {room:expedition.room,phase:expedition.phase,
+       pendingTravel:!!expedition.pendingTravel,pendingLoot:!!expedition.pendingLoot,
+       pendingHunger:!!expedition.pendingHunger};
+     });
+     if(state.room==='gallery'||state.phase!=='explore')break;
+     if(state.pendingLoot){
+      const collect=page.getByRole('button',{name:'Collect treasure'});
+      const leave=page.getByRole('button',{name:'Leave treasure'});
+      if(await collect.count())await collect.click();
+      else if(await leave.count())await leave.click();
+     }else if(state.pendingHunger){
+      await page.getByRole('button',{name:'Eat four food'}).click();
+     }else if(state.pendingTravel){
+      await page.getByRole('button',{name:'Advance corridor'}).click();
+     }else break;
+    }
+    const galleryReturn=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {room:expedition.room,phase:expedition.phase,
+      watchCleared:expedition.cleared.includes('watch')};
+    });
+    if(galleryReturn.phase==='explore'){
+     expect(galleryReturn).toEqual({room:'gallery',phase:'explore',watchCleared:true});
+     await expect(page.getByRole('button',{name:'Travel to Plague Cache'})).toBeVisible();
+     await page.getByRole('button',{name:'Travel to Plague Cache'}).click();
+     const vaultRoute=await page.evaluate(async ()=>{
+      const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+      const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+      return {room:expedition.room,phase:expedition.phase,
+       destination:expedition.pendingTravel?.to,
+       corridor:expedition.pendingTravel?.corridor};
+     });
+     expect(vaultRoute).toEqual({room:'gallery',phase:'explore',
+      destination:'vault',corridor:'gallery-vault'});
+     await page.reload();
+     await expect(page.getByRole('button',{name:'Advance corridor'})).toBeVisible();
+    }else{
+     expect(galleryReturn.phase).toBe('combat');
+    }
    }
   }
  }
