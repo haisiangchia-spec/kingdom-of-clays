@@ -168,11 +168,12 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
    }
   }
  }
- let steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0,torchesUsed=0,foodHeals=0,campsUsed=0,curativesUsed=0,skiverEncounters=0,fourEnemyEncounters=0;
+ let finalEnemyComposition=[],steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0,torchesUsed=0,foodHeals=0,campsUsed=0,curativesUsed=0,skiverEncounters=0,fourEnemyEncounters=0;
  while(d.phase==='explore'||d.phase==='combat'){
   assert.ok(++steps<1000,'expedition stalled: '+questId+' '+seed);
   if(d.phase==='combat'){
    const report=playEncounter(d);
+   finalEnemyComposition=report.enemyComposition;
    if(report.enemyComposition.includes('plagueSkiver'))skiverEncounters++;
    if(report.enemyComposition.length===4)fourEnemyEncounters++;
    battles++;
@@ -235,7 +236,7 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
  assert.ok(skills>0,'expedition did not execute combat skills');
  assert.equal(d.pendingBattle,null);
  if(d.phase==='victory')assert.ok(questObjectiveProgress(d).every(x=>x.complete));
- return {phase:d.phase,difficulty:quest.difficulty,battles,skills,heroSkills,enemySkills,heals,torchesUsed,foodHeals,campsUsed,curativesUsed,skiverEncounters,fourEnemyEncounters,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
+ return {phase:d.phase,difficulty:quest.difficulty,battles,skills,heroSkills,enemySkills,heals,torchesUsed,foodHeals,campsUsed,curativesUsed,skiverEncounters,fourEnemyEncounters,finalEnemyComposition,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
 }
 test('expedition benchmark uses each quest difficulty, not the default scout setting',()=>{
  for(const quest of QUESTS){
