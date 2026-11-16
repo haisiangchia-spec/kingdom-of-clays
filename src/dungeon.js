@@ -66,6 +66,29 @@ export function useProvision(dungeon,type,heroId=null){
  }
  return dungeon;
 }
+// Expedition purchases are permitted only at the entrance, before moving.
+// Prices are provisional Clays values, not verified DD1 shop prices.
+export const PROVISION_PRICES=Object.freeze({antivenom:150,bandage:150,medicinalHerbs:200,laudanum:100,torch:75,food:75});
+export function purchaseProvision(dungeon,settlement,type,quantity=1){
+ if(dungeon.phase!=='explore'||dungeon.room!=='entrance'||dungeon.stepsTaken!==0||dungeon.pendingTravel||dungeon.pendingBattle)
+  throw Error('Provisions can only be purchased before departure');
+ if(!Object.hasOwn(PROVISION_PRICES,type)||!Number.isInteger(quantity)||quantity<1)
+  throw Error('Invalid provision purchase');
+ const cost=PROVISION_PRICES[type]*quantity;
+ if(!settlement||!Number.isFinite(settlement.gold)||settlement.gold<cost)throw Error('Insufficient gold');
+ const old=dungeon.supplies[type]??0;
+ dungeon.supplies[type]=old+quantity;
+ // Inventory uses the same supply counters; roll back on insufficient space.
+ // Imported lazily by using the existing eight-slot backpack capacity rules.
+ const stacks=Object.entries(dungeon.supplies).reduce((n,[kind,count])=>{
+  const size={torch:2,food:4,antivenom:6,bandage:6,medicinalHerbs:6,laudanum:6}[kind];
+  return n+(size?Math.ceil(count/size):0);
+ },0)+(dungeon.curioSupplies?.holyWater??0)+(dungeon.inventory??[]).length;
+ if(stacks>8){dungeon.supplies[type]=old;throw Error('Inventory full');}
+ settlement.gold-=cost;
+ dungeon.log.push('Purchased '+quantity+' '+type+' for '+cost+' gold');
+ return dungeon;
+}
 // DD1-inspired meal and firewood rules. Camping skills and ambushes remain
 // separate future mechanics; this API does not claim complete camping parity.
 export function campMeal(dungeon,food=4){
