@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createCampaignSettlement,expeditionBonuses,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
+import {createCampaignSettlement,expeditionBonuses,encodeCampaignSave,decodeCampaignSave,upgradeFacility,nextFacilityCost} from '../src/settlement.js';
 import {selectQuest} from '../src/quest-board.js';
 import {completeCampaignExpedition,campaignProgress} from '../src/campaign-progression.js';
-import {prepareRosterParty,returnPartyToRoster,selectHero} from '../src/hero-roster.js';
-import {advanceTownWeek,recruitFromCoach} from '../src/town-week.js';
+import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket} from '../src/hero-roster.js';
+import {advanceTownWeek,recruitFromCoach,bookStressTreatment} from '../src/town-week.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger} from '../src/dungeon.js';
 import {leaveLoot} from '../src/inventory.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from '../src/engine.js';
@@ -70,10 +70,28 @@ function fillSquad(town){
  }
  return true;
 }
+function prepareTown(town){
+ // All upgrades and services go through public gameplay actions, using earned resources.
+ for(const facility of ['guild','temple','market']){
+  const cost=nextFacilityCost(town,facility);
+  if(cost&&Object.entries(cost).every(([resource,amount])=>(town[resource]??0)>=amount))
+   upgradeFacility(town,facility);
+ }
+ for(const hero of town.roster){
+  if(hero.unit.dead&&town.facilities.temple>0&&town.gold>=250)resurrectHero(town,hero.rosterId);
+  if(!hero.unit.dead&&town.trinkets.includes('ward-charm')&&!hero.equippedTrinket)
+   equipTrinket(town,hero.rosterId);
+ }
+ for(const hero of town.roster.filter(h=>!h.unit.dead&&h.unit.stress>=65)){
+  const service=['abbey','tavern'].find(s=>!town.town.treatments.some(t=>t.service===s));
+  if(service&&town.gold>=1000)bookStressTreatment(town,hero.rosterId,service);
+ }
+}
 function campaign(seed){
  let town=createCampaignSettlement();
  const history=[];
  for(let week=0;week<20;week++){
+  prepareTown(town);
   if(!fillSquad(town))break;
   const veteranWon=town.campaignVictories.includes('veteran-victory');
   const id=veteranWon?'warrens-champion':
