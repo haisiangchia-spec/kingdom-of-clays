@@ -117,8 +117,8 @@ export function finishCamp(dungeon){
  dungeon.camp=null;
  const ambushed=!camp.preventAmbush&&rng(encounterSeed(dungeon.seed,'camp:'+dungeon.room+':'+dungeon.firewood))()<1/3;
  if(ambushed){
-  for(const hero of dungeon.party.filter(h=>!h.dead))hero.stress=Math.min(200,(hero.stress??0)+5);
   dungeon.log.push('The camp is ambushed in the night');
+  startBattle(dungeon,'camp:'+dungeon.room,dungeon.difficulty==='gauntlet'?'patrol':'scout');
  }else dungeon.log.push('The camp rests undisturbed');
  return {ambushed};
 }
@@ -390,7 +390,9 @@ export function resolveDungeonBattle(dungeon){
  if(result==='defeat'){
    dungeon.phase='defeat';dungeon.log.push('The expedition has fallen');
  }else{
-   if(source.startsWith('corridor:')){
+   if(source.startsWith('camp:')){
+     dungeon.log.push('The party survives the nighttime ambush');
+   }else if(source.startsWith('corridor:')){
      const id=source.slice(9);
      dungeon.corridors[id].encounterCleared=true;
    }else{
@@ -399,7 +401,7 @@ export function resolveDungeonBattle(dungeon){
    }
    dungeon.phase=questObjectiveComplete(dungeon)?'victory':'explore';
    dungeon.log.push('Encounter cleared: '+source);
-   if(dungeon.interactiveEvents){
+   if(dungeon.interactiveEvents&&!source.startsWith('camp:')){
      // Distinct source-specific rewards, including the final victory encounter.
      // All amounts are provisional Clays balancing values.
      const drops={
