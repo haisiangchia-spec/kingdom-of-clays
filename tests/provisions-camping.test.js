@@ -95,6 +95,7 @@ test('active camp blocks corridor travel and provisions until camp ends',()=>{
  campMeal(d,2);
  assert.throws(()=>beginCorridor(d,'entrance'),/Finish camping/);
  assert.throws(()=>useProvision(d,'torch'),/Finish camping/);
+ useCampSkill(d,'sanctuary');
  finishCamp(d);
  assert.doesNotThrow(()=>beginCorridor(d,'entrance'));
 });
