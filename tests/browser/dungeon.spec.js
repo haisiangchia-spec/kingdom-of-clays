@@ -1058,6 +1058,31 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
      watchComplete:questObjectiveProgress(expedition).find(x=>x.room==='watch').complete};
    });
    expect(persistedWatchOutcome).toEqual(watchOutcome);
+   if(watchOutcome.phase==='explore'){
+    // The Vault branch is reached by backtracking to the gallery.
+    await expect(page.getByRole('button',{name:'Travel to Fungal Passage'})).toBeVisible();
+    await page.getByRole('button',{name:'Travel to Fungal Passage'}).click();
+    const backtrack=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {room:expedition.room,phase:expedition.phase,
+      corridor:expedition.pendingTravel?.corridor,
+      destination:expedition.pendingTravel?.to,
+      watchCleared:expedition.cleared.includes('watch')};
+    });
+    expect(backtrack).toEqual({room:'watch',phase:'explore',
+     corridor:'gallery-watch',destination:'gallery',watchCleared:true});
+    await page.reload();
+    const persistedBacktrack=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {room:expedition.room,phase:expedition.phase,
+      corridor:expedition.pendingTravel?.corridor,
+      destination:expedition.pendingTravel?.to,
+      watchCleared:expedition.cleared.includes('watch')};
+    });
+    expect(persistedBacktrack).toEqual(backtrack);
+   }
   }
  }
 
