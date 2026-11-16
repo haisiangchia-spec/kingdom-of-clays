@@ -660,6 +660,27 @@ test('browser travels onward after resolving its first corridor fight through co
     });
     expect(persisted).toMatchObject({completed:1,room:'entrance',cleared:[]});
     expect(persisted.visited).not.toContain('sanctum');
+    await expect(page.getByRole('button',{name:'Travel to Ashen Gallery'})).toBeVisible();
+    await page.getByRole('button',{name:'Travel to Ashen Gallery'}).click();
+    await expect(page.getByRole('button',{name:'Advance corridor'})).toBeVisible();
+    await page.getByRole('button',{name:'Advance corridor'}).click();
+    const secondRun=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {completed:settlement.completedExpeditions,phase:expedition.phase,room:expedition.room,
+      travel:!!expedition.pendingTravel,combat:!!expedition.pendingBattle};
+    });
+    expect(secondRun.completed).toBe(1);
+    expect(secondRun.room).toBe('entrance');
+    expect(secondRun.travel||secondRun.combat).toBe(true);
+    await page.reload();
+    const secondRestored=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {completed:settlement.completedExpeditions,phase:expedition.phase,room:expedition.room,
+      travel:!!expedition.pendingTravel,combat:!!expedition.pendingBattle};
+    });
+    expect(secondRestored).toEqual(secondRun);
    }
   }
  }
