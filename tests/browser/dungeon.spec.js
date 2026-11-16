@@ -681,6 +681,23 @@ test('browser travels onward after resolving its first corridor fight through co
       travel:!!expedition.pendingTravel,combat:!!expedition.pendingBattle};
     });
     expect(secondRestored).toEqual(secondRun);
+    const milestone=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {campaignMilestoneProgress,expeditionUnlock}=await import('/src/campaign-progression.js');
+     const {availableQuests}=await import('/src/quest-board.js');
+     const {settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {goals:campaignMilestoneProgress(settlement).map(g=>({id:g.id,complete:g.complete,current:g.current})),
+      veteran:expeditionUnlock(settlement,'plague','veteran').unlocked,
+      champion:expeditionUnlock(settlement,'plague','champion').unlocked,
+      apprentice:availableQuests(settlement).filter(q=>q.tier==='apprentice'&&q.unlocked).length};
+    });
+    expect(milestone.goals.length).toBe(4);
+    expect(milestone.goals[0].complete).toBe(true);
+    expect(milestone.goals[0].current).toBeGreaterThanOrEqual(1);
+    expect(milestone.veteran).toBe(false);
+    expect(milestone.champion).toBe(false);
+    expect(milestone.apprentice).toBeGreaterThan(0);
+    await expect(page.locator('#settlement-panel')).toContainText('Campaign Objectives');
    }
   }
  }
