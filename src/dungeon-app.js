@@ -550,5 +550,15 @@ function render(){
  persistCampaign();
  $('campaign-save-status').textContent=saveError||'Progress saves automatically in this browser';
 }
+$('dungeon-region').addEventListener('change',()=>{
+ // Refresh tier availability for the newly chosen region before the player
+ // selects a quest. A completed expedition leaves both selectors editable.
+ selectedQuestId=null;
+ render();
+});
+$('dungeon-tier').addEventListener('change',()=>{
+ selectedQuestId=null;
+ render();
+});
 $('dungeon-restart').onclick=startExpedition;
 if(restoreCampaign()){$('dungeon-region').value=expedition.region??'crypt';$('dungeon-tier').value=expedition.tier??'apprentice';syncCombat();render();}else startExpedition();
