@@ -49,7 +49,7 @@ test('supplies are unavailable in combat and failed actions do not consume items
  assert.equal(dungeon.phase,'combat');
  assert.throws(()=>useProvision(dungeon,'torch'),/during combat/);
  assert.throws(()=>useProvision(dungeon,'food','h1'),/during combat/);
- assert.deepEqual(dungeon.supplies,{torch:3,food:8});
+ assert.deepEqual(dungeon.supplies,{torch:3,food:8,antivenom:0,bandage:0,medicinalHerbs:0,laudanum:0});
 });
 test('late corridor traps are checked once with deterministic damage and stress',()=>{
  const a=createDungeon(95),b=createDungeon(95);
