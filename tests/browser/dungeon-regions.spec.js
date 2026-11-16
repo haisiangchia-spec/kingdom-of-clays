@@ -147,21 +147,26 @@ test('Champion Warrens expedition selection persists and generates Champion comb
  expect(saved.foes).toContain('plagueSkiver');
 });
 
-test('Unsupported Champion Crypt selection preserves completed expedition',async ({page})=>{
+test('Unsupported Champion Crypt tier is reset to Apprentice without overwriting prior victory',async ({page})=>{
  await page.goto('/dungeon.html');
  await page.evaluate(async ()=>{
   const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const {createDungeon}=await import('./src/dungeon.js');
-  const settlement=createCampaignSettlement();settlement.completedExpeditions=3;settlement.campaignVictories.push('veteran-victory');
+  const settlement=createCampaignSettlement();
+  settlement.completedExpeditions=3;
+  settlement.campaignVictories.push('veteran-victory');
   const dungeon=createDungeon(763);
   dungeon.phase='victory';dungeon.rosterReturned=true;dungeon.townWeekProcessed=true;dungeon.rewardClaimed=true;
   localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,dungeon));
  });
  await page.reload();
  await page.locator('#dungeon-region').selectOption('crypt');
- await page.locator('#dungeon-tier').evaluate(el=>{el.value='champion';el.dispatchEvent(new Event('change',{bubbles:true}));});
- await page.getByRole('button',{name:'New expedition'}).click();
- await expect(page.locator('#dungeon-log')).toContainText('Veteran and Champion expeditions are currently available only in Blighted Warrens');
+ await page.locator('#dungeon-tier').evaluate(el=>{
+  el.value='champion';
+  el.dispatchEvent(new Event('change',{bubbles:true}));
+ });
+ await expect(page.locator('#dungeon-tier option[value="champion"]')).toBeDisabled();
+ // The invalid tier is never allowed to embark; the previous victory remains saved.
  const persisted=await page.evaluate(async ()=>{
   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
@@ -169,6 +174,7 @@ test('Unsupported Champion Crypt selection preserves completed expedition',async
  });
  expect(persisted).toEqual({phase:'victory',region:'crypt',tier:'apprentice',seed:763});
 });
+
 
 
 test('Veteran Warrens selection survives reload and retains provisional combat tier',async ({page})=>{
@@ -212,21 +218,26 @@ test('Veteran Warrens selection survives reload and retains provisional combat t
 });
 
 
-test('Unsupported Veteran Crypt selection preserves completed expedition',async ({page})=>{
+test('Unsupported Veteran Crypt tier is reset to Apprentice without overwriting prior victory',async ({page})=>{
  await page.goto('/dungeon.html');
  await page.evaluate(async ()=>{
   const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const {createDungeon}=await import('./src/dungeon.js');
-  const settlement=createCampaignSettlement();settlement.completedExpeditions=3;settlement.campaignVictories.push('veteran-victory');
+  const settlement=createCampaignSettlement();
+  settlement.completedExpeditions=3;
+  settlement.campaignVictories.push('veteran-victory');
   const dungeon=createDungeon(763);
   dungeon.phase='victory';dungeon.rosterReturned=true;dungeon.townWeekProcessed=true;dungeon.rewardClaimed=true;
   localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,dungeon));
  });
  await page.reload();
  await page.locator('#dungeon-region').selectOption('crypt');
- await page.locator('#dungeon-tier').evaluate(el=>{el.value='veteran';el.dispatchEvent(new Event('change',{bubbles:true}));});
- await page.getByRole('button',{name:'New expedition'}).click();
- await expect(page.locator('#dungeon-log')).toContainText('Veteran and Champion expeditions are currently available only in Blighted Warrens');
+ await page.locator('#dungeon-tier').evaluate(el=>{
+  el.value='veteran';
+  el.dispatchEvent(new Event('change',{bubbles:true}));
+ });
+ await expect(page.locator('#dungeon-tier option[value="veteran"]')).toBeDisabled();
+ // The invalid tier is never allowed to embark; the previous victory remains saved.
  const persisted=await page.evaluate(async ()=>{
   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
@@ -234,3 +245,4 @@ test('Unsupported Veteran Crypt selection preserves completed expedition',async 
  });
  expect(persisted).toEqual({phase:'victory',region:'crypt',tier:'apprentice',seed:763});
 });
+
