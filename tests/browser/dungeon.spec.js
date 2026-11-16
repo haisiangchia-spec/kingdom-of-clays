@@ -328,6 +328,8 @@ test('browser resolves an entire corridor battle using only player combat contro
 
 test('browser travels onward after resolving its first corridor fight through combat controls',async ({page})=>{
  test.setTimeout(90000);
+ // Keep the campaign reproducible: production still uses a random seed.
+ await page.addInitScript(()=>{Math.random=()=>321/0xffffffff;});
  await page.goto('/dungeon.html');
  await page.getByRole('button',{name:'Travel to Ashen Gallery'}).click();
  await page.getByRole('button',{name:'Advance corridor'}).click();
