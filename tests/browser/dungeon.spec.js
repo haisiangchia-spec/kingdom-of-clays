@@ -824,6 +824,22 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
   return questObjectiveProgress(expedition);
  });
  expect(championObjectives).toEqual(['watch','vault','sanctum'].map(room=>({room,complete:false})));
+ // The Champion launch must also permit real UI-driven travel into a live encounter.
+ await page.getByRole('button',{name:'Travel to Fungal Passage'}).click();
+ await expect(page.getByRole('button',{name:'Advance corridor'})).toBeVisible();
+ await page.getByRole('button',{name:'Advance corridor'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+ const championBattle=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {quest:expedition.questId,tier:expedition.tier,phase:expedition.phase,
+   enemies:expedition.pendingBattle?.battle?.units.filter(u=>u.side==='enemy'&&!u.dead).length??0};
+ });
+ expect(championBattle).toMatchObject({quest:'warrens-champion',tier:'champion',phase:'combat'});
+ expect(championBattle.enemies).toBeGreaterThan(0);
+ await page.reload();
+ await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+
  // Exercise the objective checklist across saved room clearances without
  // bypassing the normal browser launch and quest-selection flow.
  await page.evaluate(async ()=>{
