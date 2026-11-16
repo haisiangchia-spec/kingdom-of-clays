@@ -71,6 +71,31 @@ test('real automated combat resolves across campaign encounter tiers and reports
  }
 });
 
+test('champion encounter diagnostics distinguish encounter tiers and action economy',()=>{
+ const results=[];
+ for(let seed=1;seed<=30;seed++){
+  const battle=makeGeneratedEncounter(seed,'patrol','plague','champion');
+  const encounterTier=battle.encounterPlan?.tier??'unknown';
+  const enemies=battle.units.filter(u=>u.side==='enemy');
+  const heroes=battle.units.filter(u=>u.side==='hero');
+  const outcome=fight(seed,'champion');
+  results.push({seed,encounterTier,outcome:outcome.outcome,actions:outcome.actions,
+   enemyCount:enemies.length,enemyTotalHp:enemies.reduce((n,u)=>n+u.hp,0),
+   heroTotalHp:heroes.reduce((n,u)=>n+u.hp,0),fallen:outcome.heroes.filter(u=>u.dead).length});
+ }
+ const groups=Object.groupBy(results,x=>x.encounterTier);
+ for(const [tier,items] of Object.entries(groups)){
+  console.log('Champion diagnostics '+JSON.stringify({encounterTier:tier,samples:items.length,
+   wins:items.filter(x=>x.outcome==='victory').length,
+   meanEnemyHp:items.reduce((n,x)=>n+x.enemyTotalHp,0)/items.length,
+   meanHeroHp:items.reduce((n,x)=>n+x.heroTotalHp,0)/items.length,
+   meanActions:items.reduce((n,x)=>n+x.actions,0)/items.length,
+   fallen:items.reduce((n,x)=>n+x.fallen,0)}));
+ }
+ assert.equal(results.length,30);
+ assert.ok(results.every(x=>x.outcome!=='ongoing'));
+});
+
 test('seeded combat outcomes and casualty metrics are reproducible',()=>{
  for(const tier of ['apprentice','veteran','champion']){
   for(const seed of [2,7,19]){
