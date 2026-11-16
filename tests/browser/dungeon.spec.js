@@ -925,6 +925,25 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
    travelling:true,phase:'explore'});
   await page.reload();
   await expect(page.getByRole('button',{name:'Advance corridor'})).toBeVisible();
+  await page.getByRole('button',{name:'Advance corridor'}).click();
+  const watchAdvance=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+   return {quest:expedition.questId,phase:expedition.phase,
+    room:expedition.room,pendingTravel:!!expedition.pendingTravel,
+    corridor:expedition.pendingTravel?.to??null};
+  });
+  expect(watchAdvance.quest).toBe('warrens-champion');
+  expect(['explore','combat','defeat']).toContain(watchAdvance.phase);
+  await page.reload();
+  const persistedWatchAdvance=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+   return {quest:expedition.questId,phase:expedition.phase,
+    room:expedition.room,pendingTravel:!!expedition.pendingTravel,
+    corridor:expedition.pendingTravel?.to??null};
+  });
+  expect(persistedWatchAdvance).toEqual(watchAdvance);
  }
 
 
