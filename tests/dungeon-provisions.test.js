@@ -4,7 +4,7 @@ import {createDungeon,useProvision,torchBand,beginCorridor,advanceCorridor} from
 
 test('expedition receives finite food and torches, and light bands respond to changes',()=>{
  const dungeon=createDungeon(91);
- assert.deepEqual(dungeon.supplies,{torch:3,food:8});
+ assert.deepEqual(dungeon.supplies,{torch:3,food:8,antivenom:0,bandage:0,medicinalHerbs:0,laudanum:0});
  assert.equal(torchBand(100),'radiant');
  assert.equal(torchBand(75),'radiant');
  assert.equal(torchBand(74),'dim');
