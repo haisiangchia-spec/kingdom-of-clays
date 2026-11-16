@@ -954,21 +954,21 @@ test('Champion gauntlet balance trial lowers four-enemy frequency without touchi
  const fourWeight=table=>table.filter(entry=>PLAGUE_TEMPLATES[entry.id].length===4)
    .reduce((n,entry)=>n+entry.weight,0);
  const champion=PLAGUE_CHAMPION_TABLES.gauntlet;
- assert.equal(weightedCount(champion),23);
+ assert.equal(weightedCount(champion),29);
  assert.equal(fourWeight(champion),2);
  assert.equal(champion.filter(entry=>PLAGUE_TEMPLATES[entry.id].length===3)
-   .reduce((n,entry)=>n+entry.weight,0),21);
+   .reduce((n,entry)=>n+entry.weight,0),27);
  assert.equal(PLAGUE_VETERAN_TABLES.gauntlet.reduce((n,e)=>n+e.weight,0),15);
  assert.equal(PLAGUE_TABLES.gauntlet.reduce((n,e)=>n+e.weight,0),15);
  let sampledFour=0;
  let sampledRelief=0;
- for(let i=0;i<2300;i++){
-  const plan=createPlagueEncounterPlan('gauntlet',()=>(i+.5)/2300,'champion');
+ for(let i=0;i<2900;i++){
+  const plan=createPlagueEncounterPlan('gauntlet',()=>(i+.5)/2900,'champion');
   if(plan.profiles.length===4)sampledFour++;
   if(plan.template==='plagueChampionRelief')sampledRelief++;
  }
  assert.equal(sampledFour,200);
- assert.equal(sampledRelief,600);
+ assert.equal(sampledRelief,1200);
 });
 
 test('Veteran patrol trial increases three-enemy encounters without changing Apprentice patrol',()=>{
