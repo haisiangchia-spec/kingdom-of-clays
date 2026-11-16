@@ -31,6 +31,7 @@ test('roughly half of Veteran and Champion encounters use the preceding tier',()
    assert.ok([tier,lower].includes(battle.encounterTier));
    if(battle.encounterTier===lower)lowerCount++;
   }
+  console.log('Encounter tier distribution '+JSON.stringify({expeditionTier:tier,samples,lowerTier:lower,lowerCount,sameTierCount:samples-lowerCount,lowerPercent:100*lowerCount/samples}));
   assert.ok(lowerCount>=140&&lowerCount<=260,
    tier+' lower-tier frequency '+lowerCount+'/'+samples+' is unexpectedly far from 50%');
  }
