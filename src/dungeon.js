@@ -66,6 +66,28 @@ export function useProvision(dungeon,type,heroId=null){
  }
  return dungeon;
 }
+// DD1-inspired meal and firewood rules. Camping skills and ambushes remain
+// separate future mechanics; this API does not claim complete camping parity.
+export function campMeal(dungeon,food=4){
+ if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingBattle||
+    dungeon.room==='entrance'||!dungeon.cleared.includes(dungeon.room))
+  throw Error('Camping requires a cleared room outside the entrance');
+ if((dungeon.firewood??0)<1)throw Error('No firewood remaining');
+ if(![0,2,4,8].includes(food))throw Error('Choose a valid camping meal');
+ const living=dungeon.party.filter(hero=>!hero.dead);
+ const cost=Math.ceil(food*living.length/4);
+ if((dungeon.supplies.food??0)<cost)throw Error('Not enough food for camping');
+ dungeon.supplies.food-=cost;
+ dungeon.firewood--;
+ for(const hero of living){
+  if(food===0){hero.hp=Math.max(0,hero.hp-Math.ceil(hero.maxHp*.2));hero.stress=Math.min(200,(hero.stress??0)+15);}
+  if(food===4)hero.hp=Math.min(hero.maxHp,hero.hp+Math.ceil(hero.maxHp*.1));
+  if(food===8){hero.hp=Math.min(hero.maxHp,hero.hp+Math.ceil(hero.maxHp*.25));hero.stress=Math.max(0,(hero.stress??0)-10);}
+ }
+ dungeon.torch=100;
+ dungeon.log.push('The party camps and consumes '+cost+' food');
+ return dungeon;
+}
 function triggerHazard(dungeon,edge){
  // A single deterministic trap check on the first forward passage through
  // each late-stage corridor, with darker light raising its probability.
@@ -233,7 +255,7 @@ export function createDungeon(seed=1,{difficulty='scout',region='crypt',tier='ap
  const layout=proceduralBranches?dungeonCorridors({seed,proceduralBranches,tier}):DUNGEON_CORRIDORS;
  const lengthBonus=tier==='champion'?2:tier==='veteran'?1:0;
  const corridorSteps=variableCorridors?Object.fromEntries(layout.map(edge=>[edge.id,2+lengthBonus+Math.floor(rng(encounterSeed(seed,'length:'+edge.id))()*3)])):null;
- return {seed,difficulty,region,tier,proceduralBranches,corridorSteps,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood,antivenom:4,bandage:3,medicinalHerbs:2,laudanum:2},hungerStressReduction,
+ return {seed,difficulty,region,tier,proceduralBranches,corridorSteps,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,firewood:difficulty==='scout'?0:difficulty==='patrol'?1:2,supplies:{torch:3,food:8+bonusFood,antivenom:4,bandage:3,medicinalHerbs:2,laudanum:2},hungerStressReduction,
   pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,inventory:[],pendingLoot:null,battleSerial:0,phase:'explore',log:['Entered '+regionRoomName(region,'entrance')]};
 }
 export function adjacentRooms(dungeon){
