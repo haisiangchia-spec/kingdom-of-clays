@@ -747,6 +747,24 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
  await expect(page.locator('#settlement-panel')).toContainText('✓ SELECTED · Veteran Warrens Expedition');
  await expect(page.locator('#dungeon-region')).toHaveValue('plague');
  await expect(page.locator('#dungeon-tier')).toHaveValue('veteran');
+ await page.getByRole('button',{name:'New expedition'}).click();
+ const launchedVeteran=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {quest:expedition.questId,region:expedition.region,tier:expedition.tier,
+   difficulty:expedition.difficulty,room:expedition.room,party:expedition.party.length,
+   completed:settlement.completedExpeditions};
+ });
+ expect(launchedVeteran).toMatchObject({quest:'warrens-veteran',region:'plague',
+  tier:'veteran',room:'entrance',party:4,completed:3});
+ await expect(page.locator('#dungeon-status')).toContainText('Warrens Entrance');
+ await page.reload();
+ const restoredVeteran=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {quest:expedition.questId,region:expedition.region,tier:expedition.tier,room:expedition.room};
+ });
+ expect(restoredVeteran).toEqual({quest:'warrens-veteran',region:'plague',tier:'veteran',room:'entrance'});
  await expect(page.locator('#settlement-panel')).toContainText('Champion Warrens Expedition — Secure both outposts and the Rotting Shrine against Champion enemies (LOCKED');
  await page.evaluate(async ()=>{
   const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
