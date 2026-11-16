@@ -551,9 +551,12 @@ function render(){
  $('campaign-save-status').textContent=saveError||'Progress saves automatically in this browser';
 }
 $('dungeon-region').addEventListener('change',()=>{
- // Refresh tier availability for the newly chosen region before the player
- // selects a quest. A completed expedition leaves both selectors editable.
+ // A tier selected in Warrens may be locked in Crypt. Reset it rather
+ // than leaving a disabled, stale selection that blocks the next quest.
  selectedQuestId=null;
+ if(!expeditionUnlock(settlement,$('dungeon-region').value,$('dungeon-tier').value).unlocked){
+  $('dungeon-tier').value='apprentice';
+ }
  render();
 });
 $('dungeon-tier').addEventListener('change',()=>{
