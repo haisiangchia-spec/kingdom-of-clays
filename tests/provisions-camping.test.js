@@ -79,13 +79,12 @@ test('entrance shop charges gold, respects capacity, and closes after departure'
 
 test('provision shop rejects full backpack without charging gold',()=>{
  const d=createDungeon(7),town={gold:10000};
- // Default food and torches occupy four of eight backpack slots.
+ // Starting supplies (including holy water) already occupy five slots.
  purchaseProvision(d,town,'antivenom',6);
  purchaseProvision(d,town,'bandage',6);
  purchaseProvision(d,town,'medicinalHerbs',6);
- purchaseProvision(d,town,'laudanum',6);
  const before=town.gold;
  assert.throws(()=>purchaseProvision(d,town,'laudanum',1),/Inventory full/);
  assert.equal(town.gold,before);
- assert.equal(d.supplies.laudanum,6);
+ assert.equal(d.supplies.laudanum,0);
 });
