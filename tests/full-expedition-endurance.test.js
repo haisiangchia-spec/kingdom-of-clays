@@ -7,7 +7,7 @@ import {chooseEnemyAction} from '../src/enemy-ai.js';
 
 // Expedition test uses real combat outcomes and persistent party HP/stress.
 // No fabricated victories, enemy deletion, or automatic hero restoration.
-function chooseHeroAction(battle,actor){
+export function chooseHeroAction(battle,actor){
  const allies=battle.units.filter(u=>u.side==='hero'&&!u.dead);
  const enemies=battle.units.filter(u=>u.side==='enemy'&&!u.dead&&!u.corpse);
  const wounded=[...allies].filter(u=>u.hp<u.maxHp).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp);
