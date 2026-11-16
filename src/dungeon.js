@@ -1,7 +1,7 @@
 // Initial Clays dungeon traversal scaffold. Room layout, event odds, and
 // travel costs are original fixtures: not yet verified DD1 dungeon rules.
 import {makeGeneratedEncounter,makeUndeadEncounter,rng,status} from './engine.js';
-import {offerLoot,collectLoot,leaveLoot} from './inventory.js';
+import {offerLoot,collectLoot,leaveLoot,inventoryUsed,INVENTORY_CAPACITY} from './inventory.js';
 import {regionCurio,regionRoomName,regionHazard} from './dungeon-regions.js';
 
 export const DUNGEON_ROOMS=Object.freeze({
@@ -78,13 +78,7 @@ export function purchaseProvision(dungeon,settlement,type,quantity=1){
  if(!settlement||!Number.isFinite(settlement.gold)||settlement.gold<cost)throw Error('Insufficient gold');
  const old=dungeon.supplies[type]??0;
  dungeon.supplies[type]=old+quantity;
- // Inventory uses the same supply counters; roll back on insufficient space.
- // Imported lazily by using the existing eight-slot backpack capacity rules.
- const stacks=Object.entries(dungeon.supplies).reduce((n,[kind,count])=>{
-  const size={torch:2,food:4,antivenom:6,bandage:6,medicinalHerbs:6,laudanum:6}[kind];
-  return n+(size?Math.ceil(count/size):0);
- },0)+(dungeon.curioSupplies?.holyWater??0)+(dungeon.inventory??[]).length;
- if(stacks>8){dungeon.supplies[type]=old;throw Error('Inventory full');}
+ if(inventoryUsed(dungeon)>INVENTORY_CAPACITY){dungeon.supplies[type]=old;throw Error('Inventory full');}
  settlement.gold-=cost;
  dungeon.log.push('Purchased '+quantity+' '+type+' for '+cost+' gold');
  return dungeon;
