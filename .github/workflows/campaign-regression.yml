@@ -44,6 +44,10 @@ jobs:
           set -o pipefail
           node --test tests/combat-endurance-smoke.test.js 2>&1 | tee combat-endurance-results.txt
           grep 'Combat endurance smoke ' combat-endurance-results.txt | sed 's/^.*Combat endurance smoke /Combat endurance smoke /' > combat-endurance-metrics.jsonl || true
+      - name: Extract encounter-tier distribution metrics
+        if: always()
+        run: |
+          grep 'Encounter tier distribution ' campaign-focused-results.txt | sed 's/^.*Encounter tier distribution /Encounter tier distribution /' > encounter-tier-metrics.jsonl || true
       - name: Run complete Node regression suite
         id: full
         continue-on-error: true
@@ -60,6 +64,7 @@ jobs:
             campaign-full-results.txt
             combat-endurance-results.txt
             combat-endurance-metrics.jsonl
+            encounter-tier-metrics.jsonl
           if-no-files-found: warn
           retention-days: 30
       - name: Summarize verification results
@@ -73,6 +78,12 @@ jobs:
           echo "- Campaign tests: $FOCUSED" >> "$GITHUB_STEP_SUMMARY"
           echo "- Full suite: $FULL" >> "$GITHUB_STEP_SUMMARY"
           echo "- Combat endurance: $ENDURANCE" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Encounter-tier distribution (400 seeds per difficulty)" >> "$GITHUB_STEP_SUMMARY"
+          if [ -s encounter-tier-metrics.jsonl ]; then
+            echo '~~~' >> "$GITHUB_STEP_SUMMARY"
+            cat encounter-tier-metrics.jsonl >> "$GITHUB_STEP_SUMMARY"
+            echo '~~~' >> "$GITHUB_STEP_SUMMARY"
+          fi
           echo "### Combat endurance metrics (seeded encounters)" >> "$GITHUB_STEP_SUMMARY"
           if [ -s combat-endurance-metrics.jsonl ]; then
             echo '```json' >> "$GITHUB_STEP_SUMMARY"
@@ -100,6 +111,13 @@ jobs:
             echo "- Focused campaign tests: $FOCUSED"
             echo "- Complete Node suite: $FULL"
             echo "- Combat endurance: $ENDURANCE"
+            echo
+            echo "### Encounter-tier distribution"
+            if [ -s encounter-tier-metrics.jsonl ]; then
+              echo '~~~'
+              cat encounter-tier-metrics.jsonl
+              echo '~~~'
+            fi
             echo
             echo "### Combat endurance metrics"
             if [ -s combat-endurance-metrics.jsonl ]; then
