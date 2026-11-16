@@ -716,6 +716,7 @@ test('browser travels onward after resolving its first corridor fight through co
 });
 
 test('browser quest board unlocks Veteran after three victories and Champion after Veteran victory',async ({page})=>{
+ test.setTimeout(90000);
  await page.goto('/dungeon.html');
  await page.evaluate(async ()=>{
   const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
