@@ -23,7 +23,11 @@ export const DUNGEON_CORRIDORS=Object.freeze([
 // Expedition supplies and hazards are Clays scaffolding, NOT DD1 parity data.
 export const EXPEDITION_SUPPLIES=Object.freeze({
  torch:Object.freeze({start:3,light:25}),
- food:Object.freeze({start:8,heal:2})
+ food:Object.freeze({start:8,heal:2}),
+ antivenom:Object.freeze({start:4}),
+ bandage:Object.freeze({start:3}),
+ medicinalHerbs:Object.freeze({start:2}),
+ laudanum:Object.freeze({start:2})
 });
 export function torchBand(value){
  if(value>=75)return 'radiant';
@@ -40,13 +44,25 @@ export function useProvision(dungeon,type,heroId=null){
    dungeon.supplies.torch--;
    dungeon.torch=Math.min(100,dungeon.torch+EXPEDITION_SUPPLIES.torch.light);
    dungeon.log.push('A torch brightens the path');
- }else{
+ }else if(type==='food'){
    const hero=dungeon.party.find(u=>u.id===heroId&&!u.dead);
    if(!hero)throw Error('Choose a living hero');
    if(hero.hp>=hero.maxHp)throw Error('Hero is already at full health');
    dungeon.supplies.food--;
    hero.hp=Math.min(hero.maxHp,hero.hp+EXPEDITION_SUPPLIES.food.heal);
    dungeon.log.push(hero.name+' eats food and recovers health');
+ }else{
+   const hero=dungeon.party.find(u=>u.id===heroId&&!u.dead);
+   if(!hero)throw Error('Choose a living hero');
+   const status=type==='antivenom'?'blight':type==='bandage'?'bleed':type==='laudanum'?'horror':null;
+   const dot=Array.isArray(hero.dot)?hero.dot:[];
+   const effects=Array.isArray(hero.effects)?hero.effects:[];
+   const matching=status?dot.filter(x=>x.type===status||x.kind===status):effects.filter(x=>x.kind==='debuff');
+   if(!matching.length)throw Error('Hero has no matching condition');
+   if(status)hero.dot=dot.filter(x=>x.type!==status&&x.kind!==status);
+   else hero.effects=effects.filter(x=>x.kind!=='debuff');
+   dungeon.supplies[type]--;
+   dungeon.log.push(hero.name+' uses '+type+' to remove '+(status??'debuffs'));
  }
  return dungeon;
 }
@@ -217,7 +233,7 @@ export function createDungeon(seed=1,{difficulty='scout',region='crypt',tier='ap
  const layout=proceduralBranches?dungeonCorridors({seed,proceduralBranches,tier}):DUNGEON_CORRIDORS;
  const lengthBonus=tier==='champion'?2:tier==='veteran'?1:0;
  const corridorSteps=variableCorridors?Object.fromEntries(layout.map(edge=>[edge.id,2+lengthBonus+Math.floor(rng(encounterSeed(seed,'length:'+edge.id))()*3)])):null;
- return {seed,difficulty,region,tier,proceduralBranches,corridorSteps,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood},hungerStressReduction,
+ return {seed,difficulty,region,tier,proceduralBranches,corridorSteps,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,supplies:{torch:3,food:8+bonusFood,antivenom:4,bandage:3,medicinalHerbs:2,laudanum:2},hungerStressReduction,
   pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,inventory:[],pendingLoot:null,battleSerial:0,phase:'explore',log:['Entered '+regionRoomName(region,'entrance')]};
 }
 export function adjacentRooms(dungeon){
