@@ -949,3 +949,30 @@ test('Champion victory claim completes campaign once and survives reload',async 
  });
  expect(persisted).toEqual({completed:5,victories:1});
 });
+
+test('incomplete Champion contract cannot claim victory rewards',async ({page})=>{
+ await page.goto('/dungeon.html');
+ const result=await page.evaluate(async ()=>{
+  const {createCampaignSettlement}=await import('/src/settlement.js');
+  const {prepareRosterParty}=await import('/src/hero-roster.js');
+  const {createDungeon}=await import('/src/dungeon.js');
+  const {completeCampaignExpedition,campaignProgress}=await import('/src/campaign-progression.js');
+  const settlement=createCampaignSettlement();
+  settlement.completedExpeditions=4;
+  settlement.campaignVictories=['veteran-victory'];
+  const expedition=createDungeon(439,{region:'plague',tier:'champion',
+   difficulty:'gauntlet',party:prepareRosterParty(settlement)});
+  expedition.questId='warrens-champion';
+  expedition.cleared=['watch','vault'];
+  expedition.phase='victory';
+  let error='';
+  try{completeCampaignExpedition(settlement,expedition);}
+  catch(e){error=e.message;}
+  return {error,completed:settlement.completedExpeditions,
+   claimed:expedition.rewardClaimed??false,
+   championRecorded:settlement.campaignVictories.includes('champion-victory'),
+   finished:campaignProgress(settlement).finished};
+ });
+ expect(result).toEqual({error:'Expedition quest objectives are incomplete',
+  completed:4,claimed:false,championRecorded:false,finished:false});
+});
