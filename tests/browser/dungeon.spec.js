@@ -488,6 +488,13 @@ test('browser travels onward after resolving its first corridor fight through co
    return {room:expedition.room,phase:expedition.phase};
   });
   if(reached.room==='watch'&&reached.phase==='explore'){
+   for(let pending=0;pending<12;pending++){
+    const loot=page.getByRole('button',{name:'Collect treasure'});
+    const hunger=page.getByRole('button',{name:'Eat four food'});
+    if(await loot.count())await loot.click();
+    else if(await hunger.count())await hunger.click();
+    else break;
+   }
    await expect(page.getByRole('button',{name:'Travel to Forgotten Sanctum'})).toBeVisible();
    await page.getByRole('button',{name:'Travel to Forgotten Sanctum'}).click();
    await page.reload();
