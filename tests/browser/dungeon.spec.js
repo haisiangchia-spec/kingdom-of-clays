@@ -1612,6 +1612,25 @@ test('Champion victory claim completes campaign once and survives reload',async 
    victories:settlement.campaignVictories.filter(x=>x==='champion-victory').length};
  });
  expect(persisted).toEqual({completed:5,victories:1});
+ const duplicateClaim=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {completeCampaignExpedition}=await import('/src/campaign-progression.js');
+  const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  const before={completed:settlement.completedExpeditions,
+   victories:[...settlement.campaignVictories],gold:settlement.gold,
+   crests:settlement.crests,deeds:settlement.deeds,busts:settlement.busts,
+   trinkets:[...settlement.trinkets]};
+  let error='';
+  try{completeCampaignExpedition(settlement,expedition);}
+  catch(e){error=e.message;}
+  return {error,unchanged:JSON.stringify(before)===JSON.stringify({
+   completed:settlement.completedExpeditions,
+   victories:settlement.campaignVictories,gold:settlement.gold,
+   crests:settlement.crests,deeds:settlement.deeds,busts:settlement.busts,
+   trinkets:settlement.trinkets})};
+ });
+ expect(duplicateClaim).toEqual({
+  error:'Expedition must be an unclaimed victory',unchanged:true});
 });
 
 test('incomplete Champion contract cannot claim victory rewards',async ({page})=>{
