@@ -29,6 +29,42 @@ jobs:
         with:
           node-version: '22'
       - name: Run focused campaign progression checks
-        run: node --test tests/campaign-navigation-smoke.test.js tests/campaign-quest-board-smoke.test.js tests/encounter-tier-distribution.test.js
+        id: focused
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node --test tests/campaign-navigation-smoke.test.js tests/campaign-quest-board-smoke.test.js tests/encounter-tier-distribution.test.js 2>&1 | tee campaign-focused-results.txt
       - name: Run complete Node regression suite
-        run: npm test
+        id: full
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee campaign-full-results.txt
+      - name: Publish test logs as downloadable artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: campaign-test-results
+          path: |
+            campaign-focused-results.txt
+            campaign-full-results.txt
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Summarize verification results
+        if: always()
+        env:
+          FOCUSED: ${{ steps.focused.outcome }}
+          FULL: ${{ steps.full.outcome }}
+        run: |
+          echo '## Kingdom of Clays regression verification' >> "$GITHUB_STEP_SUMMARY"
+          echo "- Campaign tests: $FOCUSED" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Full suite: $FULL" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Download campaign-test-results for complete test output.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Fail workflow when tests fail
+        if: always()
+        env:
+          FOCUSED: ${{ steps.focused.outcome }}
+          FULL: ${{ steps.full.outcome }}
+        run: |
+          test "$FOCUSED" = success
+          test "$FULL" = success
