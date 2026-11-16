@@ -331,8 +331,16 @@ export function beginCorridor(dungeon,to){
 function startBattle(dungeon,source,difficulty){
  const seed=encounterSeed(dungeon.seed,source+'|'+dungeon.battleSerial++);
  const roomDanger=source==='room:catacomb'||source==='room:outpost'?optionalRoomDifficulty(dungeon,source.slice(5)):difficulty;
- const battle=dungeon.region==='plague'?makeGeneratedEncounter(seed,roomDanger,'plague',dungeon.tier??'apprentice'):(source==='room:vault'?makeUndeadEncounter(seed,'blightWretch'):makeGeneratedEncounter(seed,roomDanger));
+ const expeditionTier=dungeon.tier??'apprentice';
+ const lowerTier={veteran:'apprentice',champion:'veteran'}[expeditionTier];
+ // Half of normal Veteran/Champion encounters draw from the preceding tier.
+ // The independent source-specific roll is stable across saves and replays.
+ const encounterTier=dungeon.region==='plague'&&lowerTier&&
+   rng(encounterSeed(dungeon.seed,'encounter-tier:'+source))()<.5?lowerTier:expeditionTier;
+ const battle=dungeon.region==='plague'?makeGeneratedEncounter(seed,roomDanger,'plague',encounterTier):(source==='room:vault'?makeUndeadEncounter(seed,'blightWretch'):makeGeneratedEncounter(seed,roomDanger));
  battle.expeditionEncounter=true; // guards extra disease rolls outside the combat lab
+ battle.expeditionTier=expeditionTier;
+ battle.encounterTier=encounterTier;
  const enemyUnits=battle.units.filter(u=>u.side==='enemy');
  battle.units=[...dungeon.party.map(copy),...enemyUnits];
  battle.torch=dungeon.torch;
