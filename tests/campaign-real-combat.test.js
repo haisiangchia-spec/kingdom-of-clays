@@ -173,13 +173,14 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
    }
   }
  }
- let firstEncounterReport=null,firstEnemyComposition=null,finalEnemyComposition=[],steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0,torchesUsed=0,foodHeals=0,campsUsed=0,curativesUsed=0,skiverEncounters=0,fourEnemyEncounters=0;
+ let encounterAttrition=[],firstEncounterReport=null,firstEnemyComposition=null,finalEnemyComposition=[],steps=0,battles=0,skills=0,heroSkills=0,enemySkills=0,heals=0,torchesUsed=0,foodHeals=0,campsUsed=0,curativesUsed=0,skiverEncounters=0,fourEnemyEncounters=0;
  while(d.phase==='explore'||d.phase==='combat'){
   assert.ok(++steps<1000,'expedition stalled: '+questId+' '+seed);
   if(d.phase==='combat'){
    const report=playEncounter(d);
    if(!firstEnemyComposition){firstEnemyComposition=report.enemyComposition;firstEncounterReport={outcome:report.outcome,actions:report.actions,heroSkills:report.heroSkillsUsed,enemySkills:report.enemySkillsUsed,heals:report.healsUsed,hpBefore:report.startingHeroHp,hpAfter:report.endingHeroHp,fallen:report.fallenHeroes,heroSkillsUsed:report.heroSkillCounts,enemySkillsUsed:report.enemySkillCounts};}
    finalEnemyComposition=report.enemyComposition;
+   encounterAttrition.push({battle:battles+1,enemies:report.enemyComposition,hpBefore:report.startingHeroHp,hpAfter:report.endingHeroHp,fallen:report.fallenHeroes,heroActions:report.heroSkillsUsed,enemyActions:report.enemySkillsUsed,heals:report.healsUsed});
    if(report.enemyComposition.includes('plagueSkiver'))skiverEncounters++;
    if(report.enemyComposition.length===4)fourEnemyEncounters++;
    battles++;
@@ -242,7 +243,7 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
  assert.ok(skills>0,'expedition did not execute combat skills');
  assert.equal(d.pendingBattle,null);
  if(d.phase==='victory')assert.ok(questObjectiveProgress(d).every(x=>x.complete));
- return {phase:d.phase,difficulty:quest.difficulty,battles,skills,heroSkills,enemySkills,heals,torchesUsed,foodHeals,campsUsed,curativesUsed,skiverEncounters,fourEnemyEncounters,firstEncounterReport,firstEnemyComposition,finalEnemyComposition,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
+ return {phase:d.phase,difficulty:quest.difficulty,battles,skills,heroSkills,enemySkills,heals,torchesUsed,foodHeals,campsUsed,curativesUsed,skiverEncounters,fourEnemyEncounters,encounterAttrition,firstEncounterReport,firstEnemyComposition,finalEnemyComposition,steps,food:d.supplies.food,torch:d.torch,room:d.room,cleared:d.cleared,party:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}))};
 }
 test('expedition benchmark uses each quest difficulty, not the default scout setting',()=>{
  for(const quest of QUESTS){
@@ -491,7 +492,7 @@ test('report higher-tier expedition attrition with equipment and verified skill 
    meanEnemySkills:Number((results.reduce((n,r)=>n+r.enemySkills,0)/results.length).toFixed(2)),
    meanRemainingHp:Number((results.reduce((n,r)=>n+r.party.reduce((hp,h)=>hp+Math.max(0,h.hp),0),0)/results.length).toFixed(2)),
    meanDeaths:Number((results.reduce((n,r)=>n+r.party.filter(h=>h.dead).length,0)/results.length).toFixed(2)),
-   outcomes:results.map((r,i)=>({seed:seeds[i],phase:r.phase,battles:r.battles,skivers:r.skiverEncounters,fourEnemy:r.fourEnemyEncounters,torches:r.torchesUsed,foodHeals:r.foodHeals,firstEncounter:r.firstEncounterReport,firstEnemyComposition:r.firstEnemyComposition,finalEnemyComposition:r.finalEnemyComposition,deaths:r.party.filter(h=>h.dead).length}))}));
+   outcomes:results.map((r,i)=>({seed:seeds[i],phase:r.phase,battles:r.battles,skivers:r.skiverEncounters,fourEnemy:r.fourEnemyEncounters,torches:r.torchesUsed,foodHeals:r.foodHeals,encounters:r.encounterAttrition,firstEncounter:r.firstEncounterReport,firstEnemyComposition:r.firstEnemyComposition,finalEnemyComposition:r.finalEnemyComposition,deaths:r.party.filter(h=>h.dead).length}))}));
   assert.equal(results.length,seeds.length);
  }
 });
