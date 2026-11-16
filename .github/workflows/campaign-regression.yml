@@ -36,6 +36,13 @@ jobs:
         run: |
           set -o pipefail
           node --test tests/campaign-navigation-smoke.test.js tests/campaign-quest-board-smoke.test.js tests/encounter-tier-distribution.test.js 2>&1 | tee campaign-focused-results.txt
+      - name: Run combat endurance verification and capture report
+        id: endurance
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node --test tests/combat-endurance-smoke.test.js 2>&1 | tee combat-endurance-results.txt
+          grep 'Combat endurance smoke ' combat-endurance-results.txt | sed 's/^.*Combat endurance smoke /Combat endurance smoke /' > combat-endurance-metrics.jsonl || true
       - name: Run complete Node regression suite
         id: full
         continue-on-error: true
@@ -50,6 +57,8 @@ jobs:
           path: |
             campaign-focused-results.txt
             campaign-full-results.txt
+            combat-endurance-results.txt
+            combat-endurance-metrics.jsonl
           if-no-files-found: warn
           retention-days: 30
       - name: Summarize verification results
@@ -57,10 +66,20 @@ jobs:
         env:
           FOCUSED: ${{ steps.focused.outcome }}
           FULL: ${{ steps.full.outcome }}
+          ENDURANCE: ${{ steps.endurance.outcome }}
         run: |
           echo '## Kingdom of Clays regression verification' >> "$GITHUB_STEP_SUMMARY"
           echo "- Campaign tests: $FOCUSED" >> "$GITHUB_STEP_SUMMARY"
           echo "- Full suite: $FULL" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Combat endurance: $ENDURANCE" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Combat endurance metrics (seeded encounters)" >> "$GITHUB_STEP_SUMMARY"
+          if [ -s combat-endurance-metrics.jsonl ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat combat-endurance-metrics.jsonl >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No metrics produced; inspect combat-endurance-results.txt." >> "$GITHUB_STEP_SUMMARY"
+          fi
           echo 'Download campaign-test-results for complete test output.' >> "$GITHUB_STEP_SUMMARY"
       - name: Fail workflow when tests fail
         if: always()
@@ -70,6 +89,7 @@ jobs:
         run: |
           test "$FOCUSED" = success
           test "$FULL" = success
+          test "$ENDURANCE" = success
 
   browser-regression:
     runs-on: ubuntu-latest
