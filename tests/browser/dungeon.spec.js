@@ -754,4 +754,21 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
  });
  expect(champion).toEqual({champion:true,quest:true});
  await expect(page.locator('#settlement-panel')).toContainText('Veteran Trial');
+ await expect(page.locator('#settlement-panel')).toContainText('1/1');
+ await page.reload();
+ const persistedUnlocks=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {campaignProgress,expeditionUnlock}=await import('/src/campaign-progression.js');
+  const {settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {completed:settlement.completedExpeditions,
+   finished:campaignProgress(settlement).finished,
+   milestones:campaignProgress(settlement).milestones.map(x=>({id:x.id,complete:x.complete})),
+   veteran:expeditionUnlock(settlement,'plague','veteran').unlocked,
+   champion:expeditionUnlock(settlement,'plague','champion').unlocked};
+ });
+ expect(persistedUnlocks.completed).toBe(3);
+ expect(persistedUnlocks.veteran).toBe(true);
+ expect(persistedUnlocks.champion).toBe(true);
+ expect(persistedUnlocks.finished).toBe(false);
+ expect(persistedUnlocks.milestones.find(x=>x.id==='champion-victory').complete).toBe(false);
 });
