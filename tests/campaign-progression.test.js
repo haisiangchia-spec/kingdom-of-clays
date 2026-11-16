@@ -122,6 +122,32 @@ test('real campaign reward claim transfers spoils and progress exactly once acro
  assert.equal(saved.settlement.completedExpeditions,1);
 });
 
+test('defeated expedition returns survivors, advances town once, and permits a replacement quest',()=>{
+ let settlement=createCampaignSettlement();
+ const party=prepareRosterParty(settlement);
+ const expedition=createDungeon(329,{tier:'apprentice',region:'crypt',party});
+ expedition.phase='defeat';
+ expedition.party[0].dead=true;
+ expedition.party[0].hp=0;
+ assert.equal(canStartNextExpedition(expedition).allowed,true); // legacy saves may omit transfer flags
+ expedition.rosterReturned=false;
+ expedition.townWeekProcessed=false;
+ assert.equal(canStartNextExpedition(expedition).allowed,false);
+ assert.equal(returnPartyToRoster(settlement,expedition),true);
+ assert.equal(settlement.roster[0].unit.dead,true);
+ assert.equal(canStartNextExpedition(expedition).allowed,false);
+ const previousWeek=settlement.town.week;
+ assert.equal(advanceTownWeek(settlement,expedition),true);
+ assert.equal(settlement.town.week,previousWeek+1);
+ assert.equal(canStartNextExpedition(expedition).allowed,true);
+ assert.equal(advanceTownWeek(settlement,expedition),false);
+ ({settlement}=decodeCampaignSave(encodeCampaignSave(settlement,expedition)));
+ assert.equal(settlement.roster[0].unit.dead,true);
+ assert.equal(settlement.town.week,previousWeek+1);
+ assert.equal(settlement.completedExpeditions,0);
+ assert.equal(campaignProgress(settlement).completed,0);
+});
+
 test('campaign milestone counters show bounded progress and useful next steps',()=>{
  const settlement={completedExpeditions:2,campaignVictories:[]};
  const goals=campaignMilestoneProgress(settlement);
