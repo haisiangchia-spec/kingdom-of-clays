@@ -255,7 +255,7 @@ export function createDungeon(seed=1,{difficulty='scout',region='crypt',tier='ap
  const layout=proceduralBranches?dungeonCorridors({seed,proceduralBranches,tier}):DUNGEON_CORRIDORS;
  const lengthBonus=tier==='champion'?2:tier==='veteran'?1:0;
  const corridorSteps=variableCorridors?Object.fromEntries(layout.map(edge=>[edge.id,2+lengthBonus+Math.floor(rng(encounterSeed(seed,'length:'+edge.id))()*3)])):null;
- return {seed,difficulty,region,tier,proceduralBranches,corridorSteps,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,firewood:difficulty==='scout'?0:difficulty==='patrol'?1:2,supplies:{torch:3,food:8+bonusFood,antivenom:4,bandage:3,medicinalHerbs:2,laudanum:2},hungerStressReduction,
+ return {seed,difficulty,region,tier,proceduralBranches,corridorSteps,room:'entrance',visited:['entrance'],cleared:[],corridors:{},party,torch:75,firewood:difficulty==='scout'?0:difficulty==='patrol'?1:2,supplies:{torch:3,food:8+bonusFood,antivenom:0,bandage:0,medicinalHerbs:0,laudanum:0},hungerStressReduction,
   pendingTravel:null,pendingBattle:null,pendingHunger:false,interactiveEvents,stepsTaken:0,curiosUsed:[],curioSupplies:{holyWater:1},loot:0,inventory:[],pendingLoot:null,battleSerial:0,phase:'explore',log:['Entered '+regionRoomName(region,'entrance')]};
 }
 export function adjacentRooms(dungeon){
