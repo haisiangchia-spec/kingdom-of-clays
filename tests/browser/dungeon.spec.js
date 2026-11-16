@@ -95,3 +95,33 @@ test('browser victory transfers rewards once, recovers town, and starts the next
  await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
  await expect(page.locator('#dungeon-party .dungeon-unit')).toHaveCount(4);
 });
+
+test('browser defeat returns survivors to town and permits a new expedition after reload',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {prepareRosterParty}=await import('/src/hero-roster.js');
+  const {createDungeon}=await import('/src/dungeon.js');
+  const settlement=createCampaignSettlement();
+  const expedition=createDungeon(329,{region:'crypt',tier:'apprentice',party:prepareRosterParty(settlement)});
+  expedition.phase='defeat';
+  expedition.party[0].dead=true;
+  expedition.party[0].hp=0;
+  expedition.rosterReturned=false;
+  expedition.townWeekProcessed=false;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,expedition));
+ });
+ await page.reload();
+ await expect(page.locator('#dungeon-status')).toContainText('DEFEAT');
+ await expect(page.locator('#settlement-panel')).toContainText('0 completed');
+ const state=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('/src/settlement.js');
+  const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {dead:settlement.roster[0].unit.dead,returned:expedition.rosterReturned,
+   processed:expedition.townWeekProcessed,week:settlement.town.week};
+ });
+ expect(state).toMatchObject({dead:true,returned:true,processed:true,week:2});
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
+ await expect(page.locator('#dungeon-party .dungeon-unit')).toHaveCount(4);
+});
