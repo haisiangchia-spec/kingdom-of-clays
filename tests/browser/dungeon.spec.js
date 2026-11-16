@@ -62,3 +62,36 @@ test('dungeon can finish after clearing route and sanctum in Chromium',async ({p
  expect(result.phase).toBe('victory');
  expect(result.cleared).toEqual(['watch','sanctum']);
 });
+
+test('browser victory transfers rewards once, recovers town, and starts the next quest',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {prepareRosterParty}=await import('/src/hero-roster.js');
+  const {createDungeon}=await import('/src/dungeon.js');
+  const {offerLoot,collectLoot}=await import('/src/inventory.js');
+  const settlement=createCampaignSettlement();
+  const expedition=createDungeon(321,{region:'crypt',tier:'apprentice',interactiveEvents:true,party:prepareRosterParty(settlement)});
+  expedition.questId='crypt-recon';
+  expedition.cleared=['sanctum'];
+  offerLoot(expedition,'gold',100);collectLoot(expedition);
+  expedition.phase='victory';
+  expedition.rosterReturned=false;
+  expedition.townWeekProcessed=false;
+  expedition.traitsProcessed=true;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,expedition));
+ });
+ await page.reload();
+ await expect(page.locator('#dungeon-status')).toContainText('VICTORY');
+ await expect(page.getByRole('button',{name:'Return rewards to settlement'})).toBeVisible();
+ await page.getByRole('button',{name:'Return rewards to settlement'}).click();
+ await expect(page.locator('#settlement-panel')).toContainText('100 gold');
+ await expect(page.locator('#settlement-panel')).toContainText('1 completed');
+ await expect(page.getByRole('button',{name:'Return rewards to settlement'})).toHaveCount(0);
+ await page.reload();
+ await expect(page.locator('#settlement-panel')).toContainText('1 completed');
+ await expect(page.getByRole('button',{name:'Return rewards to settlement'})).toHaveCount(0);
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
+ await expect(page.locator('#dungeon-party .dungeon-unit')).toHaveCount(4);
+});
