@@ -739,6 +739,10 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
  expect(veteran).toEqual({veteran:true,champion:false,quest:true});
  await expect(page.locator('#settlement-panel')).toContainText('Veteran Warrens Expedition');
  await expect(page.locator('#settlement-panel')).not.toContainText('Veteran Warrens Expedition — Secure both outposts and the Rotting Shrine against Veteran enemies (LOCKED');
+ await page.locator('#settlement-panel .dungeon-unit').filter({hasText:'Veteran Warrens Expedition'}).getByRole('button',{name:'Select quest'}).click();
+ await expect(page.locator('#settlement-panel')).toContainText('✓ SELECTED · Veteran Warrens Expedition');
+ await expect(page.locator('#dungeon-region')).toHaveValue('plague');
+ await expect(page.locator('#dungeon-tier')).toHaveValue('veteran');
  await expect(page.locator('#settlement-panel')).toContainText('Champion Warrens Expedition — Secure both outposts and the Rotting Shrine against Champion enemies (LOCKED');
  await page.evaluate(async ()=>{
   const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
@@ -757,6 +761,10 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
  });
  expect(champion).toEqual({champion:true,quest:true});
  await expect(page.locator('#settlement-panel')).not.toContainText('Champion Warrens Expedition — Secure both outposts and the Rotting Shrine against Champion enemies (LOCKED');
+ await page.locator('#settlement-panel .dungeon-unit').filter({hasText:'Champion Warrens Expedition'}).getByRole('button',{name:'Select quest'}).click();
+ await expect(page.locator('#settlement-panel')).toContainText('✓ SELECTED · Champion Warrens Expedition');
+ await expect(page.locator('#dungeon-region')).toHaveValue('plague');
+ await expect(page.locator('#dungeon-tier')).toHaveValue('champion');
  await expect(page.locator('#settlement-panel')).toContainText('Veteran Trial');
  await expect(page.locator('#settlement-panel')).toContainText('1/1');
  await page.reload();
