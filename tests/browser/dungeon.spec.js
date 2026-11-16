@@ -497,6 +497,31 @@ test('browser travels onward after resolving its first corridor fight through co
     return {room:expedition.room,travel:!!expedition.pendingTravel};
    });
    expect(onward).toEqual({room:'watch',travel:true});
+   let nextEncounter=false,objectiveReached=false;
+   for(let step=0;step<25;step++){
+    const progress=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {phase:expedition.phase,room:expedition.room};
+    });
+    if(progress.phase==='combat'){nextEncounter=true;break;}
+    if(progress.room==='sanctum'){objectiveReached=true;break;}
+    const collect=page.getByRole('button',{name:'Collect treasure'});
+    const hunger=page.getByRole('button',{name:'Eat four food'});
+    const advance=page.getByRole('button',{name:'Advance corridor'});
+    if(await collect.count())await collect.click();
+    else if(await hunger.count())await hunger.click();
+    else if(await advance.count())await advance.click();
+    else throw Error('No available action toward Forgotten Sanctum');
+   }
+   expect(nextEncounter||objectiveReached).toBe(true);
+   await page.reload();
+   const saved=await page.evaluate(async ()=>{
+    const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+    const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+    return {phase:expedition.phase,room:expedition.room};
+   });
+   expect(saved.phase==='combat'||saved.room==='sanctum').toBe(true);
   }
  }
 });
