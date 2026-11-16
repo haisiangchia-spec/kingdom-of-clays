@@ -771,4 +771,22 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
  expect(persistedUnlocks.champion).toBe(true);
  expect(persistedUnlocks.finished).toBe(false);
  expect(persistedUnlocks.milestones.find(x=>x.id==='champion-victory').complete).toBe(false);
+ await page.evaluate(async ()=>{
+  const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const save=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  save.settlement.campaignVictories.push('champion-victory');
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(save.settlement,save.expedition));
+ });
+ await page.reload();
+ await expect(page.locator('#settlement-panel')).toContainText('Campaign Complete — Champion of Clays');
+ const completed=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {campaignProgress}=await import('/src/campaign-progression.js');
+  const {settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  const state=campaignProgress(settlement);
+  return {finished:state.finished,completed:state.completed,total:state.milestones.length};
+ });
+ expect(completed).toEqual({finished:true,completed:4,total:4});
+ await page.reload();
+ await expect(page.locator('#settlement-panel')).toContainText('Campaign Complete — Champion of Clays');
 });
