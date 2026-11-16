@@ -1185,6 +1185,47 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
        watchCleared:expedition.cleared.includes('watch')};
      });
      expect(persistedVaultOutcome).toEqual(vaultCorridorOutcome);
+     if(vaultCorridorOutcome.phase==='explore'){
+      for(let step=0;step<12;step++){
+       const state=await page.evaluate(async ()=>{
+        const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+        const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+        return {room:expedition.room,phase:expedition.phase,
+         pendingTravel:!!expedition.pendingTravel,pendingLoot:!!expedition.pendingLoot,
+         pendingHunger:!!expedition.pendingHunger};
+       });
+       if(state.room==='vault'||state.phase!=='explore')break;
+       if(state.pendingLoot){
+        const collect=page.getByRole('button',{name:'Collect treasure'});
+        const leave=page.getByRole('button',{name:'Leave treasure'});
+        if(await collect.count())await collect.click();
+        else if(await leave.count())await leave.click();
+       }else if(state.pendingHunger){
+        await page.getByRole('button',{name:'Eat four food'}).click();
+       }else if(state.pendingTravel){
+        await page.getByRole('button',{name:'Advance corridor'}).click();
+       }else break;
+      }
+      const vaultArrival=await page.evaluate(async ()=>{
+       const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+       const {questObjectiveProgress}=await import('/src/dungeon.js');
+       const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+       return {room:expedition.room,phase:expedition.phase,
+        vaultComplete:questObjectiveProgress(expedition).find(x=>x.room==='vault').complete};
+      });
+      expect(vaultArrival.room).toBe('vault');
+      expect(['explore','combat','defeat']).toContain(vaultArrival.phase);
+      if(vaultArrival.phase==='explore')expect(vaultArrival.vaultComplete).toBe(true);
+      await page.reload();
+      const persistedVaultArrival=await page.evaluate(async ()=>{
+       const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+       const {questObjectiveProgress}=await import('/src/dungeon.js');
+       const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+       return {room:expedition.room,phase:expedition.phase,
+        vaultComplete:questObjectiveProgress(expedition).find(x=>x.room==='vault').complete};
+      });
+      expect(persistedVaultArrival).toEqual(vaultArrival);
+     }
     }else{
      expect(galleryReturn.phase).toBe('combat');
     }
