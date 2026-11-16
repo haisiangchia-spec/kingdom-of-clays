@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "commit": "37e4c5ad67520f65dce839a580c7fcc9895b919b",
-  "runId": "43778230458",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43778230458",
+  "commit": "e0ef4884a8d97d020b0fe3c5b5116650f80aa95f",
+  "runId": "43778271428",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43778271428",
   "baseline": [
     {
       "questId": "crypt-recon",
@@ -690,6 +690,7 @@
       "meanFourEnemyEncounters": 1.7,
       "meanTorchesUsed": 0.2,
       "meanFoodHeals": 0,
+      "meanCampsUsed": 0,
       "meanHeroSkills": 59.5,
       "meanEnemySkills": 50.3,
       "meanRemainingHp": 12.8,
@@ -887,6 +888,7 @@
       "meanFourEnemyEncounters": 0.2,
       "meanTorchesUsed": 0,
       "meanFoodHeals": 0.8,
+      "meanCampsUsed": 0,
       "meanHeroSkills": 32.1,
       "meanEnemySkills": 27.8,
       "meanRemainingHp": 0.4,
