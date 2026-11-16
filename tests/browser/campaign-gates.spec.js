@@ -177,3 +177,43 @@ test('active expedition cannot be replaced and remains resumable after reload',a
  await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
  await expect(page.getByRole('button',{name:'Travel to Ashen Gallery'})).toBeVisible();
 });
+
+test('unclaimed victory blocks the next expedition until rewards are returned',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave,encodeCampaignSave}=await import('/src/settlement.js');
+  const state=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  state.expedition.phase='victory';
+  state.expedition.cleared=['sanctum'];
+  state.expedition.questId='crypt-recon';
+  state.expedition.rewardClaimed=false;
+  state.expedition.rosterReturned=false;
+  state.expedition.townWeekProcessed=false;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(state.settlement,state.expedition));
+ });
+ await page.reload();
+ await expect(page.getByRole('button',{name:'Return rewards to settlement'})).toBeVisible();
+ const before=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('/src/settlement.js');
+  const {expedition,settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {seed:expedition.seed,completed:settlement.completedExpeditions};
+ });
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-log')).toContainText('Return expedition rewards to the settlement');
+ const blocked=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('/src/settlement.js');
+  const {expedition,settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {seed:expedition.seed,completed:settlement.completedExpeditions};
+ });
+ expect(blocked).toEqual(before);
+ await page.getByRole('button',{name:'Return rewards to settlement'}).click();
+ await expect(page.locator('#settlement-panel')).toContainText('1 completed');
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
+ const final=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('/src/settlement.js');
+  const {settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return settlement.completedExpeditions;
+ });
+ expect(final).toBe(before.completed+1);
+});
