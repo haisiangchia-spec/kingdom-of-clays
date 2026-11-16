@@ -114,7 +114,7 @@ test('Hookstalker is encounter-reachable and its retreating strike has legal tar
  expect(data.from).toEqual([0,1,2,3]);
 });
 
-test('Champion Warrens expedition selection persists and generates Champion combat',async ({page})=>{
+test('Champion Warrens expedition selection persists and generates tier-appropriate combat',async ({page})=>{
  await page.goto('/dungeon.html');
  await page.evaluate(async ()=>{
   const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
@@ -144,7 +144,14 @@ test('Champion Warrens expedition selection persists and generates Champion comb
  expect(saved.tier).toBe('champion');
  // Champion expeditions deliberately roll a mixture of Champion and Veteran encounters.
  expect(['veteran','champion']).toContain(saved.battleTier);
- expect(saved.foes).toContain('plagueSkiver');
+ expect(saved.foes.length).toBeGreaterThan(0);
+ if(saved.battleTier==='champion'){
+  // Champion encounters can use either Skiver or non-Skiver formations.
+  expect(saved.foes.every(id=>id.startsWith('plague'))).toBe(true);
+ }else{
+  // The lower-tier encounter must not accidentally spawn Champion-only Skivers.
+  expect(saved.foes).not.toContain('plagueSkiver');
+ }
 });
 
 test('Unsupported Champion Crypt tier is reset to Apprentice without overwriting prior victory',async ({page})=>{
