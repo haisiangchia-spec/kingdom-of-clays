@@ -873,6 +873,14 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
  expect(['explore','defeat']).toContain(championOutcome.phase);
  if(championOutcome.phase==='explore')expect(championOutcome.encounterCleared).toBe(true);
  await page.reload();
+ const restoredChampionOutcome=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {phase:expedition.phase,
+   encounterCleared:expedition.corridors['entrance-gallery']?.encounterCleared??false,
+   quest:expedition.questId,tier:expedition.tier};
+ });
+ expect(restoredChampionOutcome).toEqual({...championOutcome,quest:'warrens-champion',tier:'champion'});
 
  // Exercise the objective checklist across saved room clearances without
  // bypassing the normal browser launch and quest-selection flow.
