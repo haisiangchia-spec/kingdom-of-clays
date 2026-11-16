@@ -12,9 +12,10 @@ test('quest board unlocks the playable campaign in order across saved settlement
  assert.equal(unlocked('warrens-recon'),false);
  assert.equal(unlocked('warrens-veteran'),false);
  assert.equal(unlocked('warrens-champion'),false);
- assert.throws(()=>selectQuest(town,'warrens-veteran'),/Complete three expeditions/);
+ assert.throws(()=>selectQuest(town,'warrens-veteran'),/Complete one expedition/);
  town.completedExpeditions=1;save();
  assert.equal(unlocked('warrens-recon'),true);
+ assert.throws(()=>selectQuest(town,'warrens-veteran'),/Complete three expeditions/);
  town.completedExpeditions=3;save();
  assert.equal(unlocked('warrens-veteran'),true);
  assert.equal(unlocked('warrens-champion'),false);
