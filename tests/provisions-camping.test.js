@@ -4,6 +4,7 @@ import {createDungeon,useProvision,campMeal} from '../src/dungeon.js';
 
 test('curative supplies remove only their corresponding conditions',()=>{
  const d=createDungeon(1);
+ d.supplies.antivenom=1;d.supplies.bandage=1;d.supplies.medicinalHerbs=1;
  const hero=d.party[0];
  hero.dot=[{type:'blight',value:3,turns:3},{type:'bleed',value:2,turns:2}];
  hero.effects=[{kind:'debuff',turns:2},{kind:'buff',turns:2}];
