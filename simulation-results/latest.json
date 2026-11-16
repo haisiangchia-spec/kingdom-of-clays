@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "commit": "5cdfe9648ea55e3b2863b970ff573db54968b991",
-  "runId": "43780293873",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43780293873",
+  "commit": "2649d07362bca80f81e9a0e772e99f0dd230f67f",
+  "runId": "43781421409",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43781421409",
   "baseline": [
     {
       "questId": "crypt-recon",
@@ -14,7 +14,7 @@
           "seed": 11,
           "result": "victory",
           "battles": 3,
-          "fallen": 1
+          "fallen": 0
         },
         {
           "seed": 23,
@@ -56,7 +56,7 @@
           "seed": 83,
           "result": "victory",
           "battles": 3,
-          "fallen": 1
+          "fallen": 0
         },
         {
           "seed": 97,
@@ -74,19 +74,19 @@
       "victories": 9,
       "defeats": 1,
       "meanBattles": 2.8,
-      "meanActions": 78.5,
-      "meanHeals": 9.9,
+      "meanActions": 78.8,
+      "meanHeals": 10.2,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 0,
+      "meanFoodHeals": 1.8,
       "meanSkiverEncounters": 0,
       "meanFourEnemyEncounters": 0,
-      "meanFallen": 0.8,
-      "meanRemainingHp": 50.1,
-      "meanStress": 38.6,
-      "meanFoodRemaining": 2.4,
+      "meanFallen": 0.6,
+      "meanRemainingHp": 57.5,
+      "meanStress": 45.1,
+      "meanFoodRemaining": 1,
       "meanTorchlight": 67.1,
       "minRemainingHp": 0,
-      "maxStress": 121
+      "maxStress": 157
     },
     {
       "questId": "crypt-purge",
@@ -158,19 +158,19 @@
       "victories": 8,
       "defeats": 2,
       "meanBattles": 3.4,
-      "meanActions": 130.8,
-      "meanHeals": 18.5,
+      "meanActions": 130.7,
+      "meanHeals": 18.9,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 0.2,
+      "meanFoodHeals": 1.4,
       "meanSkiverEncounters": 0,
       "meanFourEnemyEncounters": 2.9,
       "meanFallen": 1.1,
-      "meanRemainingHp": 46.4,
-      "meanStress": 180.7,
-      "meanFoodRemaining": 0.2,
+      "meanRemainingHp": 45.6,
+      "meanStress": 194.9,
+      "meanFoodRemaining": 0.6,
       "meanTorchlight": 61.8,
       "minRemainingHp": 0,
-      "maxStress": 320
+      "maxStress": 295
     },
     {
       "questId": "warrens-recon",
@@ -242,16 +242,16 @@
       "victories": 10,
       "defeats": 0,
       "meanBattles": 2.8,
-      "meanActions": 99,
-      "meanHeals": 10.8,
+      "meanActions": 99.3,
+      "meanHeals": 10.9,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 0,
+      "meanFoodHeals": 0.7,
       "meanSkiverEncounters": 0,
       "meanFourEnemyEncounters": 1.9,
       "meanFallen": 0.2,
-      "meanRemainingHp": 69.2,
-      "meanStress": 226.9,
-      "meanFoodRemaining": 2.4,
+      "meanRemainingHp": 68.8,
+      "meanStress": 232.1,
+      "meanFoodRemaining": 1.7,
       "meanTorchlight": 67.1,
       "minRemainingHp": 42,
       "maxStress": 374
@@ -271,7 +271,7 @@
         {
           "seed": 23,
           "result": "defeat",
-          "battles": 3,
+          "battles": 4,
           "fallen": 4
         },
         {
@@ -325,20 +325,20 @@
       ],
       "victories": 8,
       "defeats": 2,
-      "meanBattles": 3.3,
-      "meanActions": 121.3,
-      "meanHeals": 13.3,
+      "meanBattles": 3.4,
+      "meanActions": 126,
+      "meanHeals": 14.2,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 0,
+      "meanFoodHeals": 0.1,
       "meanSkiverEncounters": 0,
       "meanFourEnemyEncounters": 2.6,
       "meanFallen": 1.3,
       "meanRemainingHp": 46.4,
-      "meanStress": 300.4,
-      "meanFoodRemaining": 0,
-      "meanTorchlight": 62.1,
+      "meanStress": 325.1,
+      "meanFoodRemaining": 0.3,
+      "meanTorchlight": 61.8,
       "minRemainingHp": 0,
-      "maxStress": 369
+      "maxStress": 503
     },
     {
       "questId": "warrens-veteran",
@@ -410,19 +410,19 @@
       "victories": 0,
       "defeats": 10,
       "meanBattles": 2,
-      "meanActions": 73.3,
-      "meanHeals": 7.3,
+      "meanActions": 75.5,
+      "meanHeals": 7.5,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 0.1,
+      "meanFoodHeals": 2.6,
       "meanSkiverEncounters": 0,
       "meanFourEnemyEncounters": 1,
       "meanFallen": 4,
       "meanRemainingHp": 0,
-      "meanStress": 228.4,
-      "meanFoodRemaining": 2.7,
-      "meanTorchlight": 66,
+      "meanStress": 236.7,
+      "meanFoodRemaining": 1.8,
+      "meanTorchlight": 65.8,
       "minRemainingHp": 0,
-      "maxStress": 293
+      "maxStress": 337
     },
     {
       "questId": "warrens-champion",
@@ -494,19 +494,19 @@
       "victories": 0,
       "defeats": 10,
       "meanBattles": 1.1,
-      "meanActions": 36.5,
+      "meanActions": 36.7,
       "meanHeals": 3.3,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 0,
+      "meanFoodHeals": 0.4,
       "meanSkiverEncounters": 0.8,
       "meanFourEnemyEncounters": 0.1,
       "meanFallen": 4,
       "meanRemainingHp": 0,
-      "meanStress": 106.8,
+      "meanStress": 106.6,
       "meanFoodRemaining": 7.2,
       "meanTorchlight": 73.2,
       "minRemainingHp": 0,
-      "maxStress": 279
+      "maxStress": 277
     }
   ],
   "progressedEquipment": [
@@ -518,18 +518,18 @@
       "victories": 0,
       "defeats": 10,
       "meanFallen": 4,
-      "meanRemainingHp": 0.4,
-      "meanStress": 347.4,
+      "meanRemainingHp": 0.8,
+      "meanStress": 372.6,
       "outcomes": [
         {
           "seed": 11,
           "result": "defeat",
-          "battles": 4
+          "battles": 5
         },
         {
           "seed": 23,
           "result": "defeat",
-          "battles": 5
+          "battles": 4
         },
         {
           "seed": 37,
@@ -559,7 +559,7 @@
         {
           "seed": 83,
           "result": "defeat",
-          "battles": 4
+          "battles": 3
         },
         {
           "seed": 97,
@@ -581,8 +581,8 @@
       "victories": 0,
       "defeats": 10,
       "meanFallen": 4,
-      "meanRemainingHp": 0.4,
-      "meanStress": 227.9,
+      "meanRemainingHp": 1.2,
+      "meanStress": 250.4,
       "outcomes": [
         {
           "seed": 11,
@@ -687,15 +687,15 @@
       ],
       "meanBattles": 4.2,
       "meanSkiverEncounters": 0,
-      "meanFourEnemyEncounters": 1.8,
+      "meanFourEnemyEncounters": 1.6,
       "meanTorchesUsed": 0.2,
-      "meanFoodHeals": 0,
-      "meanCampsUsed": 0.5,
-      "meanCurativesUsed": 1.8,
-      "meanHeroSkills": 66.1,
-      "meanEnemySkills": 53.5,
-      "meanRemainingHp": 15.7,
-      "meanDeaths": 2.5,
+      "meanFoodHeals": 1.9,
+      "meanCampsUsed": 0.1,
+      "meanCurativesUsed": 2,
+      "meanHeroSkills": 63.8,
+      "meanEnemySkills": 50.3,
+      "meanRemainingHp": 17.6,
+      "meanDeaths": 2.3,
       "outcomes": [
         {
           "seed": 11,
@@ -704,7 +704,7 @@
           "skivers": 0,
           "fourEnemy": 2,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 42,
@@ -734,9 +734,9 @@
           "phase": "defeat",
           "battles": 4,
           "skivers": 0,
-          "fourEnemy": 2,
+          "fourEnemy": 1,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 22,
@@ -754,20 +754,19 @@
           ],
           "finalEnemyComposition": [
             "plagueChopper",
-            "plagueChopper",
-            "plagueDrummer",
+            "plagueWretch",
             "plagueDrummer"
           ],
           "deaths": 4
         },
         {
           "seed": 37,
-          "phase": "defeat",
+          "phase": "victory",
           "battles": 4,
           "skivers": 0,
           "fourEnemy": 1,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 28,
@@ -788,7 +787,7 @@
             "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 4
+          "deaths": 0
         },
         {
           "seed": 41,
@@ -915,12 +914,12 @@
         },
         {
           "seed": 83,
-          "phase": "victory",
+          "phase": "defeat",
           "battles": 4,
           "skivers": 0,
-          "fourEnemy": 3,
+          "fourEnemy": 2,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 3,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 31,
@@ -938,12 +937,11 @@
             "plagueDrummer"
           ],
           "finalEnemyComposition": [
-            "plagueSlasher",
-            "plagueSlasher",
+            "plagueChopper",
             "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 2
+          "deaths": 4
         },
         {
           "seed": 97,
@@ -952,7 +950,7 @@
           "skivers": 0,
           "fourEnemy": 2,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 41,
@@ -1095,15 +1093,15 @@
         "Priest:sacred_strike:4",
         "Priest:sacred_strike:5"
       ],
-      "meanBattles": 2.9,
-      "meanSkiverEncounters": 1.7,
+      "meanBattles": 2.8,
+      "meanSkiverEncounters": 1.6,
       "meanFourEnemyEncounters": 0.2,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 0.4,
+      "meanFoodHeals": 3.6,
       "meanCampsUsed": 0,
-      "meanCurativesUsed": 1.7,
-      "meanHeroSkills": 34.4,
-      "meanEnemySkills": 30.7,
+      "meanCurativesUsed": 1.6,
+      "meanHeroSkills": 32.9,
+      "meanEnemySkills": 29.8,
       "meanRemainingHp": 0.2,
       "meanDeaths": 4,
       "outcomes": [
@@ -1114,7 +1112,7 @@
           "skivers": 2,
           "fourEnemy": 0,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 27,
@@ -1144,7 +1142,7 @@
           "skivers": 1,
           "fourEnemy": 0,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 1,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 22,
@@ -1174,7 +1172,7 @@
           "skivers": 2,
           "fourEnemy": 0,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 31,
@@ -1204,7 +1202,7 @@
           "skivers": 2,
           "fourEnemy": 0,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 30,
@@ -1234,7 +1232,7 @@
           "skivers": 2,
           "fourEnemy": 1,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 32,
@@ -1261,11 +1259,11 @@
         {
           "seed": 67,
           "phase": "defeat",
-          "battles": 4,
-          "skivers": 2,
+          "battles": 3,
+          "skivers": 1,
           "fourEnemy": 0,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 3,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 20,
@@ -1282,9 +1280,9 @@
             "plagueDrummer"
           ],
           "finalEnemyComposition": [
+            "plagueChopper",
             "plagueSlasher",
-            "plagueDrummer",
-            "plagueSkiver"
+            "plagueDrummer"
           ],
           "deaths": 4
         },
@@ -1326,7 +1324,7 @@
           "skivers": 2,
           "fourEnemy": 0,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 31,
@@ -1356,7 +1354,7 @@
           "skivers": 2,
           "fourEnemy": 0,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 34,
@@ -1386,7 +1384,7 @@
           "skivers": 0,
           "fourEnemy": 0,
           "torches": 0,
-          "foodHeals": 0,
+          "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
             "actions": 25,
