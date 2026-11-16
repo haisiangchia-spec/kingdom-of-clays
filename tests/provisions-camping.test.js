@@ -50,3 +50,19 @@ test('camp respite is bounded and sanctuary suppresses nighttime ambush',()=>{
  assert.equal(d.camp,null);
  assert.throws(()=>useCampSkill(d,'sanctuary'),/No active camp/);
 });
+
+test('unprotected camping ambush enters combat without claiming room progress',()=>{
+ let ambush=null;
+ for(let seed=1;seed<=100;seed++){
+  const d=createDungeon(seed,{difficulty:'patrol'});
+  d.room='gallery';d.cleared.push('gallery');
+  campMeal(d,2);
+  const outcome=finishCamp(d);
+  if(outcome.ambushed){ambush=d;break;}
+ }
+ assert.ok(ambush,'At least one seeded campsite must trigger an ambush');
+ assert.equal(ambush.phase,'combat');
+ assert.match(ambush.pendingBattle.source,/^camp:/);
+ assert.ok(ambush.pendingBattle.battle.units.some(u=>u.side==='enemy'));
+ assert.deepEqual(ambush.cleared,['gallery']);
+});
