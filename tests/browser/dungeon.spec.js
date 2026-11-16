@@ -714,3 +714,44 @@ test('browser travels onward after resolving its first corridor fight through co
   }
  }
 });
+
+test('browser quest board unlocks Veteran after three victories and Champion after Veteran victory',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const save=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  save.settlement.completedExpeditions=3;
+  save.settlement.campaignVictories=[];
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(save.settlement,save.expedition));
+ });
+ await page.reload();
+ await expect(page.locator('#settlement-panel')).toContainText('Established Company');
+ await expect(page.locator('#settlement-panel')).toContainText('3/3');
+ const veteran=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expeditionUnlock}=await import('/src/campaign-progression.js');
+  const {availableQuests}=await import('/src/quest-board.js');
+  const {settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {veteran:expeditionUnlock(settlement,'plague','veteran').unlocked,
+   champion:expeditionUnlock(settlement,'plague','champion').unlocked,
+   quest:availableQuests(settlement).find(q=>q.id==='warrens-veteran')?.unlocked};
+ });
+ expect(veteran).toEqual({veteran:true,champion:false,quest:true});
+ await page.evaluate(async ()=>{
+  const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const save=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  save.settlement.campaignVictories.push('veteran-victory');
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(save.settlement,save.expedition));
+ });
+ await page.reload();
+ const champion=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expeditionUnlock}=await import('/src/campaign-progression.js');
+  const {availableQuests}=await import('/src/quest-board.js');
+  const {settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {champion:expeditionUnlock(settlement,'plague','champion').unlocked,
+   quest:availableQuests(settlement).find(q=>q.id==='warrens-champion')?.unlocked};
+ });
+ expect(champion).toEqual({champion:true,quest:true});
+ await expect(page.locator('#settlement-panel')).toContainText('Veteran Trial');
+});
