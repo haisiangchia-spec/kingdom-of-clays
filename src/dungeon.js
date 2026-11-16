@@ -88,7 +88,7 @@ export function purchaseProvision(dungeon,settlement,type,quantity=1){
 // separate future mechanics; this API does not claim complete camping parity.
 export function campMeal(dungeon,food=4){
  if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingBattle||
-    dungeon.room==='entrance'||!dungeon.cleared.includes(dungeon.room))
+    dungeon.room==='entrance'||(!dungeon.cleared.includes(dungeon.room)&&DUNGEON_ROOMS[dungeon.room]?.encounter!==false))
   throw Error('Camping requires a cleared room outside the entrance');
  if(dungeon.pendingLoot||dungeon.pendingHunger||dungeon.camp)throw Error('Resolve pending expedition event or camp before camping');
  if((dungeon.firewood??0)<1)throw Error('No firewood remaining');
