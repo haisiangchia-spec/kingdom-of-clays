@@ -211,13 +211,24 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
    const living=d.party.filter(h=>!h.dead);
    const wounded=living.filter(h=>h.hp<h.maxHp);
    const totalMissing=living.reduce((n,h)=>n+h.maxHp-h.hp,0);
-   const meal=(d.supplies.food??0)>=8&&
-     (wounded.length>=2||living.some(h=>h.stress>=20))?8:
-     (d.supplies.food??0)>=4&&totalMissing>=8?4:null;
-   if(meal!==null){campMeal(d,meal);campsUsed++;
-    const wounded=d.party.filter(h=>!h.dead).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp);
-    if(wounded.length){useCampSkill(d,'sanctuary');useCampSkill(d,'fieldDressing',wounded[0].id);}
-    finishCamp(d);continue;}
+   // Camp proactively after a damaging encounter. Meal costs are based on
+   // living party size; reserve food for hunger, and use a zero-food rest
+   // only when the remaining respite healing outweighs the meal penalty.
+   const food=d.supplies.food??0;
+   const meal=food>=8&&totalMissing>=20?8:
+     food>=4&&totalMissing>=12?4:
+     food>=2&&totalMissing>=20?2:null;
+   if(meal!==null){
+    campMeal(d,meal);campsUsed++;
+    if(d.camp.respite>=CAMP_SKILLS.sanctuary.cost)useCampSkill(d,'sanctuary');
+    while(d.camp.respite>=CAMP_SKILLS.fieldDressing.cost){
+     const target=d.party.filter(h=>!h.dead&&h.hp<h.maxHp)
+       .sort((a,b)=>(b.maxHp-b.hp)-(a.maxHp-a.hp))[0];
+     if(!target)break;
+     useCampSkill(d,'fieldDressing',target.id);
+    }
+    finishCamp(d);continue;
+   }
   }
   // Provisional benchmark policy: use spare rations before another fight
   // when a hero falls below half HP, retaining four for the next hunger check.
