@@ -842,6 +842,20 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
  expect(partialObjectives).toEqual([
   {room:'watch',complete:true},{room:'vault',complete:true},{room:'sanctum',complete:false}
  ]);
+ await page.evaluate(async ()=>{
+  const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const save=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  save.expedition.cleared.push('sanctum');
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(save.settlement,save.expedition));
+ });
+ await page.reload();
+ const clearedObjectives=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {questObjectiveProgress}=await import('/src/dungeon.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return questObjectiveProgress(expedition);
+ });
+ expect(clearedObjectives).toEqual(['watch','vault','sanctum'].map(room=>({room,complete:true})));
  await expect(page.locator('#settlement-panel')).toContainText('Veteran Trial');
  await expect(page.locator('#settlement-panel')).toContainText('1/1');
  await page.reload();
