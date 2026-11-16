@@ -22,11 +22,13 @@ permissions:
 jobs:
   campaign-regression:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run all Node regression tests
+      - name: Run focused campaign progression checks
+        run: node --test tests/campaign-navigation-smoke.test.js tests/campaign-quest-board-smoke.test.js tests/encounter-tier-distribution.test.js
+      - name: Run complete Node regression suite
         run: npm test
