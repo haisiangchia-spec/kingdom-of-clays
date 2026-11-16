@@ -881,6 +881,39 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
    quest:expedition.questId,tier:expedition.tier};
  });
  expect(restoredChampionOutcome).toEqual({...championOutcome,quest:'warrens-champion',tier:'champion'});
+ if(championOutcome.phase==='explore'){
+  // The encounter is finished; corridor movement must still use the UI.
+  for(let step=0;step<8;step++){
+   const state=await page.evaluate(async ()=>{
+    const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+    const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+    return {room:expedition.room,phase:expedition.phase,
+     pendingTravel:!!expedition.pendingTravel,pendingLoot:!!expedition.pendingLoot,
+     pendingHunger:!!expedition.pendingHunger};
+   });
+   if(state.room==='gallery'||state.phase!=='explore')break;
+   if(state.pendingLoot){
+    const collect=page.getByRole('button',{name:'Collect treasure'});
+    const leave=page.getByRole('button',{name:'Leave treasure'});
+    if(await collect.count())await collect.click();
+    else if(await leave.count())await leave.click();
+   }else if(state.pendingHunger){
+    await page.getByRole('button',{name:'Eat four food'}).click();
+   }else if(state.pendingTravel){
+    await page.getByRole('button',{name:'Advance corridor'}).click();
+   }else break;
+  }
+  const advanced=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+   return {room:expedition.room,phase:expedition.phase};
+  });
+  expect(advanced).toEqual({room:'gallery',phase:'explore'});
+  await expect(page.locator('#dungeon-status')).toContainText('Fungal Passage');
+  await page.reload();
+  await expect(page.locator('#dungeon-status')).toContainText('Fungal Passage');
+ }
+
 
  // Exercise the objective checklist across saved room clearances without
  // bypassing the normal browser launch and quest-selection flow.
