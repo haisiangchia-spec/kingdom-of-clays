@@ -720,6 +720,10 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
  await page.evaluate(async ()=>{
   const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
   const save=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  // The quest board enables selection only between expeditions, not mid-run.
+  save.expedition.phase='defeat';
+  save.expedition.rosterReturned=true;
+  save.expedition.townWeekProcessed=true;
   save.settlement.completedExpeditions=3;
   save.settlement.campaignVictories=[];
   localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(save.settlement,save.expedition));
