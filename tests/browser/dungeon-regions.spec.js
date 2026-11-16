@@ -201,9 +201,14 @@ test('Veteran Warrens selection survives reload and retains provisional combat t
    scalings:expedition.pendingBattle?.battle?.units.filter(u=>u.side==='enemy').map(u=>u.tierScaling)};
  });
  expect(result.tier).toBe('veteran');
- expect(result.battleTier).toBe('veteran');
+ // Veteran expeditions intentionally mix Veteran and Apprentice encounters.
+ expect(['apprentice','veteran']).toContain(result.battleTier);
  expect(result.scalings.length).toBeGreaterThan(0);
- expect(result.scalings.every(x=>['clays-provisional-veteran','dd1-verified-veteran-stats'].includes(x))).toBe(true);
+ if(result.battleTier==='veteran'){
+  expect(result.scalings.every(x=>['clays-provisional-veteran','dd1-verified-veteran-stats'].includes(x))).toBe(true);
+ }else{
+  expect(result.scalings.every(x=>x===undefined)).toBe(true);
+ }
 });
 
 
