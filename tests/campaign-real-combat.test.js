@@ -1,7 +1,7 @@
 import {ENEMY_SKILLS} from '../src/enemy-skills.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,dungeonCorridors,questObjectiveProgress,resolveHunger,useProvision,purchaseProvision,campMeal,useCampSkill,finishCamp,CAMP_SKILLS} from '../src/dungeon.js';
+import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,dungeonCorridors,questObjectiveProgress,resolveHunger,useProvision,purchaseProvision,campMeal,useCampSkill,finishCamp,CAMP_SKILLS,DUNGEON_ROOMS} from '../src/dungeon.js';
 import {makeGeneratedEncounter,rng,status,startRound,currentActor,prepareActorTurn,availableTargets,takeTurn,passActorTurn,ABILITIES} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {leaveLoot} from '../src/inventory.js';
@@ -206,7 +206,7 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
    }
    if(cured)continue;
   }
-  if(enableCamping&&d.firewood>0&&d.room!=='entrance'&&d.cleared.includes(d.room)&&
+  if(enableCamping&&d.firewood>0&&d.room!=='entrance'&&(d.cleared.includes(d.room)||DUNGEON_ROOMS[d.room]?.encounter===false)&&
      !d.pendingTravel){
    const living=d.party.filter(h=>!h.dead);
    const wounded=living.filter(h=>h.hp<h.maxHp);
