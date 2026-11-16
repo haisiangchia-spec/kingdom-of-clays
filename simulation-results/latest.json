@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "commit": "11ac4dd18907d2490533dac73d9b041049d0d1c2",
-  "runId": "43781785781",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43781785781",
+  "commit": "75eb09bf5d6f9767459acec1d8381816c1c35f67",
+  "runId": "43781868735",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43781868735",
   "baseline": [
     {
       "questId": "crypt-recon",
@@ -44,13 +44,13 @@
           "seed": 67,
           "result": "victory",
           "battles": 3,
-          "fallen": 0
+          "fallen": 1
         },
         {
           "seed": 71,
           "result": "victory",
           "battles": 3,
-          "fallen": 0
+          "fallen": 1
         },
         {
           "seed": 83,
@@ -68,25 +68,25 @@
           "seed": 109,
           "result": "victory",
           "battles": 2,
-          "fallen": 0
+          "fallen": 1
         }
       ],
       "victories": 10,
       "defeats": 0,
       "meanBattles": 2.8,
-      "meanActions": 91,
-      "meanHeals": 13.9,
+      "meanActions": 96.2,
+      "meanHeals": 14.2,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 1.2,
+      "meanFoodHeals": 1.3,
       "meanSkiverEncounters": 0,
       "meanFourEnemyEncounters": 0,
-      "meanFallen": 0,
-      "meanRemainingHp": 62.3,
-      "meanStress": 46.2,
-      "meanFoodRemaining": 2,
+      "meanFallen": 0.3,
+      "meanRemainingHp": 53.7,
+      "meanStress": 55.1,
+      "meanFoodRemaining": 1.5,
       "meanTorchlight": 67.1,
-      "minRemainingHp": 50,
-      "maxStress": 145
+      "minRemainingHp": 29,
+      "maxStress": 148
     },
     {
       "questId": "crypt-purge",
@@ -96,15 +96,15 @@
       "outcomes": [
         {
           "seed": 11,
-          "result": "defeat",
+          "result": "victory",
           "battles": 3,
-          "fallen": 4
+          "fallen": 0
         },
         {
           "seed": 23,
-          "result": "defeat",
-          "battles": 3,
-          "fallen": 4
+          "result": "victory",
+          "battles": 4,
+          "fallen": 0
         },
         {
           "seed": 37,
@@ -114,9 +114,9 @@
         },
         {
           "seed": 41,
-          "result": "victory",
+          "result": "defeat",
           "battles": 4,
-          "fallen": 0
+          "fallen": 4
         },
         {
           "seed": 53,
@@ -128,12 +128,12 @@
           "seed": 67,
           "result": "victory",
           "battles": 3,
-          "fallen": 1
+          "fallen": 0
         },
         {
           "seed": 71,
           "result": "defeat",
-          "battles": 2,
+          "battles": 3,
           "fallen": 4
         },
         {
@@ -144,9 +144,9 @@
         },
         {
           "seed": 97,
-          "result": "defeat",
+          "result": "victory",
           "battles": 4,
-          "fallen": 4
+          "fallen": 1
         },
         {
           "seed": 109,
@@ -155,22 +155,22 @@
           "fallen": 0
         }
       ],
-      "victories": 5,
-      "defeats": 5,
-      "meanBattles": 3.2,
-      "meanActions": 136.9,
-      "meanHeals": 18.4,
+      "victories": 7,
+      "defeats": 3,
+      "meanBattles": 3.4,
+      "meanActions": 138.6,
+      "meanHeals": 19.6,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 1.3,
+      "meanFoodHeals": 2.3,
       "meanSkiverEncounters": 0,
-      "meanFourEnemyEncounters": 2.7,
-      "meanFallen": 2.2,
-      "meanRemainingHp": 25.4,
-      "meanStress": 165.3,
-      "meanFoodRemaining": 0.7,
-      "meanTorchlight": 62.7,
+      "meanFourEnemyEncounters": 2.9,
+      "meanFallen": 1.4,
+      "meanRemainingHp": 38.5,
+      "meanStress": 230.5,
+      "meanFoodRemaining": 0.1,
+      "meanTorchlight": 61.8,
       "minRemainingHp": 0,
-      "maxStress": 301
+      "maxStress": 544
     },
     {
       "questId": "warrens-recon",
@@ -210,9 +210,9 @@
         },
         {
           "seed": 67,
-          "result": "victory",
+          "result": "defeat",
           "battles": 3,
-          "fallen": 1
+          "fallen": 4
         },
         {
           "seed": 71,
@@ -239,22 +239,22 @@
           "fallen": 0
         }
       ],
-      "victories": 10,
-      "defeats": 0,
+      "victories": 9,
+      "defeats": 1,
       "meanBattles": 2.8,
-      "meanActions": 108.4,
-      "meanHeals": 11.5,
+      "meanActions": 118.1,
+      "meanHeals": 12.6,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 0.4,
+      "meanFoodHeals": 0.3,
       "meanSkiverEncounters": 0,
       "meanFourEnemyEncounters": 1.9,
-      "meanFallen": 0.1,
-      "meanRemainingHp": 74.2,
-      "meanStress": 222.1,
-      "meanFoodRemaining": 2,
+      "meanFallen": 0.4,
+      "meanRemainingHp": 63.6,
+      "meanStress": 249,
+      "meanFoodRemaining": 2.1,
       "meanTorchlight": 67.1,
-      "minRemainingHp": 48,
-      "maxStress": 320
+      "minRemainingHp": 0,
+      "maxStress": 375
     },
     {
       "questId": "warrens-containment",
@@ -270,21 +270,21 @@
         },
         {
           "seed": 23,
-          "result": "victory",
+          "result": "defeat",
           "battles": 4,
-          "fallen": 0
+          "fallen": 4
         },
         {
           "seed": 37,
           "result": "victory",
           "battles": 3,
-          "fallen": 2
+          "fallen": 1
         },
         {
           "seed": 41,
-          "result": "victory",
+          "result": "defeat",
           "battles": 4,
-          "fallen": 0
+          "fallen": 4
         },
         {
           "seed": 53,
@@ -296,19 +296,19 @@
           "seed": 67,
           "result": "victory",
           "battles": 3,
-          "fallen": 1
+          "fallen": 2
         },
         {
           "seed": 71,
-          "result": "defeat",
+          "result": "victory",
           "battles": 3,
-          "fallen": 4
+          "fallen": 0
         },
         {
           "seed": 83,
           "result": "victory",
           "battles": 4,
-          "fallen": 1
+          "fallen": 0
         },
         {
           "seed": 97,
@@ -323,22 +323,22 @@
           "fallen": 0
         }
       ],
-      "victories": 9,
-      "defeats": 1,
+      "victories": 8,
+      "defeats": 2,
       "meanBattles": 3.4,
-      "meanActions": 140.3,
-      "meanHeals": 16.7,
+      "meanActions": 141.1,
+      "meanHeals": 15.8,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 0.3,
+      "meanFoodHeals": 0.1,
       "meanSkiverEncounters": 0,
       "meanFourEnemyEncounters": 2.6,
-      "meanFallen": 0.8,
-      "meanRemainingHp": 57.1,
-      "meanStress": 345.3,
-      "meanFoodRemaining": 0.1,
+      "meanFallen": 1.1,
+      "meanRemainingHp": 50.9,
+      "meanStress": 330.6,
+      "meanFoodRemaining": 0.3,
       "meanTorchlight": 61.8,
       "minRemainingHp": 0,
-      "maxStress": 457
+      "maxStress": 423
     },
     {
       "questId": "warrens-veteran",
@@ -349,7 +349,7 @@
         {
           "seed": 11,
           "result": "defeat",
-          "battles": 3,
+          "battles": 1,
           "fallen": 4
         },
         {
@@ -397,32 +397,32 @@
         {
           "seed": 97,
           "result": "defeat",
-          "battles": 2,
+          "battles": 3,
           "fallen": 4
         },
         {
           "seed": 109,
           "result": "defeat",
-          "battles": 2,
+          "battles": 3,
           "fallen": 4
         }
       ],
       "victories": 0,
       "defeats": 10,
       "meanBattles": 2.1,
-      "meanActions": 104.4,
-      "meanHeals": 11.3,
+      "meanActions": 89.4,
+      "meanHeals": 9.1,
       "meanTorchesUsed": 0,
-      "meanFoodHeals": 2,
+      "meanFoodHeals": 2.8,
       "meanSkiverEncounters": 0,
       "meanFourEnemyEncounters": 1,
       "meanFallen": 4,
-      "meanRemainingHp": 0,
-      "meanStress": 294.6,
-      "meanFoodRemaining": 1.2,
-      "meanTorchlight": 65.3,
+      "meanRemainingHp": 0.5,
+      "meanStress": 307.8,
+      "meanFoodRemaining": 2,
+      "meanTorchlight": 65.5,
       "minRemainingHp": 0,
-      "maxStress": 407
+      "maxStress": 541
     },
     {
       "questId": "warrens-champion",
@@ -515,11 +515,11 @@
       "tier": "veteran",
       "level": 3,
       "n": 10,
-      "victories": 0,
-      "defeats": 10,
-      "meanFallen": 4,
+      "victories": 1,
+      "defeats": 9,
+      "meanFallen": 3.9,
       "meanRemainingHp": 0,
-      "meanStress": 409.1,
+      "meanStress": 386.2,
       "outcomes": [
         {
           "seed": 11,
@@ -533,7 +533,7 @@
         },
         {
           "seed": 37,
-          "result": "defeat",
+          "result": "victory",
           "battles": 4
         },
         {
@@ -549,17 +549,17 @@
         {
           "seed": 67,
           "result": "defeat",
-          "battles": 4
+          "battles": 3
         },
         {
           "seed": 71,
           "result": "defeat",
-          "battles": 3
+          "battles": 4
         },
         {
           "seed": 83,
           "result": "defeat",
-          "battles": 4
+          "battles": 2
         },
         {
           "seed": 97,
@@ -581,13 +581,13 @@
       "victories": 0,
       "defeats": 10,
       "meanFallen": 4,
-      "meanRemainingHp": 0.1,
-      "meanStress": 157.4,
+      "meanRemainingHp": 0,
+      "meanStress": 160.3,
       "outcomes": [
         {
           "seed": 11,
           "result": "defeat",
-          "battles": 2
+          "battles": 3
         },
         {
           "seed": 23,
@@ -643,8 +643,8 @@
       "tier": "veteran",
       "level": 3,
       "n": 10,
-      "wins": 5,
-      "defeats": 5,
+      "wins": 4,
+      "defeats": 6,
       "upgraded": [
         "Swordsman:heavy_slash:2",
         "Swordsman:heavy_slash:3",
@@ -685,17 +685,17 @@
         "Priest:sacred_strike:2",
         "Priest:sacred_strike:3"
       ],
-      "meanBattles": 4.4,
+      "meanBattles": 4.2,
       "meanSkiverEncounters": 0,
       "meanFourEnemyEncounters": 1.7,
       "meanTorchesUsed": 0.2,
       "meanFoodHeals": 1,
       "meanCampsUsed": 0.2,
-      "meanCurativesUsed": 1.6,
-      "meanHeroSkills": 79.8,
-      "meanEnemySkills": 54.3,
-      "meanRemainingHp": 28.2,
-      "meanDeaths": 2.3,
+      "meanCurativesUsed": 1.4,
+      "meanHeroSkills": 76.6,
+      "meanEnemySkills": 57.9,
+      "meanRemainingHp": 16.8,
+      "meanDeaths": 3.2,
       "outcomes": [
         {
           "seed": 11,
@@ -717,10 +717,10 @@
             "heroSkillsUsed": {
               "heavy_slash": 5,
               "greater_heal": 4,
-              "concussive_blow": 3,
+              "concussive_blow": 2,
               "hunters_mark": 1,
               "eagle_eye_shot": 4,
-              "crushing_strike": 2,
+              "crushing_strike": 3,
               "group_healing": 1
             },
             "enemySkillsUsed": {
@@ -748,7 +748,7 @@
         {
           "seed": 23,
           "phase": "defeat",
-          "battles": 4,
+          "battles": 5,
           "skivers": 0,
           "fourEnemy": 2,
           "torches": 0,
@@ -764,10 +764,11 @@
             "fallen": 0,
             "heroSkillsUsed": {
               "eagle_eye_shot": 2,
-              "concussive_blow": 3,
+              "concussive_blow": 2,
               "greater_heal": 4,
               "heavy_slash": 4,
-              "hunters_mark": 2
+              "hunters_mark": 2,
+              "crushing_strike": 1
             },
             "enemySkillsUsed": {
               "plague_veteran_vomit": 1,
@@ -783,8 +784,7 @@
           ],
           "finalEnemyComposition": [
             "plagueChopper",
-            "plagueChopper",
-            "plagueDrummer",
+            "plagueWretch",
             "plagueDrummer"
           ],
           "deaths": 4
@@ -799,71 +799,26 @@
           "foodHeals": 0,
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 26,
-            "heroSkills": 17,
-            "enemySkills": 7,
+            "actions": 29,
+            "heroSkills": 20,
+            "enemySkills": 8,
             "heals": 1,
             "hpBefore": 151,
-            "hpAfter": 127,
+            "hpAfter": 133,
             "fallen": 0,
             "heroSkillsUsed": {
-              "greater_heal": 4,
+              "greater_heal": 5,
               "eagle_eye_shot": 2,
               "heavy_slash": 5,
-              "concussive_blow": 3,
-              "hunters_mark": 2,
-              "crushing_strike": 1
-            },
-            "enemySkillsUsed": {
-              "plague_veteran_drum_debilitation": 2,
-              "plague_veteran_butcher_cut": 1,
-              "plague_veteran_vomit": 1,
-              "plague_veteran_drum_doom": 3
-            }
-          },
-          "firstEnemyComposition": [
-            "plagueChopper",
-            "plagueWretch",
-            "plagueDrummer"
-          ],
-          "finalEnemyComposition": [
-            "plagueChopper",
-            "plagueWretch",
-            "plagueDrummer"
-          ],
-          "deaths": 0
-        },
-        {
-          "seed": 41,
-          "phase": "victory",
-          "battles": 5,
-          "skivers": 0,
-          "fourEnemy": 1,
-          "torches": 0,
-          "foodHeals": 0,
-          "firstEncounter": {
-            "outcome": "victory",
-            "actions": 35,
-            "heroSkills": 21,
-            "enemySkills": 12,
-            "heals": 3,
-            "hpBefore": 151,
-            "hpAfter": 123,
-            "fallen": 0,
-            "heroSkillsUsed": {
-              "heavy_slash": 5,
+              "concussive_blow": 2,
               "hunters_mark": 3,
-              "concussive_blow": 3,
-              "greater_heal": 5,
-              "eagle_eye_shot": 3,
-              "crushing_strike": 2
+              "crushing_strike": 3
             },
             "enemySkillsUsed": {
-              "plague_veteran_drum_debilitation": 4,
-              "plague_veteran_vomit": 4,
-              "plague_veteran_ball_chain": 1,
-              "plague_veteran_drum_doom": 2,
-              "plague_veteran_butcher_cut": 1
+              "plague_veteran_drum_debilitation": 3,
+              "plague_veteran_butcher_cut": 2,
+              "plague_veteran_vomit": 1,
+              "plague_veteran_drum_doom": 2
             }
           },
           "firstEnemyComposition": [
@@ -879,6 +834,51 @@
           "deaths": 2
         },
         {
+          "seed": 41,
+          "phase": "defeat",
+          "battles": 4,
+          "skivers": 0,
+          "fourEnemy": 1,
+          "torches": 0,
+          "foodHeals": 0,
+          "firstEncounter": {
+            "outcome": "victory",
+            "actions": 36,
+            "heroSkills": 19,
+            "enemySkills": 13,
+            "heals": 1,
+            "hpBefore": 151,
+            "hpAfter": 113,
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "heavy_slash": 6,
+              "hunters_mark": 4,
+              "concussive_blow": 3,
+              "greater_heal": 3,
+              "crushing_strike": 2,
+              "eagle_eye_shot": 1
+            },
+            "enemySkillsUsed": {
+              "plague_veteran_drum_debilitation": 3,
+              "plague_veteran_vomit": 4,
+              "plague_veteran_ball_chain": 2,
+              "plague_veteran_drum_doom": 3,
+              "plague_veteran_butcher_cut": 1
+            }
+          },
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "deaths": 4
+        },
+        {
           "seed": 53,
           "phase": "victory",
           "battles": 4,
@@ -891,20 +891,21 @@
             "actions": 25,
             "heroSkills": 16,
             "enemySkills": 8,
-            "heals": 1,
+            "heals": 2,
             "hpBefore": 151,
-            "hpAfter": 124,
+            "hpAfter": 123,
             "fallen": 0,
             "heroSkillsUsed": {
               "greater_heal": 4,
               "heavy_slash": 4,
               "hunters_mark": 2,
-              "concussive_blow": 4,
-              "eagle_eye_shot": 2
+              "concussive_blow": 2,
+              "eagle_eye_shot": 2,
+              "crushing_strike": 2
             },
             "enemySkillsUsed": {
-              "plague_veteran_drum_doom": 2,
-              "plague_veteran_vomit": 3,
+              "plague_veteran_drum_doom": 3,
+              "plague_veteran_vomit": 2,
               "plague_veteran_ball_chain": 1,
               "plague_veteran_butcher_cut": 1,
               "plague_veteran_drum_debilitation": 1
@@ -921,11 +922,11 @@
             "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 1
+          "deaths": 2
         },
         {
           "seed": 67,
-          "phase": "defeat",
+          "phase": "victory",
           "battles": 4,
           "skivers": 0,
           "fourEnemy": 2,
@@ -933,26 +934,27 @@
           "foodHeals": 0,
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 29,
-            "heroSkills": 16,
-            "enemySkills": 9,
-            "heals": 2,
+            "actions": 24,
+            "heroSkills": 15,
+            "enemySkills": 7,
+            "heals": 0,
             "hpBefore": 151,
-            "hpAfter": 130,
+            "hpAfter": 120,
             "fallen": 0,
             "heroSkillsUsed": {
               "eagle_eye_shot": 2,
-              "heavy_slash": 5,
-              "concussive_blow": 3,
+              "heavy_slash": 4,
+              "concussive_blow": 1,
               "greater_heal": 3,
               "hunters_mark": 2,
-              "crushing_strike": 1
+              "crushing_strike": 3
             },
             "enemySkillsUsed": {
               "plague_veteran_vomit": 1,
               "plague_veteran_drum_debilitation": 2,
-              "plague_veteran_ball_chain": 3,
-              "plague_veteran_drum_doom": 3
+              "plague_veteran_ball_chain": 1,
+              "plague_veteran_drum_doom": 2,
+              "plague_veteran_butcher_cut": 1
             }
           },
           "firstEnemyComposition": [
@@ -966,11 +968,11 @@
             "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 4
+          "deaths": 2
         },
         {
           "seed": 71,
-          "phase": "victory",
+          "phase": "defeat",
           "battles": 4,
           "skivers": 0,
           "fourEnemy": 2,
@@ -989,9 +991,9 @@
               "heavy_slash": 5,
               "greater_heal": 5,
               "eagle_eye_shot": 4,
-              "concussive_blow": 2,
+              "concussive_blow": 1,
               "hunters_mark": 1,
-              "crushing_strike": 2
+              "crushing_strike": 3
             },
             "enemySkillsUsed": {
               "plague_veteran_drum_doom": 3,
@@ -1011,39 +1013,39 @@
             "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 0
+          "deaths": 4
         },
         {
           "seed": 83,
-          "phase": "victory",
-          "battles": 6,
+          "phase": "defeat",
+          "battles": 4,
           "skivers": 0,
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 47,
-            "heroSkills": 26,
-            "enemySkills": 18,
-            "heals": 5,
+            "actions": 49,
+            "heroSkills": 24,
+            "enemySkills": 17,
+            "heals": 4,
             "hpBefore": 151,
-            "hpAfter": 61,
+            "hpAfter": 84,
             "fallen": 0,
             "heroSkillsUsed": {
               "heavy_slash": 7,
               "greater_heal": 2,
               "hunters_mark": 3,
-              "concussive_blow": 5,
-              "eagle_eye_shot": 4,
-              "group_healing": 4,
+              "concussive_blow": 6,
+              "group_healing": 3,
+              "eagle_eye_shot": 2,
               "crushing_strike": 1
             },
             "enemySkillsUsed": {
-              "plague_veteran_drum_debilitation": 4,
-              "plague_veteran_butcher_cut": 4,
-              "plague_veteran_drum_doom": 9,
-              "plague_veteran_ball_chain": 1
+              "plague_veteran_drum_debilitation": 7,
+              "plague_veteran_butcher_cut": 3,
+              "plague_veteran_drum_doom": 4,
+              "plague_veteran_ball_chain": 3
             }
           },
           "firstEnemyComposition": [
@@ -1057,7 +1059,7 @@
             "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 0
+          "deaths": 4
         },
         {
           "seed": 97,
@@ -1069,27 +1071,29 @@
           "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 39,
-            "heroSkills": 22,
-            "enemySkills": 16,
-            "heals": 5,
+            "actions": 37,
+            "heroSkills": 20,
+            "enemySkills": 14,
+            "heals": 3,
             "hpBefore": 151,
-            "hpAfter": 94,
+            "hpAfter": 90,
             "fallen": 0,
             "heroSkillsUsed": {
-              "heavy_slash": 5,
-              "greater_heal": 6,
+              "heavy_slash": 6,
+              "greater_heal": 3,
               "concussive_blow": 3,
               "hunters_mark": 2,
-              "eagle_eye_shot": 4,
-              "crushing_strike": 2
+              "eagle_eye_shot": 3,
+              "crushing_strike": 2,
+              "group_healing": 1
             },
             "enemySkillsUsed": {
-              "plague_veteran_vomit": 4,
-              "plague_veteran_drum_doom": 3,
-              "plague_veteran_butcher_cut": 2,
-              "plague_veteran_hook_slash": 5,
-              "plague_veteran_drum_debilitation": 2
+              "plague_veteran_vomit": 2,
+              "plague_veteran_drum_doom": 2,
+              "plague_veteran_butcher_cut": 1,
+              "plague_veteran_hook_slash": 6,
+              "plague_veteran_drum_debilitation": 2,
+              "plague_veteran_ball_chain": 1
             }
           },
           "firstEnemyComposition": [
@@ -1108,7 +1112,7 @@
         },
         {
           "seed": 109,
-          "phase": "defeat",
+          "phase": "victory",
           "battles": 4,
           "skivers": 0,
           "fourEnemy": 1,
@@ -1116,24 +1120,24 @@
           "foodHeals": 0,
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 22,
-            "heroSkills": 13,
+            "actions": 19,
+            "heroSkills": 11,
             "enemySkills": 5,
             "heals": 0,
             "hpBefore": 151,
-            "hpAfter": 138,
+            "hpAfter": 135,
             "fallen": 0,
             "heroSkillsUsed": {
               "eagle_eye_shot": 2,
               "concussive_blow": 3,
-              "greater_heal": 3,
-              "heavy_slash": 4,
+              "greater_heal": 2,
+              "heavy_slash": 3,
               "hunters_mark": 1
             },
             "enemySkillsUsed": {
               "plague_veteran_vomit": 1,
-              "plague_veteran_drum_debilitation": 3,
-              "plague_veteran_ball_chain": 1
+              "plague_veteran_drum_debilitation": 2,
+              "plague_veteran_ball_chain": 2
             }
           },
           "firstEnemyComposition": [
@@ -1147,7 +1151,7 @@
             "plagueWretch",
             "plagueDrummer"
           ],
-          "deaths": 4
+          "deaths": 2
         }
       ]
     },
@@ -1242,45 +1246,43 @@
       "meanTorchesUsed": 0.1,
       "meanFoodHeals": 2.4,
       "meanCampsUsed": 0,
-      "meanCurativesUsed": 1.6,
-      "meanHeroSkills": 33.3,
-      "meanEnemySkills": 27.4,
-      "meanRemainingHp": 0.2,
+      "meanCurativesUsed": 1.4,
+      "meanHeroSkills": 34.1,
+      "meanEnemySkills": 29.1,
+      "meanRemainingHp": 0.7,
       "meanDeaths": 4,
       "outcomes": [
         {
           "seed": 11,
           "phase": "defeat",
-          "battles": 3,
-          "skivers": 2,
+          "battles": 2,
+          "skivers": 1,
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 33,
-            "heroSkills": 20,
+            "actions": 31,
+            "heroSkills": 17,
             "enemySkills": 9,
-            "heals": 3,
+            "heals": 0,
             "hpBefore": 175,
-            "hpAfter": 94,
-            "fallen": 0,
+            "hpAfter": 70,
+            "fallen": 1,
             "heroSkillsUsed": {
               "heavy_slash": 6,
               "eagle_eye_shot": 4,
-              "greater_heal": 3,
-              "concussive_blow": 4,
+              "greater_heal": 1,
+              "concussive_blow": 2,
               "hunters_mark": 1,
-              "group_healing": 1,
-              "crushing_strike": 1
+              "crushing_strike": 3
             },
             "enemySkillsUsed": {
               "plague_champion_drum_debilitation": 1,
               "plague_champion_butcher_cut": 2,
               "plague_skiver_roast": 1,
               "plague_skiver_cripple": 1,
-              "plague_champion_ball_chain": 3,
-              "plague_champion_drum_doom": 1
+              "plague_champion_ball_chain": 4
             }
           },
           "firstEnemyComposition": [
@@ -1290,23 +1292,23 @@
           ],
           "finalEnemyComposition": [
             "plagueChopper",
-            "plagueWretch",
-            "plagueSkiver"
+            "plagueSlasher",
+            "plagueDrummer"
           ],
           "deaths": 4
         },
         {
           "seed": 23,
           "phase": "defeat",
-          "battles": 4,
+          "battles": 3,
           "skivers": 1,
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 21,
-            "heroSkills": 13,
+            "actions": 19,
+            "heroSkills": 12,
             "enemySkills": 6,
             "heals": 1,
             "hpBefore": 175,
@@ -1314,9 +1316,10 @@
             "fallen": 0,
             "heroSkillsUsed": {
               "eagle_eye_shot": 3,
-              "concussive_blow": 3,
+              "concussive_blow": 2,
               "greater_heal": 3,
-              "heavy_slash": 4
+              "heavy_slash": 3,
+              "crushing_strike": 1
             },
             "enemySkillsUsed": {
               "plague_champion_drum_debilitation": 1,
@@ -1394,24 +1397,25 @@
           "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 39,
-            "heroSkills": 21,
-            "enemySkills": 14,
-            "heals": 7,
+            "actions": 35,
+            "heroSkills": 18,
+            "enemySkills": 13,
+            "heals": 6,
             "hpBefore": 175,
-            "hpAfter": 54,
+            "hpAfter": 55,
             "fallen": 1,
             "heroSkillsUsed": {
-              "greater_heal": 5,
-              "heavy_slash": 7,
+              "greater_heal": 4,
+              "heavy_slash": 6,
               "eagle_eye_shot": 1,
-              "concussive_blow": 5,
+              "concussive_blow": 3,
               "group_healing": 2,
-              "charging_blade": 1
+              "charging_blade": 1,
+              "crushing_strike": 1
             },
             "enemySkillsUsed": {
               "plague_skiver_cripple": 1,
-              "plague_champion_vomit": 6,
+              "plague_champion_vomit": 5,
               "plague_champion_butcher_cut": 4,
               "plague_skiver_roast": 2,
               "plague_champion_ball_chain": 1
@@ -1440,26 +1444,28 @@
           "firstEncounter": {
             "outcome": "victory",
             "actions": 36,
-            "heroSkills": 19,
+            "heroSkills": 18,
             "enemySkills": 12,
             "heals": 4,
             "hpBefore": 175,
-            "hpAfter": 94,
-            "fallen": 0,
+            "hpAfter": 67,
+            "fallen": 1,
             "heroSkillsUsed": {
               "greater_heal": 2,
               "heavy_slash": 5,
-              "eagle_eye_shot": 3,
+              "eagle_eye_shot": 2,
               "charging_blade": 1,
-              "concussive_blow": 4,
+              "concussive_blow": 2,
               "group_healing": 2,
-              "hunters_mark": 2
+              "hunters_mark": 2,
+              "crushing_strike": 1,
+              "sacred_strike": 1
             },
             "enemySkillsUsed": {
               "plague_skiver_roast": 2,
-              "plague_champion_vomit": 5,
-              "plague_champion_butcher_cut": 3,
-              "plague_champion_ball_chain": 1,
+              "plague_champion_vomit": 3,
+              "plague_champion_butcher_cut": 4,
+              "plague_champion_ball_chain": 2,
               "plague_skiver_flight": 1
             }
           },
@@ -1479,31 +1485,32 @@
         {
           "seed": 67,
           "phase": "defeat",
-          "battles": 3,
-          "skivers": 1,
+          "battles": 4,
+          "skivers": 2,
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 37,
-            "heroSkills": 24,
-            "enemySkills": 10,
-            "heals": 6,
+            "actions": 31,
+            "heroSkills": 20,
+            "enemySkills": 8,
+            "heals": 5,
             "hpBefore": 175,
-            "hpAfter": 92,
+            "hpAfter": 100,
             "fallen": 0,
             "heroSkillsUsed": {
-              "eagle_eye_shot": 2,
-              "greater_heal": 6,
-              "heavy_slash": 6,
-              "concussive_blow": 6,
-              "hunters_mark": 4
+              "eagle_eye_shot": 1,
+              "greater_heal": 5,
+              "heavy_slash": 5,
+              "concussive_blow": 4,
+              "hunters_mark": 4,
+              "crushing_strike": 1
             },
             "enemySkillsUsed": {
               "plague_champion_drum_doom": 2,
-              "plague_champion_butcher_cut": 2,
-              "plague_champion_hook_slash": 6
+              "plague_champion_butcher_cut": 3,
+              "plague_champion_hook_slash": 3
             }
           },
           "firstEnemyComposition": [
@@ -1512,9 +1519,9 @@
             "plagueDrummer"
           ],
           "finalEnemyComposition": [
-            "plagueChopper",
             "plagueSlasher",
-            "plagueDrummer"
+            "plagueDrummer",
+            "plagueSkiver"
           ],
           "deaths": 4
         },
@@ -1570,34 +1577,34 @@
         {
           "seed": 83,
           "phase": "defeat",
-          "battles": 3,
+          "battles": 4,
           "skivers": 2,
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 4,
           "firstEncounter": {
             "outcome": "victory",
-            "actions": 42,
-            "heroSkills": 19,
-            "enemySkills": 14,
-            "heals": 3,
+            "actions": 38,
+            "heroSkills": 16,
+            "enemySkills": 13,
+            "heals": 2,
             "hpBefore": 175,
-            "hpAfter": 55,
+            "hpAfter": 63,
             "fallen": 1,
             "heroSkillsUsed": {
-              "heavy_slash": 8,
-              "greater_heal": 4,
-              "concussive_blow": 5,
+              "heavy_slash": 7,
+              "greater_heal": 3,
+              "concussive_blow": 3,
               "sacred_strike": 1,
-              "charging_blade": 1
+              "charging_blade": 1,
+              "crushing_strike": 1
             },
             "enemySkillsUsed": {
               "plague_skiver_roast": 2,
               "plague_champion_drum_debilitation": 3,
-              "plague_champion_ball_chain": 5,
+              "plague_champion_ball_chain": 6,
               "plague_skiver_cripple": 1,
-              "plague_skiver_flight": 1,
-              "plague_champion_butcher_cut": 2
+              "plague_skiver_flight": 1
             }
           },
           "firstEnemyComposition": [
@@ -1668,20 +1675,21 @@
             "outcome": "victory",
             "actions": 29,
             "heroSkills": 17,
-            "enemySkills": 9,
+            "enemySkills": 8,
             "heals": 3,
             "hpBefore": 175,
-            "hpAfter": 134,
+            "hpAfter": 142,
             "fallen": 0,
             "heroSkillsUsed": {
-              "eagle_eye_shot": 2,
+              "eagle_eye_shot": 1,
               "concussive_blow": 4,
               "greater_heal": 5,
               "heavy_slash": 5,
-              "hunters_mark": 1
+              "hunters_mark": 1,
+              "crushing_strike": 1
             },
             "enemySkillsUsed": {
-              "plague_champion_hook_slash": 5,
+              "plague_champion_hook_slash": 4,
               "plague_champion_drum_debilitation": 1,
               "plague_champion_ball_chain": 3
             }
