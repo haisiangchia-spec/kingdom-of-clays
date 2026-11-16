@@ -6,6 +6,7 @@ import {prepareRosterParty,returnPartyToRoster} from '../src/hero-roster.js';
 import {advanceTownWeek} from '../src/town-week.js';
 import {createDungeon} from '../src/dungeon.js';
 import {offerLoot,collectLoot} from '../src/inventory.js';
+import {selectQuest} from '../src/quest-board.js';
 test('Clays campaign milestones persist across save and load',()=>{
  const settlement=createCampaignSettlement();
  assert.equal(campaignProgress(settlement).completed,0);
