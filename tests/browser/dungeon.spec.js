@@ -591,6 +591,34 @@ test('browser travels onward after resolving its first corridor fight through co
     });
     expect(destination.room==='sanctum'||destination.phase==='combat'||destination.phase==='victory').toBe(true);
    }
+   const completion=await page.evaluate(async ()=>{
+    const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+    const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+    return {phase:expedition.phase,room:expedition.room};
+   });
+   if(completion.phase==='victory'){
+    for(let pending=0;pending<15;pending++){
+     const collect=page.getByRole('button',{name:'Collect treasure'});
+     if(!await collect.count())break;
+     await collect.click();
+    }
+    await expect(page.getByRole('button',{name:'Return rewards to settlement'})).toBeVisible();
+    await page.getByRole('button',{name:'Return rewards to settlement'}).click();
+    const rewards=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {completed:settlement.completedExpeditions,claimed:expedition.rewardClaimed,gold:settlement.gold};
+    });
+    expect(rewards.completed).toBe(1);
+    expect(rewards.claimed).toBe(true);
+    await page.reload();
+    const savedRewards=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {completed:settlement.completedExpeditions,claimed:expedition.rewardClaimed,gold:settlement.gold};
+    });
+    expect(savedRewards).toEqual(rewards);
+   }
   }
  }
 });
