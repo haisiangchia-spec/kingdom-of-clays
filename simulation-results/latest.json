@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "commit": "332b010f4823243d655cc92a87f83afb3a5b17c2",
-  "runId": "43778398354",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43778398354",
+  "commit": "c162a33734c081315386c8f4a5b7d11a40807446",
+  "runId": "43779295432",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43779295432",
   "baseline": [
     {
       "questId": "crypt-recon",
@@ -643,8 +643,8 @@
       "tier": "veteran",
       "level": 3,
       "n": 10,
-      "wins": 3,
-      "defeats": 7,
+      "wins": 4,
+      "defeats": 6,
       "upgraded": [
         "Swordsman:heavy_slash:2",
         "Swordsman:heavy_slash:3",
@@ -685,23 +685,23 @@
         "Priest:sacred_strike:2",
         "Priest:sacred_strike:3"
       ],
-      "meanBattles": 4,
+      "meanBattles": 4.1,
       "meanSkiverEncounters": 0,
-      "meanFourEnemyEncounters": 1.7,
+      "meanFourEnemyEncounters": 1.8,
       "meanTorchesUsed": 0.2,
       "meanFoodHeals": 0,
-      "meanCampsUsed": 0,
-      "meanHeroSkills": 59.5,
-      "meanEnemySkills": 50.3,
-      "meanRemainingHp": 12.8,
-      "meanDeaths": 3,
+      "meanCampsUsed": 0.5,
+      "meanHeroSkills": 59.2,
+      "meanEnemySkills": 48.5,
+      "meanRemainingHp": 14.9,
+      "meanDeaths": 2.6,
       "outcomes": [
         {
           "seed": 11,
           "phase": "defeat",
-          "battles": 3,
+          "battles": 5,
           "skivers": 0,
-          "fourEnemy": 1,
+          "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
           "deaths": 4
@@ -711,7 +711,7 @@
           "phase": "defeat",
           "battles": 4,
           "skivers": 0,
-          "fourEnemy": 1,
+          "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
           "deaths": 4
@@ -728,13 +728,13 @@
         },
         {
           "seed": 41,
-          "phase": "defeat",
-          "battles": 4,
+          "phase": "victory",
+          "battles": 5,
           "skivers": 0,
-          "fourEnemy": 3,
+          "fourEnemy": 1,
           "torches": 0,
           "foodHeals": 0,
-          "deaths": 4
+          "deaths": 0
         },
         {
           "seed": 53,
@@ -769,9 +769,9 @@
         {
           "seed": 83,
           "phase": "defeat",
-          "battles": 5,
+          "battles": 4,
           "skivers": 0,
-          "fourEnemy": 2,
+          "fourEnemy": 3,
           "torches": 0,
           "foodHeals": 0,
           "deaths": 4
@@ -779,7 +779,7 @@
         {
           "seed": 97,
           "phase": "defeat",
-          "battles": 5,
+          "battles": 4,
           "skivers": 0,
           "fourEnemy": 2,
           "torches": 0,
