@@ -217,3 +217,27 @@ test('unclaimed victory blocks the next expedition until rewards are returned',a
  });
  expect(final).toBe(before.completed+1);
 });
+
+test('switching from unlocked Veteran Warrens to Crypt resets invalid tier',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave,encodeCampaignSave}=await import('/src/settlement.js');
+  const state=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  state.settlement.completedExpeditions=3;
+  state.expedition.phase='victory';
+  state.expedition.rewardClaimed=true;
+  state.expedition.rosterReturned=true;
+  state.expedition.townWeekProcessed=true;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(state.settlement,state.expedition));
+ });
+ await page.reload();
+ await page.locator('#dungeon-region').selectOption('plague');
+ await page.locator('#dungeon-tier').selectOption('veteran');
+ await expect(page.locator('#dungeon-tier')).toHaveValue('veteran');
+ await page.locator('#dungeon-region').selectOption('crypt');
+ await expect(page.locator('#dungeon-tier')).toHaveValue('apprentice');
+ await expect(page.locator('#dungeon-tier option[value="veteran"]')).toBeDisabled();
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('APPRENTICE');
+ await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
+});
