@@ -322,3 +322,60 @@ test('browser resolves an entire corridor battle using only player combat contro
  expect(['explore','defeat','victory']).toContain(result.phase);
  if(result.phase==='explore')expect(result.cleared).toBe(true);
 });
+
+test('browser travels onward after resolving its first corridor fight through combat controls',async ({page})=>{
+ test.setTimeout(90000);
+ await page.goto('/dungeon.html');
+ await page.getByRole('button',{name:'Travel to Ashen Gallery'}).click();
+ await page.getByRole('button',{name:'Advance corridor'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+ let turns=0;
+ while(turns++<120){
+  const phase=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   return decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY)).expedition.phase;
+  });
+  if(phase!=='combat')break;
+  const enemies=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+   return expedition.pendingBattle.battle.units.filter(u=>u.side==='enemy'&&!u.dead&&!u.corpse).map(u=>u.name);
+  });
+  let acted=false;
+  for(const skill of await page.locator('#dungeon-combat button[aria-pressed]').all()){
+   await skill.click();
+   for(const enemy of enemies){
+    const target=page.locator('#dungeon-combat button').filter({hasText:enemy});
+    if(await target.count()){await target.first().click();acted=true;break;}
+   }
+   if(acted)break;
+  }
+  if(!acted)await page.getByRole('button',{name:'Pass turn'}).click();
+ }
+ expect(turns).toBeLessThan(121);
+ const phase=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  return decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY)).expedition.phase;
+ });
+ expect(phase).toBe('explore');
+ for(let i=0;i<15;i++){
+  const room=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+   return expedition.room;
+  });
+  if(room==='gallery')break;
+  if(await page.getByRole('button',{name:'Eat four food'}).count())
+   await page.getByRole('button',{name:'Eat four food'}).click();
+  else if(await page.getByRole('button',{name:'Collect treasure'}).count())
+   await page.getByRole('button',{name:'Collect treasure'}).click();
+  else await page.getByRole('button',{name:'Advance corridor'}).click();
+ }
+ const reached=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {room:expedition.room,cleared:expedition.corridors['entrance-gallery'].encounterCleared};
+ });
+ expect(reached).toEqual({room:'gallery',cleared:true});
+ await expect(page.getByRole('button',{name:'Travel to Guard Post'})).toBeVisible();
+});
