@@ -1,6 +1,24 @@
-# Kingdom of Clays — Combat Lab (work in progress)
+# Kingdom of Clays — Playable Campaign (work in progress)
 
-HTML5, GitHub Pages-compatible combat-engine prototype. The design targets **base Darkest Dungeon 1** mechanics with agreed Kingdom of Clays names and, later in the campaign layer, optional Temple Resurrection. This is **not yet** a faithful/complete DD1 clone.
+HTML5, GitHub Pages-compatible, DD1-inspired tactical RPG with an integrated dungeon expedition, persistent settlement, hero roster, quest board, and campaign milestones. It is **not** a complete or mechanically identical Darkest Dungeon 1 clone; some enemy compositions, costs, progression rules and content are original Kingdom of Clays prototypes.
+
+## Play the campaign
+
+Open [Dungeon Expedition](./dungeon.html) from the project homepage (or serve the repository over HTTP and open `dungeon.html`). Progress is saved automatically in **this browser's local storage**. Clearing site data removes the save; saves do not sync between browsers or devices.
+
+1. Complete an Apprentice Ashen Crypt expedition and claim its rewards to unlock Blighted Warrens.
+2. Complete three expeditions in total to unlock Veteran Blighted Warrens.
+3. Win a Veteran Warrens quest and claim its rewards to unlock Champion.
+4. Win a Champion Warrens quest and claim its rewards to complete the four-milestone campaign.
+
+Use the settlement between expeditions to manage the persistent roster, facilities, equipment, stress treatment and recovery. An expedition cannot be replaced while active, and victory rewards must be claimed before starting another quest. Veteran and Champion Warrens expeditions deliberately contain a mixture of encounters at their own tier and one tier below; this is an agreed Clays balance choice.
+
+## Automated verification
+
+The [campaign regression workflow](./.github/workflows/campaign-regression.yml) runs Node.js gameplay tests and Playwright Chromium browser tests on relevant changes. Both jobs passed in [GitHub Actions run 43904284451](https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43904284451). That verifies the tested flows, **not** every possible full-campaign playthrough or complete DD1 fidelity.
+
+## Development history
+
 
 ## Blighted Warrens and expanded Swine enemy roster (Milestone 35)
 
