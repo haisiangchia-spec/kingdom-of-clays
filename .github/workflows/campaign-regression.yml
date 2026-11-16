@@ -62,6 +62,13 @@ jobs:
           set -o pipefail
           node --test tests/full-expedition-endurance.test.js 2>&1 | tee full-expedition-endurance-results.txt
           grep 'Full expedition endurance ' full-expedition-endurance-results.txt | sed 's/^.*Full expedition endurance /Full expedition endurance /' > full-expedition-metrics.jsonl || true
+      - name: Run organic campaign progression
+        id: organic
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node --test tests/organic-campaign-progression.test.js 2>&1 | tee organic-campaign-results.txt
+          grep 'Organic campaign progression ' organic-campaign-results.txt | sed 's/^.*Organic campaign progression /Organic campaign progression /' > organic-campaign-metrics.jsonl || true
       - name: Run complete Node regression suite
         id: full
         continue-on-error: true
@@ -83,6 +90,8 @@ jobs:
             multi-encounter-metrics.jsonl
             full-expedition-endurance-results.txt
             full-expedition-metrics.jsonl
+            organic-campaign-results.txt
+            organic-campaign-metrics.jsonl
           if-no-files-found: warn
           retention-days: 30
       - name: Summarize verification results
@@ -93,6 +102,7 @@ jobs:
           ENDURANCE: ${{ steps.endurance.outcome }}
           MULTI_TIER: ${{ steps.multi_tier.outcome }}
           EXPEDITION: ${{ steps.expedition.outcome }}
+          ORGANIC: ${{ steps.organic.outcome }}
         run: |
           echo '## Kingdom of Clays regression verification' >> "$GITHUB_STEP_SUMMARY"
           echo "- Campaign tests: $FOCUSED" >> "$GITHUB_STEP_SUMMARY"
@@ -100,6 +110,7 @@ jobs:
           echo "- Combat endurance: $ENDURANCE" >> "$GITHUB_STEP_SUMMARY"
           echo "- Multi-encounter tier distribution: $MULTI_TIER" >> "$GITHUB_STEP_SUMMARY"
           echo "- Full expedition endurance: $EXPEDITION" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Organic campaign progression: $ORGANIC" >> "$GITHUB_STEP_SUMMARY"
           echo "### Encounter-tier distribution (400 seeds per difficulty)" >> "$GITHUB_STEP_SUMMARY"
           if [ -s encounter-tier-metrics.jsonl ]; then
             echo '~~~' >> "$GITHUB_STEP_SUMMARY"
@@ -116,6 +127,12 @@ jobs:
           if [ -s full-expedition-metrics.jsonl ]; then
             echo '~~~' >> "$GITHUB_STEP_SUMMARY"
             cat full-expedition-metrics.jsonl >> "$GITHUB_STEP_SUMMARY"
+            echo '~~~' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "### Organic campaign progression" >> "$GITHUB_STEP_SUMMARY"
+          if [ -s organic-campaign-metrics.jsonl ]; then
+            echo '~~~' >> "$GITHUB_STEP_SUMMARY"
+            cat organic-campaign-metrics.jsonl >> "$GITHUB_STEP_SUMMARY"
             echo '~~~' >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "### Combat endurance metrics (seeded encounters)" >> "$GITHUB_STEP_SUMMARY"
@@ -149,6 +166,7 @@ jobs:
             echo "- Combat endurance: $ENDURANCE"
             echo "- Multi-encounter tier distribution: $MULTI_TIER"
             echo "- Full expedition endurance: $EXPEDITION"
+            echo "- Organic campaign progression: $ORGANIC"
             echo
             echo "### Encounter-tier distribution"
             if [ -s encounter-tier-metrics.jsonl ]; then
@@ -171,6 +189,13 @@ jobs:
               echo '~~~'
             fi
             echo
+            echo "### Organic campaign progression"
+            if [ -s organic-campaign-metrics.jsonl ]; then
+              echo '~~~'
+              cat organic-campaign-metrics.jsonl
+              echo '~~~'
+            fi
+            echo
             echo "### Combat endurance metrics"
             if [ -s combat-endurance-metrics.jsonl ]; then
               echo '~~~json'
@@ -187,7 +212,7 @@ jobs:
             gh issue edit "$issue" --body-file verification-status.md
           fi
           if [ -n "$issue" ]; then
-            if [ "$FOCUSED" = success ] && [ "$FULL" = success ] && [ "$ENDURANCE" = success ] && [ "$MULTI_TIER" = success ] && [ "$EXPEDITION" = success ]; then
+            if [ "$FOCUSED" = success ] && [ "$FULL" = success ] && [ "$ENDURANCE" = success ] && [ "$MULTI_TIER" = success ] && [ "$EXPEDITION" = success ] && [ "$ORGANIC" = success ]; then
               gh issue close "$issue" --reason completed || true
             else
               gh issue reopen "$issue" || true
@@ -206,6 +231,7 @@ jobs:
           test "$ENDURANCE" = success
           test "$MULTI_TIER" = success
           test "$EXPEDITION" = success
+          test "$ORGANIC" = success
 
   browser-regression:
     runs-on: ubuntu-latest
