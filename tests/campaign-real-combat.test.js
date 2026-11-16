@@ -154,6 +154,19 @@ test('higher-tier expeditions deterministically mix in one-tier-lower encounters
  }
 });
 
+test('Apprentice expeditions retain Apprentice encounters across seeds',()=>{
+ for(let seed=1;seed<=40;seed++){
+  const d=createDungeon(seed,{tier:'apprentice',region:'plague',difficulty:'patrol'});
+  beginCorridor(d,'gallery');
+  advanceCorridor(d);
+  assert.equal(d.phase,'combat');
+  const battle=dungeonBattle(d);
+  assert.equal(battle.expeditionTier,'apprentice');
+  assert.equal(battle.encounterTier,'apprentice');
+  assert.equal(battle.encounterPlan.tier,'apprentice');
+ }
+});
+
 test('seeded real-turn encounters replay deterministically across tiers',()=>{
  for(const [tier,region] of [['apprentice','crypt'],['apprentice','plague'],['veteran','plague'],['champion','plague']]){
   const run=()=>{
