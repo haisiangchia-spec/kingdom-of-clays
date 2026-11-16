@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "commit": "12847a3bad47ac70fd6463315e8a7e5e37b3b802",
-  "runId": "43779970966",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43779970966",
+  "commit": "eae4c9d16b878fee5840185b9d75e53396929bf0",
+  "runId": "43780075031",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43780075031",
   "baseline": [
     {
       "questId": "crypt-recon",
@@ -705,6 +705,18 @@
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueSlasher",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
           "deaths": 4
         },
         {
@@ -715,6 +727,17 @@
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueChopper",
+            "plagueDrummer",
+            "plagueDrummer"
+          ],
           "deaths": 4
         },
         {
@@ -725,6 +748,16 @@
           "fourEnemy": 1,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
           "deaths": 4
         },
         {
@@ -735,6 +768,16 @@
           "fourEnemy": 1,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
           "deaths": 0
         },
         {
@@ -745,6 +788,17 @@
           "fourEnemy": 2,
           "torches": 1,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
           "deaths": 1
         },
         {
@@ -755,6 +809,17 @@
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
           "deaths": 3
         },
         {
@@ -765,6 +830,17 @@
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueSlasher",
+            "plagueSlasher",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
           "deaths": 0
         },
         {
@@ -775,6 +851,18 @@
           "fourEnemy": 3,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueChopper",
+            "plagueDrummer",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueSlasher",
+            "plagueSlasher",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
           "deaths": 2
         },
         {
@@ -785,6 +873,18 @@
           "fourEnemy": 2,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueSlasher",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueSlasher",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
           "deaths": 4
         },
         {
@@ -795,6 +895,17 @@
           "fourEnemy": 1,
           "torches": 1,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueChopper",
+            "plagueWretch",
+            "plagueDrummer"
+          ],
           "deaths": 3
         }
       ]
@@ -904,6 +1015,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueDrummer",
+            "plagueChopper",
+            "plagueSkiver"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueSkiver"
+          ],
           "deaths": 4
         },
         {
@@ -914,6 +1035,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueSlasher",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueSlasher",
+            "plagueDrummer"
+          ],
           "deaths": 4
         },
         {
@@ -924,6 +1055,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueSkiver"
+          ],
+          "finalEnemyComposition": [
+            "plagueDrummer",
+            "plagueChopper",
+            "plagueSkiver"
+          ],
           "deaths": 4
         },
         {
@@ -934,6 +1075,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueSkiver"
+          ],
+          "finalEnemyComposition": [
+            "plagueDrummer",
+            "plagueChopper",
+            "plagueSkiver"
+          ],
           "deaths": 4
         },
         {
@@ -944,6 +1095,17 @@
           "fourEnemy": 1,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueWretch",
+            "plagueSkiver"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueSlasher",
+            "plagueDrummer",
+            "plagueSkiver"
+          ],
           "deaths": 4
         },
         {
@@ -954,6 +1116,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueSlasher",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueSlasher",
+            "plagueDrummer",
+            "plagueSkiver"
+          ],
           "deaths": 4
         },
         {
@@ -964,6 +1136,17 @@
           "fourEnemy": 1,
           "torches": 0,
           "foodHeals": 4,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueSlasher",
+            "plagueDrummer",
+            "plagueSkiver"
+          ],
+          "finalEnemyComposition": [
+            "plagueWretch",
+            "plagueSlasher",
+            "plagueSkiver"
+          ],
           "deaths": 4
         },
         {
@@ -974,6 +1157,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueDrummer",
+            "plagueChopper",
+            "plagueSkiver"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueSlasher",
+            "plagueDrummer"
+          ],
           "deaths": 4
         },
         {
@@ -984,6 +1177,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueDrummer",
+            "plagueChopper",
+            "plagueSkiver"
+          ],
+          "finalEnemyComposition": [
+            "plagueDrummer",
+            "plagueChopper",
+            "plagueSkiver"
+          ],
           "deaths": 4
         },
         {
@@ -994,6 +1197,16 @@
           "fourEnemy": 0,
           "torches": 0,
           "foodHeals": 0,
+          "firstEnemyComposition": [
+            "plagueChopper",
+            "plagueSlasher",
+            "plagueDrummer"
+          ],
+          "finalEnemyComposition": [
+            "plagueChopper",
+            "plagueSlasher",
+            "plagueDrummer"
+          ],
           "deaths": 4
         }
       ]
