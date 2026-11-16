@@ -4,7 +4,7 @@ import {createCampaignSettlement,expeditionBonuses,encodeCampaignSave,decodeCamp
 import {selectQuest} from '../src/quest-board.js';
 import {completeCampaignExpedition,campaignProgress} from '../src/campaign-progression.js';
 import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket} from '../src/hero-roster.js';
-import {advanceTownWeek,recruitFromCoach,bookStressTreatment} from '../src/town-week.js';
+import {advanceTownWeek,recruitFromCoach} from '../src/town-week.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger} from '../src/dungeon.js';
 import {leaveLoot} from '../src/inventory.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from '../src/engine.js';
@@ -82,10 +82,7 @@ function prepareTown(town){
   if(!hero.unit.dead&&town.trinkets.includes('ward-charm')&&!hero.equippedTrinket)
    equipTrinket(town,hero.rosterId);
  }
- for(const hero of town.roster.filter(h=>!h.unit.dead&&h.unit.stress>=65)){
-  const service=['abbey','tavern'].find(s=>!town.town.treatments.some(t=>t.service===s));
-  if(service&&town.gold>=1000)bookStressTreatment(town,hero.rosterId,service);
- }
+
 }
 function campaign(seed){
  let town=createCampaignSettlement();
