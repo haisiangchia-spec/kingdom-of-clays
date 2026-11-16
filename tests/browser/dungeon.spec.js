@@ -1316,6 +1316,49 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
          completed:questObjectiveProgress(expedition).filter(x=>x.complete).map(x=>x.room)};
        });
        expect(restoredShrineProgress).toEqual(shrineProgress);
+       if(shrineProgress.phase==='combat'){
+        let shrineCorridorTurns=0;
+        while(shrineCorridorTurns++<120){
+         const state=await page.evaluate(async ()=>{
+          const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+          const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+          return {phase:expedition.phase,
+           enemies:expedition.pendingBattle?.battle?.units.filter(u=>u.side==='enemy'&&!u.dead&&!u.corpse).map(u=>u.name)??[]};
+         });
+         if(state.phase!=='combat')break;
+         let acted=false;
+         for(const skill of await page.locator('#dungeon-combat button[aria-pressed]').all()){
+          await skill.click();
+          for(const enemy of state.enemies){
+           const target=page.locator('#dungeon-combat button').filter({hasText:enemy});
+           if(await target.count()){await target.first().click();acted=true;break;}
+          }
+          if(acted)break;
+         }
+         if(!acted)await page.getByRole('button',{name:'Pass turn'}).click();
+        }
+        expect(shrineCorridorTurns).toBeLessThan(121);
+       }
+       const shrineCorridorOutcome=await page.evaluate(async ()=>{
+        const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+        const {questObjectiveProgress}=await import('/src/dungeon.js');
+        const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+        return {room:expedition.room,phase:expedition.phase,
+         corridor:expedition.pendingTravel?.corridor??null,
+         completed:questObjectiveProgress(expedition).filter(x=>x.complete).map(x=>x.room)};
+       });
+       expect(['explore','defeat']).toContain(shrineCorridorOutcome.phase);
+       expect(shrineCorridorOutcome.completed).toEqual(expect.arrayContaining(['watch','vault']));
+       await page.reload();
+       const restoredShrineCorridorOutcome=await page.evaluate(async ()=>{
+        const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+        const {questObjectiveProgress}=await import('/src/dungeon.js');
+        const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+        return {room:expedition.room,phase:expedition.phase,
+         corridor:expedition.pendingTravel?.corridor??null,
+         completed:questObjectiveProgress(expedition).filter(x=>x.complete).map(x=>x.room)};
+       });
+       expect(restoredShrineCorridorOutcome).toEqual(shrineCorridorOutcome);
       }
      }
     }else{
