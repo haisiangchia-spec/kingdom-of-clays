@@ -1444,6 +1444,39 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
           completed:questObjectiveProgress(expedition).filter(x=>x.complete).map(x=>x.room)};
         });
         expect(restoredShrineOutcome).toEqual(shrineOutcome);
+        if(shrineOutcome.phase==='victory'){
+         await expect(page.getByRole('button',{name:'Return rewards to settlement'})).toBeVisible();
+         const beforeClaim=await page.evaluate(async ()=>{
+          const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+          const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+          return {completed: settlement.completedExpeditions,
+           claimed:!!expedition.rewardClaimed};
+         });
+         expect(beforeClaim.claimed).toBe(false);
+         await page.getByRole('button',{name:'Return rewards to settlement'}).click();
+         await expect(page.getByText('Campaign Complete — Champion of Clays')).toBeVisible();
+         const afterClaim=await page.evaluate(async ()=>{
+          const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+          const {campaignProgress}=await import('/src/campaign-progression.js');
+          const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+          return {completed:settlement.completedExpeditions,
+           claimed:!!expedition.rewardClaimed,
+           milestones:campaignProgress(settlement)};
+         });
+         expect(afterClaim.claimed).toBe(true);
+         expect(afterClaim.completed).toBe(beforeClaim.completed+1);
+         await page.reload();
+         await expect(page.getByText('Campaign Complete — Champion of Clays')).toBeVisible();
+         const persistedClaim=await page.evaluate(async ()=>{
+          const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+          const {campaignProgress}=await import('/src/campaign-progression.js');
+          const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+          return {completed:settlement.completedExpeditions,
+           claimed:!!expedition.rewardClaimed,
+           milestones:campaignProgress(settlement)};
+         });
+         expect(persistedClaim).toEqual(afterClaim);
+        }
        }
       }
      }
