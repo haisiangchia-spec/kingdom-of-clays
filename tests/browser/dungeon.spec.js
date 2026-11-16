@@ -195,6 +195,7 @@ test('browser performs a real targeted hero attack during dungeon combat',async 
    log:expedition.pendingBattle.battle.log.length};
  });
  let attacked=false;
+ for(let turn=0;turn<8&&!attacked;turn++){
  for(const button of await page.locator('#dungeon-combat button[aria-pressed]').all()){
   await button.click();
   for(const enemy of before.enemies){
@@ -206,6 +207,8 @@ test('browser performs a real targeted hero attack during dungeon combat',async 
    }
   }
   if(attacked)break;
+ }
+ if(!attacked)await page.getByRole('button',{name:'Pass turn'}).click();
  }
  expect(attacked).toBe(true);
  const after=await page.evaluate(async ()=>{
