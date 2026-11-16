@@ -215,3 +215,49 @@ test('browser performs a real targeted hero attack during dungeon combat',async 
  });
  expect(after).toBeGreaterThan(before.log);
 });
+
+test('browser completes a multi-room expedition and claims its victory rewards',async ({page})=>{
+ await page.goto('/dungeon.html');
+ // Travel and event decisions use the real UI. Combat is resolved deterministically
+ // through the engine so this test isolates the campaign traversal and reward wiring.
+ for(const destination of ['Ashen Gallery','Ashen Watch','Ashen Sanctum']){
+  await page.getByRole('button',{name:'Travel to '+destination}).click();
+  let arrived=false;
+  for(let step=0;step<35;step++){
+   const status=await page.locator('#dungeon-status').innerText();
+   if(status.includes('VICTORY')){arrived=true;break;}
+   const state=await page.evaluate(async ()=>{
+    const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+    const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+    return {room:expedition.room,phase:expedition.phase,pendingTravel:!!expedition.pendingTravel};
+   });
+   if(!state.pendingTravel&&state.phase==='explore'){arrived=true;break;}
+   if(state.phase==='combat'){
+    await page.evaluate(async ()=>{
+     const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {resolveDungeonBattle}=await import('/src/dungeon.js');
+     const save=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     for(const enemy of save.expedition.pendingBattle.battle.units.filter(u=>u.side==='enemy'))enemy.dead=true;
+     resolveDungeonBattle(save.expedition);
+     localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(save.settlement,save.expedition));
+    });
+    await page.reload();
+   }else if(await page.getByRole('button',{name:'Collect treasure'}).count()){
+    await page.getByRole('button',{name:'Collect treasure'}).click();
+   }else if(await page.getByRole('button',{name:'Eat four food'}).count()){
+    await page.getByRole('button',{name:'Eat four food'}).click();
+   }else if(await page.getByRole('button',{name:'Advance corridor'}).count()){
+    await page.getByRole('button',{name:'Advance corridor'}).click();
+   }else throw Error('Dungeon traversal stalled: '+status);
+  }
+  expect(arrived).toBe(true);
+ }
+ await expect(page.locator('#dungeon-status')).toContainText('VICTORY');
+ while(await page.getByRole('button',{name:'Collect treasure'}).count()){
+  await page.getByRole('button',{name:'Collect treasure'}).click();
+ }
+ await page.getByRole('button',{name:'Return rewards to settlement'}).click();
+ await expect(page.locator('#settlement-panel')).toContainText('1 completed');
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
+});
