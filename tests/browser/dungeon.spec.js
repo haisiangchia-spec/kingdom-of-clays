@@ -182,3 +182,36 @@ test('browser combat permits hero action and preserves battle after reload',asyn
  await page.getByRole('button',{name:'Pass turn'}).click();
  await expect(page.locator('#dungeon-combat')).toContainText('Battle log');
 });
+
+test('browser performs a real targeted hero attack during dungeon combat',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.getByRole('button',{name:'Travel to Ashen Gallery'}).click();
+ await page.getByRole('button',{name:'Advance corridor'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+ const before=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {enemies:expedition.pendingBattle.battle.units.filter(u=>u.side==='enemy'&&!u.dead).map(u=>u.name),
+   log:expedition.pendingBattle.battle.log.length};
+ });
+ let attacked=false;
+ for(const button of await page.locator('#dungeon-combat button[aria-pressed]').all()){
+  await button.click();
+  for(const enemy of before.enemies){
+   const target=page.locator('#dungeon-combat button').filter({hasText:enemy});
+   if(await target.count()){
+    await target.first().click();
+    attacked=true;
+    break;
+   }
+  }
+  if(attacked)break;
+ }
+ expect(attacked).toBe(true);
+ const after=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return expedition.pendingBattle?.battle?.log.length??0;
+ });
+ expect(after).toBeGreaterThan(before.log);
+});
