@@ -629,6 +629,22 @@ test('browser travels onward after resolving its first corridor fight through co
      return {completed:settlement.completedExpeditions,claimed:expedition.rewardClaimed,gold:settlement.gold};
     });
     expect(savedRewards).toEqual(rewards);
+    const town=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {returned:expedition.rosterReturned,weekProcessed:expedition.townWeekProcessed,week:settlement.town.week};
+    });
+    expect(town).toMatchObject({returned:true,weekProcessed:true,week:2});
+    await expect(page.getByRole('button',{name:'New expedition'})).toBeVisible();
+    await page.getByRole('button',{name:'New expedition'}).click();
+    await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
+    const next=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {completed:settlement.completedExpeditions,phase:expedition.phase,claimed:expedition.rewardClaimed,party:expedition.party.length};
+    });
+    expect(next).toMatchObject({completed:1,phase:'explore',party:4});
+    expect(next.claimed).not.toBe(true);
    }
   }
  }
