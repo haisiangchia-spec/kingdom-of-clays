@@ -903,3 +903,49 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
  await page.reload();
  await expect(page.locator('#settlement-panel')).toContainText('Campaign Complete — Champion of Clays');
 });
+
+test('Champion victory claim completes campaign once and survives reload',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {createCampaignSettlement,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {prepareRosterParty}=await import('/src/hero-roster.js');
+  const {createDungeon}=await import('/src/dungeon.js');
+  const settlement=createCampaignSettlement();
+  settlement.completedExpeditions=4;
+  settlement.campaignVictories=['veteran-victory'];
+  const expedition=createDungeon(437,{region:'plague',tier:'champion',
+   difficulty:'gauntlet',party:prepareRosterParty(settlement)});
+  expedition.questId='warrens-champion';
+  expedition.cleared=['watch','vault','sanctum'];
+  expedition.phase='victory';
+  expedition.rosterReturned=false;
+  expedition.townWeekProcessed=false;
+  expedition.traitsProcessed=true;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(settlement,expedition));
+ });
+ await page.reload();
+ await expect(page.getByRole('button',{name:'Return rewards to settlement'})).toBeVisible();
+ await expect(page.locator('#settlement-panel')).not.toContainText('Campaign Complete — Champion of Clays');
+ await page.getByRole('button',{name:'Return rewards to settlement'}).click();
+ await expect(page.locator('#settlement-panel')).toContainText('Campaign Complete — Champion of Clays');
+ await expect(page.getByRole('button',{name:'Return rewards to settlement'})).toHaveCount(0);
+ const claimed=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {campaignProgress}=await import('/src/campaign-progression.js');
+  const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {completed:settlement.completedExpeditions,
+   victories:settlement.campaignVictories.filter(x=>x==='champion-victory').length,
+   claimed:expedition.rewardClaimed,finished:campaignProgress(settlement).finished};
+ });
+ expect(claimed).toEqual({completed:5,victories:1,claimed:true,finished:true});
+ await page.reload();
+ await expect(page.locator('#settlement-panel')).toContainText('Campaign Complete — Champion of Clays');
+ await expect(page.getByRole('button',{name:'Return rewards to settlement'})).toHaveCount(0);
+ const persisted=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {completed:settlement.completedExpeditions,
+   victories:settlement.campaignVictories.filter(x=>x==='champion-victory').length};
+ });
+ expect(persisted).toEqual({completed:5,victories:1});
+});
