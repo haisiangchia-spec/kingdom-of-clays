@@ -39,9 +39,9 @@ export const PLAGUE_VETERAN_TABLES=Object.freeze({
 export const PLAGUE_CHAMPION_TABLES=Object.freeze({
  scout:Object.freeze([{id:'plagueChampionSkirmish',weight:3},{id:'plagueChampionGuard',weight:2},{id:'plagueChampionEscort',weight:1},{id:'plagueChampionFullPatrol',weight:1}]),
  patrol:Object.freeze([{id:'plagueChampionSkirmish',weight:2},{id:'plagueChampionGuard',weight:3},{id:'plagueChampionEscort',weight:2},{id:'plagueChampionAmbush',weight:1},{id:'plagueChampionFullPatrol',weight:2},{id:'plagueChampionDrumGuard',weight:1}]),
- // Provisional Clays balance trial: reduce four-enemy Champion gauntlets
+ // Provisional Clays balance trial: increase non-Skiver Champion patrol frequency
  // without changing verified monster stats or attack definitions.
- gauntlet:Object.freeze([{id:'plagueChampionRelief',weight:6},{id:'plagueChampionSkirmish',weight:4},{id:'plagueChampionGuard',weight:4},{id:'plagueChampionAmbush',weight:4},{id:'plagueChampionEscort',weight:3},{id:'plagueChampionFullPatrol',weight:1},{id:'plagueChampionDrumGuard',weight:1}])
+ gauntlet:Object.freeze([{id:'plagueChampionRelief',weight:12},{id:'plagueChampionSkirmish',weight:4},{id:'plagueChampionGuard',weight:4},{id:'plagueChampionAmbush',weight:4},{id:'plagueChampionEscort',weight:3},{id:'plagueChampionFullPatrol',weight:1},{id:'plagueChampionDrumGuard',weight:1}])
 });
 export const PLAGUE_THREAT=Object.freeze({plagueChopper:3,plagueWretch:2,plagueDrummer:2,plagueSlasher:2,plagueSkiver:5});
 export function createPlagueEncounterPlan(difficulty='patrol',random=Math.random,tier='apprentice'){
