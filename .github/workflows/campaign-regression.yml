@@ -20,6 +20,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   campaign-regression:
@@ -81,6 +82,47 @@ jobs:
             echo "No metrics produced; inspect combat-endurance-results.txt." >> "$GITHUB_STEP_SUMMARY"
           fi
           echo 'Download campaign-test-results for complete test output.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish latest Node verification status to repository issue
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FOCUSED: ${{ steps.focused.outcome }}
+          FULL: ${{ steps.full.outcome }}
+          ENDURANCE: ${{ steps.endurance.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Automated campaign verification status"
+          issue=$(gh issue list --state all --search "in:title \"$title\"" --json number,title --jq '.[] | select(.title=="Automated campaign verification status") | .number' | head -1)
+          {
+            echo "Latest run: $RUN_URL"
+            echo
+            echo "- Focused campaign tests: $FOCUSED"
+            echo "- Complete Node suite: $FULL"
+            echo "- Combat endurance: $ENDURANCE"
+            echo
+            echo "### Combat endurance metrics"
+            if [ -s combat-endurance-metrics.jsonl ]; then
+              echo '~~~json'
+              cat combat-endurance-metrics.jsonl
+              echo '~~~'
+            else
+              echo "No metrics produced; inspect the run artifacts."
+            fi
+          } > verification-status.md
+          if [ -z "$issue" ]; then
+            gh issue create --title "$title" --body-file verification-status.md
+            issue=$(gh issue list --state all --search "in:title \"$title\"" --json number,title --jq '.[] | select(.title=="Automated campaign verification status") | .number' | head -1)
+          else
+            gh issue edit "$issue" --body-file verification-status.md
+          fi
+          if [ -n "$issue" ]; then
+            if [ "$FOCUSED" = success ] && [ "$FULL" = success ] && [ "$ENDURANCE" = success ]; then
+              gh issue close "$issue" --reason completed || true
+            else
+              gh issue reopen "$issue" || true
+            fi
+          fi
       - name: Fail workflow when tests fail
         if: always()
         env:
