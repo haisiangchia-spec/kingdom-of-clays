@@ -161,3 +161,47 @@ test('campaign milestone counters show bounded progress and useful next steps',(
  assert.equal(campaignMilestoneProgress(settlement).find(x=>x.id==='established-company').current,3);
  assert.equal(campaignMilestoneProgress(settlement).find(x=>x.id==='veteran-victory').current,1);
 });
+
+test('five claimed expeditions complete the campaign with real reward transfers, roster returns and saved town weeks',()=>{
+ let settlement=createCampaignSettlement();
+ let lastExpedition=null;
+ const stages=[
+  ['crypt-recon','crypt','apprentice',['sanctum']],
+  ['warrens-recon','plague','apprentice',['sanctum']],
+  ['crypt-purge','crypt','apprentice',['watch','vault']],
+  ['warrens-veteran','plague','veteran',['watch','vault','sanctum']],
+  ['warrens-champion','plague','champion',['watch','vault','sanctum']]
+ ];
+ const firstWeek=settlement.town.week;
+ for(const [index,[questId,region,tier,objectives]] of stages.entries()){
+  assert.equal(selectQuest(settlement,questId).unlocked,true);
+  assert.equal(canStartNextExpedition(lastExpedition).allowed,true);
+  const party=prepareRosterParty(settlement);
+  const expedition=createDungeon(500+index,{region,tier,party,interactiveEvents:true});
+  expedition.questId=questId;
+  expedition.phase='victory';
+  expedition.cleared=[...objectives];
+  expedition.rosterReturned=false;
+  expedition.townWeekProcessed=false;
+  expedition.rewardClaimed=false;
+  expedition.traitsProcessed=true;
+  assert.equal(returnPartyToRoster(settlement,expedition),true);
+  assert.equal(advanceTownWeek(settlement,expedition),true);
+  assert.equal(canStartNextExpedition(expedition).allowed,false);
+  const previousGold=settlement.gold;
+  offerLoot(expedition,'gold',100);
+  collectLoot(expedition);
+  const {progress}=completeCampaignExpedition(settlement,expedition);
+  assert.equal(settlement.gold,previousGold+100);
+  assert.equal(settlement.completedExpeditions,index+1);
+  assert.equal(progress.finished,index===stages.length-1);
+  assert.throws(()=>completeCampaignExpedition(settlement,expedition),/unclaimed victory/);
+  assert.equal(canStartNextExpedition(expedition).allowed,true);
+  ({settlement,expedition:lastExpedition}=decodeCampaignSave(encodeCampaignSave(settlement,expedition)));
+  assert.equal(settlement.town.week,firstWeek+index+1);
+  assert.equal(lastExpedition.rewardClaimed,true);
+ }
+ assert.equal(campaignProgress(settlement).finished,true);
+ assert.deepEqual(settlement.campaignVictories,['veteran-victory','champion-victory']);
+ assert.equal(settlement.completedExpeditions,5);
+});
