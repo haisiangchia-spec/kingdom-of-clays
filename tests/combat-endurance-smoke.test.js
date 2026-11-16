@@ -49,3 +49,13 @@ test('real automated combat resolves across campaign encounter tiers and reports
   console.log('Combat endurance smoke '+JSON.stringify({tier,samples:results.length,wins,fallen,meanHp,meanStress}));
  }
 });
+
+test('seeded combat outcomes and casualty metrics are reproducible',()=>{
+ for(const tier of ['apprentice','veteran','champion']){
+  for(const seed of [2,7,19]){
+   const first=fight(seed,tier);
+   const replay=fight(seed,tier);
+   assert.deepEqual(replay,first,'combat diverged on '+tier+' seed '+seed);
+  }
+ }
+});
