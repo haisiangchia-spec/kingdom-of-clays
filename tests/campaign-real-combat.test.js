@@ -131,6 +131,28 @@ test('successive expedition encounters receive distinct reproducible combat seed
  assert.deepEqual(collect(),collect(),'encounter seed sequence changed across replays');
 });
 
+test('higher-tier expeditions deterministically mix in one-tier-lower encounters',()=>{
+ for(const [tier,lower] of [['veteran','apprentice'],['champion','veteran']]){
+  const observed=[];
+  for(let seed=1;seed<=80;seed++){
+   const d=createDungeon(seed,{tier,region:'plague',difficulty:'patrol'});
+   beginCorridor(d,'gallery');
+   advanceCorridor(d);
+   assert.equal(d.phase,'combat');
+   const battle=dungeonBattle(d);
+   assert.equal(battle.expeditionTier,tier);
+   assert.ok([tier,lower].includes(battle.encounterTier));
+   assert.equal(battle.encounterPlan.tier,battle.encounterTier);
+   observed.push(battle.encounterTier);
+   const replay=createDungeon(seed,{tier,region:'plague',difficulty:'patrol'});
+   beginCorridor(replay,'gallery');advanceCorridor(replay);
+   assert.equal(dungeonBattle(replay).encounterTier,battle.encounterTier);
+  }
+  const lowerCount=observed.filter(x=>x===lower).length;
+  assert.ok(lowerCount>=25&&lowerCount<=55,tier+' lower-tier encounter mix drifted: '+lowerCount+'/80');
+ }
+});
+
 test('seeded real-turn encounters replay deterministically across tiers',()=>{
  for(const [tier,region] of [['apprentice','crypt'],['apprentice','plague'],['veteran','plague'],['champion','plague']]){
   const run=()=>{
