@@ -1,6 +1,6 @@
 import {availableQuests,selectQuest} from './quest-board.js';
 import {campaignProgress,campaignMilestoneProgress,completeCampaignExpedition,canStartNextExpedition,expeditionUnlock} from './campaign-progression.js';
-import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,questObjectiveProgress,bonusObjectiveProgress,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,campMeal,useCampSkill,finishCamp,CAMP_SKILLS,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
+import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,questObjectiveProgress,bonusObjectiveProgress,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,purchaseProvision,PROVISION_PRICES,campMeal,useCampSkill,finishCamp,CAMP_SKILLS,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
@@ -431,6 +431,16 @@ function render(){
  const supplies=$('dungeon-supplies');supplies.replaceChildren();
  el('p',`Torches: ${expedition.supplies.torch} · Food: ${expedition.supplies.food} · Holy water: ${expedition.curioSupplies.holyWater} · Loot: ${expedition.loot}`,supplies);
  if(expedition.phase==='explore'){
+   if(expedition.room==='entrance'&&expedition.stepsTaken===0&&!expedition.pendingTravel){
+     el('p','Provision shop · Treasury: '+settlement.gold+' gold',supplies);
+     for(const [kind,price] of Object.entries(PROVISION_PRICES)){
+       const buy=el('button','Buy '+kind+' ('+price+' gold)',supplies,()=>{
+         try{purchaseProvision(expedition,settlement,kind);}catch(error){expedition.log.push(error.message);}
+         render();
+       });
+       buy.disabled=settlement.gold<price;
+     }
+   }
    const torchButton=el('button','Light torch (+25)',supplies,()=>{
      try{useProvision(expedition,'torch');}catch(error){expedition.log.push(error.message);}
      render();
