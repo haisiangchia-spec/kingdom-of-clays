@@ -69,3 +69,38 @@ test('browser reload preserves staged quest unlocks and campaign completion',asy
    champion:stage.champion,finished:stage.finished});
  }
 });
+
+test('browser selects a newly unlocked Warrens quest after returning from a completed expedition',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave,encodeCampaignSave}=await import('/src/settlement.js');
+  const state=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  state.settlement.completedExpeditions=1;
+  state.expedition.phase='victory';
+  state.expedition.rewardClaimed=true;
+  state.expedition.rosterReturned=true;
+  state.expedition.townWeekProcessed=true;
+  state.expedition.cleared=['sanctum'];
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(state.settlement,state.expedition));
+ });
+ await page.reload();
+ await expect(page.locator('#dungeon-status')).toContainText('VICTORY');
+ await page.locator('#dungeon-region').selectOption('plague');
+ await page.locator('#dungeon-tier').selectOption('apprentice');
+ await page.getByRole('button',{name:'New expedition'}).click();
+ const state=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('/src/settlement.js');
+  const {expedition,settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {region:expedition.region,tier:expedition.tier,phase:expedition.phase,
+   questId:expedition.questId,completedExpeditions:settlement.completedExpeditions};
+ });
+ expect(state).toEqual({region:'plague',tier:'apprentice',phase:'explore',
+  questId:'warrens-recon',completedExpeditions:1});
+ await page.reload();
+ await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
+ const persisted=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('/src/settlement.js');
+  return decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY)).expedition.questId;
+ });
+ expect(persisted).toBe('warrens-recon');
+});
