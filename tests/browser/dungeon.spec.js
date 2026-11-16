@@ -864,7 +864,7 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
    championRecorded:settlement.campaignVictories.includes('champion-victory'),
    campaignFinished:campaignProgress(settlement).finished};
  });
- expect(beforeVictory).toEqual({phase:'exploration',claimed:false,
+ expect(beforeVictory).toEqual({phase:'explore',claimed:undefined,
   championRecorded:false,campaignFinished:false});
  await expect(page.locator('#settlement-panel')).toContainText('Veteran Trial');
  await expect(page.locator('#settlement-panel')).toContainText('1/1');
