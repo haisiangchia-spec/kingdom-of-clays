@@ -641,10 +641,25 @@ test('browser travels onward after resolving its first corridor fight through co
     const next=await page.evaluate(async ()=>{
      const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
      const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
-     return {completed:settlement.completedExpeditions,phase:expedition.phase,claimed:expedition.rewardClaimed,party:expedition.party.length};
+     return {completed:settlement.completedExpeditions,phase:expedition.phase,claimed:expedition.rewardClaimed,party:expedition.party.length,
+      room:expedition.room,cleared:expedition.cleared,visited:expedition.visited,
+      rosterReturned:expedition.rosterReturned,townWeekProcessed:expedition.townWeekProcessed};
     });
-    expect(next).toMatchObject({completed:1,phase:'explore',party:4});
+    expect(next).toMatchObject({completed:1,phase:'explore',party:4,room:'entrance',cleared:[]});
     expect(next.claimed).not.toBe(true);
+    expect(next.visited).toContain('entrance');
+    expect(next.visited).not.toContain('sanctum');
+    expect(next.rosterReturned).not.toBe(true);
+    expect(next.townWeekProcessed).not.toBe(true);
+    await page.reload();
+    await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
+    const persisted=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return {completed:settlement.completedExpeditions,room:expedition.room,cleared:expedition.cleared,visited:expedition.visited};
+    });
+    expect(persisted).toMatchObject({completed:1,room:'entrance',cleared:[]});
+    expect(persisted.visited).not.toContain('sanctum');
    }
   }
  }
