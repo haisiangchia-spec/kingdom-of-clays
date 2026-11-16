@@ -23,6 +23,7 @@ function playEncounter(d,{requireBothSides=false}={}){
  const battle=dungeonBattle(d);
  const random=rng(battle.seed);
  const enemyComposition=battle.units.filter(u=>u.side==='enemy').map(u=>u.enemyProfile??u.name);
+ const encounterTier=battle.encounterTier??'apprentice';
  const startingHeroHp=battle.units.filter(u=>u.side==='hero').reduce((n,u)=>n+Math.max(0,u.hp),0);
  let actions=0,heroSkillsUsed=0,enemySkillsUsed=0,healsUsed=0;
  const heroSkillCounts={},enemySkillCounts={};
@@ -78,7 +79,7 @@ function playEncounter(d,{requireBothSides=false}={}){
  }
  assert.notEqual(status(battle),'ongoing');
  resolveDungeonBattle(d);
- return {outcome:status(battle),actions,heroSkillsUsed,enemySkillsUsed,healsUsed,enemyComposition,heroSkillCounts,enemySkillCounts,startingHeroHp,
+ return {outcome:status(battle),actions,heroSkillsUsed,enemySkillsUsed,healsUsed,enemyComposition,encounterTier,heroSkillCounts,enemySkillCounts,startingHeroHp,
   endingHeroHp:battle.units.filter(u=>u.side==='hero').reduce((n,u)=>n+Math.max(0,u.hp),0),
   fallenHeroes:battle.units.filter(u=>u.side==='hero'&&u.dead).length};
 }
@@ -202,7 +203,7 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
    const report=playEncounter(d);
    if(!firstEnemyComposition){firstEnemyComposition=report.enemyComposition;firstEncounterReport={outcome:report.outcome,actions:report.actions,heroSkills:report.heroSkillsUsed,enemySkills:report.enemySkillsUsed,heals:report.healsUsed,hpBefore:report.startingHeroHp,hpAfter:report.endingHeroHp,fallen:report.fallenHeroes,heroSkillsUsed:report.heroSkillCounts,enemySkillsUsed:report.enemySkillCounts};}
    finalEnemyComposition=report.enemyComposition;
-   encounterAttrition.push({battle:battles+1,enemies:report.enemyComposition,hpBefore:report.startingHeroHp,hpAfter:report.endingHeroHp,fallen:report.fallenHeroes,heroActions:report.heroSkillsUsed,enemyActions:report.enemySkillsUsed,heals:report.healsUsed});
+   encounterAttrition.push({battle:battles+1,tier:report.encounterTier,enemies:report.enemyComposition,hpBefore:report.startingHeroHp,hpAfter:report.endingHeroHp,fallen:report.fallenHeroes,heroActions:report.heroSkillsUsed,enemyActions:report.enemySkillsUsed,heals:report.healsUsed});
    if(report.enemyComposition.includes('plagueSkiver'))skiverEncounters++;
    if(report.enemyComposition.length===4)fourEnemyEncounters++;
    battles++;
@@ -517,6 +518,7 @@ test('report higher-tier expedition attrition with equipment and verified skill 
   const wins=results.filter(r=>r.phase==='victory').length;
   console.log('Fully progressed expedition attrition',JSON.stringify({questId,tier,level,n:seeds.length,wins,defeats:seeds.length-wins,upgraded,
    meanBattles:Number((results.reduce((n,r)=>n+r.battles,0)/results.length).toFixed(2)),
+   encounterTierCounts:Object.fromEntries([tier,tier==='champion'?'veteran':'apprentice'].map(t=>[t,results.flatMap(r=>r.encounterAttrition).filter(e=>e.tier===t).length])),
    meanSkiverEncounters:Number((results.reduce((n,r)=>n+r.skiverEncounters,0)/results.length).toFixed(2)),
    meanFourEnemyEncounters:Number((results.reduce((n,r)=>n+r.fourEnemyEncounters,0)/results.length).toFixed(2)),
    meanTorchesUsed:Number((results.reduce((n,r)=>n+r.torchesUsed,0)/results.length).toFixed(2)),
