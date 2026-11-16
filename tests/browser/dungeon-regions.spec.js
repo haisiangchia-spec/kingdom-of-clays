@@ -142,7 +142,8 @@ test('Champion Warrens expedition selection persists and generates Champion comb
    foes:expedition.pendingBattle?.battle?.units.filter(u=>u.side==='enemy').map(u=>u.enemyProfile)};
  });
  expect(saved.tier).toBe('champion');
- expect(saved.battleTier).toBe('champion');
+ // Champion expeditions deliberately roll a mixture of Champion and Veteran encounters.
+ expect(['veteran','champion']).toContain(saved.battleTier);
  expect(saved.foes).toContain('plagueSkiver');
 });
 
