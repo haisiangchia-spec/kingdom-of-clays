@@ -378,4 +378,23 @@ test('browser travels onward after resolving its first corridor fight through co
  });
  expect(reached).toEqual({room:'gallery',cleared:true});
  await expect(page.getByRole('button',{name:'Travel to Guard Post'})).toBeVisible();
+ await page.reload();
+ await expect(page.locator('#dungeon-status')).toContainText('Ashen Gallery');
+ await expect(page.getByRole('button',{name:'Travel to Guard Post'})).toBeVisible();
+ await page.getByRole('button',{name:'Travel to Guard Post'}).click();
+ const inTransit=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {room:expedition.room,travel:!!expedition.pendingTravel,phase:expedition.phase};
+ });
+ expect(inTransit.room).toBe('gallery');
+ expect(inTransit.travel).toBe(true);
+ await page.reload();
+ const resumed=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {room:expedition.room,travel:!!expedition.pendingTravel,phase:expedition.phase};
+ });
+ expect(resumed).toEqual(inTransit);
+ await expect(page.getByRole('button',{name:'Advance corridor'})).toBeVisible();
 });
