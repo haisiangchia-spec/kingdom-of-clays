@@ -14,6 +14,7 @@ test('curative supplies remove only their corresponding conditions',()=>{
  assert.equal(hero.dot.length,0);
  useProvision(d,'medicinalHerbs',hero.id);
  assert.deepEqual(hero.effects.map(x=>x.kind),['buff']);
+ d.supplies.antivenom=1;
  assert.throws(()=>useProvision(d,'antivenom',hero.id),/no matching condition/);
 });
 
