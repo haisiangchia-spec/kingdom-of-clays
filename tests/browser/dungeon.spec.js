@@ -1267,6 +1267,33 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
         vaultComplete:questObjectiveProgress(expedition).find(x=>x.room==='vault').complete};
       });
       expect(persistedVaultRoomOutcome).toEqual(vaultRoomOutcome);
+      if(vaultRoomOutcome.phase==='explore'){
+       await expect(page.getByRole('button',{name:'Travel to Rotting Shrine'})).toBeVisible();
+       await page.getByRole('button',{name:'Travel to Rotting Shrine'}).click();
+       const shrineRoute=await page.evaluate(async ()=>{
+        const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+        const {questObjectiveProgress}=await import('/src/dungeon.js');
+        const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+        return {room:expedition.room,phase:expedition.phase,
+         destination:expedition.pendingTravel?.to,corridor:expedition.pendingTravel?.corridor,
+         completed:questObjectiveProgress(expedition).filter(x=>x.complete).map(x=>x.room)};
+       });
+       expect(shrineRoute.room).toBe('vault');
+       expect(shrineRoute.phase).toBe('explore');
+       expect(shrineRoute.destination).toBe('sanctum');
+       expect(shrineRoute.corridor).toBe('vault-sanctum');
+       expect(shrineRoute.completed).toEqual(expect.arrayContaining(['watch','vault']));
+       await page.reload();
+       const restoredShrineRoute=await page.evaluate(async ()=>{
+        const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+        const {questObjectiveProgress}=await import('/src/dungeon.js');
+        const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+        return {room:expedition.room,phase:expedition.phase,
+         destination:expedition.pendingTravel?.to,corridor:expedition.pendingTravel?.corridor,
+         completed:questObjectiveProgress(expedition).filter(x=>x.complete).map(x=>x.room)};
+       });
+       expect(restoredShrineRoute).toEqual(shrineRoute);
+      }
      }
     }else{
      expect(galleryReturn.phase).toBe('combat');
