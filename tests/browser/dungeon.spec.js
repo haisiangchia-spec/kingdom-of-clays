@@ -251,12 +251,31 @@ test('browser completes a multi-room expedition and claims its victory rewards',
    }else throw Error('Dungeon traversal stalled: '+status);
   }
   expect(arrived).toBe(true);
+  const room=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   return decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY)).expedition.room;
+  });
+  expect(room).toBe(({ 'Ashen Gallery':'gallery','Guard Post':'watch','Forgotten Sanctum':'sanctum' })[destination]);
  }
  await expect(page.locator('#dungeon-status')).toContainText('VICTORY');
  while(await page.getByRole('button',{name:'Collect treasure'}).count()){
   await page.getByRole('button',{name:'Collect treasure'}).click();
  }
  await page.getByRole('button',{name:'Return rewards to settlement'}).click();
+ const claimed=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {gold:settlement.gold,crests:settlement.crests,deeds:settlement.deeds,completed:settlement.completedExpeditions,claimed:expedition.rewardClaimed};
+ });
+ expect(claimed.claimed).toBe(true);
+ expect(claimed.completed).toBe(1);
+ await page.reload();
+ const reloaded=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {settlement,expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {gold:settlement.gold,crests:settlement.crests,deeds:settlement.deeds,completed:settlement.completedExpeditions,claimed:expedition.rewardClaimed};
+ });
+ expect(reloaded).toEqual(claimed);
  await expect(page.locator('#settlement-panel')).toContainText('1 completed');
  await page.getByRole('button',{name:'New expedition'}).click();
  await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
