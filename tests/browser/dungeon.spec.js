@@ -1293,6 +1293,29 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
          completed:questObjectiveProgress(expedition).filter(x=>x.complete).map(x=>x.room)};
        });
        expect(restoredShrineRoute).toEqual(shrineRoute);
+       await page.getByRole('button',{name:'Advance corridor'}).click();
+       const shrineProgress=await page.evaluate(async ()=>{
+        const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+        const {questObjectiveProgress}=await import('/src/dungeon.js');
+        const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+        return {room:expedition.room,phase:expedition.phase,
+         corridor:expedition.pendingTravel?.corridor??null,
+         progress:expedition.pendingTravel?.progress??null,
+         completed:questObjectiveProgress(expedition).filter(x=>x.complete).map(x=>x.room)};
+       });
+       expect(shrineProgress.completed).toEqual(expect.arrayContaining(['watch','vault']));
+       expect(['explore','combat','defeat']).toContain(shrineProgress.phase);
+       await page.reload();
+       const restoredShrineProgress=await page.evaluate(async ()=>{
+        const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+        const {questObjectiveProgress}=await import('/src/dungeon.js');
+        const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+        return {room:expedition.room,phase:expedition.phase,
+         corridor:expedition.pendingTravel?.corridor??null,
+         progress:expedition.pendingTravel?.progress??null,
+         completed:questObjectiveProgress(expedition).filter(x=>x.complete).map(x=>x.room)};
+       });
+       expect(restoredShrineProgress).toEqual(shrineProgress);
       }
      }
     }else{
