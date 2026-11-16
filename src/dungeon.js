@@ -72,7 +72,7 @@ export function campMeal(dungeon,food=4){
  if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingBattle||
     dungeon.room==='entrance'||!dungeon.cleared.includes(dungeon.room))
   throw Error('Camping requires a cleared room outside the entrance');
- if(dungeon.pendingLoot||dungeon.pendingHunger)throw Error('Resolve pending expedition event before camping');
+ if(dungeon.pendingLoot||dungeon.pendingHunger||dungeon.camp)throw Error('Resolve pending expedition event or camp before camping');
  if((dungeon.firewood??0)<1)throw Error('No firewood remaining');
  if(![0,2,4,8].includes(food))throw Error('Choose a valid camping meal');
  const living=dungeon.party.filter(hero=>!hero.dead);
@@ -86,8 +86,41 @@ export function campMeal(dungeon,food=4){
   if(food===8){hero.hp=Math.min(hero.maxHp,hero.hp+Math.ceil(hero.maxHp*.25));hero.stress=Math.max(0,(hero.stress??0)-10);}
  }
  dungeon.torch=100;
+ dungeon.camp={respite:12,preventAmbush:false};
  dungeon.log.push('The party camps and consumes '+cost+' food');
  return dungeon;
+}
+// Camping respite is a separate resource from the meal. Original Clays
+// abilities until individual DD1 class camping kits are implemented.
+export const CAMP_SKILLS=Object.freeze({
+ fieldDressing:Object.freeze({name:'Field Dressing',cost:2,healPercent:15}),
+ encouragement:Object.freeze({name:'Encouragement',cost:2,stressHeal:15}),
+ sanctuary:Object.freeze({name:'Sanctuary',cost:4,preventAmbush:true}),
+});
+export function useCampSkill(dungeon,skillId,heroId=null){
+ if(!dungeon.camp||dungeon.phase!=='explore')throw Error('No active camp');
+ const skill=CAMP_SKILLS[skillId];
+ if(!skill)throw Error('Unknown camping skill');
+ if(dungeon.camp.respite<skill.cost)throw Error('Not enough respite');
+ const target=dungeon.party.find(h=>h.id===heroId&&!h.dead);
+ if(!target&&!skill.preventAmbush)throw Error('Choose a living hero');
+ if(skill.healPercent)target.hp=Math.min(target.maxHp,target.hp+Math.ceil(target.maxHp*skill.healPercent/100));
+ if(skill.stressHeal)target.stress=Math.max(0,(target.stress??0)-skill.stressHeal);
+ if(skill.preventAmbush)dungeon.camp.preventAmbush=true;
+ dungeon.camp.respite-=skill.cost;
+ dungeon.log.push('Camp skill: '+skill.name);
+ return dungeon;
+}
+export function finishCamp(dungeon){
+ if(!dungeon.camp||dungeon.phase!=='explore')throw Error('No active camp');
+ const camp=dungeon.camp;
+ dungeon.camp=null;
+ const ambushed=!camp.preventAmbush&&rng(encounterSeed(dungeon.seed,'camp:'+dungeon.room+':'+dungeon.firewood))()<1/3;
+ if(ambushed){
+  for(const hero of dungeon.party.filter(h=>!h.dead))hero.stress=Math.min(200,(hero.stress??0)+5);
+  dungeon.log.push('The camp is ambushed in the night');
+ }else dungeon.log.push('The camp rests undisturbed');
+ return {ambushed};
 }
 function triggerHazard(dungeon,edge){
  // A single deterministic trap check on the first forward passage through
