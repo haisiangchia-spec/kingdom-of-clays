@@ -456,4 +456,11 @@ test('browser travels onward after resolving its first corridor fight through co
   });
   expect(resumedPhase).toBe(resolved.phase);
  }
+ await page.reload();
+ const finalState=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {phase:expedition.phase,room:expedition.room};
+ });
+ expect(['explore','defeat','victory']).toContain(finalState.phase);
 });
