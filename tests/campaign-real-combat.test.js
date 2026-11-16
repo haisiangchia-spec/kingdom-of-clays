@@ -177,8 +177,14 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
   if(d.pendingLoot){leaveLoot(d);continue;}
   if(d.pendingHunger){resolveHunger(d,(d.supplies.food??0)>=4?'eat':'skip');continue;}
   if(enableCamping&&d.firewood>0&&d.room!=='entrance'&&d.cleared.includes(d.room)&&
-     (d.supplies.food??0)>=8&&d.party.filter(h=>!h.dead&&h.hp/h.maxHp<.65).length>=2){
-   campMeal(d,8);campsUsed++;continue;
+     !d.pendingTravel){
+   const living=d.party.filter(h=>!h.dead);
+   const wounded=living.filter(h=>h.hp<h.maxHp);
+   const totalMissing=living.reduce((n,h)=>n+h.maxHp-h.hp,0);
+   const meal=(d.supplies.food??0)>=8&&
+     (wounded.length>=2||living.some(h=>h.stress>=20))?8:
+     (d.supplies.food??0)>=4&&totalMissing>=8?4:null;
+   if(meal!==null){campMeal(d,meal);campsUsed++;continue;}
   }
   // Reserve four rations for the next hunger check; spend only surplus food
   // to rescue a critically wounded hero between fights.
