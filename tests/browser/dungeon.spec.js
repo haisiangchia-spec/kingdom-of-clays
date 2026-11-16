@@ -824,6 +824,24 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
   return questObjectiveProgress(expedition);
  });
  expect(championObjectives).toEqual(['watch','vault','sanctum'].map(room=>({room,complete:false})));
+ // Exercise the objective checklist across saved room clearances without
+ // bypassing the normal browser launch and quest-selection flow.
+ await page.evaluate(async ()=>{
+  const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const save=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  save.expedition.cleared=['watch','vault'];
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(save.settlement,save.expedition));
+ });
+ await page.reload();
+ const partialObjectives=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {questObjectiveProgress}=await import('/src/dungeon.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return questObjectiveProgress(expedition);
+ });
+ expect(partialObjectives).toEqual([
+  {room:'watch',complete:true},{room:'vault',complete:true},{room:'sanctum',complete:false}
+ ]);
  await expect(page.locator('#settlement-panel')).toContainText('Veteran Trial');
  await expect(page.locator('#settlement-panel')).toContainText('1/1');
  await page.reload();
