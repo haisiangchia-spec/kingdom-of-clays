@@ -397,4 +397,29 @@ test('browser travels onward after resolving its first corridor fight through co
  });
  expect(resumed).toEqual(inTransit);
  await expect(page.getByRole('button',{name:'Advance corridor'})).toBeVisible();
+ let encountered=false,arrived=false;
+ for(let step=0;step<25;step++){
+  const state=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+   return {room:expedition.room,phase:expedition.phase,travel:!!expedition.pendingTravel};
+  });
+  if(state.phase==='combat'){encountered=true;break;}
+  if(state.room==='watch'){arrived=true;break;}
+  if(await page.getByRole('button',{name:'Eat four food'}).count())
+   await page.getByRole('button',{name:'Eat four food'}).click();
+  else if(await page.getByRole('button',{name:'Collect treasure'}).count())
+   await page.getByRole('button',{name:'Collect treasure'}).click();
+  else if(await page.getByRole('button',{name:'Advance corridor'}).count())
+   await page.getByRole('button',{name:'Advance corridor'}).click();
+  else throw Error('No available corridor action on approach to Guard Post');
+ }
+ expect(encountered||arrived).toBe(true);
+ await page.reload();
+ const persisted=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {room:expedition.room,phase:expedition.phase,travel:!!expedition.pendingTravel};
+ });
+ expect(persisted.phase==='combat'||persisted.room==='watch').toBe(true);
 });
