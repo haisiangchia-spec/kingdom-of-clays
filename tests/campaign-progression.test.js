@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
-import {campaignProgress,recordCampaignVictory,expeditionUnlock,campaignMilestoneProgress,canStartNextExpedition} from '../src/campaign-progression.js';
+import {campaignProgress,recordCampaignVictory,expeditionUnlock,campaignMilestoneProgress,canStartNextExpedition,completeCampaignExpedition} from '../src/campaign-progression.js';
 import {prepareRosterParty,returnPartyToRoster} from '../src/hero-roster.js';
 import {advanceTownWeek} from '../src/town-week.js';
 import {createDungeon} from '../src/dungeon.js';
+import {offerLoot,collectLoot} from '../src/inventory.js';
 test('Clays campaign milestones persist across save and load',()=>{
  const settlement=createCampaignSettlement();
  assert.equal(campaignProgress(settlement).completed,0);
@@ -93,6 +94,32 @@ test('expedition return, town-week recovery, and next-quest gate survive reload'
  assert.equal(settlement.town.week,weekBefore+1);
  assert.equal(settlement.roster.length,4);
  assert.equal(prepareRosterParty(settlement).length,4);
+});
+
+test('real campaign reward claim transfers spoils and progress exactly once across reload',()=>{
+ const settlement=createCampaignSettlement();
+ const expedition=createDungeon(211,{tier:'apprentice',region:'crypt',interactiveEvents:true});
+ offerLoot(expedition,'gold',100);collectLoot(expedition);
+ offerLoot(expedition,'crest',2);collectLoot(expedition);
+ expedition.phase='victory';
+ expedition.cleared=['sanctum'];
+ expedition.questId='crypt-recon';
+ assert.equal(canStartNextExpedition(expedition).allowed,false);
+ const {report,progress}=completeCampaignExpedition(settlement,expedition);
+ assert.equal(report.totalGold,100);
+ assert.equal(settlement.gold,100);
+ assert.equal(settlement.crests,2);
+ assert.equal(settlement.completedExpeditions,1);
+ assert.equal(progress.milestones.find(m=>m.id==='first-expedition').complete,true);
+ assert.throws(()=>completeCampaignExpedition(settlement,expedition),/unclaimed victory/);
+ const saved=decodeCampaignSave(encodeCampaignSave(settlement,expedition));
+ assert.equal(saved.settlement.gold,100);
+ assert.equal(saved.settlement.crests,2);
+ assert.equal(saved.settlement.completedExpeditions,1);
+ assert.equal(saved.expedition.rewardClaimed,true);
+ assert.throws(()=>completeCampaignExpedition(saved.settlement,saved.expedition),/unclaimed victory/);
+ assert.equal(saved.settlement.gold,100);
+ assert.equal(saved.settlement.completedExpeditions,1);
 });
 
 test('campaign milestone counters show bounded progress and useful next steps',()=>{
