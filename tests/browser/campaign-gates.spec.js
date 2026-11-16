@@ -36,3 +36,36 @@ test('browser refuses locked Veteran and Champion tiers without overwriting comp
  await page.reload();
  await expect(page.locator('#dungeon-status')).toContainText('VICTORY');
 });
+
+test('browser reload preserves staged quest unlocks and campaign completion',async ({page})=>{
+ await page.goto('/dungeon.html');
+ const stages=[
+  {count:0,victories:[],recon:false,veteran:false,champion:false,finished:false},
+  {count:1,victories:[],recon:true,veteran:false,champion:false,finished:false},
+  {count:3,victories:[],recon:true,veteran:true,champion:false,finished:false},
+  {count:3,victories:['veteran-victory'],recon:true,veteran:true,champion:true,finished:false},
+  {count:4,victories:['veteran-victory','champion-victory'],recon:true,veteran:true,champion:true,finished:true}
+ ];
+ for(const stage of stages){
+  await page.evaluate(({count,victories})=>{
+   const raw=localStorage.getItem('kingdom-of-clays-campaign-v1');
+   const payload=JSON.parse(raw);
+   payload.settlement.completedExpeditions=count;
+   payload.settlement.campaignVictories=victories;
+   localStorage.setItem('kingdom-of-clays-campaign-v1',JSON.stringify(payload));
+  },stage);
+  await page.reload();
+  const actual=await page.evaluate(async ()=>{
+   const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('/src/settlement.js');
+   const {availableQuests}=await import('/src/quest-board.js');
+   const {campaignProgress}=await import('/src/campaign-progression.js');
+   const {settlement}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+   const quests=availableQuests(settlement);
+   const unlocked=id=>quests.find(q=>q.id===id)?.unlocked;
+   return {recon:unlocked('warrens-recon'),veteran:unlocked('warrens-veteran'),
+    champion:unlocked('warrens-champion'),finished:campaignProgress(settlement).finished};
+  });
+  expect(actual).toEqual({recon:stage.recon,veteran:stage.veteran,
+   champion:stage.champion,finished:stage.finished});
+ }
+});
