@@ -1,6 +1,6 @@
 import {availableQuests,selectQuest} from './quest-board.js';
 import {campaignProgress,campaignMilestoneProgress,completeCampaignExpedition,canStartNextExpedition,expeditionUnlock} from './campaign-progression.js';
-import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,questObjectiveProgress,bonusObjectiveProgress,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
+import {createDungeon,adjacentRooms,beginCorridor,advanceCorridor,resolveDungeonBattle,dungeonBattle,dungeonCorridors,questObjectiveProgress,bonusObjectiveProgress,DUNGEON_ROOMS,DUNGEON_CURIOS,useProvision,campMeal,torchBand,scoutCorridor,disarmTrap,resolveHunger,interactCurio} from './dungeon.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from './engine.js';
 import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
@@ -436,6 +436,15 @@ function render(){
      render();
    });
    torchButton.disabled=expedition.supplies.torch<=0||expedition.torch>=100;
+   if((expedition.firewood??0)>0){
+     const camping=el('button','Camp: 8-food feast (+25% HP, -10 stress)',supplies,()=>{
+       try{campMeal(expedition,8);}catch(error){expedition.log.push(error.message);}
+       render();
+     });
+     camping.disabled=expedition.room==='entrance'||!expedition.cleared.includes(expedition.room)||
+       !!expedition.pendingTravel||!!expedition.pendingLoot||!!expedition.pendingHunger||
+       expedition.supplies.food<8;
+   }
    for(const hero of expedition.party.filter(u=>!u.dead)){
      const foodButton=el('button','Feed '+hero.name+' (+2 HP)',supplies,()=>{
        try{useProvision(expedition,'food',hero.id);}catch(error){expedition.log.push(error.message);}
