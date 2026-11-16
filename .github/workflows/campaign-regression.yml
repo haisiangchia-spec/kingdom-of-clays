@@ -136,6 +136,7 @@ jobs:
           FULL: ${{ steps.full.outcome }}
           ENDURANCE: ${{ steps.endurance.outcome }}
           MULTI_TIER: ${{ steps.multi_tier.outcome }}
+          EXPEDITION: ${{ steps.expedition.outcome }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           title="Automated campaign verification status"
