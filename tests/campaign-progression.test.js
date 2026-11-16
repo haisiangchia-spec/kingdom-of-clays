@@ -224,3 +224,40 @@ test('unsupported Crypt Veteran and Champion victories cannot claim rewards or a
   assert.deepEqual(settlement.campaignVictories,[]);
  }
 });
+
+test('campaign can recover from a failed expedition without granting progress or duplicating a town week',()=>{
+ let settlement=createCampaignSettlement();
+ const firstParty=prepareRosterParty(settlement);
+ const defeat=createDungeon(1401,{region:'crypt',tier:'apprentice',party:firstParty});
+ defeat.phase='defeat';
+ defeat.rosterReturned=false;
+ defeat.townWeekProcessed=false;
+ defeat.party[0].unit && (defeat.party[0].unit.stress=60);
+ assert.equal(returnPartyToRoster(settlement,defeat),true);
+ assert.equal(advanceTownWeek(settlement,defeat),true);
+ const afterDefeatWeek=settlement.town.week;
+ assert.equal(advanceTownWeek(settlement,defeat),false);
+ assert.equal(settlement.completedExpeditions,0);
+ assert.equal(campaignProgress(settlement).completed,0);
+ assert.equal(canStartNextExpedition(defeat).allowed,true);
+ ({settlement}=decodeCampaignSave(encodeCampaignSave(settlement,defeat)));
+ assert.equal(settlement.town.week,afterDefeatWeek);
+ assert.equal(selectQuest(settlement,'crypt-recon').unlocked,true);
+ assert.equal(selectQuest(settlement,'warrens-recon').unlocked,false);
+ const recoveryParty=prepareRosterParty(settlement);
+ assert.equal(recoveryParty.length,4);
+ const recovery=createDungeon(1402,{region:'crypt',tier:'apprentice',party:recoveryParty,interactiveEvents:true});
+ recovery.questId='crypt-recon';
+ recovery.cleared=['sanctum'];
+ recovery.phase='victory';
+ recovery.rosterReturned=false;
+ recovery.townWeekProcessed=false;
+ recovery.traitsProcessed=true;
+ assert.equal(returnPartyToRoster(settlement,recovery),true);
+ assert.equal(advanceTownWeek(settlement,recovery),true);
+ const {progress}=completeCampaignExpedition(settlement,recovery);
+ assert.equal(progress.milestones.find(x=>x.id==='first-expedition').complete,true);
+ assert.equal(settlement.completedExpeditions,1);
+ assert.equal(settlement.town.week,afterDefeatWeek+1);
+ assert.equal(selectQuest(settlement,'warrens-recon').unlocked,true);
+});
