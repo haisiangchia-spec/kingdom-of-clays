@@ -65,7 +65,15 @@ function playEncounter(d,{requireBothSides=false}={}){
    })[0];
    // Avoid wasting turns on non-offensive buffs when no living enemy can
    // be reached: such turns can otherwise mask a formation deadlock.
-   const chosen=heal??offensive??candidates[0];
+   // Test a tactical survival policy: stun an active front-rank threat
+   // before using a basic strike, while retaining urgent healing priority.
+   const stun=candidates.filter(c=>c.key==='concussive_blow').find(c=>{
+     const target=battle.units.find(u=>u.id===c.targetId);
+     return target?.side==='enemy'&&!target.dead&&!target.corpse&&
+       !(target.effects??[]).some(effect=>effect.kind==='stun'||effect.type==='stun')&&
+       target.hp>0;
+   });
+   const chosen=heal??stun??offensive??candidates[0];
    if(chosen){takeTurn(battle,actor.id,chosen.key,chosen.targetId,random);heroSkillsUsed++;heroSkillCounts[chosen.key]=(heroSkillCounts[chosen.key]??0)+1;if(chosen===heal)healsUsed++;}
    else passActorTurn(battle,actor.id);
   }
