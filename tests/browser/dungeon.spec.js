@@ -156,3 +156,29 @@ test('browser exploration resumes mid-corridor after reload without resetting pr
  await page.getByRole('button',{name:'Advance corridor'}).click();
  await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
 });
+
+test('browser combat permits hero action and preserves battle after reload',async ({page})=>{
+ await page.goto('/dungeon.html');
+ await page.getByRole('button',{name:'Travel to Ashen Gallery'}).click();
+ await page.getByRole('button',{name:'Advance corridor'}).click();
+ await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+ await expect(page.locator('#dungeon-combat')).toContainText('to act');
+ const before=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {seed:expedition.seed,phase:expedition.phase,room:expedition.room,
+   battleSerial:expedition.battleSerial,randomCalls:expedition.randomCalls};
+ });
+ await page.reload();
+ await expect(page.locator('#dungeon-status')).toContainText('COMBAT');
+ await expect(page.locator('#dungeon-combat')).toContainText('to act');
+ const after=await page.evaluate(async ()=>{
+  const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {seed:expedition.seed,phase:expedition.phase,room:expedition.room,
+   battleSerial:expedition.battleSerial,randomCalls:expedition.randomCalls};
+ });
+ expect(after).toEqual(before);
+ await page.getByRole('button',{name:'Pass turn'}).click();
+ await expect(page.locator('#dungeon-combat')).toContainText('Battle log');
+});
