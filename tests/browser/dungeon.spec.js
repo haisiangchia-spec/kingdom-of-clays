@@ -912,6 +912,19 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
   await expect(page.locator('#dungeon-status')).toContainText('Fungal Passage');
   await page.reload();
   await expect(page.locator('#dungeon-status')).toContainText('Fungal Passage');
+  await expect(page.getByRole('button',{name:'Travel to Butcher Post'})).toBeVisible();
+  await page.getByRole('button',{name:'Travel to Butcher Post'}).click();
+  await expect(page.getByRole('button',{name:'Advance corridor'})).toBeVisible();
+  const watchCorridor=await page.evaluate(async ()=>{
+   const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+   const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+   return {quest:expedition.questId,room:expedition.room,
+    travelling:!!expedition.pendingTravel,phase:expedition.phase};
+  });
+  expect(watchCorridor).toEqual({quest:'warrens-champion',room:'gallery',
+   travelling:true,phase:'explore'});
+  await page.reload();
+  await expect(page.getByRole('button',{name:'Advance corridor'})).toBeVisible();
  }
 
 
