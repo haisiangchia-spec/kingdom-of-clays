@@ -441,11 +441,31 @@ function render(){
        buy.disabled=settlement.gold<price;
      }
    }
+   // Targeted curatives are usable between encounters, not during camping.
+   if(!expedition.camp){
+     const curatives=[
+       ['antivenom','blight'],['bandage','bleed'],['medicinalHerbs','debuff'],['laudanum','horror']
+     ];
+     for(const [kind,condition] of curatives){
+       el('p',ITEM_RULES[kind].name+': '+(expedition.supplies[kind]??0),supplies);
+       if((expedition.supplies[kind]??0)<=0)continue;
+       for(const hero of expedition.party.filter(u=>!u.dead)){
+         const affected=condition==='debuff'
+           ?(hero.effects??[]).some(effect=>effect.kind==='debuff')
+           :(hero.dot??[]).some(dot=>dot.type===condition||dot.kind===condition);
+         if(!affected)continue;
+         el('button','Use '+ITEM_RULES[kind].name+' on '+hero.name,supplies,()=>{
+           try{useProvision(expedition,kind,hero.id);}catch(error){expedition.log.push(error.message);}
+           render();
+         });
+       }
+     }
+   }
    const torchButton=el('button','Light torch (+25)',supplies,()=>{
      try{useProvision(expedition,'torch');}catch(error){expedition.log.push(error.message);}
      render();
    });
-   torchButton.disabled=expedition.supplies.torch<=0||expedition.torch>=100;
+   torchButton.disabled=!!expedition.camp||expedition.supplies.torch<=0||expedition.torch>=100;
    if(expedition.camp){
      el('p','Camping respite remaining: '+expedition.camp.respite,supplies);
      for(const [key,skill] of Object.entries(CAMP_SKILLS)){
@@ -482,7 +502,7 @@ function render(){
        try{useProvision(expedition,'food',hero.id);}catch(error){expedition.log.push(error.message);}
        render();
      });
-     foodButton.disabled=expedition.supplies.food<=0||hero.hp>=hero.maxHp;
+     foodButton.disabled=!!expedition.camp||expedition.supplies.food<=0||hero.hp>=hero.maxHp;
    }
  }
  const party=$('dungeon-party');party.replaceChildren();
