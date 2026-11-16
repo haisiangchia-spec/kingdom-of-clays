@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon,useProvision,purchaseProvision,campMeal,useCampSkill,finishCamp} from '../src/dungeon.js';
+import {createDungeon,beginCorridor,useProvision,purchaseProvision,campMeal,useCampSkill,finishCamp} from '../src/dungeon.js';
 
 test('curative supplies remove only their corresponding conditions',()=>{
  const d=createDungeon(1);
@@ -87,4 +87,14 @@ test('provision shop rejects full backpack without charging gold',()=>{
  assert.throws(()=>purchaseProvision(d,town,'laudanum',1),/Inventory full/);
  assert.equal(town.gold,before);
  assert.equal(d.supplies.laudanum,0);
+});
+
+test('active camp blocks corridor travel and provisions until camp ends',()=>{
+ const d=createDungeon(17,{difficulty:'patrol'});
+ d.room='gallery';d.cleared.push('gallery');
+ campMeal(d,2);
+ assert.throws(()=>beginCorridor(d,'entrance'),/Finish camping/);
+ assert.throws(()=>useProvision(d,'torch'),/Finish camping/);
+ finishCamp(d);
+ assert.doesNotThrow(()=>beginCorridor(d,'entrance'));
 });
