@@ -217,8 +217,9 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
    const food=d.supplies.food??0;
    // Hold scarce firewood until the party has substantial injuries;
    // preserve enough rations for a future hunger check.
-   const meal=totalMissing>=65&&food>=12?8:
-     totalMissing>=55&&food>=8?4:null;
+   const meal=food>=8&&totalMissing>=20?8:
+     food>=4&&totalMissing>=12?4:
+     food>=2&&totalMissing>=20?2:null;
    if(meal!==null){
     campMeal(d,meal);campsUsed++;
     if(d.camp.respite>=CAMP_SKILLS.sanctuary.cost)useCampSkill(d,'sanctuary');
