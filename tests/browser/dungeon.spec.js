@@ -1144,6 +1144,47 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
        watchCleared:expedition.cleared.includes('watch')};
      });
      expect(persistedVaultProgress).toEqual(vaultProgress);
+     if(vaultProgress.phase==='combat'){
+      let vaultTurns=0;
+      while(vaultTurns++<120){
+       const state=await page.evaluate(async ()=>{
+        const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+        const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+        return {phase:expedition.phase,
+         enemies:expedition.pendingBattle?.battle?.units.filter(u=>u.side==='enemy'&&!u.dead&&!u.corpse).map(u=>u.name)??[]};
+       });
+       if(state.phase!=='combat')break;
+       let acted=false;
+       for(const skill of await page.locator('#dungeon-combat button[aria-pressed]').all()){
+        await skill.click();
+        for(const enemy of state.enemies){
+         const target=page.locator('#dungeon-combat button').filter({hasText:enemy});
+         if(await target.count()){await target.first().click();acted=true;break;}
+        }
+        if(acted)break;
+       }
+       if(!acted)await page.getByRole('button',{name:'Pass turn'}).click();
+      }
+      expect(vaultTurns).toBeLessThan(121);
+     }
+     const vaultCorridorOutcome=await page.evaluate(async ()=>{
+      const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+      const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+      return {room:expedition.room,phase:expedition.phase,
+       corridor:expedition.pendingTravel?.corridor??null,
+       watchCleared:expedition.cleared.includes('watch')};
+     });
+     expect(['explore','defeat']).toContain(vaultCorridorOutcome.phase);
+     expect(vaultCorridorOutcome.watchCleared).toBe(true);
+     await page.reload();
+     const persistedVaultOutcome=await page.evaluate(async ()=>{
+      const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+      const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+      return {room:expedition.room,phase:expedition.phase,
+       corridor:expedition.pendingTravel?.corridor??null,
+       watchCleared:expedition.cleared.includes('watch')};
+     });
+     expect(persistedVaultOutcome).toEqual(vaultCorridorOutcome);
     }else{
      expect(galleryReturn.phase).toBe('combat');
     }
