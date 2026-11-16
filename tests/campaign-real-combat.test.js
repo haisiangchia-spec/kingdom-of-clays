@@ -1,7 +1,7 @@
 import {ENEMY_SKILLS} from '../src/enemy-skills.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,dungeonCorridors,questObjectiveProgress,resolveHunger,useProvision,campMeal} from '../src/dungeon.js';
+import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,dungeonCorridors,questObjectiveProgress,resolveHunger,useProvision,campMeal,useCampSkill,finishCamp} from '../src/dungeon.js';
 import {makeGeneratedEncounter,rng,status,startRound,currentActor,prepareActorTurn,availableTargets,takeTurn,passActorTurn,ABILITIES} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {leaveLoot} from '../src/inventory.js';
@@ -184,7 +184,10 @@ function runFullExpedition(seed,questId,tier,region,{party=null,enableCamping=fa
    const meal=(d.supplies.food??0)>=8&&
      (wounded.length>=2||living.some(h=>h.stress>=20))?8:
      (d.supplies.food??0)>=4&&totalMissing>=8?4:null;
-   if(meal!==null){campMeal(d,meal);campsUsed++;continue;}
+   if(meal!==null){campMeal(d,meal);campsUsed++;
+    const wounded=d.party.filter(h=>!h.dead).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp);
+    if(wounded.length){useCampSkill(d,'sanctuary');useCampSkill(d,'fieldDressing',wounded[0].id);}
+    finishCamp(d);continue;}
   }
   // Reserve four rations for the next hunger check; spend only surplus food
   // to rescue a critically wounded hero between fights.
