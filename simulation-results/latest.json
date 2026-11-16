@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "commit": "2649d07362bca80f81e9a0e772e99f0dd230f67f",
-  "runId": "43781421409",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43781421409",
+  "commit": "d7b866d8eec1d496dd5677833fc0a15b71440be1",
+  "runId": "43781558022",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/43781558022",
   "baseline": [
     {
       "questId": "crypt-recon",
@@ -713,7 +713,23 @@
             "heals": 5,
             "hpBefore": 151,
             "hpAfter": 97,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "heavy_slash": 6,
+              "greater_heal": 3,
+              "crushing_strike": 6,
+              "hunters_mark": 2,
+              "group_healing": 2,
+              "eagle_eye_shot": 3
+            },
+            "enemySkillsUsed": {
+              "plague_veteran_drum_debilitation": 2,
+              "plague_veteran_hook_slash": 6,
+              "plague_veteran_vomit": 4,
+              "plague_veteran_ball_chain": 2,
+              "plague_veteran_drum_doom": 3,
+              "plague_veteran_butcher_cut": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -745,7 +761,21 @@
             "heals": 1,
             "hpBefore": 151,
             "hpAfter": 109,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "eagle_eye_shot": 2,
+              "crushing_strike": 3,
+              "greater_heal": 3,
+              "heavy_slash": 4,
+              "hunters_mark": 1
+            },
+            "enemySkillsUsed": {
+              "plague_veteran_vomit": 1,
+              "plague_veteran_drum_debilitation": 3,
+              "plague_veteran_butcher_cut": 2,
+              "plague_veteran_drum_doom": 1,
+              "plague_veteran_ball_chain": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -775,7 +805,21 @@
             "heals": 2,
             "hpBefore": 151,
             "hpAfter": 105,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "greater_heal": 4,
+              "eagle_eye_shot": 2,
+              "heavy_slash": 5,
+              "crushing_strike": 4,
+              "hunters_mark": 3
+            },
+            "enemySkillsUsed": {
+              "plague_veteran_drum_debilitation": 3,
+              "plague_veteran_butcher_cut": 2,
+              "plague_veteran_vomit": 1,
+              "plague_veteran_ball_chain": 1,
+              "plague_veteran_drum_doom": 2
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -805,7 +849,21 @@
             "heals": 0,
             "hpBefore": 151,
             "hpAfter": 125,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "heavy_slash": 3,
+              "hunters_mark": 2,
+              "crushing_strike": 3,
+              "greater_heal": 2,
+              "eagle_eye_shot": 1
+            },
+            "enemySkillsUsed": {
+              "plague_veteran_drum_debilitation": 1,
+              "plague_veteran_vomit": 3,
+              "plague_veteran_ball_chain": 1,
+              "plague_veteran_drum_doom": 1,
+              "plague_veteran_butcher_cut": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -835,7 +893,19 @@
             "heals": 1,
             "hpBefore": 151,
             "hpAfter": 120,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "greater_heal": 4,
+              "heavy_slash": 4,
+              "hunters_mark": 2,
+              "crushing_strike": 4,
+              "eagle_eye_shot": 2
+            },
+            "enemySkillsUsed": {
+              "plague_veteran_drum_doom": 5,
+              "plague_veteran_vomit": 4,
+              "plague_veteran_ball_chain": 2
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -866,7 +936,21 @@
             "heals": 1,
             "hpBefore": 151,
             "hpAfter": 108,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "eagle_eye_shot": 3,
+              "heavy_slash": 4,
+              "crushing_strike": 4,
+              "greater_heal": 3,
+              "hunters_mark": 2
+            },
+            "enemySkillsUsed": {
+              "plague_veteran_vomit": 1,
+              "plague_veteran_drum_debilitation": 4,
+              "plague_veteran_ball_chain": 1,
+              "plague_veteran_butcher_cut": 2,
+              "plague_veteran_drum_doom": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -897,7 +981,19 @@
             "heals": 0,
             "hpBefore": 151,
             "hpAfter": 137,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "heavy_slash": 3,
+              "greater_heal": 3,
+              "eagle_eye_shot": 3,
+              "crushing_strike": 2
+            },
+            "enemySkillsUsed": {
+              "plague_veteran_drum_doom": 1,
+              "plague_veteran_hook_slash": 3,
+              "plague_veteran_vomit": 2,
+              "plague_veteran_drum_debilitation": 2
+            }
           },
           "firstEnemyComposition": [
             "plagueSlasher",
@@ -928,7 +1024,21 @@
             "heals": 2,
             "hpBefore": 151,
             "hpAfter": 93,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "heavy_slash": 5,
+              "greater_heal": 2,
+              "hunters_mark": 3,
+              "crushing_strike": 4,
+              "eagle_eye_shot": 2,
+              "group_healing": 2
+            },
+            "enemySkillsUsed": {
+              "plague_veteran_drum_debilitation": 6,
+              "plague_veteran_butcher_cut": 3,
+              "plague_veteran_ball_chain": 2,
+              "plague_veteran_drum_doom": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -959,7 +1069,21 @@
             "heals": 5,
             "hpBefore": 151,
             "hpAfter": 80,
-            "fallen": 1
+            "fallen": 1,
+            "heroSkillsUsed": {
+              "heavy_slash": 7,
+              "greater_heal": 7,
+              "crushing_strike": 7,
+              "hunters_mark": 2,
+              "eagle_eye_shot": 1
+            },
+            "enemySkillsUsed": {
+              "plague_veteran_vomit": 3,
+              "plague_veteran_drum_doom": 4,
+              "plague_veteran_butcher_cut": 2,
+              "plague_veteran_hook_slash": 7,
+              "plague_veteran_drum_debilitation": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -991,7 +1115,20 @@
             "heals": 0,
             "hpBefore": 151,
             "hpAfter": 121,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "eagle_eye_shot": 2,
+              "crushing_strike": 3,
+              "greater_heal": 3,
+              "heavy_slash": 3,
+              "hunters_mark": 1
+            },
+            "enemySkillsUsed": {
+              "plague_veteran_vomit": 1,
+              "plague_veteran_drum_debilitation": 2,
+              "plague_veteran_butcher_cut": 2,
+              "plague_veteran_drum_doom": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -1121,7 +1258,23 @@
             "heals": 1,
             "hpBefore": 175,
             "hpAfter": 81,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "heavy_slash": 5,
+              "eagle_eye_shot": 3,
+              "greater_heal": 1,
+              "crushing_strike": 4,
+              "hunters_mark": 1,
+              "group_healing": 1
+            },
+            "enemySkillsUsed": {
+              "plague_champion_drum_debilitation": 2,
+              "plague_champion_butcher_cut": 1,
+              "plague_skiver_roast": 1,
+              "plague_skiver_cripple": 1,
+              "plague_champion_ball_chain": 2,
+              "plague_champion_drum_doom": 3
+            }
           },
           "firstEnemyComposition": [
             "plagueDrummer",
@@ -1151,7 +1304,20 @@
             "heals": 4,
             "hpBefore": 175,
             "hpAfter": 115,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "eagle_eye_shot": 2,
+              "crushing_strike": 4,
+              "greater_heal": 4,
+              "heavy_slash": 3,
+              "hunters_mark": 1
+            },
+            "enemySkillsUsed": {
+              "plague_champion_drum_debilitation": 1,
+              "plague_champion_hook_slash": 2,
+              "plague_champion_butcher_cut": 2,
+              "plague_champion_ball_chain": 2
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -1181,7 +1347,22 @@
             "heals": 4,
             "hpBefore": 175,
             "hpAfter": 86,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "eagle_eye_shot": 2,
+              "heavy_slash": 5,
+              "crushing_strike": 3,
+              "group_healing": 4,
+              "hunters_mark": 2,
+              "charging_blade": 1
+            },
+            "enemySkillsUsed": {
+              "plague_skiver_cripple": 1,
+              "plague_champion_ball_chain": 3,
+              "plague_champion_vomit": 4,
+              "plague_skiver_roast": 1,
+              "plague_champion_butcher_cut": 2
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -1211,7 +1392,21 @@
             "heals": 4,
             "hpBefore": 175,
             "hpAfter": 81,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "greater_heal": 1,
+              "heavy_slash": 5,
+              "eagle_eye_shot": 2,
+              "crushing_strike": 5,
+              "group_healing": 3,
+              "hunters_mark": 3
+            },
+            "enemySkillsUsed": {
+              "plague_skiver_cripple": 2,
+              "plague_champion_vomit": 5,
+              "plague_champion_butcher_cut": 1,
+              "plague_champion_ball_chain": 2
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -1241,7 +1436,23 @@
             "heals": 4,
             "hpBefore": 175,
             "hpAfter": 103,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "greater_heal": 3,
+              "heavy_slash": 5,
+              "eagle_eye_shot": 2,
+              "charging_blade": 1,
+              "crushing_strike": 3,
+              "hunters_mark": 2,
+              "group_healing": 1
+            },
+            "enemySkillsUsed": {
+              "plague_skiver_roast": 2,
+              "plague_champion_vomit": 5,
+              "plague_champion_butcher_cut": 2,
+              "plague_champion_ball_chain": 2,
+              "plague_skiver_flight": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -1272,7 +1483,19 @@
             "heals": 2,
             "hpBefore": 175,
             "hpAfter": 115,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "eagle_eye_shot": 3,
+              "greater_heal": 2,
+              "heavy_slash": 4,
+              "crushing_strike": 3
+            },
+            "enemySkillsUsed": {
+              "plague_champion_drum_doom": 1,
+              "plague_champion_butcher_cut": 1,
+              "plague_champion_hook_slash": 3,
+              "plague_champion_ball_chain": 2
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -1302,7 +1525,24 @@
             "heals": 2,
             "hpBefore": 175,
             "hpAfter": 0,
-            "fallen": 2
+            "fallen": 2,
+            "heroSkillsUsed": {
+              "heavy_slash": 7,
+              "greater_heal": 1,
+              "crushing_strike": 7,
+              "eagle_eye_shot": 2,
+              "group_healing": 1
+            },
+            "enemySkillsUsed": {
+              "plague_skiver_roast": 1,
+              "plague_champion_butcher_cut": 2,
+              "plague_champion_drum_doom": 4,
+              "plague_champion_hook_slash": 7,
+              "plague_skiver_flight": 1,
+              "plague_champion_ball_chain": 2,
+              "plague_skiver_cripple": 1,
+              "plague_champion_drum_debilitation": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
@@ -1333,7 +1573,19 @@
             "heals": 2,
             "hpBefore": 175,
             "hpAfter": 102,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "heavy_slash": 5,
+              "greater_heal": 3,
+              "crushing_strike": 5,
+              "eagle_eye_shot": 3
+            },
+            "enemySkillsUsed": {
+              "plague_skiver_roast": 2,
+              "plague_champion_drum_debilitation": 2,
+              "plague_champion_ball_chain": 5,
+              "plague_champion_drum_doom": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueDrummer",
@@ -1363,7 +1615,25 @@
             "heals": 4,
             "hpBefore": 175,
             "hpAfter": 114,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "heavy_slash": 1,
+              "greater_heal": 1,
+              "crushing_strike": 6,
+              "eagle_eye_shot": 3,
+              "sacred_strike": 2,
+              "hunters_mark": 2,
+              "battle_shout": 3,
+              "group_healing": 3
+            },
+            "enemySkillsUsed": {
+              "plague_champion_drum_doom": 2,
+              "plague_skiver_cripple": 1,
+              "plague_champion_ball_chain": 2,
+              "plague_champion_butcher_cut": 3,
+              "plague_champion_drum_debilitation": 1,
+              "plague_skiver_roast": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueDrummer",
@@ -1393,7 +1663,20 @@
             "heals": 1,
             "hpBefore": 175,
             "hpAfter": 107,
-            "fallen": 0
+            "fallen": 0,
+            "heroSkillsUsed": {
+              "eagle_eye_shot": 2,
+              "crushing_strike": 4,
+              "greater_heal": 2,
+              "heavy_slash": 4,
+              "hunters_mark": 1
+            },
+            "enemySkillsUsed": {
+              "plague_champion_hook_slash": 4,
+              "plague_champion_drum_debilitation": 1,
+              "plague_champion_ball_chain": 3,
+              "plague_champion_butcher_cut": 1
+            }
           },
           "firstEnemyComposition": [
             "plagueChopper",
