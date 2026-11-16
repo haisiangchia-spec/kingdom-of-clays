@@ -529,6 +529,40 @@ test('browser travels onward after resolving its first corridor fight through co
     return {phase:expedition.phase,room:expedition.room};
    });
    expect(saved.phase==='combat'||saved.room==='sanctum').toBe(true);
+   if(saved.phase==='combat'){
+    let turns=0;
+    while(turns++<120){
+     const battle=await page.evaluate(async ()=>{
+      const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+      const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+      return {phase:expedition.phase,enemies:expedition.pendingBattle?.battle.units.filter(u=>u.side==='enemy'&&!u.dead&&!u.corpse).map(u=>u.name)??[]};
+     });
+     if(battle.phase!=='combat')break;
+     let acted=false;
+     for(const skill of await page.locator('#dungeon-combat button[aria-pressed]').all()){
+      await skill.click();
+      for(const enemy of battle.enemies){
+       const target=page.locator('#dungeon-combat button').filter({hasText:enemy});
+       if(await target.count()){await target.first().click();acted=true;break;}
+      }
+      if(acted)break;
+     }
+     if(!acted)await page.getByRole('button',{name:'Pass turn'}).click();
+    }
+    expect(turns).toBeLessThan(121);
+    const afterBattle=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+     return expedition.phase;
+    });
+    expect(['explore','victory','defeat']).toContain(afterBattle);
+    await page.reload();
+    const restoredPhase=await page.evaluate(async ()=>{
+     const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+     return decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY)).expedition.phase;
+    });
+    expect(restoredPhase).toBe(afterBattle);
+   }
   }
  }
 });
