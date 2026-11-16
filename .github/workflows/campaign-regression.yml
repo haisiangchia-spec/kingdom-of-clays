@@ -68,3 +68,46 @@ jobs:
         run: |
           test "$FOCUSED" = success
           test "$FULL" = success
+
+  browser-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test runner
+        run: npm install --no-save @playwright/test
+      - name: Install Chromium and dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Run Chromium gameplay regression tests
+        id: browser
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npx playwright test --project=chromium 2>&1 | tee campaign-browser-results.txt
+      - name: Upload browser logs, screenshots and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: campaign-browser-results
+          path: |
+            campaign-browser-results.txt
+            playwright-report/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Summarize browser verification
+        if: always()
+        env:
+          BROWSER: ${{ steps.browser.outcome }}
+        run: |
+          echo '## Chromium gameplay verification' >> "$GITHUB_STEP_SUMMARY"
+          echo "- Browser regression tests: $BROWSER" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Download campaign-browser-results for logs and failure traces.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Fail when browser checks fail
+        if: always()
+        env:
+          BROWSER: ${{ steps.browser.outcome }}
+        run: test "$BROWSER" = success
