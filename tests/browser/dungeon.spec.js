@@ -1123,6 +1123,27 @@ test('browser quest board unlocks Veteran after three victories and Champion aft
       destination:'vault',corridor:'gallery-vault'});
      await page.reload();
      await expect(page.getByRole('button',{name:'Advance corridor'})).toBeVisible();
+     await page.getByRole('button',{name:'Advance corridor'}).click();
+     const vaultProgress=await page.evaluate(async ()=>{
+      const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+      const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+      return {room:expedition.room,phase:expedition.phase,
+       corridor:expedition.pendingTravel?.corridor??null,
+       progress:expedition.pendingTravel?.progress??null,
+       watchCleared:expedition.cleared.includes('watch')};
+     });
+     expect(vaultProgress.watchCleared).toBe(true);
+     expect(['explore','combat','defeat']).toContain(vaultProgress.phase);
+     await page.reload();
+     const persistedVaultProgress=await page.evaluate(async ()=>{
+      const {decodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('/src/settlement.js');
+      const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+      return {room:expedition.room,phase:expedition.phase,
+       corridor:expedition.pendingTravel?.corridor??null,
+       progress:expedition.pendingTravel?.progress??null,
+       watchCleared:expedition.cleared.includes('watch')};
+     });
+     expect(persistedVaultProgress).toEqual(vaultProgress);
     }else{
      expect(galleryReturn.phase).toBe('combat');
     }
