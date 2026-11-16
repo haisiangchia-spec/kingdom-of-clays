@@ -220,7 +220,7 @@ test('browser completes a multi-room expedition and claims its victory rewards',
  await page.goto('/dungeon.html');
  // Travel and event decisions use the real UI. Combat is resolved deterministically
  // through the engine so this test isolates the campaign traversal and reward wiring.
- for(const destination of ['Ashen Gallery','Ashen Watch','Ashen Sanctum']){
+ for(const destination of ['Ashen Gallery','Guard Post','Forgotten Sanctum']){
   await page.getByRole('button',{name:'Travel to '+destination}).click();
   let arrived=false;
   for(let step=0;step<35;step++){
