@@ -156,3 +156,24 @@ test('Champion unlock enables tier selector and launches final campaign quest',a
  await expect(page.locator('#dungeon-status')).toContainText('CHAMPION');
  await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
 });
+
+test('active expedition cannot be replaced and remains resumable after reload',async ({page})=>{
+ await page.goto('/dungeon.html');
+ const before=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {seed:expedition.seed,phase:expedition.phase,room:expedition.room,questId:expedition.questId};
+ });
+ expect(before).toMatchObject({phase:'explore',room:'entrance'});
+ await page.getByRole('button',{name:'New expedition'}).click();
+ await expect(page.locator('#dungeon-log')).toContainText('Finish the expedition before starting another');
+ const after=await page.evaluate(async ()=>{
+  const {CAMPAIGN_SAVE_KEY,decodeCampaignSave}=await import('/src/settlement.js');
+  const {expedition}=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  return {seed:expedition.seed,phase:expedition.phase,room:expedition.room,questId:expedition.questId};
+ });
+ expect(after).toEqual(before);
+ await page.reload();
+ await expect(page.locator('#dungeon-status')).toContainText('EXPLORE');
+ await expect(page.getByRole('button',{name:'Travel to Ashen Gallery'})).toBeVisible();
+});
