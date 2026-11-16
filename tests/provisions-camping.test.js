@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDungeon,useProvision,campMeal,useCampSkill,finishCamp} from '../src/dungeon.js';
+import {createDungeon,useProvision,purchaseProvision,campMeal,useCampSkill,finishCamp} from '../src/dungeon.js';
 
 test('curative supplies remove only their corresponding conditions',()=>{
  const d=createDungeon(1);
@@ -65,4 +65,14 @@ test('unprotected camping ambush enters combat without claiming room progress',(
  assert.match(ambush.pendingBattle.source,/^camp:/);
  assert.ok(ambush.pendingBattle.battle.units.some(u=>u.side==='enemy'));
  assert.deepEqual(ambush.cleared,['gallery']);
+});
+
+test('entrance shop charges gold, respects capacity, and closes after departure',()=>{
+ const d=createDungeon(7),town={gold:1000};
+ purchaseProvision(d,town,'antivenom',2);
+ assert.equal(town.gold,700);
+ assert.equal(d.supplies.antivenom,2);
+ assert.throws(()=>purchaseProvision(d,town,'bandage',100),/Insufficient gold/);
+ d.room='gallery';
+ assert.throws(()=>purchaseProvision(d,town,'bandage'),/before departure/);
 });
