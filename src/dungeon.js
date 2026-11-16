@@ -36,6 +36,7 @@ export function torchBand(value){
  return 'pitch-black';
 }
 export function useProvision(dungeon,type,heroId=null){
+ if(dungeon.camp)throw Error('Finish camping before exploring');
  if(dungeon.phase!=='explore')throw Error('Provisions cannot be used during combat');
  if(!EXPEDITION_SUPPLIES[type])throw Error('Unknown provision');
  if((dungeon.supplies?.[type]??0)<=0)throw Error('No '+type+' provisions remaining');
@@ -155,6 +156,7 @@ function triggerHazard(dungeon,edge){
 // Optional event-choice layer for expedition clients; original Clays fixtures.
 // Scouting previews the existing seeded encounter/trap rolls (not DD1 odds).
 export function scoutCorridor(dungeon,to){
+ if(dungeon.camp)throw Error('Finish camping before exploring');
  if(dungeon.phase!=='explore'||dungeon.pendingTravel)throw Error('Scouting requires a free room');
  const edge=dungeonCorridors(dungeon).find(e=>(e.from===dungeon.room&&e.to===to)||(e.to===dungeon.room&&e.from===to));
  if(!edge)throw Error('Destination is not adjacent');
@@ -171,6 +173,7 @@ export function scoutCorridor(dungeon,to){
  return record;
 }
 export function disarmTrap(dungeon,heroId){
+ if(dungeon.camp)throw Error('Finish camping before exploring');
  const trip=dungeon.pendingTravel;
  if(dungeon.phase!=='explore'||!trip||trip.progress!==0)throw Error('Disarm before moving along the corridor');
  const record=dungeon.corridors[trip.corridor];
@@ -201,6 +204,7 @@ function applyTrapDamage(dungeon,victim){
  }
 }
 export function resolveHunger(dungeon,choice){
+ if(dungeon.camp)throw Error('Finish camping before exploring');
  if(dungeon.phase!=='explore'||!dungeon.pendingHunger)throw Error('No hunger check pending');
  if(choice!=='eat'&&choice!=='skip')throw Error('Choose eat or skip');
  if(choice==='eat'){
@@ -227,6 +231,7 @@ export const DUNGEON_CURIOS=Object.freeze({
  vault:Object.freeze({name:'Sealed Urn'})
 });
 export function interactCurio(dungeon,choice){
+ if(dungeon.camp)throw Error('Finish camping before exploring');
  if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingHunger||dungeon.pendingLoot)throw Error('Cannot inspect curio now');
  const curio=regionCurio(dungeon.region??'crypt',dungeon.room);
  if(!curio||dungeon.curiosUsed.includes(dungeon.room))throw Error('No untouched curio in this room');
@@ -315,6 +320,7 @@ export function adjacentRooms(dungeon){
   .map(e=>({room:keyFor(e,dungeon.room),corridor:e.id}));
 }
 export function beginCorridor(dungeon,to){
+ if(dungeon.camp)throw Error('Finish camping before exploring');
  if(dungeon.phase!=='explore'||dungeon.pendingTravel||dungeon.pendingHunger||dungeon.pendingLoot)throw Error('Exploration is blocked');
  const edge=dungeonCorridors(dungeon).find(e=>(e.from===dungeon.room&&e.to===to)||(e.to===dungeon.room&&e.from===to));
  if(!edge)throw Error('Destination is not adjacent');
@@ -337,6 +343,7 @@ function startBattle(dungeon,source,difficulty){
  return dungeon;
 }
 export function advanceCorridor(dungeon){
+ if(dungeon.camp)throw Error('Finish camping before exploring');
  if(dungeon.phase!=='explore'||!dungeon.pendingTravel)throw Error('No traversable corridor');
  if(dungeon.pendingHunger)throw Error('Resolve hunger before advancing');
  if(dungeon.pendingLoot)throw Error('Resolve loot before advancing');
