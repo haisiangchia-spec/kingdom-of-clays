@@ -606,7 +606,8 @@ test('browser travels onward after resolving its first corridor fight through co
     expect(state.questId).toBe('crypt-recon');
     if(state.phase==='victory')expect(state.cleared).toContain('sanctum');
    }
-   if(completion.phase==='victory'){
+   expect(completion.phase,'expedition must win through browser combat and exploration').toBe('victory');
+   {
     for(let pending=0;pending<15;pending++){
      const collect=page.getByRole('button',{name:'Collect treasure'});
      if(!await collect.count())break;
