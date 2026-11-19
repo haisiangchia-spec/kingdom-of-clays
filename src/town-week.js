@@ -11,10 +11,11 @@ export const TREATMENTS=Object.freeze({
 });
 const goodInt=n=>Number.isSafeInteger(n)&&n>=0;
 const names=Object.keys(TREATMENTS);
-export function stageCoachOffers(week,roster=[]){
+export function stageCoachOffers(week,roster=[],network=0){
  if(!goodInt(week)||week<1)throw Error('Invalid town week');
  const living=roster.filter(h=>!h.unit.dead).length;
- const count=Math.min(4,Math.max(2,4-living));
+ if(!goodInt(network)||network>5)throw Error('Invalid Stage Coach network');
+ const count=Math.min(7,Math.max(2,4-living)+network);
  let seed=(Math.imul(week,2654435761)^0xa2c79f13)>>>0;
  const offers=[];
  for(let i=0;i<count;i++){
@@ -25,13 +26,13 @@ export function stageCoachOffers(week,roster=[]){
  return offers;
 }
 export function initTown(settlement){
- settlement.town={week:1,offers:stageCoachOffers(1,settlement.roster),treatments:[]};
+ settlement.town={week:1,offers:stageCoachOffers(1,settlement.roster,settlement.stageCoach?.network??0),treatments:[]};
  return settlement;
 }
 export function validateTown(settlement){
  const town=settlement.town;
  if(!town||typeof town!=='object'||!goodInt(town.week)||town.week<1||
-   !Array.isArray(town.offers)||town.offers.length>4||
+   !Array.isArray(town.offers)||town.offers.length>7||
    !Array.isArray(town.treatments)||town.treatments.length>names.length)throw Error('Invalid town state');
  const offerIds=new Set();
  for(const offer of town.offers){
@@ -94,7 +95,7 @@ export function advanceTownWeek(settlement,expedition){
  }
  completeSanitariumWeek(settlement);
  town.week++;
- town.offers=stageCoachOffers(town.week,settlement.roster);
+ town.offers=stageCoachOffers(town.week,settlement.roster,settlement.stageCoach?.network??0);
  town.treatments=[];
  expedition.townWeekProcessed=true;
  return true;
