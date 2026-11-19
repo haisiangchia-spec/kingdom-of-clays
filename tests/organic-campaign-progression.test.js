@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createCampaignSettlement,expeditionBonuses,encodeCampaignSave,decodeCampaignSave,upgradeFacility,nextFacilityCost} from '../src/settlement.js';
+import {createCampaignSettlement,expeditionBonuses,encodeCampaignSave,decodeCampaignSave,upgradeFacility,nextFacilityCost,upgradeStageCoach,STAGE_COACH_UPGRADE_COSTS} from '../src/settlement.js';
 import {selectQuest} from '../src/quest-board.js';
 import {completeCampaignExpedition,campaignProgress} from '../src/campaign-progression.js';
-import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero} from '../src/hero-roster.js';
+import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero,rosterCapacity} from '../src/hero-roster.js';
 import {advanceTownWeek,recruitFromCoach} from '../src/town-week.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger} from '../src/dungeon.js';
 import {leaveLoot,collectLoot,inventoryCanAdd} from '../src/inventory.js';
@@ -66,7 +66,7 @@ function fillSquad(town){
  // Recruit from the actual Stage Coach and release deceased roster entries.
  // Prefer healthy veterans over stressed survivors, while preserving earned XP.
  while(town.roster.filter(h=>!h.unit.dead).length<4&&town.town.offers.length){
-  if(town.roster.length>=8){
+  if(town.roster.length>=rosterCapacity(town)){
    const deceased=town.roster.find(h=>h.unit.dead);
    if(!deceased)break;
    dismissHero(town,deceased.rosterId);
@@ -75,7 +75,7 @@ function fillSquad(town){
  }
  // Build a reserve from genuine weekly Stage Coach offers, not only after deaths.
  // This permits exhausted veterans to recover while fresh recruits embark.
- while(town.roster.length<8&&town.town.offers.length){
+ while(town.roster.length<rosterCapacity(town)&&town.town.offers.length){
   recruitFromCoach(town,town.town.offers[0].offerId);
  }
  const candidates=town.roster.filter(h=>!h.unit.dead&&
@@ -91,6 +91,13 @@ function fillSquad(town){
  return true;
 }
 function prepareTown(town){
+ // Expand barracks before filling reserves; all costs are paid from earned loot.
+ for(const track of ['barracks','network']){
+  const level=town.stageCoach[track];
+  if(level>=5)continue;
+  const affordable=Object.entries(STAGE_COACH_UPGRADE_COSTS[track]).every(([resource,base])=>(town[resource]??0)>=base*(level+1));
+  if(affordable)upgradeStageCoach(town,track);
+ }
  // All upgrades and services go through public gameplay actions, using earned resources.
  for(const facility of ['guild','temple','market']){
   const cost=nextFacilityCost(town,facility);
@@ -136,7 +143,7 @@ function campaign(seed){
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},reward,expeditionLoot,encounters:report.encounters,
+  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,reward,expeditionLoot,encounters:report.encounters,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
