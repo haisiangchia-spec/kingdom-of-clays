@@ -46,6 +46,14 @@ function handleLoot(d){
 function play(d,seed){
  const random=rng(seed+830000);
  const mix={lower:0,same:0};let encounters=0,campsUsed=0;
+ const encounterAudit=[];
+ const fight=(source)=>{
+  const b=dungeonBattle(d);
+  const before=d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead}));
+  const tier=b?.encounterTier??'unknown';
+  battle(d,random);
+  encounterAudit.push({source,tier,before,after:d.party.map(h=>({hp:h.hp,stress:h.stress,dead:h.dead})),phase:d.phase});
+ };
  for(const room of ['gallery','watch','gallery','vault','gallery','watch','sanctum']){
   if(d.phase!=='explore')break;
   if(d.pendingLoot)handleLoot(d);
@@ -65,7 +73,7 @@ function play(d,seed){
      useCampSkill(d,'fieldDressing',wounded.id);
     }
     finishCamp(d);
-    if(d.phase==='combat'){encounters++;battle(d,random);}
+    if(d.phase==='combat'){encounters++;fight('camp-ambush');}
    }
   }
   beginCorridor(d,room);
@@ -78,7 +86,7 @@ function play(d,seed){
      assert.ok([lower,d.tier].includes(b.encounterTier));
      mix[b.encounterTier===lower?'lower':'same']++;
     }
-    encounters++;battle(d,random);
+    encounters++;fight('travel:'+room);
    }else if(d.pendingLoot)handleLoot(d);
    else if(d.pendingHunger)resolveHunger(d,d.supplies.food>=4?'eat':'skip');
    else advanceCorridor(d);
@@ -86,7 +94,7 @@ function play(d,seed){
   assert.ok(guard<70,'travel stalled');
  }
  if(d.pendingLoot)handleLoot(d);
- return {encounters,mix,campsUsed};
+ return {encounters,mix,campsUsed,encounterAudit};
 }
 function fillSquad(town){
  // Recruit from the actual Stage Coach and release deceased roster entries.
@@ -268,7 +276,7 @@ function campaign(seed,maxWeeks=100){
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
   history.push({week:week+1,townBudget,readinessAudit,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,levelThreeHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=3).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
-   lowerTierEncounters:report.mix.lower});
+   lowerTierEncounters:report.mix.lower,encounterAudit:quest.tier==='champion'?report.encounterAudit:undefined});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
  }
@@ -305,6 +313,7 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   championLowerTierEncounters:attempts.filter(x=>x.tier==='champion').reduce((n,x)=>n+x.lowerTierEncounters,0),
   championStartingLevelDistribution:Object.fromEntries([0,1,2,3,4,5,6].map(level=>[level,attempts.filter(x=>x.tier==='champion').flatMap(x=>x.levels).filter(x=>x===level).length])),
   championPartyDeaths:attempts.filter(x=>x.tier==='champion').reduce((n,x)=>n+(x.partyDeaths??0),0),
+  championEncounterAudits:attempts.filter(x=>x.tier==='champion').map(x=>({week:x.week,phase:x.phase,entryStress:x.entryStress,entryHp:x.entryHp,encounters:x.encounterAudit})),
   apprenticeWins:attempts.filter(x=>x.tier==='apprentice'&&x.phase==='victory').length,
   veteranMeanEntryStress:attempts.filter(x=>x.tier==='veteran').reduce((n,x)=>n+x.entryStress.reduce((a,b)=>a+b,0),0)/Math.max(1,attempts.filter(x=>x.tier==='veteran').length*4),
   veteranMeanEntryHpPercent:attempts.filter(x=>x.tier==='veteran').reduce((n,x)=>n+x.entryHp.reduce((a,b)=>a+b,0),0)/Math.max(1,attempts.filter(x=>x.tier==='veteran').length*4),
