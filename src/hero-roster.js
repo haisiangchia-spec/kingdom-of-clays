@@ -138,7 +138,9 @@ export function returnPartyToRoster(settlement,expedition){
   const originalMax=hero.unit.maxHp;
   const bonusHp=Math.max(0,copyUnit.maxHp-originalMax);
   copyUnit.maxHp=originalMax;
-  copyUnit.hp=Math.min(originalMax,Math.max(0,copyUnit.hp-bonusHp));
+  // DD1-style Hamlet recovery: surviving heroes return at full HP; stress persists.
+  // Fallen heroes remain dead and cannot be healed by this transition.
+  copyUnit.hp=copyUnit.dead?0:originalMax;
   copyUnit.dot=[];copyUnit.restoration=[];copyUnit.effects=[];copyUnit.stun=0;
   copyUnit.deathDoor=false;copyUnit.acted=false;
   copyUnit.actionsTaken=0;copyUnit.actionsRemaining=copyUnit.actionsPerRound??1;
