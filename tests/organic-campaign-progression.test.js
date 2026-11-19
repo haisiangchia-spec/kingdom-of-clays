@@ -189,7 +189,7 @@ function campaign(seed){
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,reward,expeditionLoot,encounters:report.encounters,
+  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,reward,expeditionLoot,encounters:report.encounters,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -205,6 +205,10 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   champion:attempts.filter(x=>x.tier==='champion').length,
   completedChampion:attempts.filter(x=>x.tier==='champion'&&x.phase==='victory').length,
   highestEarnedLevel:Math.max(...results.flatMap(x=>x.levels)),
+  highestEverRosterLevel:Math.max(...attempts.map(x=>x.peakRosterLevel??0)),
+  maximumLivingLevelTwoHeroes:Math.max(...attempts.map(x=>x.levelTwoHeroes??0)),
+  totalExpeditionDeaths:attempts.reduce((n,x)=>n+(x.partyDeaths??0),0),
+  meanLivingRoster:attempts.reduce((n,x)=>n+(x.livingRoster??0),0)/attempts.length,
   lowerTierEncounters:attempts.reduce((n,x)=>n+(x.lowerTierEncounters??0),0),
   blockedCampaigns:results.filter(x=>x.history.some(h=>h.phase==='blocked')).length,
   blockedReasons:results.flatMap(x=>x.history.filter(h=>h.phase==='blocked').map(h=>h.reason)),
