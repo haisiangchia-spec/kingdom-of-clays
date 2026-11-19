@@ -138,23 +138,23 @@ function campaign(seed){
    break;
   }
   const veteranWon=town.campaignVictories.includes('veteran-victory');
-  const partyLevels=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).level);
-  // The quest board, not a fabricated hero-level gate, determines access.
-  // Veteran attempts with underprepared parties remain genuine outcomes.
-  // Champion requires three naturally earned level-two heroes; continue Veteran
-  // or Apprentice quests until the party actually meets that threshold.
-  const squadHeroes=town.squad.map(id=>town.roster.find(h=>h.rosterId===id));
-  const healthyCount=squadHeroes.filter(h=>h.unit.hp/h.unit.maxHp>=0.7&&h.unit.stress<=80).length;
-  // Deliberately farm lower-tier quests while recovering: a level alone is not
-  // evidence that a depleted party is ready for Veteran or Champion.
-  // Every fourth week permits a Veteran trial to prevent indefinite farming.
-  const veteranReady=partyLevels.filter(level=>level>=1).length>=3&&(healthyCount>=3||week%4===3);
-  const championReady=partyLevels.filter(level=>level>=2).length>=3&&healthyCount>=3;
+  // Match the existing fully progressed combat benchmarks: Veteran = level 3,
+  // Champion = level 5, with matching weapon and armor ranks. No free levels
+  // or upgrades are granted; only actual roster purchases and earned XP count.
+  const benchmarkReady=(level)=>town.squad.every(id=>{
+   const hero=town.roster.find(h=>h.rosterId===id);
+   return hero&&!hero.unit.dead&&hero.level>=level&&
+    (hero.equipment?.weapon??0)>=level&&(hero.equipment?.armor??0)>=level&&
+    hero.unit.hp===hero.unit.maxHp&&hero.unit.stress===0;
+  });
+  const veteranReady=benchmarkReady(3);
+  const championReady=benchmarkReady(5);
   const id=veteranWon&&championReady?'warrens-champion':
    town.completedExpeditions>=3&&veteranReady?'warrens-veteran':
    town.completedExpeditions>=1?'warrens-recon':'crypt-recon';
   const quest=selectQuest(town,id);
   const levels=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).level);
+  const equipment=town.squad.map(x=>({...town.roster.find(h=>h.rosterId===x).equipment}));
   const entryStress=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).unit.stress);
   const entryHp=town.squad.map(x=>{const u=town.roster.find(h=>h.rosterId===x).unit;return Math.round(u.hp/u.maxHp*100)});
   const d=createDungeon(seed*100+week+1,{region:quest.region,tier:quest.tier,
@@ -167,7 +167,7 @@ function campaign(seed){
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,reward,expeditionLoot,encounters:report.encounters,
+  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,reward,expeditionLoot,encounters:report.encounters,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -206,8 +206,20 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
  for(const result of results){
   const h=result.history;
   for(let i=0;i<h.length;i++){
-   if(h[i].tier==='veteran')assert.ok(h.slice(0,i).filter(x=>x.phase==='victory').length>=3);
-   if(h[i].tier==='champion')assert.ok(h.slice(0,i).some(x=>x.tier==='veteran'&&x.phase==='victory'));
+   if(h[i].tier==='veteran'){
+    assert.ok(h.slice(0,i).filter(x=>x.phase==='victory').length>=3);
+    assert.ok(h[i].levels.every(level=>level>=3));
+    assert.ok(h[i].equipment.every(e=>e.weapon>=3&&e.armor>=3));
+    assert.ok(h[i].entryStress.every(stress=>stress===0));
+    assert.ok(h[i].entryHp.every(hp=>hp===100));
+   }
+   if(h[i].tier==='champion'){
+    assert.ok(h.slice(0,i).some(x=>x.tier==='veteran'&&x.phase==='victory'));
+    assert.ok(h[i].levels.every(level=>level>=5));
+    assert.ok(h[i].equipment.every(e=>e.weapon>=5&&e.armor>=5));
+    assert.ok(h[i].entryStress.every(stress=>stress===0));
+    assert.ok(h[i].entryHp.every(hp=>hp===100));
+   }
   }
  }
 });
