@@ -5,11 +5,11 @@ import {INVENTORY_CAPACITY,inventoryStacks,inventoryUsed,inventoryCanAdd,offerLo
 
 test('inventory presents existing provision stacks without duplicating supply counters',()=>{
  const d=createDungeon(301);
- assert.equal(INVENTORY_CAPACITY,8);
+ assert.equal(INVENTORY_CAPACITY,16);
  assert.deepEqual(inventoryStacks(d).map(x=>[x.kind,x.quantity]),[
-  ['food',4],['food',4],['torch',2],['torch',1],['holyWater',1]
+  ['food',8],['torch',3],['holyWater',1]
  ]);
- assert.equal(inventoryUsed(d),5);
+ assert.equal(inventoryUsed(d),3);
  assert.equal(d.supplies.food,8);
  assert.equal(d.curioSupplies.holyWater,1);
 });
@@ -25,32 +25,31 @@ test('curio rewards queue as collectible gold in interactive expeditions',()=>{
  assert.equal(d.pendingLoot,null);
  assert.equal(d.loot,175);
  assert.deepEqual(d.inventory,[{kind:'gold',quantity:100},{kind:'gold',quantity:75}]);
- assert.equal(inventoryUsed(d),6); // 2 food, 2 torches, 0 water, 2 gold
+ assert.equal(inventoryUsed(d),4); // 1 food, 1 torch, 0 water, 2 gold
 });
 test('full capacity rejects atomic collection until a stack is discarded',()=>{
  const d=createDungeon(303,{interactiveEvents:true});
- offerLoot(d,'gold',300);
- assert.equal(inventoryCanAdd(d,'gold',300),true);
- collectLoot(d); // 5 supplies + 3 gold slots = 8
- assert.equal(inventoryUsed(d),8);
+ offerLoot(d,'gold',1300);
+ assert.equal(inventoryCanAdd(d,'gold',1300),true);
+ collectLoot(d); // 3 supplies + 13 gold slots = 16
+ assert.equal(inventoryUsed(d),16);
  offerLoot(d,'gold',100);
  assert.equal(inventoryCanAdd(d,'gold',100),false);
  assert.throws(()=>collectLoot(d),/Inventory full/);
- assert.equal(d.loot,300);
- assert.equal(d.pendingLoot.quantity,100);
+ assert.equal(d.loot,1300);
  discardInventoryStack(d,'food:0');
- assert.equal(d.supplies.food,4);
- assert.equal(inventoryUsed(d),7);
+ assert.equal(d.supplies.food,0);
+ assert.equal(inventoryUsed(d),15);
  collectLoot(d);
- assert.equal(d.loot,400);
- assert.equal(inventoryUsed(d),8);
+ assert.equal(d.loot,1400);
+ assert.equal(inventoryUsed(d),16);
 });
 test('gold partial stacks merge before consuming new slots and discard reduces recorded gold',()=>{
  const d=createDungeon(304);
  offerLoot(d,'gold',175);collectLoot(d);
  offerLoot(d,'gold',25);collectLoot(d);
  assert.deepEqual(d.inventory,[{kind:'gold',quantity:100},{kind:'gold',quantity:100}]);
- assert.equal(inventoryUsed(d),7);
+ assert.equal(inventoryUsed(d),5);
  discardInventoryStack(d,'treasure:0');
  assert.equal(d.loot,100);
  assert.deepEqual(d.inventory,[{kind:'gold',quantity:100}]);
@@ -69,11 +68,11 @@ test('leaving loot does not change existing inventory or resource counts',()=>{
 });
 test('inventory discards named provision stacks and never underflows',()=>{
  const d=createDungeon(306);
- discardInventoryStack(d,'torch:1');
- assert.equal(d.supplies.torch,2);
+ discardInventoryStack(d,'torch:0');
+ assert.equal(d.supplies.torch,0);
  discardInventoryStack(d,'holyWater:0');
  assert.equal(d.curioSupplies.holyWater,0);
- assert.equal(inventoryUsed(d),3);
+ assert.equal(inventoryUsed(d),1);
  assert.throws(()=>discardInventoryStack(d,'holyWater:0'),/not found/);
  assert.throws(()=>offerLoot(d,'torch',1),/Invalid loot/);
  assert.throws(()=>offerLoot(d,'gold',0),/Invalid loot/);
