@@ -1,5 +1,6 @@
 // Campaign quest board: Clays-original objectives and descriptions.
-// One guaranteed trinket per successful quest follows DD1; rarity follows tier/length.\n// Gold and heirloom payouts remain unconfigured until verified from DD1 tables.
+// One guaranteed trinket per successful quest follows DD1; rarity follows tier/length.
+// Gold and heirloom payouts remain unconfigured until verified from DD1 tables.
 import {expeditionUnlock} from './campaign-progression.js';
 export const QUESTS=Object.freeze([
  Object.freeze({id:'crypt-recon',region:'crypt',tier:'apprentice',name:'Ashen Crypt Reconnaissance',objective:'Secure the Forgotten Sanctum',questReward:Object.freeze({trinkets:1}),trinketRarity:'common',difficulty:'scout'}),
