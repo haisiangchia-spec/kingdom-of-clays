@@ -440,7 +440,10 @@ export function resolveDungeonBattle(dungeon){
        'room:watch':['crest',3],
        'corridor:gallery-watch':['bust',3],
        'corridor:gallery-vault':['bust',3],
-       'room:vault':['gem',2],
+       // The Vault guardian awards Deeds on every clear. Corridor fights
+       // remain optional, so critical Stage Coach progression cannot rely
+       // on a random corridor encounter spawning.
+       'room:vault':['deed',2],
        'corridor:watch-sanctum':['deed',2],
        'corridor:vault-sanctum':['deed',2]
      };
