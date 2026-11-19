@@ -263,3 +263,25 @@ test('Stage Coach network generates seven valid weekly offers after full upgrade
  assert.deepEqual(s.town.offers,stageCoachOffers(2,s.roster,5));
  assert.deepEqual(decodeCampaignSave(encodeCampaignSave(s,null)).settlement.town.offers,s.town.offers);
 });
+
+test('DD1 Resolve XP scales with quest length and tier, never on defeat',()=>{
+ const cases=[
+  ['apprentice','scout',2],['apprentice','patrol',3],['apprentice','gauntlet',4],
+  ['veteran','scout',4],['veteran','patrol',6],['veteran','gauntlet',8],
+  ['champion','scout',8],['champion','patrol',12],['champion','gauntlet',16]
+ ];
+ for(const [tier,difficulty,xp] of cases){
+  const s=createCampaignSettlement();
+  const d=createDungeon(918,{tier,difficulty,party:prepareRosterParty(s)});
+  d.phase='victory';
+  assert.equal(returnPartyToRoster(s,d),true);
+  assert.equal(s.roster[0].xp,xp,tier+' '+difficulty);
+  assert.equal(returnPartyToRoster(s,d),false,'return is idempotent');
+  assert.equal(s.roster[0].xp,xp);
+ }
+ const s=createCampaignSettlement();
+ const d=createDungeon(919,{tier:'champion',difficulty:'gauntlet',party:prepareRosterParty(s)});
+ d.phase='defeat';
+ returnPartyToRoster(s,d);
+ assert.equal(s.roster[0].xp,0);
+});
