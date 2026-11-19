@@ -13,6 +13,7 @@ export function rosterCapacity(settlement){return ROSTER_CAPACITY+4*(settlement.
 export const RECRUITMENT_COST=0; // DD1 base Stage Coach recruits are free
 export const RESURRECTION_COST=250; // user-authorized temple exception
 export const HERO_CLASSES=Object.freeze(['Swordsman','Warrior','Hunter','Priest']);
+export const TRINKET_IDS=Object.freeze(['ward-charm','ward-charm-common','ward-charm-uncommon','ward-charm-rare','ward-charm-ancestral']);
 const slots=Object.freeze(['h1','h2','h3','h4']);
 const copy=value=>structuredClone(value);
 const integer=n=>Number.isSafeInteger(n)&&n>=0;
@@ -34,7 +35,7 @@ function checkRoster(settlement){
   if(!h||typeof h!=='object'||typeof h.rosterId!=='string'||!/^r[1-9]\d*$/.test(h.rosterId)||
      seen.has(h.rosterId)||!HERO_CLASSES.includes(h.heroClass)||typeof h.name!=='string'||h.name.length>80||
      !integer(h.level)||h.level>6||!integer(h.xp)||h.xp>100000||
-     ![null,'ward-charm'].includes(h.equippedTrinket)||!h.unit||typeof h.unit!=='object'||
+     ![null,...TRINKET_IDS].includes(h.equippedTrinket)||!h.unit||typeof h.unit!=='object'||
      !Number.isFinite(h.unit.hp)||!Number.isFinite(h.unit.maxHp)||h.unit.maxHp<1||
      !Number.isFinite(h.unit.stress)||typeof h.unit.dead!=='boolean')throw Error('Invalid hero roster');
   seen.add(h.rosterId);
@@ -179,15 +180,15 @@ export function resurrectHero(settlement,rosterId){
  hero.unit.deathDoor=false;hero.unit.affliction=null;hero.unit.virtue=null;
  return hero;
 }
-export function equipTrinket(settlement,rosterId){
+export function equipTrinket(settlement,rosterId,trinketId=null){
  checkRoster(settlement);
  const hero=settlement.roster.find(h=>h.rosterId===rosterId);
  if(!hero||hero.unit.dead)throw Error('Hero cannot equip a trinket');
  if(hero.equippedTrinket)throw Error('Hero already has a trinket');
- const index=settlement.trinkets.indexOf('ward-charm');
+ if(trinketId!==null&&!TRINKET_IDS.includes(trinketId))throw Error('Unknown trinket');
+ const index=trinketId===null?settlement.trinkets.findIndex(id=>TRINKET_IDS.includes(id)):settlement.trinkets.indexOf(trinketId);
  if(index<0)throw Error('No available trinket');
- settlement.trinkets.splice(index,1);
- hero.equippedTrinket='ward-charm';
+ hero.equippedTrinket=settlement.trinkets.splice(index,1)[0];
  return hero;
 }
 export function unequipTrinket(settlement,rosterId){
