@@ -199,7 +199,9 @@ function campaign(seed,maxWeeks=100){
     (hero.equipment?.weapon??0)>=level&&(hero.equipment?.armor??0)>=level&&
     hero.unit.hp===hero.unit.maxHp&&hero.unit.stress===0;
   });
-  const readinessAudit={gold:town.gold,level3:0,equipped3:0,fullyRested3:0,fullyReady3:0};
+  const readinessAudit={gold:town.gold,level3:0,equipped3:0,fullyRested3:0,fullyReady3:0,
+   equippedButNotRested3:0,restedButNotEquipped3:0,level3MissingWeaponRanks:0,
+   level3MissingArmorRanks:0,level3TotalStress:0,level3MissingHp:0};
   for(const hero of town.roster.filter(h=>!h.unit.dead)){
    if(hero.level>=3){
     readinessAudit.level3++;
@@ -208,6 +210,12 @@ function campaign(seed,maxWeeks=100){
     if(equipped)readinessAudit.equipped3++;
     if(rested)readinessAudit.fullyRested3++;
     if(equipped&&rested)readinessAudit.fullyReady3++;
+    if(equipped&&!rested)readinessAudit.equippedButNotRested3++;
+    if(rested&&!equipped)readinessAudit.restedButNotEquipped3++;
+    readinessAudit.level3MissingWeaponRanks+=Math.max(0,3-(hero.equipment?.weapon??0));
+    readinessAudit.level3MissingArmorRanks+=Math.max(0,3-(hero.equipment?.armor??0));
+    readinessAudit.level3TotalStress+=hero.unit.stress;
+    readinessAudit.level3MissingHp+=Math.max(0,hero.unit.maxHp-hero.unit.hp);
    }
   }
   const veteranReady=benchmarkReady(3);
@@ -300,6 +308,10 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   weeksWithFourLevelThreeHeroes:attempts.filter(x=>x.readinessAudit.level3>=4).length,
   weeksWithFourFullyEquippedLevelThreeHeroes:attempts.filter(x=>x.readinessAudit.equipped3>=4).length,
   weeksWithFourVeteranReadyHeroes:attempts.filter(x=>x.readinessAudit.fullyReady3>=4).length,
+  weeksWithFourEquippedButNotFullyRestedLevelThreeHeroes:attempts.filter(x=>x.readinessAudit.equipped3>=4&&x.readinessAudit.fullyReady3<4).length,
+  peakEquippedButNotRestedLevelThreeHeroes:Math.max(...attempts.map(x=>x.readinessAudit.equippedButNotRested3)),
+  peakRestedButNotEquippedLevelThreeHeroes:Math.max(...attempts.map(x=>x.readinessAudit.restedButNotEquipped3)),
+  finalReadinessBottlenecks:results.map(x=>x.history.at(-1)?.readinessAudit??null),
   discardedDeeds:attempts.reduce((n,x)=>n+x.discardedLoot.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   collectedDeeds:attempts.reduce((n,x)=>n+x.expeditionLoot.inventory.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   maximumBarracksRank:Math.max(...attempts.map(x=>x.stageCoach?.barracks??0)),
