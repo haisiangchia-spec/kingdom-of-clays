@@ -3,13 +3,20 @@ import assert from 'node:assert/strict';
 import {createCampaignSettlement,expeditionBonuses,encodeCampaignSave,decodeCampaignSave,upgradeFacility,nextFacilityCost,upgradeStageCoach,STAGE_COACH_UPGRADE_COSTS} from '../src/settlement.js';
 import {selectQuest} from '../src/quest-board.js';
 import {completeCampaignExpedition,campaignProgress} from '../src/campaign-progression.js';
-import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero,rosterCapacity,upgradeHeroEquipment} from '../src/hero-roster.js';
+import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero,rosterCapacity,upgradeHeroEquipment,upgradeHeroSkill} from '../src/hero-roster.js';
 import {advanceTownWeek,recruitFromCoach,bookStressTreatment,TREATMENTS} from '../src/town-week.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger} from '../src/dungeon.js';
 import {leaveLoot,collectLoot,inventoryCanAdd} from '../src/inventory.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {chooseHeroAction} from './full-expedition-endurance.test.js';
+
+const BENCHMARK_SKILLS={
+ Swordsman:['heavy_slash','countering_advance','battle_shout','guardian_parry','riposte_stance','swordmasters_orders','steadfast_resolve'],
+ Warrior:['crushing_strike','sweeping_assault','concussive_blow','iron_fortress','warrior_recovery','charging_blade','rallying_roar'],
+ Hunter:['eagle_eye_shot','hunters_mark'],
+ Priest:['greater_heal','group_healing','sacred_strike']
+};
 
 // Actual campaign lifecycle: quest-board unlocks, real combat, rewards, XP,
 // persistent roster, weekly town recovery and stage-coach replacement.
@@ -110,6 +117,21 @@ function prepareTown(town){
    const rank=hero.equipment?.[kind]??0;
    if(rank<hero.level&&rank<5&&town.gold>=100*(rank+1)+TREATMENTS.abbey.gold)
     upgradeHeroEquipment(town,hero.rosterId,kind);
+  }
+ }
+ // Match the verified skill-upgrade policy of the historical progressed
+ // expedition fixture, purchasing only supported levels with earned gold.
+ for(const hero of town.roster.filter(h=>!h.unit.dead&&h.level>=2)){
+  for(const skillId of BENCHMARK_SKILLS[hero.heroClass]??[]){
+   while((hero.unit.skillLevels?.[skillId]??1)<Math.min(hero.level,5)){
+    try{
+     if(town.gold<1500)break;
+     upgradeHeroSkill(town,hero.rosterId,skillId);
+    }catch(error){
+     if(/Unverified skill upgrade|No verified|not verified|Unknown skill|not available|Insufficient gold/.test(error.message))break;
+     throw error;
+    }
+   }
   }
  }
  // Reserve two genuine town treatment slots for stressed survivors.
