@@ -214,6 +214,7 @@ function campaign(seed,maxWeeks=100){
    difficulty:quest.difficulty,party:prepareRosterParty(town,expeditionBonuses(town)),
    proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
   d.questId=quest.id;
+  d.questReward=structuredClone(quest.questReward);
   // The dungeon already supplies eight food and three torches at entry.
   // Avoid buying redundant provisions on every Apprentice expedition; reserve
   // gold for persistent Stage Coach, weapon and armor progression. Purchase
