@@ -5,7 +5,7 @@ import {selectQuest} from '../src/quest-board.js';
 import {completeCampaignExpedition,campaignProgress} from '../src/campaign-progression.js';
 import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero,rosterCapacity,upgradeHeroEquipment,upgradeHeroSkill} from '../src/hero-roster.js';
 import {advanceTownWeek,recruitFromCoach,bookStressTreatment,TREATMENTS} from '../src/town-week.js';
-import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger} from '../src/dungeon.js';
+import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger,purchaseProvision,campMeal,useCampSkill,finishCamp,CAMP_SKILLS} from '../src/dungeon.js';
 import {leaveLoot,collectLoot,inventoryCanAdd} from '../src/inventory.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
@@ -45,10 +45,29 @@ function handleLoot(d){
 }
 function play(d,seed){
  const random=rng(seed+830000);
- const mix={lower:0,same:0};let encounters=0;
+ const mix={lower:0,same:0};let encounters=0,campsUsed=0;
  for(const room of ['gallery','watch','gallery','vault','gallery','watch','sanctum']){
   if(d.phase!=='explore')break;
   if(d.pendingLoot)handleLoot(d);
+  // Use actual dungeon camping, not free between-encounter healing.
+  if(d.phase==='explore'&&!d.pendingTravel&&!d.pendingHunger&&!d.camp&&
+    d.firewood>0&&d.room!=='entrance'&&d.cleared.includes(d.room)){
+   const living=d.party.filter(h=>!h.dead);
+   const missing=living.reduce((n,h)=>n+h.maxHp-h.hp,0);
+   const food=d.supplies.food??0;
+   const meal=food>=8&&missing>=20?8:food>=4&&missing>=12?4:null;
+   if(meal!==null){
+    campMeal(d,meal);campsUsed++;
+    if(d.camp.respite>=CAMP_SKILLS.sanctuary.cost)useCampSkill(d,'sanctuary');
+    while(d.camp.respite>=CAMP_SKILLS.fieldDressing.cost){
+     const wounded=living.filter(h=>h.hp<h.maxHp).sort((a,b)=>(b.maxHp-b.hp)-(a.maxHp-a.hp))[0];
+     if(!wounded)break;
+     useCampSkill(d,'fieldDressing',wounded.id);
+    }
+    finishCamp(d);
+    if(d.phase==='combat'){encounters++;battle(d,random);}
+   }
+  }
   beginCorridor(d,room);
   let guard=0;
   while((d.pendingTravel||d.phase==='combat')&&!['victory','defeat'].includes(d.phase)&&guard++<70){
@@ -67,7 +86,7 @@ function play(d,seed){
   assert.ok(guard<70,'travel stalled');
  }
  if(d.pendingLoot)handleLoot(d);
- return {encounters,mix};
+ return {encounters,mix,campsUsed};
 }
 function fillSquad(town){
  // Recruit from the actual Stage Coach and release deceased roster entries.
@@ -187,13 +206,18 @@ function campaign(seed,maxWeeks=100){
    difficulty:quest.difficulty,party:prepareRosterParty(town,expeditionBonuses(town)),
    proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
   d.questId=quest.id;
+  // Provisions consume earned settlement gold, matching real expedition entry.
+  for(const [kind,qty] of [['food',8],['torch',4],['antivenom',2],['bandage',1]]){
+   try{purchaseProvision(d,town,kind,qty);}
+   catch(error){if(!/Inventory full|Insufficient gold/.test(error.message))throw error;}
+  }
   const report=play(d,seed*100+week+1);
   const expeditionLoot={inventory:d.inventory.map(x=>({kind:x.kind,quantity:x.quantity})),pendingLoot:!!d.pendingLoot,loot:d.loot};
   let reward=null;
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,reward,expeditionLoot,encounters:report.encounters,
+  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,reward,expeditionLoot,encounters:report.encounters,campsUsed:report.campsUsed,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -217,6 +241,7 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   highestEverRosterLevel:Math.max(...attempts.map(x=>x.peakRosterLevel??0)),
   maximumLivingLevelTwoHeroes:Math.max(...attempts.map(x=>x.levelTwoHeroes??0)),
   totalExpeditionDeaths:attempts.reduce((n,x)=>n+(x.partyDeaths??0),0),
+  totalCampsUsed:attempts.reduce((n,x)=>n+(x.campsUsed??0),0),
   meanApprenticeEntryStress:attempts.filter(x=>x.tier==='apprentice').reduce((n,x)=>n+x.entryStress.reduce((a,b)=>a+b,0),0)/Math.max(1,attempts.filter(x=>x.tier==='apprentice').length*4),
   meanLivingRoster:attempts.reduce((n,x)=>n+(x.livingRoster??0),0)/attempts.length,
   lowerTierEncounters:attempts.reduce((n,x)=>n+(x.lowerTierEncounters??0),0),
