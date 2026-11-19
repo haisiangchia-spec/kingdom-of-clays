@@ -111,7 +111,7 @@ export function completeCampaignExpedition(settlement,expedition){
  const report=claimExpeditionRewards(expedition,settlement);
  if(questReward){
   for(const key of ['gold','crests','deeds','busts'])if(questReward[key])settlement[key]+=questReward[key];
-  for(let i=0;i<(questReward.trinkets??0);i++)settlement.trinkets.push('ward-charm');
+  const rarity=expedition.questId?({\n   'crypt-recon':'common','crypt-purge':'uncommon',\n   'warrens-recon':'common','warrens-containment':'uncommon',\n   'warrens-veteran':'rare','warrens-champion':'ancestral'\n  })[expedition.questId]:null;\n  for(let i=0;i<(questReward.trinkets??0);i++)settlement.trinkets.push(rarity?'ward-charm-'+rarity:'ward-charm');
   expedition.questRewardClaimed=true;
  }
  settlement.completedExpeditions++;
