@@ -88,9 +88,13 @@ function fillSquad(town){
  const candidates=town.roster.filter(h=>!h.unit.dead&&
   !town.town.treatments.some(t=>t.rosterId===h.rosterId));
  if(candidates.length<4)return false;
- candidates.sort((a,b)=>
-  (b.level*40-b.unit.stress*.5+b.unit.hp/b.unit.maxHp*20)-
-  (a.level*40-a.unit.stress*.5+a.unit.hp/a.unit.maxHp*20));
+ // Avoid repeatedly sending afflicted high-level heroes into combat.
+ // Once stress is manageable, favour earned level and purchased equipment.
+ const readiness=h=>(h.unit.stress>=100?-1000:0)-
+  h.unit.stress*2+h.level*25+
+  ((h.equipment?.weapon??0)+(h.equipment?.armor??0))*8+
+  h.unit.hp/h.unit.maxHp*20;
+ candidates.sort((a,b)=>readiness(b)-readiness(a));
  const selected=candidates.slice(0,4);
  // Release previous positions before reselecting to avoid duplicate rank errors.
  town.squad=[null,null,null,null];
@@ -208,6 +212,7 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   highestEverRosterLevel:Math.max(...attempts.map(x=>x.peakRosterLevel??0)),
   maximumLivingLevelTwoHeroes:Math.max(...attempts.map(x=>x.levelTwoHeroes??0)),
   totalExpeditionDeaths:attempts.reduce((n,x)=>n+(x.partyDeaths??0),0),
+  meanApprenticeEntryStress:attempts.filter(x=>x.tier==='apprentice').reduce((n,x)=>n+x.entryStress.reduce((a,b)=>a+b,0),0)/Math.max(1,attempts.filter(x=>x.tier==='apprentice').length*4),
   meanLivingRoster:attempts.reduce((n,x)=>n+(x.livingRoster??0),0)/attempts.length,
   lowerTierEncounters:attempts.reduce((n,x)=>n+(x.lowerTierEncounters??0),0),
   blockedCampaigns:results.filter(x=>x.history.some(h=>h.phase==='blocked')).length,
