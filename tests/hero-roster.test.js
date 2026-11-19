@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,normalizeCampaignSettlement,encodeCampaignSave,decodeCampaignSave,expeditionBonuses,upgradeFacility,upgradeStageCoach} from '../src/settlement.js';
 import {createDungeon} from '../src/dungeon.js';
+import {stageCoachOffers,advanceTownWeek} from '../src/town-week.js';
 import {claimExpeditionRewards} from '../src/inventory.js';
 import {HERO_CLASSES,ROSTER_CAPACITY,rosterCapacity,RECRUITMENT_COST,RESURRECTION_COST,createHeroRoster,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,upgradeHeroSkill,validateHeroRoster} from '../src/hero-roster.js';
 
@@ -250,4 +251,15 @@ test('Stage Coach barracks expand roster capacity and network increases weekly a
  const restored=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
  assert.deepEqual(restored.stageCoach,{barracks:5,network:5});
  assert.equal(rosterCapacity(restored),28);
+});
+
+test('Stage Coach network generates seven valid weekly offers after full upgrades',()=>{
+ const s=createCampaignSettlement();s.gold=100000;s.crests=1000;s.deeds=1000;
+ for(let i=0;i<5;i++)upgradeStageCoach(s,'network');
+ const expedition={phase:'victory',rosterReturned:true,party:[],traitsProcessed:true};
+ advanceTownWeek(s,expedition);
+ assert.equal(s.town.offers.length,7);
+ assert.equal(s.town.offers[6].offerId,'w2-o7');
+ assert.deepEqual(s.town.offers,stageCoachOffers(2,s.roster,5));
+ assert.deepEqual(decodeCampaignSave(encodeCampaignSave(s,null)).settlement.town.offers,s.town.offers);
 });
