@@ -1,16 +1,16 @@
 // Kingdom of Clays settlement campaign scaffold.
-// Prices and unlock effects are authored prototypes, NOT DD1 building values.
+// Upgrade quantities and unlock effects remain prototypes; DD1 town building upgrades spend heirlooms, not gold.
 import {createSettlement} from './inventory.js';
 import {setupHeroRoster,validateHeroRoster} from './hero-roster.js';
 import {initTown,validateTown} from './town-week.js';
 import {initSanitarium,validateSanitarium} from './sanitarium.js';
 
 export const SETTLEMENT_FACILITIES=Object.freeze({
- market:Object.freeze({name:'Market',maxLevel:3,baseCost:Object.freeze({gold:100,crests:1,deeds:0}),description:'+2 starting food per level'}),
- guild:Object.freeze({name:'Guild',maxLevel:3,baseCost:Object.freeze({gold:125,crests:0,deeds:1}),description:'+2 starting HP per hero per level'}),
- temple:Object.freeze({name:'Temple',maxLevel:3,baseCost:Object.freeze({gold:150,crests:1,deeds:1}),description:'-2 hunger stress per level'})
+ market:Object.freeze({name:'Market',maxLevel:3,baseCost:Object.freeze({gold:0,crests:1,deeds:0}),description:'+2 starting food per level'}),
+ guild:Object.freeze({name:'Guild',maxLevel:3,baseCost:Object.freeze({gold:0,crests:0,deeds:1}),description:'+2 starting HP per hero per level'}),
+ temple:Object.freeze({name:'Temple',maxLevel:3,baseCost:Object.freeze({gold:0,crests:1,deeds:1}),description:'-2 hunger stress per level'})
 });
-export const STAGE_COACH_UPGRADE_COSTS=Object.freeze({barracks:Object.freeze({gold:250,crests:2,deeds:2}),network:Object.freeze({gold:200,crests:2,deeds:1})});
+export const STAGE_COACH_UPGRADE_COSTS=Object.freeze({barracks:Object.freeze({gold:0,crests:2,deeds:2}),network:Object.freeze({gold:0,crests:2,deeds:1})});
 export function upgradeStageCoach(settlement,track){
  if(!Object.hasOwn(STAGE_COACH_UPGRADE_COSTS,track))throw Error('Unknown Stage Coach upgrade');
  const level=settlement.stageCoach?.[track]??0;
