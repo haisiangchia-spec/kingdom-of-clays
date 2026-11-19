@@ -140,7 +140,7 @@ function prepareTown(town){
  for(const hero of town.roster.filter(h=>!h.unit.dead&&h.level>=1)){
   for(const kind of ['weapon','armor']){
    const rank=hero.equipment?.[kind]??0;
-   if(rank<hero.level&&rank<5&&town.gold>=100*(rank+1)+1000)
+   if(rank<hero.level&&rank<5&&town.gold>=100*(rank+1)+250)
     upgradeHeroEquipment(town,hero.rosterId,kind);
   }
  }
@@ -150,7 +150,7 @@ function prepareTown(town){
   for(const skillId of BENCHMARK_SKILLS[hero.heroClass]??[]){
    while((hero.unit.skillLevels?.[skillId]??1)<Math.min(hero.level,5)){
     try{
-     if(town.gold<2000)break;
+     if(town.gold<1000)break;
      upgradeHeroSkill(town,hero.rosterId,skillId);
     }catch(error){
      if(/Unverified skill upgrade|No verified|not verified|Unknown skill|not available|Insufficient gold/.test(error.message))break;
@@ -228,7 +228,7 @@ function campaign(seed,maxWeeks=100){
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
+  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,levelThreeHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=3).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -275,6 +275,8 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   earnedDeeds:attempts.reduce((n,x)=>n+(x.reward?.deeds??0),0),
   finalDeeds:results.map(x=>x.history.at(-1)?.deeds??null),
   finalGold:results.map(x=>x.history.at(-1)?.gold??null),
+  maximumEquippedLevelTwoHeroes:Math.max(...attempts.map(x=>x.levels.filter((level,i)=>level>=2&&x.equipment[i].weapon>=2&&x.equipment[i].armor>=2).length)),
+  maximumLivingLevelThreeHeroes:Math.max(...results.flatMap(x=>x.history.map(h=>h.levelThreeHeroes??0))),
   discardedDeeds:attempts.reduce((n,x)=>n+x.discardedLoot.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   collectedDeeds:attempts.reduce((n,x)=>n+x.expeditionLoot.inventory.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   maximumBarracksRank:Math.max(...attempts.map(x=>x.stageCoach?.barracks??0)),
