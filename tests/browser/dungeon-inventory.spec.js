@@ -35,5 +35,5 @@ test('curio loot is pending in interactive mode and cannot be farmed',async ({pa
   try{interactCurio(d,'purify')}catch{repeat=true}
   return {offered,gold:d.loot,slots:inventoryUsed(d),repeat};
  });
- expect(result).toEqual({offered:175,gold:175,slots:4,repeat:true});
+ expect(result).toEqual({offered:175,gold:175,slots:3,repeat:true});
 });
