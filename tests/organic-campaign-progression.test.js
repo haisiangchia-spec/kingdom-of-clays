@@ -141,8 +141,10 @@ function campaign(seed){
   const partyLevels=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).level);
   // The quest board, not a fabricated hero-level gate, determines access.
   // Veteran attempts with underprepared parties remain genuine outcomes.
+  // Champion requires three naturally earned level-two heroes; continue Veteran
+  // or Apprentice quests until the party actually meets that threshold.
   const veteranReady=partyLevels.filter(level=>level>=1).length>=3;
-  const championReady=partyLevels.filter(level=>level>=1).length>=3;
+  const championReady=partyLevels.filter(level=>level>=2).length>=3;
   const id=veteranWon&&championReady?'warrens-champion':
    town.completedExpeditions>=3&&veteranReady?'warrens-veteran':
    town.completedExpeditions>=1?'warrens-recon':'crypt-recon';
