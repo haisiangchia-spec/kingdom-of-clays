@@ -97,6 +97,17 @@ export function completeCampaignExpedition(settlement,expedition){
    }
   }
  }
+ // Preflight the combined carried spoils and quest payout before either is claimed.
+ const carried=expeditionRewardSummary(expedition);
+ for(const [key,amount] of Object.entries({
+  gold:carried.totalGold+(questReward?.gold??0),
+  crests:carried.crests+(questReward?.crests??0),
+  deeds:carried.deeds+(questReward?.deeds??0),
+  ...(Object.hasOwn(settlement,'busts')?{busts:(carried.busts??0)+(questReward?.busts??0)}:{})
+ })){
+  if(!Number.isSafeInteger(amount)||!Number.isSafeInteger(settlement[key]+amount))throw Error('Combined expedition reward exceeds settlement capacity');
+ }
+ if(settlement.trinkets.length+carried.trinkets+(questReward?.trinkets??0)>1000)throw Error('Combined expedition trinket reward exceeds settlement capacity');
  const report=claimExpeditionRewards(expedition,settlement);
  if(questReward){
   for(const key of ['gold','crests','deeds','busts'])if(questReward[key])settlement[key]+=questReward[key];
