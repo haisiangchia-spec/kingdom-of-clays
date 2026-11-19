@@ -195,6 +195,7 @@ test('five claimed expeditions complete the campaign with real reward transfers,
   const {progress}=completeCampaignExpedition(settlement,expedition);
   assert.equal(settlement.gold,previousGold+100);
   assert.equal(settlement.trinkets.length,index+1);
+  assert.equal(settlement.trinkets.at(-1),['ward-charm-common','ward-charm-common','ward-charm-uncommon','ward-charm-rare','ward-charm-ancestral'][index]);
   assert.equal(expedition.questRewardClaimed,true);
   assert.equal(settlement.completedExpeditions,index+1);
   assert.equal(progress.finished,index===stages.length-1);
