@@ -73,6 +73,11 @@ function fillSquad(town){
   }
   recruitFromCoach(town,town.town.offers[0].offerId);
  }
+ // Build a reserve from genuine weekly Stage Coach offers, not only after deaths.
+ // This permits exhausted veterans to recover while fresh recruits embark.
+ while(town.roster.length<8&&town.town.offers.length){
+  recruitFromCoach(town,town.town.offers[0].offerId);
+ }
  const candidates=town.roster.filter(h=>!h.unit.dead&&
   !town.town.treatments.some(t=>t.rosterId===h.rosterId));
  if(candidates.length<4)return false;
