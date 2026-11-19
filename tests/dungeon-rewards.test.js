@@ -12,28 +12,28 @@ test('mixed reward kinds have independently bounded stacks and carried gold trac
   {kind:'gem',quantity:3},
   {kind:'crest',quantity:5},{kind:'deed',quantity:2}
  ]);
- assert.equal(inventoryUsed(d),8,'five starting supply slots and three distinct reward stacks');
+ assert.equal(inventoryUsed(d),6,'three starting supply slots and three distinct reward stacks');
 });
 test('mixed rewards enforce total capacity atomically and merge same-kind stacks',()=>{
  const d=createDungeon(402,{interactiveEvents:true});
  offerLoot(d,'gem',3);collectLoot(d);
  offerLoot(d,'gem',1);collectLoot(d);
  assert.deepEqual(d.inventory,[{kind:'gem',quantity:3},{kind:'gem',quantity:1}]);
- assert.equal(inventoryUsed(d),7);
- offerLoot(d,'deed',8);
- assert.equal(inventoryCanAdd(d,'deed',8),false);
+ assert.equal(inventoryUsed(d),5);
+ offerLoot(d,'deed',72); // twelve Deed stacks exceed remaining slots
+ assert.equal(inventoryCanAdd(d,'deed',72),false);
  assert.throws(()=>collectLoot(d),/Inventory full/);
  assert.equal(d.inventory.length,2);
  discardInventoryStack(d,'food:0');
- assert.equal(inventoryUsed(d),6);
+ assert.equal(inventoryUsed(d),4);
  collectLoot(d);
- assert.equal(inventoryUsed(d),8);
+ assert.equal(inventoryUsed(d),16);
 });
 test('mixed loot cannot be disguised as consumable provisions',()=>{
  const d=createDungeon(403);
  assert.equal(ITEM_RULES.gem.stack,3);
- assert.equal(ITEM_RULES.crest.stack,6);
- assert.equal(ITEM_RULES.deed.stack,4);
+ assert.equal(ITEM_RULES.crest.stack,12);
+ assert.equal(ITEM_RULES.deed.stack,6);
  assert.equal(ITEM_RULES.trinket.stack,1);
  assert.throws(()=>offerLoot(d,'food',1),/Invalid loot/);
  assert.throws(()=>inventoryCanAdd(d,'torch',1),/Only rewards/);
@@ -52,7 +52,7 @@ test('purified Vault curio offers a trinket while noninteractive legacy curio st
  legacy.room='vault';interactCurio(legacy,'purify');
  assert.equal(legacy.loot,175);
 });
-test('room victories grant gold and reliable Vault Deeds',()=>{
+test('room victories grant Crests and reliable Vault Deeds',()=>{
  for(const [room,expected] of [['watch',{kind:'crest',quantity:3}],['vault',{kind:'deed',quantity:2}]]){
   const d=createDungeon(405,{interactiveEvents:true});
   d.room=room;
