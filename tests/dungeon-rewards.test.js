@@ -52,8 +52,8 @@ test('purified Vault curio offers a trinket while noninteractive legacy curio st
  legacy.room='vault';interactCurio(legacy,'purify');
  assert.equal(legacy.loot,175);
 });
-test('room victory creates a crest reward while other rooms offer gems',()=>{
- for(const [room,expected] of [['watch',{kind:'crest',quantity:3}],['vault',{kind:'gem',quantity:2}]]){
+test('room victories grant crests and reliable Vault Deeds',()=>{
+ for(const [room,expected] of [['watch',{kind:'crest',quantity:3}],['vault',{kind:'deed',quantity:2}]]){
   const d=createDungeon(405,{interactiveEvents:true});
   d.room=room;
   beginCorridor(d,room==='watch'?'sanctum':'gallery');
