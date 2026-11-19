@@ -41,7 +41,7 @@ function handleLoot(d){
  if(!d.pendingLoot)return;
  const {kind,quantity}=d.pendingLoot;
  if(inventoryCanAdd(d,kind,quantity))collectLoot(d);
- else leaveLoot(d);
+ else {d._discardedLoot??=[];d._discardedLoot.push({kind,quantity});leaveLoot(d);}
 }
 function play(d,seed){
  const random=rng(seed+830000);
@@ -213,7 +213,7 @@ function campaign(seed,maxWeeks=100){
    proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
   d.questId=quest.id;
   // Provisions consume earned settlement gold, matching real expedition entry.
-  for(const [kind,qty] of [['food',8],['torch',4],['antivenom',2],['bandage',1]]){
+  for(const [kind,qty] of [['food',4],['torch',2],['antivenom',1]]){
    try{purchaseProvision(d,town,kind,qty);}
    catch(error){if(!/Inventory full|Insufficient gold/.test(error.message))throw error;}
   }
@@ -223,7 +223,7 @@ function campaign(seed,maxWeeks=100){
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,reward,expeditionLoot,encounters:report.encounters,campsUsed:report.campsUsed,
+  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -269,6 +269,8 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   earnedCrests:attempts.reduce((n,x)=>n+(x.reward?.crests??0),0),
   earnedDeeds:attempts.reduce((n,x)=>n+(x.reward?.deeds??0),0),
   finalDeeds:results.map(x=>x.history.at(-1)?.deeds??null),
+  discardedDeeds:attempts.reduce((n,x)=>n+x.discardedLoot.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
+  collectedDeeds:attempts.reduce((n,x)=>n+x.expeditionLoot.inventory.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   maximumBarracksRank:Math.max(...attempts.map(x=>x.stageCoach?.barracks??0)),
   lootBearingExpeditions:attempts.filter(x=>x.expeditionLoot?.inventory?.length>0).length};
  console.log('Organic campaign progression '+JSON.stringify(summary));
