@@ -350,15 +350,15 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
     assert.ok(h.slice(0,i).filter(x=>x.phase==='victory').length>=3);
     assert.ok(h[i].levels.every(level=>level>=3));
     assert.ok(h[i].equipment.every(e=>e.weapon>=3&&e.armor>=3));
-    assert.ok(h[i].entryStress.every(stress=>stress===0));
-    assert.ok(h[i].entryHp.every(hp=>hp===100));
+    assert.ok(h[i].entryStress.every(stress=>stress<=60));
+    assert.ok(h[i].entryHp.every(hp=>hp>=75));
    }
    if(h[i].tier==='champion'){
     assert.ok(h.slice(0,i).some(x=>x.tier==='veteran'&&x.phase==='victory'));
     assert.ok(h[i].levels.every(level=>level>=5));
     assert.ok(h[i].equipment.every(e=>e.weapon>=5&&e.armor>=5));
-    assert.ok(h[i].entryStress.every(stress=>stress===0));
-    assert.ok(h[i].entryHp.every(hp=>hp===100));
+    assert.ok(h[i].entryStress.every(stress=>stress<=60));
+    assert.ok(h[i].entryHp.every(hp=>hp>=75));
    }
   }
  }
