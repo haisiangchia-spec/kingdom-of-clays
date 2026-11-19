@@ -1,5 +1,5 @@
 // Kingdom of Clays provisional expedition inventory.
-// Capacity and stack sizes are not yet sourced from DD1 game data.
+// Sixteen inventory slots and 1,750 gold per stack match vanilla DD1.\n// Other item stack sizes remain provisional pending game-data verification.
 // Supplies remain in the legacy fields; this module presents a unified view
 // while valuables use explicit stacks. No duplicated supply counters.
 export const INVENTORY_CAPACITY=16;
@@ -11,7 +11,7 @@ export const ITEM_RULES=Object.freeze({
  bandage:Object.freeze({name:'Bandage',stack:6}),
  medicinalHerbs:Object.freeze({name:'Medicinal Herbs',stack:6}),
  laudanum:Object.freeze({name:'Laudanum',stack:6}),
- gold:Object.freeze({name:'Gold',stack:100,value:1}),
+ gold:Object.freeze({name:'Gold',stack:1750,value:1}),
  gem:Object.freeze({name:'Moonstone',stack:3,value:125}),
  crest:Object.freeze({name:'Crest',stack:12}),
  deed:Object.freeze({name:'Deed',stack:6}),
