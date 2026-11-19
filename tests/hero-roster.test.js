@@ -272,7 +272,7 @@ test('DD1 Resolve XP scales with quest length and tier, never on defeat',()=>{
  ];
  for(const [tier,difficulty,xp] of cases){
   const s=createCampaignSettlement();
-  const d=createDungeon(918,{tier,difficulty,party:prepareRosterParty(s)});
+  const d=createDungeon(918,{tier,region:tier==='apprentice'?'crypt':'plague',difficulty,party:prepareRosterParty(s)});
   d.phase='victory';
   assert.equal(returnPartyToRoster(s,d),true);
   assert.equal(s.roster[0].xp,xp,tier+' '+difficulty);
@@ -280,7 +280,7 @@ test('DD1 Resolve XP scales with quest length and tier, never on defeat',()=>{
   assert.equal(s.roster[0].xp,xp);
  }
  const s=createCampaignSettlement();
- const d=createDungeon(919,{tier:'champion',difficulty:'gauntlet',party:prepareRosterParty(s)});
+ const d=createDungeon(919,{tier:'champion',region:'plague',difficulty:'gauntlet',party:prepareRosterParty(s)});
  d.phase='defeat';
  returnPartyToRoster(s,d);
  assert.equal(s.roster[0].xp,0);
