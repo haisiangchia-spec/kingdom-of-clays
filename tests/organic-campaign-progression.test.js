@@ -194,9 +194,12 @@ function campaign(seed,maxWeeks=100){
   });
   const veteranReady=benchmarkReady(3);
   const championReady=benchmarkReady(5);
+  // Build a durable core on Apprentice Ashen Crypt quests before risking
+  // the Blighted Warrens. Patrol quests supply real firewood for camping.
+  // No experience, equipment, or victories are granted by this policy.
   const id=veteranWon&&championReady?'warrens-champion':
    town.completedExpeditions>=3&&veteranReady?'warrens-veteran':
-   town.completedExpeditions>=1?'warrens-recon':'crypt-recon';
+   town.completedExpeditions>=1?'crypt-purge':'crypt-recon';
   const quest=selectQuest(town,id);
   const levels=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).level);
   const equipment=town.squad.map(x=>({...town.roster.find(h=>h.rosterId===x).equipment}));
@@ -234,6 +237,8 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   firstChampionAttemptWeek:results.map(x=>x.history.find(h=>h.tier==='champion')?.week??null),
   campaignCompletionWeek:results.map(x=>x.history.find(h=>h.tier==='champion'&&h.phase==='victory')?.week??null),
   apprentice:attempts.filter(x=>x.tier==='apprentice').length,
+  cryptApprentice:attempts.filter(x=>x.tier==='apprentice'&&x.quest.startsWith('crypt-')).length,
+  warrensApprentice:attempts.filter(x=>x.tier==='apprentice'&&x.quest.startsWith('warrens-')).length,
   veteran:attempts.filter(x=>x.tier==='veteran').length,
   champion:attempts.filter(x=>x.tier==='champion').length,
   completedChampion:attempts.filter(x=>x.tier==='champion'&&x.phase==='victory').length,
