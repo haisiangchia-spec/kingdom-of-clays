@@ -439,7 +439,9 @@ export function resolveDungeonBattle(dungeon){
      const drops={
        'room:watch':['crest',3],
        'corridor:gallery-watch':['bust',3],
-       'corridor:gallery-vault':['bust',3],
+       // Vault approaches yield saleable gems, while the guardian awards
+       // Deeds. Preserve both gold income and persistent upgrade heirlooms.
+       'corridor:gallery-vault':['gem',2],
        // The Vault guardian awards Deeds on every clear. Corridor fights
        // remain optional, so critical Stage Coach progression cannot rely
        // on a random corridor encounter spawning.
