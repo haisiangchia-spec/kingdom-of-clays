@@ -200,6 +200,17 @@ function campaign(seed,maxWeeks=100){
     (hero.equipment?.weapon??0)>=level&&(hero.equipment?.armor??0)>=level&&
     hero.unit.hp===hero.unit.maxHp&&hero.unit.stress===0;
   });
+  const readinessAudit={gold:town.gold,level3:0,equipped3:0,fullyRested3:0,fullyReady3:0};
+  for(const hero of town.roster.filter(h=>!h.unit.dead)){
+   if(hero.level>=3){
+    readinessAudit.level3++;
+    const equipped=(hero.equipment?.weapon??0)>=3&&(hero.equipment?.armor??0)>=3;
+    const rested=hero.unit.stress===0&&hero.unit.hp===hero.unit.maxHp;
+    if(equipped)readinessAudit.equipped3++;
+    if(rested)readinessAudit.fullyRested3++;
+    if(equipped&&rested)readinessAudit.fullyReady3++;
+   }
+  }
   const veteranReady=benchmarkReady(3);
   const championReady=benchmarkReady(5);
   // Build a durable core on Apprentice Ashen Crypt quests before risking
@@ -235,7 +246,7 @@ function campaign(seed,maxWeeks=100){
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,levelThreeHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=3).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
+  history.push({week:week+1,readinessAudit,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,levelThreeHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=3).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -284,6 +295,12 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   finalGold:results.map(x=>x.history.at(-1)?.gold??null),
   maximumEquippedLevelTwoHeroes:Math.max(...attempts.map(x=>x.levels.filter((level,i)=>level>=2&&x.equipment[i].weapon>=2&&x.equipment[i].armor>=2).length)),
   maximumLivingLevelThreeHeroes:Math.max(...results.flatMap(x=>x.history.map(h=>h.levelThreeHeroes??0))),
+  maximumFullyEquippedLevelThreeHeroes:Math.max(...attempts.map(x=>x.readinessAudit.equipped3)),
+  maximumFullyRestedLevelThreeHeroes:Math.max(...attempts.map(x=>x.readinessAudit.fullyRested3)),
+  maximumVeteranReadyHeroes:Math.max(...attempts.map(x=>x.readinessAudit.fullyReady3)),
+  weeksWithFourLevelThreeHeroes:attempts.filter(x=>x.readinessAudit.level3>=4).length,
+  weeksWithFourFullyEquippedLevelThreeHeroes:attempts.filter(x=>x.readinessAudit.equipped3>=4).length,
+  weeksWithFourVeteranReadyHeroes:attempts.filter(x=>x.readinessAudit.fullyReady3>=4).length,
   discardedDeeds:attempts.reduce((n,x)=>n+x.discardedLoot.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   collectedDeeds:attempts.reduce((n,x)=>n+x.expeditionLoot.inventory.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   maximumBarracksRank:Math.max(...attempts.map(x=>x.stageCoach?.barracks??0)),
