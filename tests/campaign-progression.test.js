@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
 import {campaignProgress,recordCampaignVictory,expeditionUnlock,campaignMilestoneProgress,canStartNextExpedition,completeCampaignExpedition} from '../src/campaign-progression.js';
-import {prepareRosterParty,returnPartyToRoster} from '../src/hero-roster.js';
+import {prepareRosterParty,returnPartyToRoster,equipTrinket,unequipTrinket} from '../src/hero-roster.js';
 import {advanceTownWeek} from '../src/town-week.js';
 import {createDungeon} from '../src/dungeon.js';
 import {offerLoot,collectLoot} from '../src/inventory.js';
@@ -359,4 +359,18 @@ test('combined carried and guaranteed trinkets cannot exceed settlement storage'
  assert.equal(settlement.trinkets.length,999);
  assert.equal(settlement.completedExpeditions,0);
  assert.notEqual(expedition.rewardClaimed,true);
+});
+
+test('rarity-tagged quest rewards can be equipped, saved, and unequipped without changing identity',()=>{
+ const town=createCampaignSettlement();
+ town.trinkets.push('ward-charm-rare');
+ const id=town.roster[0].rosterId;
+ const hero=equipTrinket(town,id,'ward-charm-rare');
+ assert.equal(hero.equippedTrinket,'ward-charm-rare');
+ assert.equal(town.trinkets.length,0);
+ const restored=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
+ assert.equal(restored.roster[0].equippedTrinket,'ward-charm-rare');
+ unequipTrinket(restored,id);
+ assert.deepEqual(restored.trinkets,['ward-charm-rare']);
+ assert.equal(restored.roster[0].equippedTrinket,null);
 });
