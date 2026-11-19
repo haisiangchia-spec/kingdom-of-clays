@@ -147,7 +147,8 @@ function campaign(seed){
   const healthyCount=squadHeroes.filter(h=>h.unit.hp/h.unit.maxHp>=0.7&&h.unit.stress<=80).length;
   // Deliberately farm lower-tier quests while recovering: a level alone is not
   // evidence that a depleted party is ready for Veteran or Champion.
-  const veteranReady=partyLevels.filter(level=>level>=1).length>=3&&healthyCount>=3;
+  // Every fourth week permits a Veteran trial to prevent indefinite farming.
+  const veteranReady=partyLevels.filter(level=>level>=1).length>=3&&(healthyCount>=3||week%4===3);
   const championReady=partyLevels.filter(level=>level>=2).length>=3&&healthyCount>=3;
   const id=veteranWon&&championReady?'warrens-champion':
    town.completedExpeditions>=3&&veteranReady?'warrens-veteran':
