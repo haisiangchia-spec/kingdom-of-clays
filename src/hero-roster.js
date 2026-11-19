@@ -7,7 +7,9 @@ import {resolveSkillDefinition} from './skill-progression.js';
 import {ensureTraits,sanitariumUnavailable} from './sanitarium.js';
 import {traitBonus,applyTraitBonus,reverseTraitBonus} from './trait-effects.js';
 
-export const ROSTER_CAPACITY=8;
+export const ROSTER_CAPACITY=8; // Starting Hero Barracks capacity
+export const MAX_ROSTER_CAPACITY=28;
+export function rosterCapacity(settlement){return ROSTER_CAPACITY+4*(settlement.stageCoach?.barracks??0);}
 export const RECRUITMENT_COST=0; // DD1 base Stage Coach recruits are free
 export const RESURRECTION_COST=250; // user-authorized temple exception
 export const HERO_CLASSES=Object.freeze(['Swordsman','Warrior','Hunter','Priest']);
@@ -26,7 +28,7 @@ export function createHeroRoster(){
  }));
 }
 function checkRoster(settlement){
- if(!Array.isArray(settlement.roster)||settlement.roster.length>ROSTER_CAPACITY)throw Error('Invalid hero roster');
+ if(!Array.isArray(settlement.roster)||settlement.roster.length>rosterCapacity(settlement))throw Error('Invalid hero roster');
  const seen=new Set();
  for(const h of settlement.roster){
   if(!h||typeof h!=='object'||typeof h.rosterId!=='string'||!/^r[1-9]\d*$/.test(h.rosterId)||
@@ -54,7 +56,7 @@ export function validateHeroRoster(settlement){checkRoster(settlement);return se
 export function recruitHero(settlement,className){
  if(!HERO_CLASSES.includes(className))throw Error('Unknown hero class');
  checkRoster(settlement);
- if(settlement.roster.length>=ROSTER_CAPACITY)throw Error('Roster is full');
+ if(settlement.roster.length>=rosterCapacity(settlement))throw Error('Roster is full');
  if(!integer(settlement.gold)||settlement.gold<RECRUITMENT_COST)throw Error('Insufficient gold to recruit');
  const hero={rosterId:'r'+settlement.nextHeroId,name:className+' '+settlement.nextHeroId,
    heroClass:className,level:0,xp:0,equippedTrinket:null,unit:template(className)};
