@@ -294,3 +294,33 @@ test('invalid configured quest rewards reject without claiming loot or advancing
   assert.equal(settlement.completedExpeditions,0);
  }
 });
+
+test('quest reward arithmetic overflow is rejected before transferring collected loot',()=>{
+ for(const [field,reward] of [['gold',{gold:2}],['crests',{crests:2}],['deeds',{deeds:2}],['busts',{busts:2}]]){
+  const settlement=createCampaignSettlement();
+  settlement[field]=Number.MAX_SAFE_INTEGER-1;
+  const expedition=createDungeon(914,{tier:'apprentice',region:'crypt',interactiveEvents:true});
+  offerLoot(expedition,'gold',100);collectLoot(expedition);
+  expedition.phase='victory';
+  expedition.cleared=['sanctum'];
+  expedition.questId='crypt-recon';
+  expedition.questReward=reward;
+  assert.throws(()=>completeCampaignExpedition(settlement,expedition),/capacity/);
+  assert.notEqual(expedition.rewardClaimed,true);
+  assert.equal(settlement.completedExpeditions,0);
+  assert.equal(settlement.gold,field==='gold'?Number.MAX_SAFE_INTEGER-1:0);
+ }
+});
+
+test('oversized trinket rewards fail without altering settlement or expedition',()=>{
+ const settlement=createCampaignSettlement();
+ const expedition=createDungeon(915,{tier:'apprentice',region:'crypt'});
+ expedition.phase='victory';
+ expedition.cleared=['sanctum'];
+ expedition.questId='crypt-recon';
+ expedition.questReward={trinkets:1001};
+ assert.throws(()=>completeCampaignExpedition(settlement,expedition),/trinket/);
+ assert.equal(settlement.trinkets.length,0);
+ assert.equal(settlement.completedExpeditions,0);
+ assert.notEqual(expedition.rewardClaimed,true);
+});
