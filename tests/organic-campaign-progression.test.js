@@ -116,7 +116,7 @@ function campaign(seed){
   const levels=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).level);
   const d=createDungeon(seed*100+week+1,{region:quest.region,tier:quest.tier,
    difficulty:quest.difficulty,party:prepareRosterParty(town,expeditionBonuses(town)),
-   proceduralBranches:true,variableCorridors:true});
+   proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
   d.questId=quest.id;
   const report=play(d,seed*100+week+1);
   const expeditionLoot={inventory:d.inventory.map(x=>({kind:x.kind,quantity:x.quantity})),pendingLoot:!!d.pendingLoot,loot:d.loot};
