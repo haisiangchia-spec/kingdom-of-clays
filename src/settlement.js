@@ -23,6 +23,7 @@ export function upgradeStageCoach(settlement,track){
 }
 export const CAMPAIGN_SAVE_KEY='kingdom-of-clays-campaign-v1';
 export const CAMPAIGN_SAVE_VERSION=1;
+export const QUEST_TRINKET_IDS=Object.freeze(['ward-charm','ward-charm-common','ward-charm-uncommon','ward-charm-rare','ward-charm-ancestral']);
 const safeNumber=x=>Number.isSafeInteger(x)&&x>=0;
 const isObject=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 export function createCampaignSettlement(){
@@ -35,7 +36,7 @@ export function normalizeCampaignSettlement(input){
   if(!safeNumber(input[key]))throw Error('Invalid settlement '+key);
   base[key]=input[key];
  }
- if(!Array.isArray(input.trinkets)||input.trinkets.length>1000||input.trinkets.some(x=>x!=='ward-charm'))throw Error('Invalid settlement trinkets');
+ if(!Array.isArray(input.trinkets)||input.trinkets.length>1000||input.trinkets.some(x=>!QUEST_TRINKET_IDS.includes(x)))throw Error('Invalid settlement trinkets');
  base.trinkets=[...input.trinkets];
  if(input.busts!==undefined){if(!safeNumber(input.busts))throw Error('Invalid settlement busts');base.busts=input.busts;}
  const coach=input.stageCoach??{barracks:0,network:0};
