@@ -121,6 +121,8 @@ function fillSquad(town){
  return true;
 }
 function prepareTown(town){
+ const goldBefore=town.gold;
+ const spending={equipment:0,skills:0,treatments:0,resurrection:0};
  // Stage Coach expansion and facilities consume heirlooms, not gold.
  // Reserve expedition gold for equipment and recovery.
  for(const track of ['barracks','network']){
@@ -146,7 +148,7 @@ function prepareTown(town){
   for(const kind of ['weapon','armor']){
    const rank=hero.equipment?.[kind]??0;
    if(rank<hero.level&&rank<5&&town.gold>=100*(rank+1)+250)
-    upgradeHeroEquipment(town,hero.rosterId,kind);
+    {const before=town.gold;upgradeHeroEquipment(town,hero.rosterId,kind);spending.equipment+=before-town.gold;}
   }
  }
  // Match the verified skill-upgrade policy of the historical progressed
@@ -162,7 +164,7 @@ function prepareTown(town){
    while((hero.unit.skillLevels?.[skillId]??1)<Math.min(hero.level,5)){
     try{
      if(town.gold<1000)break;
-     upgradeHeroSkill(town,hero.rosterId,skillId);
+     {const before=town.gold;upgradeHeroSkill(town,hero.rosterId,skillId);spending.skills+=before-town.gold;}
     }catch(error){
      if(/Unverified skill upgrade|No verified|not verified|Unknown skill|not available|Insufficient gold/.test(error.message))break;
      throw error;
@@ -177,20 +179,20 @@ function prepareTown(town){
  for(const service of ['abbey','tavern']){
   const hero=stressed.find(h=>!town.town.treatments.some(t=>t.rosterId===h.rosterId));
   if(hero&&town.gold>=TREATMENTS[service].gold+1500)
-   bookStressTreatment(town,hero.rosterId,service);
+   {const before=town.gold;bookStressTreatment(town,hero.rosterId,service);spending.treatments+=before-town.gold;}
  }
  for(const hero of town.roster){
-  if(hero.unit.dead&&town.facilities.temple>0&&town.gold>=1750)resurrectHero(town,hero.rosterId);
+  if(hero.unit.dead&&town.facilities.temple>0&&town.gold>=1750){const before=town.gold;resurrectHero(town,hero.rosterId);spending.resurrection+=before-town.gold;}
   if(!hero.unit.dead&&town.trinkets.some(id=>id==='ward-charm'||id.startsWith('ward-charm-'))&&!hero.equippedTrinket)
    equipTrinket(town,hero.rosterId);
  }
-
+ return {goldBefore,spending,goldAfter:town.gold};
 }
 function campaign(seed,maxWeeks=100){
  let town=createCampaignSettlement();
  const history=[];
  for(let week=0;week<maxWeeks;week++){
-  prepareTown(town);
+  const townBudget=prepareTown(town);
   if(!fillSquad(town)){
    history.push({week:week+1,phase:'blocked',reason:'insufficient living and available heroes',living:town.roster.filter(h=>!h.unit.dead).length,gold:town.gold});
    break;
@@ -259,7 +261,7 @@ function campaign(seed,maxWeeks=100){
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,readinessAudit,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,levelThreeHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=3).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
+  history.push({week:week+1,townBudget,readinessAudit,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,levelThreeHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=3).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -301,6 +303,9 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   veteranMeanEntryStress:attempts.filter(x=>x.tier==='veteran').reduce((n,x)=>n+x.entryStress.reduce((a,b)=>a+b,0),0)/Math.max(1,attempts.filter(x=>x.tier==='veteran').length*4),
   veteranMeanEntryHpPercent:attempts.filter(x=>x.tier==='veteran').reduce((n,x)=>n+x.entryHp.reduce((a,b)=>a+b,0),0)/Math.max(1,attempts.filter(x=>x.tier==='veteran').length*4),
   veteranMeanEncountersBeforeDefeat:attempts.filter(x=>x.tier==='veteran'&&x.phase==='defeat').reduce((n,x)=>n+x.encounters,0)/Math.max(1,attempts.filter(x=>x.tier==='veteran'&&x.phase==='defeat').length),
+  totalTownSpending:Object.fromEntries(['equipment','skills','treatments','resurrection'].map(kind=>[kind,attempts.reduce((n,x)=>n+(x.townBudget?.spending?.[kind]??0),0)])),
+  expeditionsWithNoGoldReward:attempts.filter(x=>x.phase==='victory'&&(x.reward?.totalGold??0)===0).length,
+  meanGoldPerSuccessfulExpedition:attempts.filter(x=>x.phase==='victory').reduce((n,x)=>n+(x.reward?.totalGold??0),0)/Math.max(1,attempts.filter(x=>x.phase==='victory').length),
   earnedGold:attempts.reduce((n,x)=>n+(x.reward?.totalGold??0),0),
   earnedCrests:attempts.reduce((n,x)=>n+(x.reward?.crests??0),0),
   earnedDeeds:attempts.reduce((n,x)=>n+(x.reward?.deeds??0),0),
