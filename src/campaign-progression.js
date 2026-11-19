@@ -90,6 +90,11 @@ export function completeCampaignExpedition(settlement,expedition){
   for(const [key,value] of Object.entries(questReward)){
    if(!Number.isSafeInteger(value)||value<0)throw Error('Invalid quest reward quantity');
    if(key==='busts'&&!Number.isFinite(settlement.busts))throw Error('Settlement does not support bust rewards');
+   if(key==='trinkets'){
+    if(!Array.isArray(settlement.trinkets)||value>1000)throw Error('Invalid quest reward trinket quantity');
+   }else if(!Number.isSafeInteger(settlement[key])||!Number.isSafeInteger(settlement[key]+value)){
+    throw Error('Quest reward exceeds settlement capacity');
+   }
   }
  }
  const report=claimExpeditionRewards(expedition,settlement);
