@@ -441,7 +441,7 @@ export function resolveDungeonBattle(dungeon){
        // optional heirlooms. The prior 50-gold fallback could not sustain
        // equipment progression across repeated expeditions.
        'room:sanctum':['gold',250],
-       'room:watch':['crest',3],
+       'room:watch':['gold',250],
        'corridor:gallery-watch':['bust',3],
        // Vault approaches yield saleable gems, while the guardian awards
        // Deeds. Preserve both gold income and persistent upgrade heirlooms.
