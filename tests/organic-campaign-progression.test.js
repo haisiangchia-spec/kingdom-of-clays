@@ -170,7 +170,7 @@ function prepareTown(town){
  }
  for(const hero of town.roster){
   if(hero.unit.dead&&town.facilities.temple>0&&town.gold>=1750)resurrectHero(town,hero.rosterId);
-  if(!hero.unit.dead&&town.trinkets.includes('ward-charm')&&!hero.equippedTrinket)
+  if(!hero.unit.dead&&town.trinkets.some(id=>id==='ward-charm'||id.startsWith('ward-charm-'))&&!hero.equippedTrinket)
    equipTrinket(town,hero.rosterId);
  }
 
