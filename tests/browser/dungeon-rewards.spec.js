@@ -8,6 +8,7 @@ test('browser inventory supports heirlooms, gems and trinkets with atomic overfl
   const d=createDungeon(520,{interactiveEvents:true});
   offerLoot(d,'gem',3);collectLoot(d);
   offerLoot(d,'crest',6);collectLoot(d);
+  offerLoot(d,'deed',60);collectLoot(d);
   offerLoot(d,'trinket',2);
   const refused=!inventoryCanAdd(d,'trinket',2);
   let atomic=false;
@@ -18,8 +19,8 @@ test('browser inventory supports heirlooms, gems and trinkets with atomic overfl
   return {refused,atomic,slots:inventoryUsed(d),reward};
  });
  expect(outcome).toEqual({
-  refused:true,atomic:true,slots:8,
-  reward:{gold:0,gems:3,crests:6,deeds:0,trinkets:2,gemValue:375,trinketValue:500,totalGold:375}
+  refused:true,atomic:true,slots:16,
+  reward:{gold:0,gems:3,crests:6,deeds:60,trinkets:2,gemValue:375,trinketValue:500,totalGold:375}
  });
 });
 
