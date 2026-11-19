@@ -121,9 +121,8 @@ function fillSquad(town){
  return true;
 }
 function prepareTown(town){
- // Protect a small capital reserve for Stage Coach expansion. Recruitment
- // capacity takes priority over discretionary facilities and treatments.
- // Every upgrade still consumes actual earned gold and heirlooms.
+ // Stage Coach expansion and facilities consume heirlooms, not gold.
+ // Reserve expedition gold for equipment and recovery.
  for(const track of ['barracks','network']){
   const level=town.stageCoach[track];
   if(level>=5)continue;
@@ -133,7 +132,7 @@ function prepareTown(town){
  // All upgrades and services go through public gameplay actions, using earned resources.
  for(const facility of ['guild','temple','market']){
   const cost=nextFacilityCost(town,facility);
-  if(cost&&town.gold>=cost.gold+1000&&Object.entries(cost).every(([resource,amount])=>(town[resource]??0)>=amount))
+  if(cost&&Object.entries(cost).every(([resource,amount])=>(town[resource]??0)>=amount))
    upgradeFacility(town,facility);
  }
  // Spend earned gold on available level-gated equipment before Veteran runs.
