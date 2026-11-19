@@ -1,4 +1,4 @@
-import {claimExpeditionRewards} from './inventory.js';
+import {claimExpeditionRewards,expeditionRewardSummary} from './inventory.js';
 // Clays-original campaign progression. DD1 combat rules remain unchanged.
 // Completion is a persistent campaign goal, not a claim of DD1 quest parity.
 export const CAMPAIGN_MILESTONES=Object.freeze([
