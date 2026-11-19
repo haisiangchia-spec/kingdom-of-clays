@@ -214,10 +214,13 @@ function campaign(seed,maxWeeks=100){
    difficulty:quest.difficulty,party:prepareRosterParty(town,expeditionBonuses(town)),
    proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
   d.questId=quest.id;
-  // Provisions consume earned settlement gold, matching real expedition entry.
-  for(const [kind,qty] of [['food',4],['torch',2],['antivenom',1]]){
-   try{purchaseProvision(d,town,kind,qty);}
-   catch(error){if(!/Inventory full|Insufficient gold/.test(error.message))throw error;}
+  // The dungeon already supplies eight food and three torches at entry.
+  // Avoid buying redundant provisions on every Apprentice expedition; reserve
+  // gold for persistent Stage Coach, weapon and armor progression. Purchase
+  // one curative only for plague expeditions with a sufficient cash buffer.
+  if(quest.region==='plague'&&town.gold>=1750){
+   try{purchaseProvision(d,town,'antivenom',1);}
+   catch(error){if(!/Inventory full/.test(error.message))throw error;}
   }
   const report=play(d,seed*100+week+1);
   const expeditionLoot={inventory:d.inventory.map(x=>({kind:x.kind,quantity:x.quantity})),pendingLoot:!!d.pendingLoot,loot:d.loot};
@@ -271,6 +274,7 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   earnedCrests:attempts.reduce((n,x)=>n+(x.reward?.crests??0),0),
   earnedDeeds:attempts.reduce((n,x)=>n+(x.reward?.deeds??0),0),
   finalDeeds:results.map(x=>x.history.at(-1)?.deeds??null),
+  finalGold:results.map(x=>x.history.at(-1)?.gold??null),
   discardedDeeds:attempts.reduce((n,x)=>n+x.discardedLoot.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   collectedDeeds:attempts.reduce((n,x)=>n+x.expeditionLoot.inventory.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   maximumBarracksRank:Math.max(...attempts.map(x=>x.stageCoach?.barracks??0)),
