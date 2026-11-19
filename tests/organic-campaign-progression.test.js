@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCampaignSettlement,expeditionBonuses,encodeCampaignSave,decodeCampaignSave,upgradeFacility,nextFacilityCost} from '../src/settlement.js';
 import {selectQuest} from '../src/quest-board.js';
 import {completeCampaignExpedition,campaignProgress} from '../src/campaign-progression.js';
-import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket} from '../src/hero-roster.js';
+import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero} from '../src/hero-roster.js';
 import {advanceTownWeek,recruitFromCoach} from '../src/town-week.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger} from '../src/dungeon.js';
 import {leaveLoot} from '../src/inventory.js';
@@ -61,6 +61,10 @@ function fillSquad(town){
   const current=town.roster.find(h=>h.rosterId===town.squad[i]&&!h.unit.dead);
   if(current)continue;
   let candidate=town.roster.find(h=>!h.unit.dead&&!town.squad.includes(h.rosterId));
+  if(!candidate&&town.roster.length>=8){
+   const deceased=town.roster.find(h=>h.unit.dead);
+   if(deceased)dismissHero(town,deceased.rosterId);
+  }
   if(!candidate&&town.roster.length<8&&town.town.offers.length){
    candidate=recruitFromCoach(town,town.town.offers[0].offerId);
   }
@@ -87,15 +91,19 @@ function prepareTown(town){
 function campaign(seed){
  let town=createCampaignSettlement();
  const history=[];
- for(let week=0;week<20;week++){
+ for(let week=0;week<40;week++){
   prepareTown(town);
   if(!fillSquad(town)){
    history.push({week:week+1,phase:'blocked',reason:'insufficient living and available heroes',living:town.roster.filter(h=>!h.unit.dead).length,gold:town.gold});
    break;
   }
   const veteranWon=town.campaignVictories.includes('veteran-victory');
+  const partyLevels=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).level);
+  // Quest unlocks are not a requirement to embark immediately: train via
+  // actual Apprentice victories until the active company is Veteran-ready.
+  const veteranReady=partyLevels.every(level=>level>=2);
   const id=veteranWon?'warrens-champion':
-   town.completedExpeditions>=3?'warrens-veteran':
+   town.completedExpeditions>=3&&veteranReady?'warrens-veteran':
    town.completedExpeditions>=1?'warrens-recon':'crypt-recon';
   const quest=selectQuest(town,id);
   const levels=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).level);
@@ -129,6 +137,7 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   veteranWins:attempts.filter(x=>x.tier==='veteran'&&x.phase==='victory').length,
   apprenticeWins:attempts.filter(x=>x.tier==='apprentice'&&x.phase==='victory').length};
  console.log('Organic campaign progression '+JSON.stringify(summary));
+ for(let i=0;i<results.length;i++)console.log('Organic campaign trace '+JSON.stringify({seed:i+1,history:results[i].history}));
  assert.ok(attempts.length>0);
  for(const result of results){
   const h=result.history;
