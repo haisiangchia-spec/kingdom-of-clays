@@ -199,7 +199,10 @@ function campaign(seed,maxWeeks=100){
   // No experience, equipment, or victories are granted by this policy.
   const id=veteranWon&&championReady?'warrens-champion':
    town.completedExpeditions>=3&&veteranReady?'warrens-veteran':
-   town.completedExpeditions>=1?'crypt-purge':'crypt-recon';
+   town.completedExpeditions>=1?
+    // Patrols provide camping firewood. Rotate regions so a player can
+    // acquire both heirloom types instead of exhausting all Deeds in Crypt.
+    (week%3===0?'warrens-containment':'crypt-purge'):'crypt-recon';
   const quest=selectQuest(town,id);
   const levels=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).level);
   const equipment=town.squad.map(x=>({...town.roster.find(h=>h.rosterId===x).equipment}));
@@ -265,6 +268,8 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   earnedGold:attempts.reduce((n,x)=>n+(x.reward?.totalGold??0),0),
   earnedCrests:attempts.reduce((n,x)=>n+(x.reward?.crests??0),0),
   earnedDeeds:attempts.reduce((n,x)=>n+(x.reward?.deeds??0),0),
+  finalDeeds:results.map(x=>x.history.at(-1)?.deeds??null),
+  maximumBarracksRank:Math.max(...attempts.map(x=>x.stageCoach?.barracks??0)),
   lootBearingExpeditions:attempts.filter(x=>x.expeditionLoot?.inventory?.length>0).length};
  console.log('Organic campaign progression '+JSON.stringify(summary));
  for(let i=0;i<results.length;i++)console.log('Organic campaign trace '+JSON.stringify({seed:i+1,history:results[i].history}));
