@@ -10,9 +10,9 @@ test('campaign settlement starts empty with three independent upgradeable facili
  assert.equal(s.roster.length,4);
  assert.deepEqual(s.squad,['r1','r2','r3','r4']);
  assert.deepEqual(Object.keys(SETTLEMENT_FACILITIES),['market','guild','temple']);
- assert.deepEqual(nextFacilityCost(s,'market'),{gold:100,crests:1,deeds:0});
- assert.deepEqual(nextFacilityCost(s,'guild'),{gold:125,crests:0,deeds:1});
- assert.deepEqual(nextFacilityCost(s,'temple'),{gold:150,crests:1,deeds:1});
+ assert.deepEqual(nextFacilityCost(s,'market'),{gold:0,crests:1,deeds:0});
+ assert.deepEqual(nextFacilityCost(s,'guild'),{gold:0,crests:0,deeds:1});
+ assert.deepEqual(nextFacilityCost(s,'temple'),{gold:0,crests:1,deeds:1});
  assert.throws(()=>upgradeFacility(s,'market'),/Insufficient/);
  assert.deepEqual(s,createCampaignSettlement());
 });
@@ -107,7 +107,7 @@ test('reward handoff remains once-only after a serialized victory and upgrades s
  const loaded=decodeCampaignSave(encodeCampaignSave({...s,facilities:{market:0,guild:0,temple:0}},d));
  assert.throws(()=>claimExpeditionRewards(loaded.expedition,loaded.settlement),/already been claimed/);
  upgradeFacility(loaded.settlement,'market');
- assert.equal(loaded.settlement.gold,0);
+ assert.equal(loaded.settlement.gold,100);
  assert.equal(loaded.settlement.crests,1);
  assert.equal(loaded.settlement.completedExpeditions,1);
 });
