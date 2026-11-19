@@ -53,7 +53,7 @@ test('purified Vault curio offers a trinket while noninteractive legacy curio st
  assert.equal(legacy.loot,175);
 });
 test('room victories grant gold and reliable Vault Deeds',()=>{
- for(const [room,expected] of [['watch',{kind:'gold',quantity:250}],['vault',{kind:'deed',quantity:2}]]){
+ for(const [room,expected] of [['watch',{kind:'crest',quantity:3}],['vault',{kind:'deed',quantity:2}]]){
   const d=createDungeon(405,{interactiveEvents:true});
   d.room=room;
   beginCorridor(d,room==='watch'?'sanctum':'gallery');
