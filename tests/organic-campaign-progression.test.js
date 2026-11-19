@@ -99,9 +99,9 @@ function campaign(seed){
   }
   const veteranWon=town.campaignVictories.includes('veteran-victory');
   const partyLevels=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).level);
-  // Quest unlocks are not a requirement to embark immediately: train via
-  // actual Apprentice victories until the active company is Veteran-ready.
-  const veteranReady=partyLevels.every(level=>level>=2);
+  // The quest board, not a fabricated hero-level gate, determines access.
+  // Veteran attempts with underprepared parties remain genuine outcomes.
+  const veteranReady=true;
   const id=veteranWon?'warrens-champion':
    town.completedExpeditions>=3&&veteranReady?'warrens-veteran':
    town.completedExpeditions>=1?'warrens-recon':'crypt-recon';
