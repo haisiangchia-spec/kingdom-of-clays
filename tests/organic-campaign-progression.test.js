@@ -107,14 +107,20 @@ function fillSquad(town){
  const candidates=town.roster.filter(h=>!h.unit.dead&&
   !town.town.treatments.some(t=>t.rosterId===h.rosterId));
  if(candidates.length<4)return false;
- // Avoid repeatedly sending afflicted high-level heroes into combat.
- // Once stress is manageable, favour earned level and purchased equipment.
+ // Prefer an actually deployable Veteran/Champion core when four earned,
+ // equipped heroes are available. Do not require unrealistically perfect HP/stress.
+ const readyForTier=(h,level)=>h.level>=level&&
+  (h.equipment?.weapon??0)>=level&&(h.equipment?.armor??0)>=level&&
+  h.unit.hp/h.unit.maxHp>=0.75&&h.unit.stress<=60;
+ const veteranCore=candidates.filter(h=>readyForTier(h,3));
+ const championCore=candidates.filter(h=>readyForTier(h,5));
+ const pool=championCore.length>=4?championCore:veteranCore.length>=4?veteranCore:candidates;
  const readiness=h=>(h.unit.stress>=100?-1000:0)-
   h.unit.stress*2+h.level*25+
   ((h.equipment?.weapon??0)+(h.equipment?.armor??0))*8+
   h.unit.hp/h.unit.maxHp*20;
- candidates.sort((a,b)=>readiness(b)-readiness(a));
- const selected=candidates.slice(0,4);
+ pool.sort((a,b)=>readiness(b)-readiness(a));
+ const selected=pool.slice(0,4);
  // Release previous positions before reselecting to avoid duplicate rank errors.
  town.squad=[null,null,null,null];
  selected.forEach((hero,i)=>selectHero(town,i,hero.rosterId));
@@ -205,7 +211,7 @@ function campaign(seed,maxWeeks=100){
    const hero=town.roster.find(h=>h.rosterId===id);
    return hero&&!hero.unit.dead&&hero.level>=level&&
     (hero.equipment?.weapon??0)>=level&&(hero.equipment?.armor??0)>=level&&
-    hero.unit.hp===hero.unit.maxHp&&hero.unit.stress===0;
+    hero.unit.hp/hero.unit.maxHp>=0.75&&hero.unit.stress<=60;
   });
   const readinessAudit={gold:town.gold,level3:0,equipped3:0,fullyRested3:0,fullyReady3:0,
    equippedButNotRested3:0,restedButNotEquipped3:0,level3MissingWeaponRanks:0,
