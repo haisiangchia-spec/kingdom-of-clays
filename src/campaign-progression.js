@@ -81,8 +81,8 @@ export function completeCampaignExpedition(settlement,expedition){
  }
  if(expedition.pendingLoot)throw Error('Resolve pending loot before settlement transfer');
  // DD1 separates guaranteed, quest-board rewards from collected loot.
- // Only pay explicitly configured quest rewards; do not invent gold amounts.
- const questReward=expedition.questReward??null;
+ // A validated quest ID guarantees one completion trinket, even when older\n // expedition saves omit questReward. Never invent gold or heirloom amounts.
+ const questReward=expedition.questReward??(expedition.questId?{trinkets:1}:null);
  if(questReward!==null){
   if(!questReward||typeof questReward!=='object'||Array.isArray(questReward))throw Error('Invalid quest reward');
   const allowed=['gold','crests','deeds','busts','trinkets'];
