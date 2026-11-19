@@ -8,21 +8,19 @@ test('expedition screen displays provision stacks and discard actions',async ({p
  await expect(page.locator('#dungeon-inventory')).toContainText('Inventory: 2/16');
  await expect(page.locator('#dungeon-supplies')).toContainText('Food: 0');
 });
-test('browser inventory enforces capacity and allows discarding to claim gold',async ({page})=>{
+test('browser inventory merges gold up to DD1 stack limit',async ({page})=>{
  await page.goto('/dungeon.html');
  const result=await page.evaluate(async ()=>{
   const {createDungeon}=await import('./src/dungeon.js');
   const {offerLoot,collectLoot,inventoryUsed,discardInventoryStack}=await import('./src/inventory.js');
   const d=createDungeon(500,{interactiveEvents:true});
   offerLoot(d,'gold',1300);collectLoot(d);
-  offerLoot(d,'gold',100);
-  let refused=false;
-  try{collectLoot(d)}catch(e){refused=/Inventory full/.test(e.message)}
-  discardInventoryStack(d,'torch:0');
-  collectLoot(d);
-  return {refused,slots:inventoryUsed(d),gold:d.loot,torches:d.supplies.torch,pending:d.pendingLoot};
+  offerLoot(d,'gold',100);collectLoot(d);
+  const merged=inventoryUsed(d);
+  offerLoot(d,'gold',400);collectLoot(d);
+  return {merged,slots:inventoryUsed(d),gold:d.loot,pending:d.pendingLoot};
  });
- expect(result).toEqual({refused:true,slots:16,gold:1400,torches:0,pending:null});
+ expect(result).toEqual({merged:4,slots:5,gold:1800,pending:null});
 });
 test('curio loot is pending in interactive mode and cannot be farmed',async ({page})=>{
  await page.goto('/dungeon.html');
