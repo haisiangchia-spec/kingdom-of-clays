@@ -143,8 +143,12 @@ function campaign(seed){
   // Veteran attempts with underprepared parties remain genuine outcomes.
   // Champion requires three naturally earned level-two heroes; continue Veteran
   // or Apprentice quests until the party actually meets that threshold.
-  const veteranReady=partyLevels.filter(level=>level>=1).length>=3;
-  const championReady=partyLevels.filter(level=>level>=2).length>=3;
+  const squadHeroes=town.squad.map(id=>town.roster.find(h=>h.rosterId===id));
+  const healthyCount=squadHeroes.filter(h=>h.unit.hp/h.unit.maxHp>=0.7&&h.unit.stress<=80).length;
+  // Deliberately farm lower-tier quests while recovering: a level alone is not
+  // evidence that a depleted party is ready for Veteran or Champion.
+  const veteranReady=partyLevels.filter(level=>level>=1).length>=3&&healthyCount>=3;
+  const championReady=partyLevels.filter(level=>level>=2).length>=3&&healthyCount>=3;
   const id=veteranWon&&championReady?'warrens-champion':
    town.completedExpeditions>=3&&veteranReady?'warrens-veteran':
    town.completedExpeditions>=1?'warrens-recon':'crypt-recon';
