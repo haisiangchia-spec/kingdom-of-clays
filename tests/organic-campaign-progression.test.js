@@ -151,7 +151,13 @@ function prepareTown(town){
  }
  // Match the verified skill-upgrade policy of the historical progressed
  // expedition fixture, purchasing only supported levels with earned gold.
- for(const hero of upgradeCandidates.slice(0,4).filter(h=>h.level>=2)){
+ // Avoid buying discretionary skills while the four-hero core still lacks
+ // the equipment needed for Veteran. This is a spending-policy change only:
+ // upgrades continue to require earned gold and legal facility levels.
+ const equipmentCoreReady=upgradeCandidates.slice(0,4).length===4&&
+  upgradeCandidates.slice(0,4).every(h=>h.level>=3&&
+   (h.equipment?.weapon??0)>=3&&(h.equipment?.armor??0)>=3);
+ for(const hero of (equipmentCoreReady?upgradeCandidates.slice(0,4).filter(h=>h.level>=2):[])){
   for(const skillId of BENCHMARK_SKILLS[hero.heroClass]??[]){
    while((hero.unit.skillLevels?.[skillId]??1)<Math.min(hero.level,5)){
     try{
