@@ -2,10 +2,10 @@
 // Capacity and stack sizes are not yet sourced from DD1 game data.
 // Supplies remain in the legacy fields; this module presents a unified view
 // while valuables use explicit stacks. No duplicated supply counters.
-export const INVENTORY_CAPACITY=8;
+export const INVENTORY_CAPACITY=16;
 export const ITEM_RULES=Object.freeze({
- food:Object.freeze({name:'Food',stack:4}),
- torch:Object.freeze({name:'Torch',stack:2}),
+ food:Object.freeze({name:'Food',stack:12}),
+ torch:Object.freeze({name:'Torch',stack:8}),
  holyWater:Object.freeze({name:'Holy Water',stack:1}),
  antivenom:Object.freeze({name:'Antivenom',stack:6}),
  bandage:Object.freeze({name:'Bandage',stack:6}),
@@ -13,8 +13,8 @@ export const ITEM_RULES=Object.freeze({
  laudanum:Object.freeze({name:'Laudanum',stack:6}),
  gold:Object.freeze({name:'Gold',stack:100,value:1}),
  gem:Object.freeze({name:'Moonstone',stack:3,value:125}),
- crest:Object.freeze({name:'Crest',stack:6}),
- deed:Object.freeze({name:'Deed',stack:4}),
+ crest:Object.freeze({name:'Crest',stack:12}),
+ deed:Object.freeze({name:'Deed',stack:6}),
  bust:Object.freeze({name:'Bust',stack:6}),
  trinket:Object.freeze({name:'Ward Charm',stack:1,value:250})
 });
