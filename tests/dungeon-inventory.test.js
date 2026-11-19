@@ -24,35 +24,35 @@ test('curio rewards queue as collectible gold in interactive expeditions',()=>{
  collectLoot(d);
  assert.equal(d.pendingLoot,null);
  assert.equal(d.loot,175);
- assert.deepEqual(d.inventory,[{kind:'gold',quantity:100},{kind:'gold',quantity:75}]);
- assert.equal(inventoryUsed(d),4); // 1 food, 1 torch, 0 water, 2 gold
+ assert.deepEqual(d.inventory,[{kind:'gold',quantity:175}]);
+ assert.equal(inventoryUsed(d),3); // 1 food, 1 torch, 0 water, 1 gold
 });
 test('full capacity rejects atomic collection until a stack is discarded',()=>{
  const d=createDungeon(303,{interactiveEvents:true});
- offerLoot(d,'gold',1300);
- assert.equal(inventoryCanAdd(d,'gold',1300),true);
- collectLoot(d); // 3 supplies + 13 gold slots = 16
+ offerLoot(d,'deed',78);
+ assert.equal(inventoryCanAdd(d,'deed',78),true);
+ collectLoot(d); // 3 supplies + 13 deed slots = 16
  assert.equal(inventoryUsed(d),16);
  offerLoot(d,'gold',100);
  assert.equal(inventoryCanAdd(d,'gold',100),false);
  assert.throws(()=>collectLoot(d),/Inventory full/);
- assert.equal(d.loot,1300);
+ assert.equal(d.loot,0);
  discardInventoryStack(d,'food:0');
  assert.equal(d.supplies.food,0);
  assert.equal(inventoryUsed(d),15);
  collectLoot(d);
- assert.equal(d.loot,1400);
+ assert.equal(d.loot,100);
  assert.equal(inventoryUsed(d),16);
 });
 test('gold partial stacks merge before consuming new slots and discard reduces recorded gold',()=>{
  const d=createDungeon(304);
- offerLoot(d,'gold',175);collectLoot(d);
- offerLoot(d,'gold',25);collectLoot(d);
- assert.deepEqual(d.inventory,[{kind:'gold',quantity:100},{kind:'gold',quantity:100}]);
+ offerLoot(d,'gold',1700);collectLoot(d);
+ offerLoot(d,'gold',100);collectLoot(d);
+ assert.deepEqual(d.inventory,[{kind:'gold',quantity:1750},{kind:'gold',quantity:50}]);
  assert.equal(inventoryUsed(d),5);
  discardInventoryStack(d,'treasure:0');
- assert.equal(d.loot,100);
- assert.deepEqual(d.inventory,[{kind:'gold',quantity:100}]);
+ assert.equal(d.loot,50);
+ assert.deepEqual(d.inventory,[{kind:'gold',quantity:50}]);
  assert.throws(()=>discardInventoryStack(d,'treasure:8'),/not found/);
 });
 test('leaving loot does not change existing inventory or resource counts',()=>{
