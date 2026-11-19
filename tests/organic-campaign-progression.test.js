@@ -63,21 +63,26 @@ function play(d,seed){
  return {encounters,mix};
 }
 function fillSquad(town){
- for(let i=0;i<4;i++){
-  const current=town.roster.find(h=>h.rosterId===town.squad[i]&&!h.unit.dead);
-  if(current)continue;
-  let candidate=town.roster.find(h=>!h.unit.dead&&!town.squad.includes(h.rosterId));
-  if(!candidate&&town.roster.length>=8){
+ // Recruit from the actual Stage Coach and release deceased roster entries.
+ // Prefer healthy veterans over stressed survivors, while preserving earned XP.
+ while(town.roster.filter(h=>!h.unit.dead).length<4&&town.town.offers.length){
+  if(town.roster.length>=8){
    const deceased=town.roster.find(h=>h.unit.dead);
-   if(deceased)dismissHero(town,deceased.rosterId);
+   if(!deceased)break;
+   dismissHero(town,deceased.rosterId);
   }
-  if(!candidate&&town.roster.length<8&&town.town.offers.length){
-   candidate=recruitFromCoach(town,town.town.offers[0].offerId);
-  }
-  if(!candidate)return false;
-  town.squad[i]=null;
-  selectHero(town,i,candidate.rosterId);
+  recruitFromCoach(town,town.town.offers[0].offerId);
  }
+ const candidates=town.roster.filter(h=>!h.unit.dead&&
+  !town.town.treatments.some(t=>t.rosterId===h.rosterId));
+ if(candidates.length<4)return false;
+ candidates.sort((a,b)=>
+  (b.level*40-b.unit.stress*.5+b.unit.hp/b.unit.maxHp*20)-
+  (a.level*40-a.unit.stress*.5+a.unit.hp/a.unit.maxHp*20));
+ const selected=candidates.slice(0,4);
+ // Release previous positions before reselecting to avoid duplicate rank errors.
+ town.squad=[null,null,null,null];
+ selected.forEach((hero,i)=>selectHero(town,i,hero.rosterId));
  return true;
 }
 function prepareTown(town){
