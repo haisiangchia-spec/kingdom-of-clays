@@ -10,12 +10,23 @@ export const SETTLEMENT_FACILITIES=Object.freeze({
  guild:Object.freeze({name:'Guild',maxLevel:3,baseCost:Object.freeze({gold:125,crests:0,deeds:1}),description:'+2 starting HP per hero per level'}),
  temple:Object.freeze({name:'Temple',maxLevel:3,baseCost:Object.freeze({gold:150,crests:1,deeds:1}),description:'-2 hunger stress per level'})
 });
+export const STAGE_COACH_UPGRADE_COSTS=Object.freeze({barracks:Object.freeze({gold:250,crests:2,deeds:2}),network:Object.freeze({gold:200,crests:2,deeds:1})});
+export function upgradeStageCoach(settlement,track){
+ if(!Object.hasOwn(STAGE_COACH_UPGRADE_COSTS,track))throw Error('Unknown Stage Coach upgrade');
+ const level=settlement.stageCoach?.[track]??0;
+ if(level>=5)throw Error('Stage Coach upgrade at maximum');
+ const cost=Object.fromEntries(Object.entries(STAGE_COACH_UPGRADE_COSTS[track]).map(([k,v])=>[k,v*(level+1)]));
+ if(Object.entries(cost).some(([k,v])=>(settlement[k]??0)<v))throw Error('Insufficient settlement resources');
+ for(const [k,v] of Object.entries(cost))settlement[k]-=v;
+ settlement.stageCoach??={barracks:0,network:0};settlement.stageCoach[track]=level+1;
+ return {track,level:level+1,cost};
+}
 export const CAMPAIGN_SAVE_KEY='kingdom-of-clays-campaign-v1';
 export const CAMPAIGN_SAVE_VERSION=1;
 const safeNumber=x=>Number.isSafeInteger(x)&&x>=0;
 const isObject=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 export function createCampaignSettlement(){
- return initSanitarium(initTown(setupHeroRoster({...createSettlement(),busts:0,facilities:{market:0,guild:0,temple:0},completedExpeditions:0,campaignVictories:[]})));
+ return initSanitarium(initTown(setupHeroRoster({...createSettlement(),busts:0,stageCoach:{barracks:0,network:0},facilities:{market:0,guild:0,temple:0},completedExpeditions:0,campaignVictories:[]})));
 }
 export function normalizeCampaignSettlement(input){
  if(!isObject(input))throw Error('Invalid settlement');
@@ -27,6 +38,9 @@ export function normalizeCampaignSettlement(input){
  if(!Array.isArray(input.trinkets)||input.trinkets.length>1000||input.trinkets.some(x=>x!=='ward-charm'))throw Error('Invalid settlement trinkets');
  base.trinkets=[...input.trinkets];
  if(input.busts!==undefined){if(!safeNumber(input.busts))throw Error('Invalid settlement busts');base.busts=input.busts;}
+ const coach=input.stageCoach??{barracks:0,network:0};
+ if(!isObject(coach)||!['barracks','network'].every(k=>safeNumber(coach[k])&&coach[k]<=5))throw Error('Invalid Stage Coach upgrades');
+ base.stageCoach={barracks:coach.barracks,network:coach.network};
  const fields=input.facilities??{};
  if(!isObject(fields))throw Error('Invalid settlement facilities');
  for(const [key,rule] of Object.entries(SETTLEMENT_FACILITIES)){
