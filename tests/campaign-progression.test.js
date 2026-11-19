@@ -194,6 +194,8 @@ test('five claimed expeditions complete the campaign with real reward transfers,
   collectLoot(expedition);
   const {progress}=completeCampaignExpedition(settlement,expedition);
   assert.equal(settlement.gold,previousGold+100);
+  assert.equal(settlement.trinkets.length,index+1);
+  assert.equal(expedition.questRewardClaimed,true);
   assert.equal(settlement.completedExpeditions,index+1);
   assert.equal(progress.finished,index===stages.length-1);
   assert.throws(()=>completeCampaignExpedition(settlement,expedition),/unclaimed victory/);
