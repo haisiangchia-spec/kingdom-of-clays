@@ -115,7 +115,7 @@ function campaign(seed){
   if(d.phase==='victory')completeCampaignExpedition(town,d);
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,encounters:report.encounters,
+  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,encounters:report.encounters,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -135,6 +135,11 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   blockedCampaigns:results.filter(x=>x.history.some(h=>h.phase==='blocked')).length,
   blockedReasons:results.flatMap(x=>x.history.filter(h=>h.phase==='blocked').map(h=>h.reason)),
   veteranWins:attempts.filter(x=>x.tier==='veteran'&&x.phase==='victory').length,
+  championDefeats:attempts.filter(x=>x.tier==='champion'&&x.phase==='defeat').length,
+  championEncounters:attempts.filter(x=>x.tier==='champion').reduce((n,x)=>n+x.encounters,0),
+  championLowerTierEncounters:attempts.filter(x=>x.tier==='champion').reduce((n,x)=>n+x.lowerTierEncounters,0),
+  championStartingLevelDistribution:Object.fromEntries([0,1,2,3,4,5,6].map(level=>[level,attempts.filter(x=>x.tier==='champion').flatMap(x=>x.levels).filter(x=>x===level).length])),
+  championPartyDeaths:attempts.filter(x=>x.tier==='champion').reduce((n,x)=>n+(x.partyDeaths??0),0),
   apprenticeWins:attempts.filter(x=>x.tier==='apprentice'&&x.phase==='victory').length};
  console.log('Organic campaign progression '+JSON.stringify(summary));
  for(let i=0;i<results.length;i++)console.log('Organic campaign trace '+JSON.stringify({seed:i+1,history:results[i].history}));
