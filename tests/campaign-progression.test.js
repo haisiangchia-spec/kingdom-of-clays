@@ -282,7 +282,7 @@ test('configured quest rewards are separate from collected loot and paid only on
 });
 
 test('invalid configured quest rewards reject without claiming loot or advancing progress',()=>{
- for(const reward of [{gold:-1},{gold:1.5},{gold:Infinity},{unknown:5},{busts:1}]){
+ for(const reward of [{gold:-1},{gold:1.5},{gold:Infinity},{unknown:5},{trinkets:-2}]){
   const settlement=createCampaignSettlement();
   const expedition=createDungeon(913,{tier:'apprentice',region:'crypt',interactiveEvents:true});
   expedition.phase='victory';
