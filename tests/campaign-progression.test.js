@@ -261,3 +261,36 @@ test('campaign can recover from a failed expedition without granting progress or
  assert.equal(settlement.town.week,afterDefeatWeek+1);
  assert.equal(selectQuest(settlement,'warrens-recon').unlocked,true);
 });
+
+test('configured quest rewards are separate from collected loot and paid only once',()=>{
+ const settlement=createCampaignSettlement();
+ const expedition=createDungeon(912,{tier:'apprentice',region:'crypt',interactiveEvents:true});
+ offerLoot(expedition,'gold',100);collectLoot(expedition);
+ expedition.phase='victory';
+ expedition.cleared=['sanctum'];
+ expedition.questId='crypt-recon';
+ expedition.questReward={gold:500,crests:2,deeds:1,trinkets:1};
+ const {report}=completeCampaignExpedition(settlement,expedition);
+ assert.equal(report.totalGold,100,'inventory report remains separate from guaranteed quest rewards');
+ assert.equal(settlement.gold,600);
+ assert.equal(settlement.crests,2);
+ assert.equal(settlement.deeds,1);
+ assert.equal(settlement.trinkets.length,1);
+ assert.equal(expedition.questRewardClaimed,true);
+ assert.throws(()=>completeCampaignExpedition(settlement,expedition),/unclaimed victory/);
+ assert.equal(settlement.gold,600);
+});
+
+test('invalid configured quest rewards reject without claiming loot or advancing progress',()=>{
+ for(const reward of [{gold:-1},{gold:1.5},{gold:Infinity},{unknown:5},{busts:1}]){
+  const settlement=createCampaignSettlement();
+  const expedition=createDungeon(913,{tier:'apprentice',region:'crypt',interactiveEvents:true});
+  expedition.phase='victory';
+  expedition.cleared=['sanctum'];
+  expedition.questId='crypt-recon';
+  expedition.questReward=reward;
+  assert.throws(()=>completeCampaignExpedition(settlement,expedition),/reward|bust/i);
+  assert.equal(expedition.rewardClaimed,false);
+  assert.equal(settlement.completedExpeditions,0);
+ }
+});
