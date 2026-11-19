@@ -306,6 +306,13 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   totalTownSpending:Object.fromEntries(['equipment','skills','treatments','resurrection'].map(kind=>[kind,attempts.reduce((n,x)=>n+(x.townBudget?.spending?.[kind]??0),0)])),
   expeditionsWithNoGoldReward:attempts.filter(x=>x.phase==='victory'&&(x.reward?.totalGold??0)===0).length,
   meanGoldPerSuccessfulExpedition:attempts.filter(x=>x.phase==='victory').reduce((n,x)=>n+(x.reward?.totalGold??0),0)/Math.max(1,attempts.filter(x=>x.phase==='victory').length),
+  goldRewardSources:{
+   carriedGold:attempts.reduce((n,x)=>n+(x.expeditionLoot?.inventory??[]).filter(y=>y.kind==='gold').reduce((m,y)=>m+y.quantity,0),0),
+   carriedGems:attempts.reduce((n,x)=>n+(x.expeditionLoot?.inventory??[]).filter(y=>y.kind==='gem').reduce((m,y)=>m+y.quantity,0),0),
+   questGold:attempts.reduce((n,x)=>n+(x.reward?.questReward?.gold??0),0),
+   rewardGold:attempts.reduce((n,x)=>n+(x.reward?.totalGold??0),0)
+  },
+  lootKindCounts:Object.fromEntries(['gold','gem','crest','deed','bust','trinket'].map(kind=>[kind,attempts.reduce((n,x)=>n+(x.expeditionLoot?.inventory??[]).filter(y=>y.kind===kind).reduce((m,y)=>m+y.quantity,0),0)])),
   earnedGold:attempts.reduce((n,x)=>n+(x.reward?.totalGold??0),0),
   earnedCrests:attempts.reduce((n,x)=>n+(x.reward?.crests??0),0),
   earnedDeeds:attempts.reduce((n,x)=>n+(x.reward?.deeds??0),0),
