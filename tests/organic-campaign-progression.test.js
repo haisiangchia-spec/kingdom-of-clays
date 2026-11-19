@@ -89,7 +89,10 @@ function campaign(seed){
  const history=[];
  for(let week=0;week<20;week++){
   prepareTown(town);
-  if(!fillSquad(town))break;
+  if(!fillSquad(town)){
+   history.push({week:week+1,phase:'blocked',reason:'insufficient living and available heroes',living:town.roster.filter(h=>!h.unit.dead).length,gold:town.gold});
+   break;
+  }
   const veteranWon=town.campaignVictories.includes('veteran-victory');
   const id=veteranWon?'warrens-champion':
    town.completedExpeditions>=3?'warrens-veteran':
@@ -104,7 +107,7 @@ function campaign(seed){
   if(d.phase==='victory')completeCampaignExpedition(town,d);
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,encounters:report.encounters,
+  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,encounters:report.encounters,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -120,7 +123,11 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   champion:attempts.filter(x=>x.tier==='champion').length,
   completedChampion:attempts.filter(x=>x.tier==='champion'&&x.phase==='victory').length,
   highestEarnedLevel:Math.max(...results.flatMap(x=>x.levels)),
-  lowerTierEncounters:attempts.reduce((n,x)=>n+x.lowerTierEncounters,0)};
+  lowerTierEncounters:attempts.reduce((n,x)=>n+(x.lowerTierEncounters??0),0),
+  blockedCampaigns:results.filter(x=>x.history.some(h=>h.phase==='blocked')).length,
+  blockedReasons:results.flatMap(x=>x.history.filter(h=>h.phase==='blocked').map(h=>h.reason)),
+  veteranWins:attempts.filter(x=>x.tier==='veteran'&&x.phase==='victory').length,
+  apprenticeWins:attempts.filter(x=>x.tier==='apprentice'&&x.phase==='victory').length};
  console.log('Organic campaign progression '+JSON.stringify(summary));
  assert.ok(attempts.length>0);
  for(const result of results){
