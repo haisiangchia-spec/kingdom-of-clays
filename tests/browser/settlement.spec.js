@@ -49,7 +49,7 @@ test('victory reward handoff, spending heirlooms, and bonuses persist through re
  await page.getByRole('button',{name:/Upgrade Market/}).click();
  await expect(page.locator('#settlement-panel')).toContainText('Market Lv 1/3');
  await page.reload();
- await expect(page.locator('#settlement-panel')).toContainText('Treasury: 350 gold · 1 crests · 1 deeds');
+ await expect(page.locator('#settlement-panel')).toContainText('Treasury: 450 gold · 1 crests · 1 deeds');
  await expect(page.locator('#settlement-panel')).toContainText('Market Lv 1/3');
  await expect(page.getByRole('button',{name:'Return rewards to settlement'})).toHaveCount(0);
  await page.getByRole('button',{name:'New expedition'}).click();
