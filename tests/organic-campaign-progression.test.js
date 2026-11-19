@@ -124,6 +124,8 @@ function campaign(seed){
    town.completedExpeditions>=1?'warrens-recon':'crypt-recon';
   const quest=selectQuest(town,id);
   const levels=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).level);
+  const entryStress=town.squad.map(x=>town.roster.find(h=>h.rosterId===x).unit.stress);
+  const entryHp=town.squad.map(x=>{const u=town.roster.find(h=>h.rosterId===x).unit;return Math.round(u.hp/u.maxHp*100)});
   const d=createDungeon(seed*100+week+1,{region:quest.region,tier:quest.tier,
    difficulty:quest.difficulty,party:prepareRosterParty(town,expeditionBonuses(town)),
    proceduralBranches:true,variableCorridors:true,interactiveEvents:true});
@@ -134,7 +136,7 @@ function campaign(seed){
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},reward,expeditionLoot,encounters:report.encounters,
+  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},reward,expeditionLoot,encounters:report.encounters,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -160,6 +162,9 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   championStartingLevelDistribution:Object.fromEntries([0,1,2,3,4,5,6].map(level=>[level,attempts.filter(x=>x.tier==='champion').flatMap(x=>x.levels).filter(x=>x===level).length])),
   championPartyDeaths:attempts.filter(x=>x.tier==='champion').reduce((n,x)=>n+(x.partyDeaths??0),0),
   apprenticeWins:attempts.filter(x=>x.tier==='apprentice'&&x.phase==='victory').length,
+  veteranMeanEntryStress:attempts.filter(x=>x.tier==='veteran').reduce((n,x)=>n+x.entryStress.reduce((a,b)=>a+b,0),0)/Math.max(1,attempts.filter(x=>x.tier==='veteran').length*4),
+  veteranMeanEntryHpPercent:attempts.filter(x=>x.tier==='veteran').reduce((n,x)=>n+x.entryHp.reduce((a,b)=>a+b,0),0)/Math.max(1,attempts.filter(x=>x.tier==='veteran').length*4),
+  veteranMeanEncountersBeforeDefeat:attempts.filter(x=>x.tier==='veteran'&&x.phase==='defeat').reduce((n,x)=>n+x.encounters,0)/Math.max(1,attempts.filter(x=>x.tier==='veteran'&&x.phase==='defeat').length),
   earnedGold:attempts.reduce((n,x)=>n+(x.reward?.totalGold??0),0),
   earnedCrests:attempts.reduce((n,x)=>n+(x.reward?.crests??0),0),
   earnedDeeds:attempts.reduce((n,x)=>n+(x.reward?.deeds??0),0),
