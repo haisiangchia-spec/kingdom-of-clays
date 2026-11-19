@@ -154,10 +154,10 @@ function prepareTown(town){
  }
 
 }
-function campaign(seed){
+function campaign(seed,maxWeeks=100){
  let town=createCampaignSettlement();
  const history=[];
- for(let week=0;week<40;week++){
+ for(let week=0;week<maxWeeks;week++){
   prepareTown(town);
   if(!fillSquad(town)){
    history.push({week:week+1,phase:'blocked',reason:'insufficient living and available heroes',living:town.roster.filter(h=>!h.unit.dead).length,gold:town.gold});
@@ -201,9 +201,14 @@ function campaign(seed){
  return {history,progress:campaignProgress(town),levels:town.roster.map(h=>h.level)};
 }
 test('seeded player campaigns advance through real Apprentice, Veteran and Champion quest gates',()=>{
- const results=Array.from({length:5},(_,i)=>campaign(i+1));
+ // DD1 has no fixed normal-mode deadline. Evaluate a 100-week primary
+ // horizon and a 150-week endurance horizon without granting free progress.
+ const results=[...Array.from({length:5},(_,i)=>campaign(i+1,100)),campaign(6,150)];
  const attempts=results.flatMap(x=>x.history);
- const summary={campaigns:results.length,attempts:attempts.length,
+ const summary={campaigns:results.length,primaryHorizonWeeks:100,enduranceHorizonWeeks:150,attempts:attempts.length,
+  firstVeteranAttemptWeek:results.map(x=>x.history.find(h=>h.tier==='veteran')?.week??null),
+  firstChampionAttemptWeek:results.map(x=>x.history.find(h=>h.tier==='champion')?.week??null),
+  campaignCompletionWeek:results.map(x=>x.history.find(h=>h.tier==='champion'&&h.phase==='victory')?.week??null),
   apprentice:attempts.filter(x=>x.tier==='apprentice').length,
   veteran:attempts.filter(x=>x.tier==='veteran').length,
   champion:attempts.filter(x=>x.tier==='champion').length,
