@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {createCampaignSettlement,expeditionBonuses,encodeCampaignSave,decodeCampaignSave,upgradeFacility,nextFacilityCost,upgradeStageCoach,STAGE_COACH_UPGRADE_COSTS} from '../src/settlement.js';
 import {selectQuest} from '../src/quest-board.js';
 import {completeCampaignExpedition,campaignProgress} from '../src/campaign-progression.js';
-import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero,rosterCapacity} from '../src/hero-roster.js';
-import {advanceTownWeek,recruitFromCoach} from '../src/town-week.js';
+import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero,rosterCapacity,upgradeHeroEquipment} from '../src/hero-roster.js';
+import {advanceTownWeek,recruitFromCoach,bookStressTreatment,TREATMENTS} from '../src/town-week.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger} from '../src/dungeon.js';
 import {leaveLoot,collectLoot,inventoryCanAdd} from '../src/inventory.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from '../src/engine.js';
@@ -103,6 +103,23 @@ function prepareTown(town){
   const cost=nextFacilityCost(town,facility);
   if(cost&&Object.entries(cost).every(([resource,amount])=>(town[resource]??0)>=amount))
    upgradeFacility(town,facility);
+ }
+ // Spend earned gold on available level-gated equipment before Veteran runs.
+ for(const hero of town.roster.filter(h=>!h.unit.dead&&h.level>=1)){
+  for(const kind of ['weapon','armor']){
+   const rank=hero.equipment?.[kind]??0;
+   if(rank<hero.level&&rank<5&&town.gold>=100*(rank+1)+TREATMENTS.abbey.gold)
+    upgradeHeroEquipment(town,hero.rosterId,kind);
+  }
+ }
+ // Reserve two genuine town treatment slots for stressed survivors.
+ // Treatment completes after the next expedition; treated heroes cannot deploy.
+ const stressed=town.roster.filter(h=>!h.unit.dead&&h.unit.stress>=80)
+  .sort((a,b)=>b.level-a.level||b.unit.stress-a.unit.stress);
+ for(const service of ['abbey','tavern']){
+  const hero=stressed.find(h=>!town.town.treatments.some(t=>t.rosterId===h.rosterId));
+  if(hero&&town.gold>=TREATMENTS[service].gold+500)
+   bookStressTreatment(town,hero.rosterId,service);
  }
  for(const hero of town.roster){
   if(hero.unit.dead&&town.facilities.temple>0&&town.gold>=250)resurrectHero(town,hero.rosterId);
