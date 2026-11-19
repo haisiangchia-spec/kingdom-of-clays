@@ -147,9 +147,17 @@ export function returnPartyToRoster(settlement,expedition){
   hero.unit=copyUnit;
   hero.diseases=[...(copyUnit.diseases??hero.diseases??[])];
   if(!hero.unit.dead&&expedition.phase==='victory'){
-   // Clays campaign balancing: higher-tier quests advance Resolve faster.
-   const resolveXp={apprentice:2,veteran:4,champion:8};
-   hero.xp+=resolveXp[expedition.tier??'apprentice']??2;
+   // DD1 Resolve XP by difficulty and mission length. Clays scout,
+   // patrol and gauntlet correspond to short, medium and long missions.
+   // Preserve short-mission behavior for legacy expeditions with no length.
+   const resolveXp={
+    apprentice:{scout:2,patrol:3,gauntlet:4},
+    veteran:{scout:4,patrol:6,gauntlet:8},
+    champion:{scout:8,patrol:12,gauntlet:16}
+   };
+   const tier=expedition.tier??'apprentice';
+   const length=expedition.difficulty??'scout';
+   hero.xp+=(resolveXp[tier]??resolveXp.apprentice)[length]??resolveXp.apprentice.scout;
    const thresholds=[0,2,8,14,24,36,48];
    hero.level=thresholds.reduce((lvl,required,i)=>hero.xp>=required?i:lvl,0);
   }
