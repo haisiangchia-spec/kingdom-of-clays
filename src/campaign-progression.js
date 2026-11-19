@@ -80,7 +80,24 @@ export function completeCampaignExpedition(settlement,expedition){
   if(!Array.isArray(expedition.cleared)||objectives.some(room=>!expedition.cleared.includes(room)))throw Error('Expedition quest objectives are incomplete');
  }
  if(expedition.pendingLoot)throw Error('Resolve pending loot before settlement transfer');
+ // DD1 separates guaranteed, quest-board rewards from collected loot.
+ // Only pay explicitly configured quest rewards; do not invent gold amounts.
+ const questReward=expedition.questReward??null;
+ if(questReward!==null){
+  if(!questReward||typeof questReward!=='object'||Array.isArray(questReward))throw Error('Invalid quest reward');
+  const allowed=['gold','crests','deeds','busts','trinkets'];
+  if(Object.keys(questReward).some(key=>!allowed.includes(key)))throw Error('Unknown quest reward');
+  for(const [key,value] of Object.entries(questReward)){
+   if(!Number.isSafeInteger(value)||value<0)throw Error('Invalid quest reward quantity');
+   if(key==='busts'&&!Number.isFinite(settlement.busts))throw Error('Settlement does not support bust rewards');
+  }
+ }
  const report=claimExpeditionRewards(expedition,settlement);
+ if(questReward){
+  for(const key of ['gold','crests','deeds','busts'])if(questReward[key])settlement[key]+=questReward[key];
+  for(let i=0;i<(questReward.trinkets??0);i++)settlement.trinkets.push('ward-charm');
+  expedition.questRewardClaimed=true;
+ }
  settlement.completedExpeditions++;
  recordCampaignVictory(settlement,expedition);
  return {report,progress:campaignProgress(settlement)};
