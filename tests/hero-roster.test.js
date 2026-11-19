@@ -37,7 +37,7 @@ test('recruitment costs gold, supports duplicates, and party selection preserves
  assert.equal(s.roster.length,ROSTER_CAPACITY);
  assert.throws(()=>recruitHero(s,'Swordsman'),/Roster is full/);
 });
-test('wounds, stress and permanent death survive the return from a completed expedition',()=>{
+test('survivors recover HP while stress and permanent death survive expedition return',()=>{
  const s=createCampaignSettlement();
  const d=createDungeon(901,{interactiveEvents:true,party:prepareRosterParty(s)});
  d.party[0].hp=17;d.party[0].stress=61;
@@ -45,7 +45,7 @@ test('wounds, stress and permanent death survive the return from a completed exp
  d.phase='defeat';
  assert.equal(returnPartyToRoster(s,d),true);
  assert.equal(returnPartyToRoster(s,d),false);
- assert.equal(s.roster[0].unit.hp,17);
+ assert.equal(s.roster[0].unit.hp,s.roster[0].unit.maxHp);
  assert.equal(s.roster[0].unit.stress,61);
  assert.equal(s.roster[1].unit.dead,true);
  assert.equal(s.roster[1].unit.hp,0);
@@ -63,7 +63,7 @@ test('surviving heroes earn one experience on victory; Guild HP does not become 
  first.phase='victory';
  returnPartyToRoster(s,first);
  assert.equal(s.roster[0].unit.maxHp,33);
- assert.equal(s.roster[0].unit.hp,28);
+ assert.equal(s.roster[0].unit.hp,33);
  assert.equal(s.roster[0].xp,2);
  assert.equal(s.roster[0].level,1);
  const second=createDungeon(903,{party:prepareRosterParty(s,bonuses),bonuses});
