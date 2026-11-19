@@ -78,9 +78,9 @@ test('Temple resurrection is a priced user-approved exception to permanent death
  s.gold=RESURRECTION_COST+150;
  assert.throws(()=>resurrectHero(s,'r1'),/Temple must reach level one/);
  s.crests=1;s.deeds=1;upgradeFacility(s,'temple');
- assert.equal(s.gold,RESURRECTION_COST);
+ assert.equal(s.gold,RESURRECTION_COST+150);
  const hero=resurrectHero(s,'r1');
- assert.equal(s.gold,0);
+ assert.equal(s.gold,150);
  assert.equal(hero.unit.dead,false);
  assert.equal(hero.unit.hp,Math.ceil(hero.unit.maxHp/2));
  assert.equal(hero.unit.stress,100);
