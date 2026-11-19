@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createCampaignSettlement,normalizeCampaignSettlement,encodeCampaignSave,decodeCampaignSave,expeditionBonuses,upgradeFacility} from '../src/settlement.js';
+import {createCampaignSettlement,normalizeCampaignSettlement,encodeCampaignSave,decodeCampaignSave,expeditionBonuses,upgradeFacility,upgradeStageCoach} from '../src/settlement.js';
 import {createDungeon} from '../src/dungeon.js';
 import {claimExpeditionRewards} from '../src/inventory.js';
-import {HERO_CLASSES,ROSTER_CAPACITY,RECRUITMENT_COST,RESURRECTION_COST,createHeroRoster,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,upgradeHeroSkill,validateHeroRoster} from '../src/hero-roster.js';
+import {HERO_CLASSES,ROSTER_CAPACITY,rosterCapacity,RECRUITMENT_COST,RESURRECTION_COST,createHeroRoster,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,upgradeHeroSkill,validateHeroRoster} from '../src/hero-roster.js';
 
 test('initial four heroes have persistent IDs, classes, and independent combat units',()=>{
  const s=createCampaignSettlement();
@@ -235,4 +235,19 @@ test('equipment combat bonuses persist through campaign save and expedition retu
  for(const hero of saved.roster){
   for(const [key,value] of Object.entries(expected.get(hero.rosterId)))assert.equal(hero.unit[key],value,'expedition return lost '+hero.heroClass+' '+key);
  }
+});
+
+test('Stage Coach barracks expand roster capacity and network increases weekly arrivals',()=>{
+ const s=createCampaignSettlement();
+ assert.equal(rosterCapacity(s),8);
+ s.gold=100000;s.crests=1000;s.deeds=1000;
+ for(let i=0;i<5;i++)upgradeStageCoach(s,'barracks');
+ assert.equal(rosterCapacity(s),28);
+ for(let i=4;i<28;i++)recruitHero(s,'Hunter');
+ assert.equal(s.roster.length,28);
+ assert.throws(()=>recruitHero(s,'Priest'),/Roster is full/);
+ for(let i=0;i<5;i++)upgradeStageCoach(s,'network');
+ const restored=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ assert.deepEqual(restored.stageCoach,{barracks:5,network:5});
+ assert.equal(rosterCapacity(restored),28);
 });
