@@ -21,17 +21,18 @@ test('quest board declares one DD1-style completion trinket with tier-length rar
  s.completedExpeditions=3;
  s.campaignVictories.push('veteran-victory');
  const expected={
-  'crypt-recon':'common',
-  'crypt-purge':'uncommon',
-  'warrens-recon':'common',
-  'warrens-containment':'uncommon',
-  'warrens-veteran':'rare',
-  'warrens-champion':'ancestral'
+  'crypt-recon':{rarity:'common',length:'short',gold:2000,crests:2},
+  'crypt-purge':{rarity:'uncommon',length:'medium',gold:3500,crests:4},
+  'warrens-recon':{rarity:'common',length:'short',gold:2000,deeds:2},
+  'warrens-containment':{rarity:'uncommon',length:'medium',gold:3500,deeds:4},
+  'warrens-veteran':{rarity:'rare',length:'medium',gold:5000,deeds:6},
+  'warrens-champion':{rarity:'ancestral',length:'long',gold:7000,deeds:8}
  };
  for(const quest of availableQuests(s)){
-  assert.deepEqual(quest.questReward,{trinkets:1});
-  assert.equal(quest.trinketRarity,expected[quest.id]);
-  assert.equal(quest.questReward.gold,undefined); // Do not invent DD1 payout figures.
+  const {rarity,length,...reward}=expected[quest.id];
+  assert.deepEqual(quest.questReward,{...reward,trinkets:1});
+  assert.equal(quest.trinketRarity,rarity);
+  assert.equal(quest.length,length);
  }
 });
 
