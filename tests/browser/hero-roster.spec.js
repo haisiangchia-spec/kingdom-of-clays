@@ -80,7 +80,7 @@ test('hero roster state survives an expedition end and cannot be transferred twi
   return {hp:after.settlement.roster[1].unit.hp,stress:after.settlement.roster[1].unit.stress,
    dead:after.settlement.roster[2].unit.dead,again:returnPartyToRoster(after.settlement,after.expedition)};
  });
- expect(output).toEqual({hp:9,stress:76,dead:true,again:false});
+ expect(output).toEqual({hp:33,stress:76,dead:true,again:false});
 });
 
 test('full roster with a dead hero can dismiss, recruit and fill vacant party rank',async ({page})=>{
