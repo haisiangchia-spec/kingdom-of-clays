@@ -119,10 +119,12 @@ function campaign(seed){
    proceduralBranches:true,variableCorridors:true});
   d.questId=quest.id;
   const report=play(d,seed*100+week+1);
-  if(d.phase==='victory')completeCampaignExpedition(town,d);
+  const expeditionLoot={inventory:d.inventory.map(x=>({kind:x.kind,quantity:x.quantity})),pendingLoot:!!d.pendingLoot,loot:d.loot};
+  let reward=null;
+  if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,encounters:report.encounters,
+  history.push({week:week+1,quest:id,tier:quest.tier,phase:d.phase,levels,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},reward,expeditionLoot,encounters:report.encounters,
    lowerTierEncounters:report.mix.lower});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -147,7 +149,11 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   championLowerTierEncounters:attempts.filter(x=>x.tier==='champion').reduce((n,x)=>n+x.lowerTierEncounters,0),
   championStartingLevelDistribution:Object.fromEntries([0,1,2,3,4,5,6].map(level=>[level,attempts.filter(x=>x.tier==='champion').flatMap(x=>x.levels).filter(x=>x===level).length])),
   championPartyDeaths:attempts.filter(x=>x.tier==='champion').reduce((n,x)=>n+(x.partyDeaths??0),0),
-  apprenticeWins:attempts.filter(x=>x.tier==='apprentice'&&x.phase==='victory').length};
+  apprenticeWins:attempts.filter(x=>x.tier==='apprentice'&&x.phase==='victory').length,
+  earnedGold:attempts.reduce((n,x)=>n+(x.reward?.totalGold??0),0),
+  earnedCrests:attempts.reduce((n,x)=>n+(x.reward?.crests??0),0),
+  earnedDeeds:attempts.reduce((n,x)=>n+(x.reward?.deeds??0),0),
+  lootBearingExpeditions:attempts.filter(x=>x.expeditionLoot?.inventory?.length>0).length};
  console.log('Organic campaign progression '+JSON.stringify(summary));
  for(let i=0;i<results.length;i++)console.log('Organic campaign trace '+JSON.stringify({seed:i+1,history:results[i].history}));
  assert.ok(attempts.length>0);
