@@ -44,7 +44,7 @@ test('returning heroes reverses quirk, illness and Guild combat bonuses once wit
   assert.equal(h.unit.dodge,base.dodge);
   assert.ok(!h.unit.traitApplied);
  }
- assert.equal(h.unit.hp,base.hp-9);
+ assert.equal(h.unit.hp,base.maxHp);
 });
 test('source-backed Wretch disease exposure persists on roster, but combat lab is unchanged',()=>{
  const s=createCampaignSettlement();
