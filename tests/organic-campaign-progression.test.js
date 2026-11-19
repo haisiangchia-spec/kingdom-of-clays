@@ -6,7 +6,7 @@ import {completeCampaignExpedition,campaignProgress} from '../src/campaign-progr
 import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero} from '../src/hero-roster.js';
 import {advanceTownWeek,recruitFromCoach} from '../src/town-week.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger} from '../src/dungeon.js';
-import {leaveLoot} from '../src/inventory.js';
+import {leaveLoot,collectLoot,inventoryCanAdd} from '../src/inventory.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from '../src/engine.js';
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {chooseHeroAction} from './full-expedition-endurance.test.js';
@@ -30,12 +30,18 @@ function battle(d,random){
  assert.notEqual(status(b),'ongoing','combat stalled');
  resolveDungeonBattle(d);
 }
+function handleLoot(d){
+ if(!d.pendingLoot)return;
+ const {kind,quantity}=d.pendingLoot;
+ if(inventoryCanAdd(d,kind,quantity))collectLoot(d);
+ else leaveLoot(d);
+}
 function play(d,seed){
  const random=rng(seed+830000);
  const mix={lower:0,same:0};let encounters=0;
  for(const room of ['gallery','watch','gallery','vault','gallery','watch','sanctum']){
   if(d.phase!=='explore')break;
-  if(d.pendingLoot)leaveLoot(d);
+  if(d.pendingLoot)handleLoot(d);
   beginCorridor(d,room);
   let guard=0;
   while((d.pendingTravel||d.phase==='combat')&&!['victory','defeat'].includes(d.phase)&&guard++<70){
@@ -47,13 +53,13 @@ function play(d,seed){
      mix[b.encounterTier===lower?'lower':'same']++;
     }
     encounters++;battle(d,random);
-   }else if(d.pendingLoot)leaveLoot(d);
+   }else if(d.pendingLoot)handleLoot(d);
    else if(d.pendingHunger)resolveHunger(d,d.supplies.food>=4?'eat':'skip');
    else advanceCorridor(d);
   }
   assert.ok(guard<70,'travel stalled');
  }
- if(d.pendingLoot)leaveLoot(d);
+ if(d.pendingLoot)handleLoot(d);
  return {encounters,mix};
 }
 function fillSquad(town){
