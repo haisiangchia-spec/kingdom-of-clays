@@ -81,7 +81,8 @@ export function completeCampaignExpedition(settlement,expedition){
  }
  if(expedition.pendingLoot)throw Error('Resolve pending loot before settlement transfer');
  // DD1 separates guaranteed, quest-board rewards from collected loot.
- // A validated quest ID guarantees one completion trinket, even when older\n // expedition saves omit questReward. Never invent gold or heirloom amounts.
+ // A validated quest ID guarantees one completion trinket, even when older
+ // expedition saves omit questReward. Never invent gold or heirloom amounts.
  const questReward=expedition.questReward??(expedition.questId?{trinkets:1}:null);
  if(questReward!==null){
   if(!questReward||typeof questReward!=='object'||Array.isArray(questReward))throw Error('Invalid quest reward');
@@ -111,7 +112,12 @@ export function completeCampaignExpedition(settlement,expedition){
  const report=claimExpeditionRewards(expedition,settlement);
  if(questReward){
   for(const key of ['gold','crests','deeds','busts'])if(questReward[key])settlement[key]+=questReward[key];
-  const rarity=expedition.questId?({\n   'crypt-recon':'common','crypt-purge':'uncommon',\n   'warrens-recon':'common','warrens-containment':'uncommon',\n   'warrens-veteran':'rare','warrens-champion':'ancestral'\n  })[expedition.questId]:null;\n  for(let i=0;i<(questReward.trinkets??0);i++)settlement.trinkets.push(rarity?'ward-charm-'+rarity:'ward-charm');
+  const rarity=expedition.questId?({
+   'crypt-recon':'common','crypt-purge':'uncommon',
+   'warrens-recon':'common','warrens-containment':'uncommon',
+   'warrens-veteran':'rare','warrens-champion':'ancestral'
+  })[expedition.questId]:null;
+  for(let i=0;i<(questReward.trinkets??0);i++)settlement.trinkets.push(rarity?'ward-charm-'+rarity:'ward-charm');
   expedition.questRewardClaimed=true;
  }
  settlement.completedExpeditions++;
