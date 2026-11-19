@@ -154,6 +154,7 @@ jobs:
           ENDURANCE: ${{ steps.endurance.outcome }}
           MULTI_TIER: ${{ steps.multi_tier.outcome }}
           EXPEDITION: ${{ steps.expedition.outcome }}
+          ORGANIC: ${{ steps.organic.outcome }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           title="Automated campaign verification status"
@@ -225,6 +226,8 @@ jobs:
           FULL: ${{ steps.full.outcome }}
           ENDURANCE: ${{ steps.endurance.outcome }}
           MULTI_TIER: ${{ steps.multi_tier.outcome }}
+          EXPEDITION: ${{ steps.expedition.outcome }}
+          ORGANIC: ${{ steps.organic.outcome }}
         run: |
           test "$FOCUSED" = success
           test "$FULL" = success
