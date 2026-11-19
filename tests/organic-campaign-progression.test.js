@@ -121,7 +121,9 @@ function fillSquad(town){
  return true;
 }
 function prepareTown(town){
- // Expand barracks before filling reserves; all costs are paid from earned loot.
+ // Protect a small capital reserve for Stage Coach expansion. Recruitment
+ // capacity takes priority over discretionary facilities and treatments.
+ // Every upgrade still consumes actual earned gold and heirlooms.
  for(const track of ['barracks','network']){
   const level=town.stageCoach[track];
   if(level>=5)continue;
@@ -131,14 +133,14 @@ function prepareTown(town){
  // All upgrades and services go through public gameplay actions, using earned resources.
  for(const facility of ['guild','temple','market']){
   const cost=nextFacilityCost(town,facility);
-  if(cost&&Object.entries(cost).every(([resource,amount])=>(town[resource]??0)>=amount))
+  if(cost&&town.gold>=cost.gold+1000&&Object.entries(cost).every(([resource,amount])=>(town[resource]??0)>=amount))
    upgradeFacility(town,facility);
  }
  // Spend earned gold on available level-gated equipment before Veteran runs.
  for(const hero of town.roster.filter(h=>!h.unit.dead&&h.level>=1)){
   for(const kind of ['weapon','armor']){
    const rank=hero.equipment?.[kind]??0;
-   if(rank<hero.level&&rank<5&&town.gold>=100*(rank+1)+TREATMENTS.abbey.gold)
+   if(rank<hero.level&&rank<5&&town.gold>=100*(rank+1)+1000)
     upgradeHeroEquipment(town,hero.rosterId,kind);
   }
  }
@@ -148,7 +150,7 @@ function prepareTown(town){
   for(const skillId of BENCHMARK_SKILLS[hero.heroClass]??[]){
    while((hero.unit.skillLevels?.[skillId]??1)<Math.min(hero.level,5)){
     try{
-     if(town.gold<1500)break;
+     if(town.gold<2000)break;
      upgradeHeroSkill(town,hero.rosterId,skillId);
     }catch(error){
      if(/Unverified skill upgrade|No verified|not verified|Unknown skill|not available|Insufficient gold/.test(error.message))break;
@@ -163,11 +165,11 @@ function prepareTown(town){
   .sort((a,b)=>b.level-a.level||b.unit.stress-a.unit.stress);
  for(const service of ['abbey','tavern']){
   const hero=stressed.find(h=>!town.town.treatments.some(t=>t.rosterId===h.rosterId));
-  if(hero&&town.gold>=TREATMENTS[service].gold+500)
+  if(hero&&town.gold>=TREATMENTS[service].gold+1500)
    bookStressTreatment(town,hero.rosterId,service);
  }
  for(const hero of town.roster){
-  if(hero.unit.dead&&town.facilities.temple>0&&town.gold>=250)resurrectHero(town,hero.rosterId);
+  if(hero.unit.dead&&town.facilities.temple>0&&town.gold>=1750)resurrectHero(town,hero.rosterId);
   if(!hero.unit.dead&&town.trinkets.includes('ward-charm')&&!hero.equippedTrinket)
    equipTrinket(town,hero.rosterId);
  }
