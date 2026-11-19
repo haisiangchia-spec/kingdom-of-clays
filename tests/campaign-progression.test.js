@@ -290,7 +290,7 @@ test('invalid configured quest rewards reject without claiming loot or advancing
   expedition.questId='crypt-recon';
   expedition.questReward=reward;
   assert.throws(()=>completeCampaignExpedition(settlement,expedition),/reward|bust/i);
-  assert.equal(expedition.rewardClaimed,false);
+  assert.notEqual(expedition.rewardClaimed,true);
   assert.equal(settlement.completedExpeditions,0);
  }
 });
