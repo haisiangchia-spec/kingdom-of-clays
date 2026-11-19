@@ -36,7 +36,7 @@ export function validateTown(settlement){
    !Array.isArray(town.treatments)||town.treatments.length>names.length)throw Error('Invalid town state');
  const offerIds=new Set();
  for(const offer of town.offers){
-  if(!offer||typeof offer.offerId!=='string'||!new RegExp('^w'+town.week+'-o[1-7](offer.offerId)||
+  if(!offer||typeof offer.offerId!=='string'||!new RegExp('^w'+town.week+'-o[1-7]'+String.fromCharCode(36)).test(offer.offerId)||
     offerIds.has(offer.offerId)||!HERO_CLASSES.includes(offer.heroClass))throw Error('Invalid Stage Coach offer');
   offerIds.add(offer.offerId);
  }
