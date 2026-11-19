@@ -324,3 +324,36 @@ test('oversized trinket rewards fail without altering settlement or expedition',
  assert.equal(settlement.completedExpeditions,0);
  assert.notEqual(expedition.rewardClaimed,true);
 });
+
+test('combined carried loot and quest payouts cannot overflow settlement accounting',()=>{
+ const settlement=createCampaignSettlement();
+ settlement.gold=Number.MAX_SAFE_INTEGER-150;
+ const expedition=createDungeon(916,{tier:'apprentice',region:'crypt',interactiveEvents:true});
+ offerLoot(expedition,'gold',100);collectLoot(expedition);
+ expedition.phase='victory';
+ expedition.cleared=['sanctum'];
+ expedition.questId='crypt-recon';
+ expedition.questReward={gold:100};
+ const beforeGold=settlement.gold;
+ assert.throws(()=>completeCampaignExpedition(settlement,expedition),/Combined expedition reward/);
+ assert.equal(settlement.gold,beforeGold);
+ assert.equal(settlement.completedExpeditions,0);
+ assert.notEqual(expedition.rewardClaimed,true);
+ assert.notEqual(expedition.questRewardClaimed,true);
+ assert.equal(expedition.inventory.find(x=>x.kind==='gold').quantity,100);
+});
+
+test('combined carried and guaranteed trinkets cannot exceed settlement storage',()=>{
+ const settlement=createCampaignSettlement();
+ settlement.trinkets=Array(999).fill('ward-charm');
+ const expedition=createDungeon(917,{tier:'apprentice',region:'crypt',interactiveEvents:true});
+ offerLoot(expedition,'trinket',1);collectLoot(expedition);
+ expedition.phase='victory';
+ expedition.cleared=['sanctum'];
+ expedition.questId='crypt-recon';
+ expedition.questReward={trinkets:1};
+ assert.throws(()=>completeCampaignExpedition(settlement,expedition),/Combined expedition trinket reward/);
+ assert.equal(settlement.trinkets.length,999);
+ assert.equal(settlement.completedExpeditions,0);
+ assert.notEqual(expedition.rewardClaimed,true);
+});
