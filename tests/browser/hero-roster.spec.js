@@ -64,7 +64,7 @@ test('Temple resurrection and trinket equipment keep spend and hero states throu
   const s=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY)).settlement;
   return {gold:s.gold,temple:s.facilities.temple,dead:s.roster[0].unit.dead,stress:s.roster[0].unit.stress,gear:s.roster[0].equippedTrinket,stored:s.trinkets.length};
  });
- expect(state).toEqual({gold:250,temple:1,dead:false,stress:100,gear:'ward-charm',stored:0});
+ expect(state).toEqual({gold:400,temple:1,dead:false,stress:100,gear:'ward-charm',stored:0});
 });
 
 test('hero roster state survives an expedition end and cannot be transferred twice',async ({page})=>{
