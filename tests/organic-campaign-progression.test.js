@@ -137,7 +137,13 @@ function prepareTown(town){
    upgradeFacility(town,facility);
  }
  // Spend earned gold on available level-gated equipment before Veteran runs.
- for(const hero of town.roster.filter(h=>!h.unit.dead&&h.level>=1)){
+ const upgradeCandidates=town.roster.filter(h=>!h.unit.dead&&h.level>=1)
+  .sort((a,b)=>b.level-a.level||a.unit.stress-b.unit.stress||
+   ((b.equipment?.weapon??0)+(b.equipment?.armor??0))-
+   ((a.equipment?.weapon??0)+(a.equipment?.armor??0)));
+ // Concentrate scarce gold on a deployable four-hero core rather than
+ // spreading half-finished upgrades across every Stage Coach recruit.
+ for(const hero of upgradeCandidates.slice(0,4)){
   for(const kind of ['weapon','armor']){
    const rank=hero.equipment?.[kind]??0;
    if(rank<hero.level&&rank<5&&town.gold>=100*(rank+1)+250)
@@ -146,7 +152,7 @@ function prepareTown(town){
  }
  // Match the verified skill-upgrade policy of the historical progressed
  // expedition fixture, purchasing only supported levels with earned gold.
- for(const hero of town.roster.filter(h=>!h.unit.dead&&h.level>=2)){
+ for(const hero of upgradeCandidates.slice(0,4).filter(h=>h.level>=2)){
   for(const skillId of BENCHMARK_SKILLS[hero.heroClass]??[]){
    while((hero.unit.skillLevels?.[skillId]??1)<Math.min(hero.level,5)){
     try{
