@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createCampaignSettlement} from '../src/settlement.js';
+import {createCampaignSettlement,upgradeStageCoach,upgradeFacility} from '../src/settlement.js';
 import {availableQuests,selectQuest} from '../src/quest-board.js';
 test('quest board gates contracts and assigns distinct difficulty',()=>{
  const s=createCampaignSettlement();
@@ -33,4 +33,19 @@ test('quest board declares one DD1-style completion trinket with tier-length rar
   assert.equal(quest.trinketRarity,expected[quest.id]);
   assert.equal(quest.questReward.gold,undefined); // Do not invent DD1 payout figures.
  }
+});
+
+test('DD1-style town construction spends heirlooms but never expedition gold',()=>{
+ const town=createCampaignSettlement();
+ town.gold=5000;
+ town.crests=100;
+ town.deeds=100;
+ const before=town.gold;
+ const coach=upgradeStageCoach(town,'barracks');
+ assert.equal(coach.cost.gold,0);
+ assert.equal(town.gold,before);
+ const facility=upgradeFacility(town,'guild');
+ assert.equal(facility.cost.gold,0);
+ assert.equal(town.gold,before);
+ assert.ok(town.crests<100||town.deeds<100);
 });
