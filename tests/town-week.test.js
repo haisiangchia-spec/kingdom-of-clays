@@ -176,6 +176,12 @@ test('fully upgraded Abbey and Tavern support twelve distinct simultaneous treat
  }
  assert.equal(s.town.treatments.length,12);
  assert.equal(s.gold,0);
+ // Even a funded thirteenth hero cannot exceed the six independent room caps.
+ s.stageCoach.barracks=2;
+ const extra=recruitHero(s,'Priest');extra.unit.stress=100;
+ s.gold=1000;
+ assert.throws(()=>bookStressTreatment(s,extra.rosterId,'abbey'),/room is occupied/);
+ assert.equal(s.gold,1000,'rejected booking must not spend gold');
  const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
  assert.equal(loaded.town.treatments.length,12);
  const finished={phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true};
