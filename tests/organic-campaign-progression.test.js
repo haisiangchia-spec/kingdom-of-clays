@@ -215,7 +215,7 @@ function prepareTown(town){
   const hero=stressed.find(h=>!town.town.treatments.some(t=>t.rosterId===h.rosterId));
   if(hero&&town.gold>=TREATMENTS[service].gold+1500)
    {const before=town.gold;bookStressTreatment(town,hero.rosterId,service);spending.treatments+=before-town.gold;
-    town._organicTreatmentAudit.booked.push({level:hero.level,stress:hero.unit.stress,
+    town._organicTreatmentAudit.booked.push({rosterId:hero.rosterId,level:hero.level,stress:hero.unit.stress,
      equippedVeteran:hero.level>=3&&(hero.equipment?.weapon??0)>=3&&(hero.equipment?.armor??0)>=3});}
  }
  for(const hero of town.roster){
@@ -316,6 +316,14 @@ function campaign(seed,maxWeeks=100){
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
+  // Record actual post-week outcomes, rather than assuming treatment
+  // restored a hero to the <=60 stress Veteran deployment threshold.
+  for(const booked of treatmentAudit.booked){
+   const after=town.roster.find(h=>h.rosterId===booked.rosterId);
+   booked.stressAfter=after?.unit.stress??null;
+   booked.readyAfter=!!after&&!after.unit.dead&&after.unit.stress<=60&&
+    after.unit.hp/after.unit.maxHp>=0.75;
+  }
   history.push({week:week+1,townBudget,readinessAudit,deploymentAudit,treatmentAudit,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,levelThreeHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=3).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
    lowerTierEncounters:report.mix.lower,encounterAudit:quest.tier==='champion'?report.encounterAudit:undefined,recoveryAudit:quest.tier==='champion'?report.recoveryAudit:undefined,campOpportunityAudit:quest.tier==='champion'?report.campOpportunityAudit:undefined});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
@@ -351,6 +359,8 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
    cumulativeEquippedHpBlocks:x.history.reduce((n,h)=>n+(h.readinessAudit?.equippedHpBlocked3??0),0),
    cumulativeTreatmentBlockedReady:x.history.reduce((n,h)=>n+Math.max(0,(h.readinessAudit?.fullyReady3??0)-(h.readinessAudit?.deployable3??0)),0),
    equippedTreatmentBookings:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>b.equippedVeteran).length??0),0),
+   equippedTreatmentsReadyAfter:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>b.equippedVeteran&&b.readyAfter).length??0),0),
+   equippedTreatmentsStillStressed:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>b.equippedVeteran&&b.stressAfter!==null&&b.stressAfter>60).length??0),0),
    otherTreatmentBookings:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>!b.equippedVeteran).length??0),0),
    equippedStressEligibleWeeks:x.history.reduce((n,h)=>n+(h.treatmentAudit?.equippedEligible??0),0),
    equippedStress80Weeks:x.history.reduce((n,h)=>n+(h.treatmentAudit?.equippedAtOrAbove80??0),0),
