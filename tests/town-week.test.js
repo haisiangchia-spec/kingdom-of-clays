@@ -130,3 +130,24 @@ test('maximum recovery upgrade unlocks a second treatment slot and preserves bot
  assert.equal(saved.roster[0].unit.stress,30);
  assert.equal(saved.roster[1].unit.stress,30);
 });
+
+test('six DD1 Abbey and Tavern activities book independently and persist across saves',()=>{
+ const s=createCampaignSettlement();
+ assert.equal(Object.keys(TREATMENTS).length,6);
+ s.gold=6000;
+ for(let i=0;i<6;i++){
+  const hero=i<s.roster.length?s.roster[i]:recruitHero(s,'Priest');
+  hero.unit.stress=100;
+  const service=Object.keys(TREATMENTS)[i];
+  bookStressTreatment(s,hero.rosterId,service);
+ }
+ assert.equal(s.town.treatments.length,6);
+ assert.equal(s.gold,0);
+ assert.throws(()=>bookStressTreatment(s,s.roster[0].rosterId,'tavern'),/already receiving/);
+ const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ assert.equal(loaded.town.treatments.length,6);
+ const finished={phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true};
+ advanceTownWeek(loaded,finished);
+ assert.deepEqual(loaded.roster.slice(0,6).map(h=>h.unit.stress),Array(6).fill(55));
+ assert.equal(loaded.town.treatments.length,0);
+});
