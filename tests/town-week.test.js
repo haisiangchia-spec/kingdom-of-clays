@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave,upgradeFacility} from '../src/settlement.js';
 import {createDungeon} from '../src/dungeon.js';
 import {prepareRosterParty,returnPartyToRoster,selectHero,recruitHero} from '../src/hero-roster.js';
-import {TREATMENTS,stageCoachOffers,recruitFromCoach,bookStressTreatment,advanceTownWeek,townUnavailable,validateTown} from '../src/town-week.js';
+import {TREATMENTS,treatmentConfig,upgradeRecoveryActivity,stageCoachOffers,recruitFromCoach,bookStressTreatment,advanceTownWeek,townUnavailable,validateTown} from '../src/town-week.js';
 
 const completed=(s,seed=1)=>{
  const d=createDungeon(seed,{party:prepareRosterParty(s)});
@@ -188,4 +188,23 @@ test('fully upgraded Abbey and Tavern support twelve distinct simultaneous treat
  assert.equal(advanceTownWeek(loaded,finished),true);
  assert.deepEqual(loaded.roster.slice(0,12).map(h=>h.unit.stress),Array(12).fill(30));
  assert.equal(loaded.town.treatments.length,0);
+});
+
+test('individual recovery upgrades affect only the selected activity and persist in saves',()=>{
+ const s=createCampaignSettlement();
+ s.crests=30;s.deeds=30;
+ assert.equal(treatmentConfig(s,'abbeyTransept').stressRelief,45);
+ assert.equal(treatmentConfig(s,'abbeyPenance').stressRelief,45);
+ upgradeRecoveryActivity(s,'abbeyTransept');
+ assert.equal(treatmentConfig(s,'abbeyTransept').stressRelief,56);
+ assert.equal(treatmentConfig(s,'abbeyPenance').stressRelief,45);
+ upgradeRecoveryActivity(s,'abbeyTransept');
+ assert.equal(treatmentConfig(s,'abbeyTransept').capacity,2);
+ assert.equal(treatmentConfig(s,'abbeyPenance').capacity,1);
+ const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ assert.equal(treatmentConfig(loaded,'abbeyTransept').stressRelief,70);
+ assert.equal(treatmentConfig(loaded,'abbeyPenance').stressRelief,45);
+ assert.throws(()=>upgradeRecoveryActivity(loaded,'abbeyTransept'),/maximum/);
+ const bad=structuredClone(loaded);bad.recoveryTracks.abbeyTransept=3;
+ assert.throws(()=>encodeCampaignSave(bad,null),/Invalid recovery activity level/);
 });
