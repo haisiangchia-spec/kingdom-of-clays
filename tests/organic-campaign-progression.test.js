@@ -317,6 +317,26 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
  const results=[...Array.from({length:5},(_,i)=>campaign(i+1,100)),campaign(6,150)];
  const attempts=results.flatMap(x=>x.history);
  const summary={campaigns:results.length,primaryHorizonWeeks:100,enduranceHorizonWeeks:150,attempts:attempts.length,
+  // Keep per-seed progression visible: a pooled success can mask five stalled campaigns.
+  perCampaign:results.map((x,i)=>({
+   seed:i+1,
+   expeditions:x.history.filter(h=>h.tier).length,
+   apprenticeWins:x.history.filter(h=>h.tier==='apprentice'&&h.phase==='victory').length,
+   veteranAttempts:x.history.filter(h=>h.tier==='veteran').length,
+   veteranWins:x.history.filter(h=>h.tier==='veteran'&&h.phase==='victory').length,
+   championAttempts:x.history.filter(h=>h.tier==='champion').length,
+   championWins:x.history.filter(h=>h.tier==='champion'&&h.phase==='victory').length,
+   firstVeteranWeek:x.history.find(h=>h.tier==='veteran')?.week??null,
+   firstChampionWeek:x.history.find(h=>h.tier==='champion')?.week??null,
+   completionWeek:x.history.find(h=>h.tier==='champion'&&h.phase==='victory')?.week??null,
+   peakLivingLevel3:Math.max(0,...x.history.map(h=>h.levelThreeHeroes??0)),
+   peakVeteranReady:Math.max(0,...x.history.map(h=>h.readinessAudit?.fullyReady3??0)),
+   finalGold:x.history.at(-1)?.gold??null,
+   finalDeeds:x.history.at(-1)?.deeds??null
+  })),
+  veteranReachRate:results.filter(x=>x.history.some(h=>h.tier==='veteran')).length/results.length,
+  championReachRate:results.filter(x=>x.history.some(h=>h.tier==='champion')).length/results.length,
+  championCompletionRate:results.filter(x=>x.history.some(h=>h.tier==='champion'&&h.phase==='victory')).length/results.length,
   firstVeteranAttemptWeek:results.map(x=>x.history.find(h=>h.tier==='veteran')?.week??null),
   firstChampionAttemptWeek:results.map(x=>x.history.find(h=>h.tier==='champion')?.week??null),
   campaignCompletionWeek:results.map(x=>x.history.find(h=>h.tier==='champion'&&h.phase==='victory')?.week??null),
