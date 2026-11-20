@@ -365,6 +365,14 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
  console.log('Organic campaign progression '+JSON.stringify(summary));
  for(let i=0;i<results.length;i++)console.log('Organic campaign trace '+JSON.stringify({seed:i+1,history:results[i].history}));
  assert.ok(attempts.length>0);
+ // Preserve the demonstrated organic end-to-end campaign milestone.
+ // Champion must be completed by earned level-5 heroes with purchased
+ // equipment and normal dungeon camping, never by fixture upgrades.
+ assert.ok(summary.veteranWins>=1,'organic campaigns must win Veteran');
+ assert.ok(summary.completedChampion>=1,'organic campaigns must complete Champion');
+ assert.ok(attempts.some(x=>x.tier==='champion'&&x.phase==='victory'&&
+  x.campsUsed>=1&&x.recoveryAudit?.length>=1),
+  'a successful Champion expedition must use genuine dungeon camping');
  for(const result of results){
   const h=result.history;
   for(let i=0;i<h.length;i++){
