@@ -6,7 +6,7 @@ import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
 import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
 import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,upgradeHeroSkill} from './hero-roster.js';
-import {TREATMENTS,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
+import {TREATMENTS,treatmentConfig,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
 import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits,sanitariumTreatmentCost,sanitariumWardBookings} from './sanitarium.js';
 import {DUNGEON_REGIONS,regionRoomName,regionCurio} from './dungeon-regions.js';
 import {availableVerifiedLevels} from './skill-progression.js';
@@ -230,7 +230,7 @@ function render(){
  const roster=$('hero-roster');roster.replaceChildren();
  const townAvailable=['victory','defeat'].includes(expedition.phase);
  el('p',`Heroes: ${settlement.roster.length}/${ROSTER_CAPACITY} · Recruitment ${RECRUITMENT_COST} gold · Resurrection ${RESURRECTION_COST} gold (Temple Lv 1)`,roster);
- el('p',`Town Week ${settlement.town.week} · Stage Coach candidates: ${settlement.town.offers.length} · Treatment rooms: ${settlement.town.treatments.length}/2`,roster);
+ el('p',`Town Week ${settlement.town.week} · Stage Coach candidates: ${settlement.town.offers.length} · Treatment rooms: ${settlement.town.treatments.length}/${Object.keys(TREATMENTS).reduce((sum,service)=>sum+treatmentConfig(settlement,service).capacity,0)}`,roster);
  el('p',settlement.town.week>=4?`Sanitarium: OPEN · ${sanitariumWardBookings(settlement,'quirkWard').length}/${sanitariumWardCapacity(settlement,'quirkWard')} quirk wards, ${sanitariumWardBookings(settlement,'medicalWard').length}/${sanitariumWardCapacity(settlement,'medicalWard')} medical wards`:'Sanitarium: unlocks in Week 4',roster);
  if(townAvailable){
   for(const offer of settlement.town.offers){
@@ -317,11 +317,12 @@ function render(){
    dismiss.title='Irreversibly remove this hero and free a roster slot';
    dismiss.disabled=townUnavailable(settlement,h.rosterId);
    if(!u.dead&&u.stress>0&&!townUnavailable(settlement,h.rosterId)){
-    for(const [service,rule] of Object.entries(TREATMENTS)){
-     const book=el('button',`Treat at ${rule.name} · ${rule.gold} gold`,row,()=>{
+    for(const [service] of Object.entries(TREATMENTS)){
+     const rule=treatmentConfig(settlement,service);
+     const book=el('button',`Treat at ${rule.name} · ${rule.gold} gold · -${rule.stressRelief} stress`,row,()=>{
       try{bookStressTreatment(settlement,h.rosterId,service);}catch(e){expedition.log.push(e.message);}render();
      });
-     book.disabled=settlement.gold<rule.gold||settlement.town.treatments.some(t=>t.service===service);
+     book.disabled=settlement.gold<rule.gold||settlement.town.treatments.filter(t=>t.service===service).length>=rule.capacity;
     }
    }
   }
