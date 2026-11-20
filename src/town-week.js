@@ -9,6 +9,13 @@ export const TREATMENTS=Object.freeze({
  abbey:Object.freeze({name:'Abbey Cloister',gold:1000,stressRelief:45}),
  tavern:Object.freeze({name:'Tavern Bar',gold:1000,stressRelief:45})
 });
+export function treatmentConfig(settlement,service){
+ const base=TREATMENTS[service];
+ if(!base)throw Error('Unknown stress treatment');
+ const level=settlement.facilities?.[service]??0;
+ if(!Number.isInteger(level)||level<0||level>2)throw Error('Invalid recovery upgrade');
+ return {...base,stressRelief:[45,56,70][level]};
+}
 const goodInt=n=>Number.isSafeInteger(n)&&n>=0;
 const names=Object.keys(TREATMENTS);
 export function stageCoachOffers(week,roster=[],network=0){
@@ -59,7 +66,7 @@ export function recruitFromCoach(settlement,offerId){
 }
 export function bookStressTreatment(settlement,rosterId,service){
  validateHeroRoster(settlement);
- const town=validateTown(settlement),config=TREATMENTS[service];
+ const town=validateTown(settlement),config=treatmentConfig(settlement,service);
  if(!config)throw Error('Unknown stress treatment');
  const hero=settlement.roster.find(h=>h.rosterId===rosterId);
  if(!hero||hero.unit.dead)throw Error('Hero is unavailable');
@@ -86,7 +93,7 @@ export function advanceTownWeek(settlement,expedition){
  for(const t of town.treatments){
   const hero=settlement.roster.find(h=>h.rosterId===t.rosterId);
   if(!hero||hero.unit.dead)continue;
-  hero.unit.stress=Math.max(0,hero.unit.stress-TREATMENTS[t.service].stressRelief);
+  hero.unit.stress=Math.max(0,hero.unit.stress-treatmentConfig(settlement,t.service).stressRelief);
   if(hero.unit.stress<100)hero.unit.affliction=null;
  }
  for(const hero of settlement.roster){
