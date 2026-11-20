@@ -85,3 +85,25 @@ test('all six Abbey and Tavern activities are visible and independent in the Ham
  await expect(page.locator('#hero-roster')).toContainText('Treatment rooms: 2/6');
  await expect(page.locator('#settlement-panel')).toContainText('Treasury: 4000 gold');
 });
+
+test('Hamlet activity upgrades are independently visible and persist across reload',async ({page})=>{
+ await makeTown(page,{gold:1000,stress:100});
+ await page.evaluate(async ()=>{
+  const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const saved=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  saved.settlement.crests=20;saved.settlement.deeds=20;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(saved.settlement,saved.expedition));
+ });
+ await page.reload();
+ const panel=page.locator('#settlement-panel');
+ await expect(panel).toContainText('Abbey Transept activity upgrade Lv 0/2 · 1 slots · -45 stress');
+ await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -45 stress');
+ await page.getByRole('button',{name:'Upgrade Abbey Transept activity (3 crests, 2 deeds)'}).click();
+ await expect(panel).toContainText('Abbey Transept activity upgrade Lv 1/2 · 1 slots · -56 stress');
+ await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -45 stress');
+ await page.reload();
+ await expect(panel).toContainText('Abbey Transept activity upgrade Lv 1/2 · 1 slots · -56 stress');
+ await page.getByRole('button',{name:'Upgrade Abbey Transept activity (6 crests, 4 deeds)'}).click();
+ await expect(panel).toContainText('Abbey Transept activity upgrade Lv 2/2 · 2 slots · -70 stress');
+ await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -45 stress');
+});
