@@ -67,6 +67,13 @@ test('town week completes treatment once, refreshes coach, and does not repeat o
 
 test('all six Abbey and Tavern activities are visible and independent in the Hamlet',async ({page})=>{
  await makeTown(page,{gold:6000,stress:100});
+ await page.evaluate(async ()=>{
+  const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const saved=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  saved.settlement.roster[1].unit.stress=100;
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(saved.settlement,saved.expedition));
+ });
+ await page.reload();
  const names=['Abbey Cloister','Abbey Transept','Abbey Penance Hall','Tavern Bar','Tavern Gambling Hall','Tavern Brothel'];
  for(const name of names){
   await expect(page.getByRole('button',{name:`Treat at ${name} · 1000 gold`,exact:false}).first()).toBeVisible();
