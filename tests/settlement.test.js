@@ -4,12 +4,12 @@ import {createDungeon,resolveHunger} from '../src/dungeon.js';
 import {createCampaignSettlement,normalizeCampaignSettlement,SETTLEMENT_FACILITIES,nextFacilityCost,upgradeFacility,expeditionBonuses,encodeCampaignSave,decodeCampaignSave,CAMPAIGN_SAVE_VERSION} from '../src/settlement.js';
 import {offerLoot,collectLoot,claimExpeditionRewards} from '../src/inventory.js';
 
-test('campaign settlement starts empty with three independent upgradeable facilities',()=>{
+test('campaign settlement starts empty with five independent upgradeable facilities',()=>{
  const s=createCampaignSettlement();
- assert.deepEqual({gold:s.gold,crests:s.crests,deeds:s.deeds,trinkets:s.trinkets,facilities:s.facilities,completedExpeditions:s.completedExpeditions},{gold:0,crests:0,deeds:0,trinkets:[],facilities:{market:0,guild:0,temple:0},completedExpeditions:0});
+ assert.deepEqual({gold:s.gold,crests:s.crests,deeds:s.deeds,trinkets:s.trinkets,facilities:s.facilities,completedExpeditions:s.completedExpeditions},{gold:0,crests:0,deeds:0,trinkets:[],facilities:{market:0,guild:0,temple:0,abbey:0,tavern:0},completedExpeditions:0});
  assert.equal(s.roster.length,4);
  assert.deepEqual(s.squad,['r1','r2','r3','r4']);
- assert.deepEqual(Object.keys(SETTLEMENT_FACILITIES),['market','guild','temple']);
+ assert.deepEqual(Object.keys(SETTLEMENT_FACILITIES),['market','guild','temple','abbey','tavern']);
  assert.deepEqual(nextFacilityCost(s,'market'),{gold:0,crests:1,deeds:0});
  assert.deepEqual(nextFacilityCost(s,'guild'),{gold:0,crests:0,deeds:1});
  assert.deepEqual(nextFacilityCost(s,'temple'),{gold:0,crests:1,deeds:1});
@@ -104,7 +104,7 @@ test('reward handoff remains once-only after a serialized victory and upgrades s
  claimExpeditionRewards(d,s);
  s.completedExpeditions++;
  assert.deepEqual({gold:s.gold,crests:s.crests,deeds:s.deeds}, {gold:100,crests:2,deeds:1});
- const loaded=decodeCampaignSave(encodeCampaignSave({...s,facilities:{market:0,guild:0,temple:0}},d));
+ const loaded=decodeCampaignSave(encodeCampaignSave({...s,facilities:{market:0,guild:0,temple:0,abbey:0,tavern:0}},d));
  assert.throws(()=>claimExpeditionRewards(loaded.expedition,loaded.settlement),/already been claimed/);
  upgradeFacility(loaded.settlement,'market');
  assert.equal(loaded.settlement.gold,100);
