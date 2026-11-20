@@ -228,7 +228,7 @@ function prepareTown(town){
  };
  const stressed=town.roster.filter(h=>!h.unit.dead&&h.unit.stress>=80)
   .sort((a,b)=>b.level-a.level||b.unit.stress-a.unit.stress);
- for(const service of ['abbey','tavern']){
+ for(const service of ['abbey','tavern'].flatMap(name=>Array.from({length:town.facilities?.[name]===2?2:1},()=>name))){
   const hero=stressed.find(h=>!town.town.treatments.some(t=>t.rosterId===h.rosterId));
   if(hero&&town.gold>=TREATMENTS[service].gold+1500)
    {const before=town.gold;bookStressTreatment(town,hero.rosterId,service);spending.treatments+=before-town.gold;
