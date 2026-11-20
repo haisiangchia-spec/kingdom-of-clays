@@ -30,6 +30,26 @@ export function upgradeRecoveryActivity(settlement,service){
  settlement.recoveryTracks[service]=level+1;
  return {service,level:level+1,cost};
 }
+// Vanilla DD1 forced and prohibited activity quirks. Contradictory quirks
+// deliberately leave no valid treatment until a quirk is removed.
+const FORCED_ACTIVITIES=Object.freeze({
+ enlightened:'abbey',godFearing:'abbeyTransept',flagellant:'abbeyPenance',
+ tippler:'tavern',gambler:'tavernGambling',loveInterest:'tavernBrothel'
+});
+const BLOCKED_ACTIVITIES=Object.freeze({
+ unquietMind:['abbey'],witness:['abbeyTransept'],
+ faithless:['abbeyTransept','abbeyPenance'],resolution:['tavern'],
+ knownCheat:['tavernGambling'],deviantTastes:['tavernBrothel']
+});
+export function canUseStressTreatment(hero,service){
+ if(!TREATMENTS[service])return false;
+ const ids=new Set((hero?.quirks?.negative??[]).map(q=>q.id));
+ for(const [id,required] of Object.entries(FORCED_ACTIVITIES))
+  if(ids.has(id)&&service!==required)return false;
+ for(const [id,blocked] of Object.entries(BLOCKED_ACTIVITIES))
+  if(ids.has(id)&&blocked.includes(service))return false;
+ return true;
+}
 export function treatmentConfig(settlement,service){
  const base=TREATMENTS[service];
  if(!base)throw Error('Unknown stress treatment');
@@ -94,6 +114,7 @@ export function bookStressTreatment(settlement,rosterId,service){
  const hero=settlement.roster.find(h=>h.rosterId===rosterId);
  if(!hero||hero.unit.dead)throw Error('Hero is unavailable');
  if(hero.unit.stress<=0)throw Error('Hero has no stress to treat');
+ if(!canUseStressTreatment(hero,service))throw Error('Hero quirk forbids this stress treatment');
  if(town.treatments.some(t=>t.rosterId===rosterId)||sanitariumUnavailable(settlement,rosterId))throw Error('Hero is already receiving treatment');
  if(town.treatments.filter(t=>t.service===service).length>=config.capacity)throw Error('Treatment room is occupied');
  if(settlement.gold<config.gold)throw Error('Insufficient gold for treatment');
