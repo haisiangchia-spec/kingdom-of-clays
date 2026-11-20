@@ -331,6 +331,13 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
    completionWeek:x.history.find(h=>h.tier==='champion'&&h.phase==='victory')?.week??null,
    peakLivingLevel3:Math.max(0,...x.history.map(h=>h.levelThreeHeroes??0)),
    peakVeteranReady:Math.max(0,...x.history.map(h=>h.readinessAudit?.fullyReady3??0)),
+   peakDeployableVeterans:Math.max(0,...x.history.map(h=>h.readinessAudit?.deployable3??0)),
+   peakEquippedVeterans:Math.max(0,...x.history.map(h=>h.readinessAudit?.equipped3??0)),
+   weeksWithFourEquipped:x.history.filter(h=>(h.readinessAudit?.equipped3??0)>=4).length,
+   weeksWithFourDeployable:x.history.filter(h=>(h.readinessAudit?.deployable3??0)>=4).length,
+   cumulativeEquippedStressBlocks:x.history.reduce((n,h)=>n+(h.readinessAudit?.equippedStressBlocked3??0),0),
+   cumulativeEquippedHpBlocks:x.history.reduce((n,h)=>n+(h.readinessAudit?.equippedHpBlocked3??0),0),
+   cumulativeTreatmentBlockedReady:x.history.reduce((n,h)=>n+Math.max(0,(h.readinessAudit?.fullyReady3??0)-(h.readinessAudit?.deployable3??0)),0),
    finalGold:x.history.at(-1)?.gold??null,
    finalDeeds:x.history.at(-1)?.deeds??null
   })),
