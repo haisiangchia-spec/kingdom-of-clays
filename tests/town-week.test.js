@@ -208,3 +208,24 @@ test('individual recovery upgrades affect only the selected activity and persist
  const bad=structuredClone(loaded);bad.recoveryTracks.abbeyTransept=3;
  assert.throws(()=>encodeCampaignSave(bad,null),/Invalid recovery activity level/);
 });
+
+test('recovery upgrade migration preserves legacy levels and freezes other activity tracks',()=>{
+ const s=createCampaignSettlement();
+ s.crests=100;s.deeds=100;
+ upgradeFacility(s,'abbey');
+ upgradeFacility(s,'tavern');upgradeFacility(s,'tavern');
+ assert.equal(treatmentConfig(s,'abbey').level,1);
+ assert.equal(treatmentConfig(s,'tavernGambling').level,2);
+ const originalCrests=s.crests,originalDeeds=s.deeds;
+ upgradeRecoveryActivity(s,'abbeyTransept');
+ assert.equal(s.crests,originalCrests-6);
+ assert.equal(s.deeds,originalDeeds-4);
+ assert.equal(treatmentConfig(s,'abbeyTransept').level,2);
+ assert.equal(treatmentConfig(s,'abbeyPenance').level,1);
+ assert.equal(treatmentConfig(s,'tavernGambling').level,2);
+ const restored=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ assert.deepEqual(restored.recoveryTracks,s.recoveryTracks);
+ upgradeFacility(restored,'abbey');
+ assert.equal(treatmentConfig(restored,'abbeyPenance').level,1,'legacy building upgrade must not silently modify independent activity tracks');
+ assert.equal(treatmentConfig(restored,'abbeyTransept').level,2);
+});
