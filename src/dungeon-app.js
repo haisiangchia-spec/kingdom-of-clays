@@ -6,7 +6,7 @@ import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
 import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
 import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,upgradeHeroSkill} from './hero-roster.js';
-import {TREATMENTS,canUseStressTreatment,treatmentConfig,upgradeRecoveryActivity,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
+import {TREATMENTS,canUseStressTreatment,stressTreatmentRestriction,treatmentConfig,upgradeRecoveryActivity,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
 import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits,sanitariumTreatmentCost,sanitariumWardBookings} from './sanitarium.js';
 import {DUNGEON_REGIONS,regionRoomName,regionCurio} from './dungeon-regions.js';
 import {availableVerifiedLevels} from './skill-progression.js';
@@ -335,7 +335,7 @@ function render(){
       try{bookStressTreatment(settlement,h.rosterId,service);}catch(e){expedition.log.push(e.message);}render();
      });
      book.disabled=!canUseStressTreatment(h,service)||settlement.gold<rule.gold||settlement.town.treatments.filter(t=>t.service===service).length>=rule.capacity;
-     if(!canUseStressTreatment(h,service))book.title='Unavailable due to this hero\'s quirks';
+     if(!canUseStressTreatment(h,service))book.title=stressTreatmentRestriction(h,service);
     }
    }
   }
