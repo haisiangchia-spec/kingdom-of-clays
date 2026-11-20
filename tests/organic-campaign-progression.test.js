@@ -134,6 +134,13 @@ function fillSquad(town){
   h.unit.hp/h.unit.maxHp*20;
  pool.sort((a,b)=>readiness(b)-readiness(a));
  const selected=pool.slice(0,4);
+ const selectedIds=new Set(selected.map(h=>h.rosterId));
+ town._organicDeploymentAudit={
+  selected:selected.map(h=>({level:h.level,stress:h.unit.stress,weapon:h.equipment?.weapon??0,armor:h.equipment?.armor??0})),
+  restingEquipped:candidates.filter(h=>!selectedIds.has(h.rosterId)&&h.level>=3&&
+   (h.equipment?.weapon??0)>=3&&(h.equipment?.armor??0)>=3).length,
+  treatmentCount:town.town.treatments.length
+ };
  // Release previous positions before reselecting to avoid duplicate rank errors.
  town.squad=[null,null,null,null];
  selected.forEach((hero,i)=>selectHero(town,i,hero.rosterId));
@@ -226,6 +233,7 @@ function campaign(seed,maxWeeks=100){
     (hero.equipment?.weapon??0)>=level&&(hero.equipment?.armor??0)>=level&&
     hero.unit.hp/hero.unit.maxHp>=0.75&&hero.unit.stress<=60;
   });
+  const deploymentAudit=town._organicDeploymentAudit;
   const readinessAudit={gold:town.gold,level3:0,equipped3:0,fullyRested3:0,fullyReady3:0,
    deployable3:0,equippedStressBlocked3:0,equippedHpBlocked3:0,restedEquipmentBlocked3:0,
    equippedButNotRested3:0,restedButNotEquipped3:0,level3MissingWeaponRanks:0,
@@ -296,7 +304,7 @@ function campaign(seed,maxWeeks=100){
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,townBudget,readinessAudit,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,levelThreeHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=3).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
+  history.push({week:week+1,townBudget,readinessAudit,deploymentAudit,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,levelThreeHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=3).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
    lowerTierEncounters:report.mix.lower,encounterAudit:quest.tier==='champion'?report.encounterAudit:undefined,recoveryAudit:quest.tier==='champion'?report.recoveryAudit:undefined,campOpportunityAudit:quest.tier==='champion'?report.campOpportunityAudit:undefined});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -366,6 +374,16 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   peakEquippedButNotRestedLevelThreeHeroes:Math.max(...attempts.map(x=>x.readinessAudit.equippedButNotRested3)),
   peakRestedButNotEquippedLevelThreeHeroes:Math.max(...attempts.map(x=>x.readinessAudit.restedButNotEquipped3)),
   finalReadinessBottlenecks:results.map(x=>x.history.at(-1)?.readinessAudit??null),
+  veteranDeploymentStress:attempts.filter(x=>x.deploymentAudit).reduce((acc,x)=>{
+   for(const h of x.deploymentAudit.selected){
+    if(h.level>=3&&h.weapon>=3&&h.armor>=3){
+     acc.deployed++;if(h.stress>60)acc.overstressedDeployed++;
+    }
+   }
+   acc.restingEquipped+=x.deploymentAudit.restingEquipped;
+   acc.treatmentSlotsUsed+=x.deploymentAudit.treatmentCount;
+   return acc;
+  },{deployed:0,overstressedDeployed:0,restingEquipped:0,treatmentSlotsUsed:0}),
   discardedDeeds:attempts.reduce((n,x)=>n+x.discardedLoot.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   collectedDeeds:attempts.reduce((n,x)=>n+x.expeditionLoot.inventory.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   maximumBarracksRank:Math.max(...attempts.map(x=>x.stageCoach?.barracks??0)),
