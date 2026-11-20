@@ -161,3 +161,24 @@ test('a tampered save cannot reserve one hero for both Abbey and Sanitarium',()=
  assert.throws(()=>validateTown(s),/Invalid treatment reservation/);
  assert.throws(()=>decodeCampaignSave(JSON.stringify({version:1,settlement:s,expedition:null})),/Invalid treatment reservation/);
 });
+
+test('fully upgraded Abbey and Tavern support twelve distinct simultaneous treatment bookings',()=>{
+ const s=createCampaignSettlement();
+ s.gold=12000;s.crests=100;s.deeds=100;
+ upgradeFacility(s,'abbey');upgradeFacility(s,'abbey');
+ upgradeFacility(s,'tavern');upgradeFacility(s,'tavern');
+ while(s.roster.length<12)recruitHero(s,'Priest');
+ for(const hero of s.roster)hero.unit.stress=100;
+ for(const [index,service] of Object.keys(TREATMENTS).entries()){
+  bookStressTreatment(s,s.roster[index*2].rosterId,service);
+  bookStressTreatment(s,s.roster[index*2+1].rosterId,service);
+ }
+ assert.equal(s.town.treatments.length,12);
+ assert.equal(s.gold,0);
+ const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ assert.equal(loaded.town.treatments.length,12);
+ const finished={phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true};
+ assert.equal(advanceTownWeek(loaded,finished),true);
+ assert.deepEqual(loaded.roster.slice(0,12).map(h=>h.unit.stress),Array(12).fill(30));
+ assert.equal(loaded.town.treatments.length,0);
+});
