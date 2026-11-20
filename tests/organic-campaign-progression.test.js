@@ -321,6 +321,8 @@ function campaign(seed,maxWeeks=100){
   for(const booked of treatmentAudit.booked){
    const after=town.roster.find(h=>h.rosterId===booked.rosterId);
    booked.stressAfter=after?.unit.stress??null;
+   booked.stressReduction=after?booked.stress-after.unit.stress:null;
+   booked.treatmentStillActive=town.town.treatments.some(t=>t.rosterId===booked.rosterId);
    booked.readyAfter=!!after&&!after.unit.dead&&after.unit.stress<=60&&
     after.unit.hp/after.unit.maxHp>=0.75;
   }
@@ -361,6 +363,16 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
    equippedTreatmentBookings:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>b.equippedVeteran).length??0),0),
    equippedTreatmentsReadyAfter:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>b.equippedVeteran&&b.readyAfter).length??0),0),
    equippedTreatmentsStillStressed:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>b.equippedVeteran&&b.stressAfter!==null&&b.stressAfter>60).length??0),0),
+   equippedTreatmentStressReduction:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>b.equippedVeteran&&b.stressReduction!==null).reduce((sum,b)=>sum+b.stressReduction,0)??0),0),
+   equippedTreatmentStillActive:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>b.equippedVeteran&&b.treatmentStillActive).length??0),0),
+   equippedTreatmentReductionHistogram:x.history.reduce((hist,h)=>{
+    for(const b of h.treatmentAudit?.booked??[]){
+     if(!b.equippedVeteran||b.stressReduction===null)continue;
+     const bucket=b.stressReduction<=0?'none':b.stressReduction<20?'1-19':b.stressReduction<40?'20-39':'40+';
+     hist[bucket]=(hist[bucket]??0)+1;
+    }
+    return hist;
+   },{}),
    otherTreatmentBookings:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>!b.equippedVeteran).length??0),0),
    equippedStressEligibleWeeks:x.history.reduce((n,h)=>n+(h.treatmentAudit?.equippedEligible??0),0),
    equippedStress80Weeks:x.history.reduce((n,h)=>n+(h.treatmentAudit?.equippedAtOrAbove80??0),0),
