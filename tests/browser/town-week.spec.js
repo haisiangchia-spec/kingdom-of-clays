@@ -64,3 +64,17 @@ test('town week completes treatment once, refreshes coach, and does not repeat o
  await page.reload();
  await expect(page.locator('#hero-roster')).toContainText('Town Week 3');
 });
+
+test('all six Abbey and Tavern activities are visible and independent in the Hamlet',async ({page})=>{
+ await makeTown(page,{gold:6000,stress:100});
+ const names=['Abbey Cloister','Abbey Transept','Abbey Penance Hall','Tavern Bar','Tavern Gambling Hall','Tavern Brothel'];
+ for(const name of names){
+  await expect(page.getByRole('button',{name:`Treat at ${name} · 1000 gold`,exact:false}).first()).toBeVisible();
+ }
+ await page.getByRole('button',{name:/Treat at Abbey Cloister · 1000 gold/}).first().click();
+ await page.getByRole('button',{name:/Treat at Tavern Gambling Hall · 1000 gold/}).first().click();
+ await expect(page.locator('#hero-roster')).toContainText('Treatment rooms: 2/6');
+ await page.reload();
+ await expect(page.locator('#hero-roster')).toContainText('Treatment rooms: 2/6');
+ await expect(page.locator('#settlement-panel')).toContainText('Treasury: 4000 gold');
+});
