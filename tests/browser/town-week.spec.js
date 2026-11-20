@@ -125,3 +125,20 @@ test('migrated recovery tracks hide obsolete shared Abbey and Tavern upgrades',a
  await expect(page.getByRole('button',{name:/Upgrade Tavern Recovery \(/})).toHaveCount(0);
  await expect(page.getByRole('button',{name:'Upgrade Abbey Transept activity (6 crests, 4 deeds)'})).toBeEnabled();
 });
+
+test('hero treatment quirks disable forbidden Hamlet activities in the browser',async ({page})=>{
+ await makeTown(page,{gold:6000,stress:100});
+ await page.evaluate(async ()=>{
+  const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const saved=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  saved.settlement.roster[0].quirks.negative=[{id:'gambler',locked:false}];
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(saved.settlement,saved.expedition));
+ });
+ await page.reload();
+ await expect(page.getByRole('button',{name:/Treat at Tavern Gambling Hall · 1000 gold/}).first()).toBeEnabled();
+ await expect(page.getByRole('button',{name:/Treat at Abbey Cloister · 1000 gold/}).first()).toBeDisabled();
+ await expect(page.getByRole('button',{name:/Treat at Tavern Bar · 1000 gold/}).first()).toBeDisabled();
+ await page.getByRole('button',{name:/Treat at Tavern Gambling Hall · 1000 gold/}).first().click();
+ await expect(page.locator('#settlement-panel')).toContainText('Treasury: 5000 gold');
+ await expect(page.locator('#hero-roster')).toContainText('Treatment rooms: 1/6');
+});
