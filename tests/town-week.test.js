@@ -231,3 +231,14 @@ test('recovery upgrade migration preserves legacy levels and freezes other activ
  assert.equal(treatmentConfig(restored,'abbeyPenance').level,1,'legacy building upgrade must not silently modify independent activity tracks');
  assert.equal(treatmentConfig(restored,'abbeyTransept').level,2);
 });
+
+test('a failed independent recovery upgrade preserves heirlooms and leaves legacy state untouched',()=>{
+ const s=createCampaignSettlement();
+ s.crests=2;s.deeds=1;
+ const before=structuredClone(s);
+ assert.throws(()=>upgradeRecoveryActivity(s,'abbeyTransept'),/Insufficient settlement resources/);
+ assert.deepEqual(s,before);
+ assert.equal(s.recoveryTracks,undefined);
+ assert.throws(()=>upgradeRecoveryActivity(s,'unknownService'),/Unknown stress treatment/);
+ assert.deepEqual(s,before);
+});
