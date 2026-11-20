@@ -2,7 +2,7 @@
 // Classes, recruitment costs, XP and resurrection are CLAYS prototypes,
 // not validated DD1 roster/economy values. Resurrection is a deliberate
 // user-approved departure from ordinary DD1 permadeath.
-import {makeBattle,ABILITIES} from './engine.js';
+import {makeBattle,unit,ABILITIES} from './engine.js';
 import {resolveSkillDefinition} from './skill-progression.js';
 import {ensureTraits,sanitariumUnavailable} from './sanitarium.js';
 import {traitBonus,applyTraitBonus,reverseTraitBonus} from './trait-effects.js';
@@ -12,18 +12,41 @@ export const MAX_ROSTER_CAPACITY=28;
 export function rosterCapacity(settlement){return ROSTER_CAPACITY+4*(settlement.stageCoach?.barracks??0);}
 export const RECRUITMENT_COST=0; // DD1 base Stage Coach recruits are free
 export const RESURRECTION_COST=250; // user-authorized temple exception
-export const HERO_CLASSES=Object.freeze(['Swordsman','Warrior','Hunter','Priest']);
+export const HERO_CLASSES=Object.freeze([
+ 'Swordsman','Warrior','Hunter','Priest','Thief','Mage','Monster Slayer',
+ 'Berserker','Dark Knight','Beastmaster','Bard','Cursed Champion',
+ 'Hex Mage','Treasure Hunter','Spiritbound'
+]);
+// Baseline profiles are taken from the existing combat laboratories.
+// They are not yet independently certified as DD1 class stat parity.
+const ADDITIONAL_HERO_PROFILES=Object.freeze({
+ Thief:{hp:20,spd:8,dodge:10,dmgMin:4,dmgMax:8},
+ Mage:{hp:22,spd:7,dmgMin:4,dmgMax:7},
+ 'Monster Slayer':{hp:25,spd:5,dmgMin:5,dmgMax:10},
+ Berserker:{hp:26,spd:4,dodge:10,crit:5,dmgMin:6,dmgMax:12,bleedResist:40},
+ 'Dark Knight':{hp:23,spd:5,dmgMin:5,dmgMax:10},
+ Beastmaster:{hp:21,spd:5,dmgMin:4,dmgMax:7},
+ Bard:{hp:19,spd:7,dmgMin:4,dmgMax:7},
+ 'Cursed Champion':{hp:35,spd:2,dodge:0,dmgMin:8,dmgMax:14},
+ 'Hex Mage':{hp:19,spd:6,dmgMin:4,dmgMax:7},
+ 'Treasure Hunter':{hp:19,spd:5,dodge:10,dmgMin:3,dmgMax:6},
+ Spiritbound:{hp:26,spd:7,dmgMin:6,dmgMax:11,form:'human',blightResist:60}
+});
 export const TRINKET_IDS=Object.freeze(['ward-charm','ward-charm-common','ward-charm-uncommon','ward-charm-rare','ward-charm-ancestral']);
 const slots=Object.freeze(['h1','h2','h3','h4']);
 const copy=value=>structuredClone(value);
 const integer=n=>Number.isSafeInteger(n)&&n>=0;
+function makeHeroUnit(className){
+ return unit('h1',className,'hero',ADDITIONAL_HERO_PROFILES[className]);
+}
 function template(className){
  const unit=makeBattle(1).units.find(u=>u.side==='hero'&&u.name===className);
- if(!unit)throw Error('Unknown hero class');
- return copy(unit);
+ if(unit)return copy(unit);
+ if(!Object.hasOwn(ADDITIONAL_HERO_PROFILES,className))throw Error('Unknown hero class');
+ return copy(makeHeroUnit(className));
 }
 export function createHeroRoster(){
- return HERO_CLASSES.map((kind,i)=>({
+ return HERO_CLASSES.slice(0,4).map((kind,i)=>({
   rosterId:'r'+(i+1),name:kind,heroClass:kind,level:0,xp:0,
   equippedTrinket:null,unit:template(kind)
  }));
