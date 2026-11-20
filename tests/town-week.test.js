@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave,upgradeFacility} from '../src/settlement.js';
 import {createDungeon} from '../src/dungeon.js';
 import {prepareRosterParty,returnPartyToRoster,selectHero,recruitHero} from '../src/hero-roster.js';
-import {TREATMENTS,canUseStressTreatment,treatmentConfig,upgradeRecoveryActivity,stageCoachOffers,recruitFromCoach,bookStressTreatment,advanceTownWeek,townUnavailable,validateTown} from '../src/town-week.js';
+import {TREATMENTS,canUseStressTreatment,stressTreatmentRestriction,treatmentConfig,upgradeRecoveryActivity,stageCoachOffers,recruitFromCoach,bookStressTreatment,advanceTownWeek,townUnavailable,validateTown} from '../src/town-week.js';
 
 const completed=(s,seed=1)=>{
  const d=createDungeon(seed,{party:prepareRosterParty(s)});
@@ -275,4 +275,14 @@ test('tampered save cannot book a hero into a quirk-forbidden stress activity',(
  s.town.treatments[0].service='tavernGambling';
  assert.doesNotThrow(()=>validateTown(s));
  assert.doesNotThrow(()=>encodeCampaignSave(s,null));
+});
+
+test('Hamlet quirk restrictions explain forced and prohibited activities',()=>{
+ const s=createCampaignSettlement(),hero=s.roster[0];
+ hero.quirks.negative=[{id:'gambler',locked:false}];
+ assert.equal(stressTreatmentRestriction(hero,'abbey'),'gambler requires Tavern Gambling Hall');
+ assert.equal(stressTreatmentRestriction(hero,'tavernGambling'),null);
+ hero.quirks.negative=[{id:'knownCheat',locked:false}];
+ assert.equal(stressTreatmentRestriction(hero,'tavernGambling'),'knownCheat prohibits Tavern Gambling Hall');
+ assert.equal(stressTreatmentRestriction(hero,'abbey'),null);
 });
