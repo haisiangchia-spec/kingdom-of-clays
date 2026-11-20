@@ -5,14 +5,21 @@
 import {HERO_CLASSES,recruitHero,validateHeroRoster} from './hero-roster.js';
 import {sanitariumUnavailable,completeSanitariumWeek,applyQuestTraitRolls} from './sanitarium.js';
 
+// DD1's three Abbey and three Tavern activities are separate treatment slots.
+// The original 'abbey' and 'tavern' keys are retained for existing campaign saves.
+// Costs, relief amounts and facility-wide upgrades are still Clays fixtures.
 export const TREATMENTS=Object.freeze({
- abbey:Object.freeze({name:'Abbey Cloister',gold:1000,stressRelief:45}),
- tavern:Object.freeze({name:'Tavern Bar',gold:1000,stressRelief:45})
+ abbey:Object.freeze({name:'Abbey Cloister',facility:'abbey',gold:1000,stressRelief:45}),
+ abbeyTransept:Object.freeze({name:'Abbey Transept',facility:'abbey',gold:1000,stressRelief:45}),
+ abbeyPenance:Object.freeze({name:'Abbey Penance Hall',facility:'abbey',gold:1000,stressRelief:45}),
+ tavern:Object.freeze({name:'Tavern Bar',facility:'tavern',gold:1000,stressRelief:45}),
+ tavernGambling:Object.freeze({name:'Tavern Gambling Hall',facility:'tavern',gold:1000,stressRelief:45}),
+ tavernBrothel:Object.freeze({name:'Tavern Brothel',facility:'tavern',gold:1000,stressRelief:45})
 });
 export function treatmentConfig(settlement,service){
  const base=TREATMENTS[service];
  if(!base)throw Error('Unknown stress treatment');
- const level=settlement.facilities?.[service]??0;
+ const level=settlement.facilities?.[base.facility]??0;
  if(!Number.isInteger(level)||level<0||level>2)throw Error('Invalid recovery upgrade');
  return {...base,stressRelief:[45,56,70][level],capacity:level===2?2:1};
 }
