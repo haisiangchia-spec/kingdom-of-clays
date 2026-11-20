@@ -165,6 +165,7 @@ test('a tampered save cannot reserve one hero for both Abbey and Sanitarium',()=
 test('fully upgraded Abbey and Tavern support twelve distinct simultaneous treatment bookings',()=>{
  const s=createCampaignSettlement();
  s.gold=12000;s.crests=100;s.deeds=100;
+ s.stageCoach.barracks=1; // twelve roster slots are needed to fill twelve treatment rooms
  upgradeFacility(s,'abbey');upgradeFacility(s,'abbey');
  upgradeFacility(s,'tavern');upgradeFacility(s,'tavern');
  while(s.roster.length<12)recruitHero(s,'Priest');
