@@ -11,6 +11,23 @@ import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,avai
 import {chooseEnemyAction} from '../src/enemy-ai.js';
 import {chooseHeroAction} from './full-expedition-endurance.test.js';
 
+test('Abbey and Tavern upgrades increase treatment relief and survive campaign saves',()=>{
+ const town=createCampaignSettlement();
+ town.crests=100;town.deeds=100;town.gold=10000;
+ const hero=town.roster.find(h=>!h.unit.dead);
+ assert.ok(hero,'starting roster has a living hero');
+ hero.unit.stress=120;
+ upgradeFacility(town,'abbey');
+ upgradeFacility(town,'abbey');
+ assert.equal(town.facilities.abbey,2);
+ const saved=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
+ assert.equal(saved.facilities.abbey,2);
+ bookStressTreatment(saved,hero.rosterId,'abbey');
+ const expedition={phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true};
+ advanceTownWeek(saved,expedition);
+ assert.equal(saved.roster.find(h=>h.rosterId===hero.rosterId).unit.stress,50);
+});
+
 const BENCHMARK_SKILLS={
  Swordsman:['heavy_slash','countering_advance','battle_shout','guardian_parry','riposte_stance','swordmasters_orders','steadfast_resolve'],
  Warrior:['crushing_strike','sweeping_assault','concussive_blow','iron_fortress','warrior_recovery','charging_blade','rallying_roar'],
