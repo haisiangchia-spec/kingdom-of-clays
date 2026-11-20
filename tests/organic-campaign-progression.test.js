@@ -200,8 +200,15 @@ function prepareTown(town){
  }
  // Reserve two genuine town treatment slots for stressed survivors.
  // Treatment completes after the next expedition; treated heroes cannot deploy.
- const stressed=town.roster.filter(h=>!h.unit.dead&&h.unit.stress>=80)
-  .sort((a,b)=>b.level-a.level||b.unit.stress-a.unit.stress);
+ const stressed=town.roster.filter(h=>!h.unit.dead&&
+  (h.unit.stress>=80||(h.level>=3&&h.unit.stress>60&&
+   (h.equipment?.weapon??0)>=3&&(h.equipment?.armor??0)>=3)))
+  // Keep the proven level-first treatment policy, but break same-level
+  // ties in favour of equipped heroes who can actually enter Veteran.
+  .sort((a,b)=>b.level-a.level||
+   Number(b.level>=3&&(b.equipment?.weapon??0)>=3&&(b.equipment?.armor??0)>=3)-
+   Number(a.level>=3&&(a.equipment?.weapon??0)>=3&&(a.equipment?.armor??0)>=3)||
+   b.unit.stress-a.unit.stress);
  for(const service of ['abbey','tavern']){
   const hero=stressed.find(h=>!town.town.treatments.some(t=>t.rosterId===h.rosterId));
   if(hero&&town.gold>=TREATMENTS[service].gold+1500)
