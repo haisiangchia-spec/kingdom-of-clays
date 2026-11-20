@@ -444,17 +444,17 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
   earnedDeeds:attempts.reduce((n,x)=>n+(x.reward?.deeds??0),0),
   finalDeeds:results.map(x=>x.history.at(-1)?.deeds??null),
   finalGold:results.map(x=>x.history.at(-1)?.gold??null),
-  maximumEquippedLevelTwoHeroes:Math.max(...attempts.map(x=>x.levels.filter((level,i)=>level>=2&&x.equipment[i].weapon>=2&&x.equipment[i].armor>=2).length)),
+  maximumEquippedLevelTwoHeroes:Math.max(...attempts.map(x=>(x.levels??[]).filter((level,i)=>level>=2&&(x.equipment?.[i]?.weapon??0)>=2&&(x.equipment?.[i]?.armor??0)>=2).length)),
   maximumLivingLevelThreeHeroes:Math.max(...results.flatMap(x=>x.history.map(h=>h.levelThreeHeroes??0))),
-  maximumFullyEquippedLevelThreeHeroes:Math.max(...attempts.map(x=>x.readinessAudit.equipped3)),
-  maximumFullyRestedLevelThreeHeroes:Math.max(...attempts.map(x=>x.readinessAudit.fullyRested3)),
-  maximumVeteranReadyHeroes:Math.max(...attempts.map(x=>x.readinessAudit.fullyReady3)),
-  weeksWithFourLevelThreeHeroes:attempts.filter(x=>x.readinessAudit.level3>=4).length,
-  weeksWithFourFullyEquippedLevelThreeHeroes:attempts.filter(x=>x.readinessAudit.equipped3>=4).length,
-  weeksWithFourVeteranReadyHeroes:attempts.filter(x=>x.readinessAudit.fullyReady3>=4).length,
-  weeksWithFourEquippedButNotFullyRestedLevelThreeHeroes:attempts.filter(x=>x.readinessAudit.equipped3>=4&&x.readinessAudit.fullyReady3<4).length,
-  peakEquippedButNotRestedLevelThreeHeroes:Math.max(...attempts.map(x=>x.readinessAudit.equippedButNotRested3)),
-  peakRestedButNotEquippedLevelThreeHeroes:Math.max(...attempts.map(x=>x.readinessAudit.restedButNotEquipped3)),
+  maximumFullyEquippedLevelThreeHeroes:Math.max(...attempts.map(x=>(x.readinessAudit?.equipped3??0))),
+  maximumFullyRestedLevelThreeHeroes:Math.max(...attempts.map(x=>(x.readinessAudit?.fullyRested3??0))),
+  maximumVeteranReadyHeroes:Math.max(...attempts.map(x=>(x.readinessAudit?.fullyReady3??0))),
+  weeksWithFourLevelThreeHeroes:attempts.filter(x=>(x.readinessAudit?.level3??0)>=4).length,
+  weeksWithFourFullyEquippedLevelThreeHeroes:attempts.filter(x=>(x.readinessAudit?.equipped3??0)>=4).length,
+  weeksWithFourVeteranReadyHeroes:attempts.filter(x=>(x.readinessAudit?.fullyReady3??0)>=4).length,
+  weeksWithFourEquippedButNotFullyRestedLevelThreeHeroes:attempts.filter(x=>(x.readinessAudit?.equipped3??0)>=4&&(x.readinessAudit?.fullyReady3??0)<4).length,
+  peakEquippedButNotRestedLevelThreeHeroes:Math.max(...attempts.map(x=>(x.readinessAudit?.equippedButNotRested3??0))),
+  peakRestedButNotEquippedLevelThreeHeroes:Math.max(...attempts.map(x=>(x.readinessAudit?.restedButNotEquipped3??0))),
   finalReadinessBottlenecks:results.map(x=>x.history.at(-1)?.readinessAudit??null),
   veteranDeploymentStress:attempts.filter(x=>x.deploymentAudit).reduce((acc,x)=>{
    for(const h of x.deploymentAudit.selected){
@@ -466,8 +466,8 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
    acc.treatmentSlotsUsed+=x.deploymentAudit.treatmentCount;
    return acc;
   },{deployed:0,overstressedDeployed:0,restingEquipped:0,treatmentSlotsUsed:0}),
-  discardedDeeds:attempts.reduce((n,x)=>n+x.discardedLoot.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
-  collectedDeeds:attempts.reduce((n,x)=>n+x.expeditionLoot.inventory.reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
+  discardedDeeds:attempts.reduce((n,x)=>n+(x.discardedLoot??[]).reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
+  collectedDeeds:attempts.reduce((n,x)=>n+(x.expeditionLoot?.inventory??[]).reduce((m,y)=>m+(y.kind==='deed'?y.quantity:0),0),0),
   maximumBarracksRank:Math.max(...attempts.map(x=>x.stageCoach?.barracks??0)),
   lootBearingExpeditions:attempts.filter(x=>x.expeditionLoot?.inventory?.length>0).length};
  console.log('Organic campaign progression '+JSON.stringify(summary));
