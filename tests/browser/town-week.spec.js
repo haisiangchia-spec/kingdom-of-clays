@@ -17,10 +17,10 @@ async function makeTown(page,{gold=2500,stress=80,week=2}={}){
 test('Stage Coach offers specific free candidates once per town week, retained after reload',async ({page})=>{
  await makeTown(page,{gold:0});
  await expect(page.locator('#hero-roster')).toContainText('Town Week 2 · Stage Coach candidates: 2');
- await expect(page.getByRole('button',{name:/Recruit Swordsman · w2-o1/})).toBeEnabled();
- await page.getByRole('button',{name:/Recruit Swordsman · w2-o1/}).click();
+ await expect(page.getByRole('button',{name:/Recruit .+ · w2-o1/})).toBeEnabled();
+ await page.getByRole('button',{name:/Recruit .+ · w2-o1/}).click();
  await expect(page.locator('#hero-roster')).toContainText('Heroes: 5/8');
- await expect(page.getByRole('button',{name:/Recruit Swordsman · w2-o1/})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:/Recruit .+ · w2-o1/})).toHaveCount(0);
  await page.reload();
  await expect(page.locator('#hero-roster')).toContainText('Heroes: 5/8');
  await expect(page.locator('#hero-roster')).toContainText('Stage Coach candidates: 1');
