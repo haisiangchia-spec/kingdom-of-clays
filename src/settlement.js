@@ -8,7 +8,9 @@ import {initSanitarium,validateSanitarium} from './sanitarium.js';
 export const SETTLEMENT_FACILITIES=Object.freeze({
  market:Object.freeze({name:'Market',maxLevel:3,baseCost:Object.freeze({gold:0,crests:1,deeds:0}),description:'+2 starting food per level'}),
  guild:Object.freeze({name:'Guild',maxLevel:3,baseCost:Object.freeze({gold:0,crests:0,deeds:1}),description:'+2 starting HP per hero per level'}),
- temple:Object.freeze({name:'Temple',maxLevel:3,baseCost:Object.freeze({gold:0,crests:1,deeds:1}),description:'-2 hunger stress per level'})
+ temple:Object.freeze({name:'Temple',maxLevel:3,baseCost:Object.freeze({gold:0,crests:1,deeds:1}),description:'-2 hunger stress per level'}),
+ abbey:Object.freeze({name:'Abbey Recovery',maxLevel:2,baseCost:Object.freeze({gold:0,crests:3,deeds:2}),description:'Cloister treatment stress relief: 45 / 56 / 70'}),
+ tavern:Object.freeze({name:'Tavern Recovery',maxLevel:2,baseCost:Object.freeze({gold:0,crests:3,deeds:2}),description:'Bar treatment stress relief: 45 / 56 / 70'})
 });
 export const STAGE_COACH_UPGRADE_COSTS=Object.freeze({barracks:Object.freeze({gold:0,crests:2,deeds:2}),network:Object.freeze({gold:0,crests:2,deeds:1})});
 export function upgradeStageCoach(settlement,track){
@@ -27,7 +29,7 @@ export const QUEST_TRINKET_IDS=Object.freeze(['ward-charm','ward-charm-common','
 const safeNumber=x=>Number.isSafeInteger(x)&&x>=0;
 const isObject=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 export function createCampaignSettlement(){
- return initSanitarium(initTown(setupHeroRoster({...createSettlement(),busts:0,stageCoach:{barracks:0,network:0},facilities:{market:0,guild:0,temple:0},completedExpeditions:0,campaignVictories:[]})));
+ return initSanitarium(initTown(setupHeroRoster({...createSettlement(),busts:0,stageCoach:{barracks:0,network:0},facilities:{market:0,guild:0,temple:0,abbey:0,tavern:0},completedExpeditions:0,campaignVictories:[]})));
 }
 export function normalizeCampaignSettlement(input){
  if(!isObject(input))throw Error('Invalid settlement');
