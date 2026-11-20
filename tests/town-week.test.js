@@ -225,7 +225,9 @@ test('recovery upgrade migration preserves legacy levels and freezes other activ
  assert.equal(treatmentConfig(s,'tavernGambling').level,2);
  const restored=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
  assert.deepEqual(restored.recoveryTracks,s.recoveryTracks);
- upgradeFacility(restored,'abbey');
+ const before={crests:restored.crests,deeds:restored.deeds};
+ assert.throws(()=>upgradeFacility(restored,'abbey'),/individual recovery activity upgrades/);
+ assert.deepEqual({crests:restored.crests,deeds:restored.deeds},before,'rejected legacy upgrade must not charge heirlooms');
  assert.equal(treatmentConfig(restored,'abbeyPenance').level,1,'legacy building upgrade must not silently modify independent activity tracks');
  assert.equal(treatmentConfig(restored,'abbeyTransept').level,2);
 });
