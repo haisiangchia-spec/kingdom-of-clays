@@ -270,6 +270,14 @@ function campaign(seed,maxWeeks=100){
   // Avoid buying redundant provisions on every Apprentice expedition; reserve
   // gold for persistent Stage Coach, weapon and armor progression. Purchase
   // one curative only for plague expeditions with a sufficient cash buffer.
+  // Long Champion missions require paid food for corridor hunger and a camp.
+  // Purchase through the normal provision API: no free food or rule changes.
+  if(quest.tier==='champion'&&town.gold>=4000){
+   for(let i=0;i<16;i++){
+    try{purchaseProvision(d,town,'food',1);}
+    catch(error){if(/Inventory full|Insufficient gold/.test(error.message))break;throw error;}
+   }
+  }
   if(quest.region==='plague'&&town.gold>=1750){
    try{purchaseProvision(d,town,'antivenom',1);}
    catch(error){if(!/Inventory full/.test(error.message))throw error;}
