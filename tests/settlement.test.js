@@ -79,7 +79,7 @@ test('legacy minimal settlement is normalized without losing wallet or trinkets'
  const legacy={gold:25,crests:5,deeds:2,trinkets:['ward-charm']};
  const migrated=normalizeCampaignSettlement(legacy);
  assert.equal(migrated.gold,25);
- assert.deepEqual(migrated.facilities,{market:0,guild:0,temple:0});
+ assert.deepEqual(migrated.facilities,{market:0,guild:0,temple:0,abbey:0,tavern:0});
  assert.equal(migrated.completedExpeditions,0);
  assert.deepEqual(migrated.trinkets,['ward-charm']);
 });
