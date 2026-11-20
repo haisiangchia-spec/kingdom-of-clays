@@ -200,12 +200,23 @@ function prepareTown(town){
  }
  // Reserve two genuine town treatment slots for stressed survivors.
  // Treatment completes after the next expedition; treated heroes cannot deploy.
+ // Preserve the proven treatment policy; record its choices to explain
+ // why otherwise equipped Veteran cores do or do not recover in time.
+ town._organicTreatmentAudit={
+  equippedEligible:town.roster.filter(h=>!h.unit.dead&&h.level>=3&&
+   (h.equipment?.weapon??0)>=3&&(h.equipment?.armor??0)>=3&&h.unit.stress>60).length,
+  equippedAtOrAbove80:town.roster.filter(h=>!h.unit.dead&&h.level>=3&&
+   (h.equipment?.weapon??0)>=3&&(h.equipment?.armor??0)>=3&&h.unit.stress>=80).length,
+  booked:[]
+ };
  const stressed=town.roster.filter(h=>!h.unit.dead&&h.unit.stress>=80)
   .sort((a,b)=>b.level-a.level||b.unit.stress-a.unit.stress);
  for(const service of ['abbey','tavern']){
   const hero=stressed.find(h=>!town.town.treatments.some(t=>t.rosterId===h.rosterId));
   if(hero&&town.gold>=TREATMENTS[service].gold+1500)
-   {const before=town.gold;bookStressTreatment(town,hero.rosterId,service);spending.treatments+=before-town.gold;}
+   {const before=town.gold;bookStressTreatment(town,hero.rosterId,service);spending.treatments+=before-town.gold;
+    town._organicTreatmentAudit.booked.push({level:hero.level,stress:hero.unit.stress,
+     equippedVeteran:hero.level>=3&&(hero.equipment?.weapon??0)>=3&&(hero.equipment?.armor??0)>=3});}
  }
  for(const hero of town.roster){
   if(hero.unit.dead&&town.facilities.temple>0&&town.gold>=1750){const before=town.gold;resurrectHero(town,hero.rosterId);spending.resurrection+=before-town.gold;}
@@ -234,6 +245,7 @@ function campaign(seed,maxWeeks=100){
     hero.unit.hp/hero.unit.maxHp>=0.75&&hero.unit.stress<=60;
   });
   const deploymentAudit=town._organicDeploymentAudit;
+  const treatmentAudit=town._organicTreatmentAudit;
   const readinessAudit={gold:town.gold,level3:0,equipped3:0,fullyRested3:0,fullyReady3:0,
    deployable3:0,equippedStressBlocked3:0,equippedHpBlocked3:0,restedEquipmentBlocked3:0,
    equippedButNotRested3:0,restedButNotEquipped3:0,level3MissingWeaponRanks:0,
@@ -304,7 +316,7 @@ function campaign(seed,maxWeeks=100){
   if(d.phase==='victory')reward=completeCampaignExpedition(town,d).report;
   returnPartyToRoster(town,d);
   advanceTownWeek(town,d);
-  history.push({week:week+1,townBudget,readinessAudit,deploymentAudit,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,levelThreeHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=3).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
+  history.push({week:week+1,townBudget,readinessAudit,deploymentAudit,treatmentAudit,quest:id,tier:quest.tier,phase:d.phase,levels,equipment,entryStress,entryHp,partyDeaths:d.party.filter(h=>h.dead).length,partyHp:d.party.map(h=>h.hp),partyStress:d.party.map(h=>h.stress),gold:town.gold,crests:town.crests,deeds:town.deeds,facilities:{...town.facilities},stageCoach:{...town.stageCoach},rosterSize:town.roster.length,livingRoster:town.roster.filter(h=>!h.unit.dead).length,peakRosterLevel:Math.max(...town.roster.map(h=>h.level)),levelTwoHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=2).length,levelThreeHeroes:town.roster.filter(h=>!h.unit.dead&&h.level>=3).length,reward,expeditionLoot,discardedLoot:d._discardedLoot??[],encounters:report.encounters,campsUsed:report.campsUsed,
    lowerTierEncounters:report.mix.lower,encounterAudit:quest.tier==='champion'?report.encounterAudit:undefined,recoveryAudit:quest.tier==='champion'?report.recoveryAudit:undefined,campOpportunityAudit:quest.tier==='champion'?report.campOpportunityAudit:undefined});
   town=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
   if(d.phase==='victory'&&quest.tier==='champion')break;
@@ -338,6 +350,10 @@ test('seeded player campaigns advance through real Apprentice, Veteran and Champ
    cumulativeEquippedStressBlocks:x.history.reduce((n,h)=>n+(h.readinessAudit?.equippedStressBlocked3??0),0),
    cumulativeEquippedHpBlocks:x.history.reduce((n,h)=>n+(h.readinessAudit?.equippedHpBlocked3??0),0),
    cumulativeTreatmentBlockedReady:x.history.reduce((n,h)=>n+Math.max(0,(h.readinessAudit?.fullyReady3??0)-(h.readinessAudit?.deployable3??0)),0),
+   equippedTreatmentBookings:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>b.equippedVeteran).length??0),0),
+   otherTreatmentBookings:x.history.reduce((n,h)=>n+(h.treatmentAudit?.booked.filter(b=>!b.equippedVeteran).length??0),0),
+   equippedStressEligibleWeeks:x.history.reduce((n,h)=>n+(h.treatmentAudit?.equippedEligible??0),0),
+   equippedStress80Weeks:x.history.reduce((n,h)=>n+(h.treatmentAudit?.equippedAtOrAbove80??0),0),
    finalGold:x.history.at(-1)?.gold??null,
    finalDeeds:x.history.at(-1)?.deeds??null
   })),
