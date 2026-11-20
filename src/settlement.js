@@ -2,7 +2,7 @@
 // Upgrade quantities and unlock effects remain prototypes; DD1 town building upgrades spend heirlooms, not gold.
 import {createSettlement} from './inventory.js';
 import {setupHeroRoster,validateHeroRoster} from './hero-roster.js';
-import {initTown,validateTown} from './town-week.js';
+import {initTown,validateTown,RECOVERY_TRACKS} from './town-week.js';
 import {initSanitarium,validateSanitarium} from './sanitarium.js';
 
 export const SETTLEMENT_FACILITIES=Object.freeze({
@@ -50,6 +50,15 @@ export function normalizeCampaignSettlement(input){
   const level=fields[key]??0;
   if(!safeNumber(level)||level>rule.maxLevel)throw Error('Invalid facility level');
   base.facilities[key]=level;
+ }
+ if(input.recoveryTracks!==undefined){
+  if(!isObject(input.recoveryTracks)||Object.keys(input.recoveryTracks).some(k=>!RECOVERY_TRACKS.includes(k)))throw Error('Invalid recovery activity upgrades');
+  base.recoveryTracks={};
+  for(const service of RECOVERY_TRACKS){
+   const level=input.recoveryTracks[service];
+   if(!safeNumber(level)||level>2)throw Error('Invalid recovery activity level');
+   base.recoveryTracks[service]=level;
+  }
  }
  if(input.campaignVictories!==undefined){
   if(!Array.isArray(input.campaignVictories)||input.campaignVictories.some(x=>!['veteran-victory','champion-victory'].includes(x))||new Set(input.campaignVictories).size!==input.campaignVictories.length)throw Error('Invalid campaign victories');
