@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "commit": "f428ed232a8828f74488e00be916e8a1f9067987",
-  "runId": "44699633264",
-  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/44699633264",
+  "commit": "7a8178b311b8c2081240d94599d1304e769cab8a",
+  "runId": "44700404021",
+  "runUrl": "https://github.com/haisiangchia-spec/kingdom-of-clays/actions/runs/44700404021",
   "baseline": [
     {
       "questId": "crypt-recon",
