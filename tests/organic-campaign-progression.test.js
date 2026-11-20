@@ -128,17 +128,12 @@ function fillSquad(town){
  const veteranCore=candidates.filter(h=>readyForTier(h,3));
  const championCore=candidates.filter(h=>readyForTier(h,5));
  const pool=championCore.length>=4?championCore:veteranCore.length>=4?veteranCore:candidates;
- // On Apprentice runs, preserve the upgraded Veteran core when enough
- // lower-level substitutes are available. They still earn XP and take real
- // expedition risks; high-tier squads remain selected when actually ready.
- const apprenticeReserves=candidates.filter(h=>h.level<3&&h.unit.stress<100);
- const selectionPool=pool===candidates&&apprenticeReserves.length>=4?apprenticeReserves:pool;
  const readiness=h=>(h.unit.stress>=100?-1000:0)-
   h.unit.stress*2+h.level*25+
   ((h.equipment?.weapon??0)+(h.equipment?.armor??0))*8+
   h.unit.hp/h.unit.maxHp*20;
- selectionPool.sort((a,b)=>readiness(b)-readiness(a));
- const selected=selectionPool.slice(0,4);
+ pool.sort((a,b)=>readiness(b)-readiness(a));
+ const selected=pool.slice(0,4);
  const selectedIds=new Set(selected.map(h=>h.rosterId));
  town._organicDeploymentAudit={
   selected:selected.map(h=>({level:h.level,stress:h.unit.stress,weapon:h.equipment?.weapon??0,armor:h.equipment?.armor??0})),
