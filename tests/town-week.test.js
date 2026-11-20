@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
+import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave,upgradeFacility} from '../src/settlement.js';
 import {createDungeon} from '../src/dungeon.js';
 import {prepareRosterParty,returnPartyToRoster,selectHero,recruitHero} from '../src/hero-roster.js';
 import {TREATMENTS,stageCoachOffers,recruitFromCoach,bookStressTreatment,advanceTownWeek,townUnavailable,validateTown} from '../src/town-week.js';
@@ -114,4 +114,19 @@ test('pending treatment and available recruits remain identical after save reloa
  const fresh=recruitFromCoach(saved,offer.offerId);
  selectHero(saved,0,fresh.rosterId);
  assert.equal(prepareRosterParty(saved)[0].rosterId,fresh.rosterId);
+});
+
+test('maximum recovery upgrade unlocks a second treatment slot and preserves both bookings',()=>{
+ const s=createCampaignSettlement();s.gold=5000;s.crests=50;s.deeds=50;
+ upgradeFacility(s,'abbey');upgradeFacility(s,'abbey');
+ for(const hero of s.roster)hero.unit.stress=100;
+ bookStressTreatment(s,'r1','abbey');bookStressTreatment(s,'r2','abbey');
+ assert.equal(s.town.treatments.length,2);
+ assert.throws(()=>bookStressTreatment(s,'r3','abbey'),/occupied/);
+ const saved=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ assert.equal(saved.town.treatments.length,2);
+ const expedition={phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true};
+ advanceTownWeek(saved,expedition);
+ assert.equal(saved.roster[0].unit.stress,30);
+ assert.equal(saved.roster[1].unit.stress,30);
 });
