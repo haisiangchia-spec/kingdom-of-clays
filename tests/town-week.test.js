@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave,upgradeFacility} from '../src/settlement.js';
 import {createDungeon} from '../src/dungeon.js';
 import {prepareRosterParty,returnPartyToRoster,selectHero,recruitHero} from '../src/hero-roster.js';
-import {TREATMENTS,treatmentConfig,upgradeRecoveryActivity,stageCoachOffers,recruitFromCoach,bookStressTreatment,advanceTownWeek,townUnavailable,validateTown} from '../src/town-week.js';
+import {TREATMENTS,canUseStressTreatment,treatmentConfig,upgradeRecoveryActivity,stageCoachOffers,recruitFromCoach,bookStressTreatment,advanceTownWeek,townUnavailable,validateTown} from '../src/town-week.js';
 
 const completed=(s,seed=1)=>{
  const d=createDungeon(seed,{party:prepareRosterParty(s)});
@@ -241,4 +241,27 @@ test('a failed independent recovery upgrade preserves heirlooms and leaves legac
  assert.equal(s.recoveryTracks,undefined);
  assert.throws(()=>upgradeRecoveryActivity(s,'unknownService'),/Unknown stress treatment/);
  assert.deepEqual(s,before);
+});
+
+test('DD1 treatment quirks force or prohibit the correct six activities without charging gold',()=>{
+ const s=createCampaignSettlement();s.gold=10000;s.roster[0].unit.stress=100;
+ const hero=s.roster[0];
+ const forced={enlightened:'abbey',godFearing:'abbeyTransept',flagellant:'abbeyPenance',tippler:'tavern',gambler:'tavernGambling',loveInterest:'tavernBrothel'};
+ for(const [id,allowed] of Object.entries(forced)){
+  hero.quirks.negative=[{id,locked:false}];
+  for(const service of Object.keys(TREATMENTS)){
+   assert.equal(canUseStressTreatment(hero,service),service===allowed,id+' / '+service);
+   if(service!==allowed)assert.throws(()=>bookStressTreatment(s,hero.rosterId,service),/quirk forbids/);
+  }
+  assert.equal(s.gold,10000);
+ }
+ const blocked={unquietMind:['abbey'],witness:['abbeyTransept'],faithless:['abbeyTransept','abbeyPenance'],resolution:['tavern'],knownCheat:['tavernGambling'],deviantTastes:['tavernBrothel']};
+ for(const [id,forbidden] of Object.entries(blocked)){
+  hero.quirks.negative=[{id,locked:false}];
+  for(const service of Object.keys(TREATMENTS))
+   assert.equal(canUseStressTreatment(hero,service),!forbidden.includes(service),id+' / '+service);
+ }
+ hero.quirks.negative=[{id:'gambler',locked:false},{id:'knownCheat',locked:false}];
+ assert.ok(Object.keys(TREATMENTS).every(service=>!canUseStressTreatment(hero,service)));
+ assert.equal(s.gold,10000);
 });
