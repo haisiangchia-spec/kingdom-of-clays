@@ -227,6 +227,7 @@ function campaign(seed,maxWeeks=100){
     hero.unit.hp/hero.unit.maxHp>=0.75&&hero.unit.stress<=60;
   });
   const readinessAudit={gold:town.gold,level3:0,equipped3:0,fullyRested3:0,fullyReady3:0,
+   deployable3:0,equippedStressBlocked3:0,equippedHpBlocked3:0,restedEquipmentBlocked3:0,
    equippedButNotRested3:0,restedButNotEquipped3:0,level3MissingWeaponRanks:0,
    level3MissingArmorRanks:0,level3TotalStress:0,level3MissingHp:0};
   for(const hero of town.roster.filter(h=>!h.unit.dead)){
@@ -239,6 +240,11 @@ function campaign(seed,maxWeeks=100){
     if(equipped)readinessAudit.equipped3++;
     if(rested)readinessAudit.fullyRested3++;
     if(equipped&&rested)readinessAudit.fullyReady3++;
+    if(equipped&&rested&&!town.town.treatments.some(t=>t.rosterId===hero.rosterId))
+     readinessAudit.deployable3++;
+    if(equipped&&hero.unit.stress>60)readinessAudit.equippedStressBlocked3++;
+    if(equipped&&hero.unit.hp/hero.unit.maxHp<0.75)readinessAudit.equippedHpBlocked3++;
+    if(rested&&!equipped)readinessAudit.restedEquipmentBlocked3++;
     if(equipped&&!rested)readinessAudit.equippedButNotRested3++;
     if(rested&&!equipped)readinessAudit.restedButNotEquipped3++;
     readinessAudit.level3MissingWeaponRanks+=Math.max(0,3-(hero.equipment?.weapon??0));
