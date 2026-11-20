@@ -151,3 +151,13 @@ test('six DD1 Abbey and Tavern activities book independently and persist across 
  assert.deepEqual(loaded.roster.slice(0,6).map(h=>h.unit.stress),Array(6).fill(55));
  assert.equal(loaded.town.treatments.length,0);
 });
+
+test('a tampered save cannot reserve one hero for both Abbey and Sanitarium',()=>{
+ const s=createCampaignSettlement();
+ s.gold=1000;
+ s.roster[0].unit.stress=80;
+ bookStressTreatment(s,'r1','abbey');
+ s.sanitarium.quirkWard={rosterId:'r1',mode:'negative',target:'test'};
+ assert.throws(()=>validateTown(s),/Invalid treatment reservation/);
+ assert.throws(()=>decodeCampaignSave(JSON.stringify({version:1,settlement:s,expedition:null})),/Invalid treatment reservation/);
+});
