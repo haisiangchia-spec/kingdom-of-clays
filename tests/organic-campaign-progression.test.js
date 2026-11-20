@@ -158,7 +158,7 @@ function prepareTown(town){
   if(affordable)upgradeStageCoach(town,track);
  }
  // All upgrades and services go through public gameplay actions, using earned resources.
- for(const facility of ['guild','temple','market']){
+ for(const facility of ['guild','temple','market','abbey','tavern']){
   const cost=nextFacilityCost(town,facility);
   if(cost&&Object.entries(cost).every(([resource,amount])=>(town[resource]??0)>=amount))
    upgradeFacility(town,facility);
