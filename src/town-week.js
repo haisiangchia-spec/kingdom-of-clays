@@ -41,14 +41,17 @@ const BLOCKED_ACTIVITIES=Object.freeze({
  faithless:['abbeyTransept','abbeyPenance'],resolution:['tavern'],
  knownCheat:['tavernGambling'],deviantTastes:['tavernBrothel']
 });
-export function canUseStressTreatment(hero,service){
- if(!TREATMENTS[service])return false;
+export function stressTreatmentRestriction(hero,service){
+ if(!TREATMENTS[service])return 'Unknown stress treatment';
  const ids=new Set((hero?.quirks?.negative??[]).map(q=>q.id));
  for(const [id,required] of Object.entries(FORCED_ACTIVITIES))
-  if(ids.has(id)&&service!==required)return false;
+  if(ids.has(id)&&service!==required)return id+' requires '+TREATMENTS[required].name;
  for(const [id,blocked] of Object.entries(BLOCKED_ACTIVITIES))
-  if(ids.has(id)&&blocked.includes(service))return false;
- return true;
+  if(ids.has(id)&&blocked.includes(service))return id+' prohibits '+TREATMENTS[service].name;
+ return null;
+}
+export function canUseStressTreatment(hero,service){
+ return stressTreatmentRestriction(hero,service)===null;
 }
 export function treatmentConfig(settlement,service){
  const base=TREATMENTS[service];
