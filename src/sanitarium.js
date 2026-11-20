@@ -6,7 +6,13 @@ export const QUIRKS=Object.freeze({
  sturdy:{name:'Sturdy',kind:'positive'},eagleEye:{name:'Eagle Eye',kind:'positive'},
  earlyRiser:{name:'Early Riser',kind:'positive'},
  nervous:{name:'Nervous',kind:'negative'},slowReflexes:{name:'Slow Reflexes',kind:'negative'},
- nocturnal:{name:'Nocturnal',kind:'negative'}
+ nocturnal:{name:'Nocturnal',kind:'negative'},
+ enlightened:{name:'Enlightened',kind:'negative'},unquietMind:{name:'Unquiet Mind',kind:'negative'},
+ godFearing:{name:'God Fearing',kind:'negative'},witness:{name:'Witness',kind:'negative'},
+ flagellant:{name:'Flagellant',kind:'negative'},faithless:{name:'Faithless',kind:'negative'},
+ tippler:{name:'Tippler',kind:'negative'},resolution:{name:'Resolution',kind:'negative'},
+ gambler:{name:'Gambler',kind:'negative'},knownCheat:{name:'Known Cheat',kind:'negative'},
+ loveInterest:{name:'Love Interest',kind:'negative'},deviantTastes:{name:'Deviant Tastes',kind:'negative'}
 });
 export const DISEASES=Object.freeze({
  creepingCough:{name:'Creeping Cough'},ashenFever:{name:'Ashen Fever'}
