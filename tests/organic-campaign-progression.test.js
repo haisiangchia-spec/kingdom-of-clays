@@ -233,7 +233,9 @@ function campaign(seed,maxWeeks=100){
    if(hero.level>=3){
     readinessAudit.level3++;
     const equipped=(hero.equipment?.weapon??0)>=3&&(hero.equipment?.armor??0)>=3;
-    const rested=hero.unit.stress===0&&hero.unit.hp===hero.unit.maxHp;
+    // Match the actual deployment gate (75% HP, <=60 stress), not
+    // the obsolete perfect-health/zero-stress benchmark.
+    const rested=hero.unit.stress<=60&&hero.unit.hp/hero.unit.maxHp>=0.75;
     if(equipped)readinessAudit.equipped3++;
     if(rested)readinessAudit.fullyRested3++;
     if(equipped&&rested)readinessAudit.fullyReady3++;
