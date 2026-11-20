@@ -139,7 +139,21 @@ jobs:
           git add simulation-results/latest.json
           if ! git diff --cached --quiet; then
             git commit -m "chore: publish campaign simulation results for run ${GITHUB_RUN_ID} [skip ci]"
-            git push origin HEAD:main
+            # Other CI runs may publish results or new commits while this job runs.
+            # Rebase the generated report on the current branch and retry safely.
+            for attempt in 1 2 3 4 5; do
+              git fetch origin main
+              if ! git rebase origin/main; then
+                git rebase --abort
+                echo "Report rebase conflicted; retaining uploaded run artifacts instead."
+                break
+              fi
+              if git push origin HEAD:main; then
+                break
+              fi
+              echo "Concurrent branch update; retrying report publication ($attempt/5)."
+              sleep 2
+            done
           fi
       - name: Upload campaign balance results
         if: always()
