@@ -16,12 +16,28 @@ export const TREATMENTS=Object.freeze({
  tavernGambling:Object.freeze({name:'Tavern Gambling Hall',facility:'tavern',gold:1000,stressRelief:45}),
  tavernBrothel:Object.freeze({name:'Tavern Brothel',facility:'tavern',gold:1000,stressRelief:45})
 });
+// New campaigns may upgrade each activity independently. Older saves without
+// recoveryTracks continue to use their existing Abbey/Tavern building levels.
+export const RECOVERY_TRACKS=Object.freeze(Object.keys(TREATMENTS));
+export function upgradeRecoveryActivity(settlement,service){
+ if(!RECOVERY_TRACKS.includes(service))throw Error('Unknown stress treatment');
+ const level=treatmentConfig(settlement,service).level;
+ if(level>=2)throw Error('Recovery activity is already at maximum level');
+ const cost={crests:3*(level+1),deeds:2*(level+1)};
+ if(Object.entries(cost).some(([key,amount])=>!Number.isSafeInteger(settlement[key])||settlement[key]<amount))throw Error('Insufficient settlement resources');
+ for(const [key,amount] of Object.entries(cost))settlement[key]-=amount;
+ settlement.recoveryTracks??=Object.fromEntries(RECOVERY_TRACKS.map(key=>[key,settlement.facilities?.[TREATMENTS[key].facility]??0]));
+ settlement.recoveryTracks[service]=level+1;
+ return {service,level:level+1,cost};
+}
 export function treatmentConfig(settlement,service){
  const base=TREATMENTS[service];
  if(!base)throw Error('Unknown stress treatment');
- const level=settlement.facilities?.[base.facility]??0;
+ const legacy=settlement.facilities?.[base.facility]??0;
+ const independent=settlement.recoveryTracks?.[service];
+ const level=independent===undefined?legacy:independent;
  if(!Number.isInteger(level)||level<0||level>2)throw Error('Invalid recovery upgrade');
- return {...base,stressRelief:[45,56,70][level],capacity:level===2?2:1};
+ return {...base,level,stressRelief:[45,56,70][level],capacity:level===2?2:1};
 }
 const goodInt=n=>Number.isSafeInteger(n)&&n>=0;
 const names=Object.keys(TREATMENTS);
