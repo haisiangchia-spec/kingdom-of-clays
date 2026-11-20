@@ -14,7 +14,7 @@ export function treatmentConfig(settlement,service){
  if(!base)throw Error('Unknown stress treatment');
  const level=settlement.facilities?.[service]??0;
  if(!Number.isInteger(level)||level<0||level>2)throw Error('Invalid recovery upgrade');
- return {...base,stressRelief:[45,56,70][level]};
+ return {...base,stressRelief:[45,56,70][level],capacity:level===2?2:1};
 }
 const goodInt=n=>Number.isSafeInteger(n)&&n>=0;
 const names=Object.keys(TREATMENTS);
@@ -40,18 +40,18 @@ export function validateTown(settlement){
  const town=settlement.town;
  if(!town||typeof town!=='object'||!goodInt(town.week)||town.week<1||
    !Array.isArray(town.offers)||town.offers.length>7||
-   !Array.isArray(town.treatments)||town.treatments.length>names.length)throw Error('Invalid town state');
+   !Array.isArray(town.treatments)||town.treatments.length>names.reduce((sum,name)=>sum+treatmentConfig(settlement,name).capacity,0))throw Error('Invalid town state');
  const offerIds=new Set();
  for(const offer of town.offers){
   if(!offer||typeof offer.offerId!=='string'||!new RegExp('^w'+town.week+'-o[1-7]'+String.fromCharCode(36)).test(offer.offerId)||
     offerIds.has(offer.offerId)||!HERO_CLASSES.includes(offer.heroClass))throw Error('Invalid Stage Coach offer');
   offerIds.add(offer.offerId);
  }
- const usedServices=new Set(),usedHeroes=new Set();
+ const serviceCounts=new Map(),usedHeroes=new Set();
  for(const t of town.treatments){
-  if(!t||!names.includes(t.service)||usedServices.has(t.service)||usedHeroes.has(t.rosterId)||
+  if(!t||!names.includes(t.service)||(serviceCounts.get(t.service)??0)>=treatmentConfig(settlement,t.service).capacity||usedHeroes.has(t.rosterId)||
     !settlement.roster.some(h=>h.rosterId===t.rosterId&&!h.unit.dead))throw Error('Invalid treatment reservation');
-  usedServices.add(t.service);usedHeroes.add(t.rosterId);
+  serviceCounts.set(t.service,(serviceCounts.get(t.service)??0)+1);usedHeroes.add(t.rosterId);
  }
  return town;
 }
@@ -71,7 +71,7 @@ export function bookStressTreatment(settlement,rosterId,service){
  const hero=settlement.roster.find(h=>h.rosterId===rosterId);
  if(!hero||hero.unit.dead)throw Error('Hero is unavailable');
  if(hero.unit.stress<=0)throw Error('Hero has no stress to treat');
- if(town.treatments.some(t=>t.service===service))throw Error('Treatment room is occupied');
+ if(town.treatments.filter(t=>t.service===service).length>=config.capacity)throw Error('Treatment room is occupied');
  if(town.treatments.some(t=>t.rosterId===rosterId)||sanitariumUnavailable(settlement,rosterId))throw Error('Hero is already receiving treatment');
  if(settlement.gold<config.gold)throw Error('Insufficient gold for treatment');
  settlement.gold-=config.gold;
