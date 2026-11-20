@@ -56,7 +56,7 @@ export function validateTown(settlement){
  }
  const serviceCounts=new Map(),usedHeroes=new Set();
  for(const t of town.treatments){
-  if(!t||!names.includes(t.service)||(serviceCounts.get(t.service)??0)>=treatmentConfig(settlement,t.service).capacity||usedHeroes.has(t.rosterId)||
+  if(!t||!names.includes(t.service)||(serviceCounts.get(t.service)??0)>=treatmentConfig(settlement,t.service).capacity||usedHeroes.has(t.rosterId)||sanitariumUnavailable(settlement,t.rosterId)||
     !settlement.roster.some(h=>h.rosterId===t.rosterId&&!h.unit.dead))throw Error('Invalid treatment reservation');
   serviceCounts.set(t.service,(serviceCounts.get(t.service)??0)+1);usedHeroes.add(t.rosterId);
  }
