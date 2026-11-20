@@ -265,3 +265,14 @@ test('DD1 treatment quirks force or prohibit the correct six activities without 
  assert.ok(Object.keys(TREATMENTS).every(service=>!canUseStressTreatment(hero,service)));
  assert.equal(s.gold,10000);
 });
+
+test('tampered save cannot book a hero into a quirk-forbidden stress activity',()=>{
+ const s=createCampaignSettlement();s.gold=3000;s.roster[0].unit.stress=100;
+ s.roster[0].quirks.negative=[{id:'gambler',locked:false}];
+ s.town.treatments.push({rosterId:s.roster[0].rosterId,service:'abbey'});
+ assert.throws(()=>validateTown(s),/Invalid treatment reservation/);
+ assert.throws(()=>encodeCampaignSave(s,null),/Invalid treatment reservation/);
+ s.town.treatments[0].service='tavernGambling';
+ assert.doesNotThrow(()=>validateTown(s));
+ assert.doesNotThrow(()=>encodeCampaignSave(s,null));
+});
