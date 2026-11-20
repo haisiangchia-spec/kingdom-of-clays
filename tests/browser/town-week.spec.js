@@ -107,3 +107,21 @@ test('Hamlet activity upgrades are independently visible and persist across relo
  await expect(panel).toContainText('Abbey Transept activity upgrade Lv 2/2 · 2 slots · -70 stress');
  await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -45 stress');
 });
+
+test('migrated recovery tracks hide obsolete shared Abbey and Tavern upgrades',async ({page})=>{
+ await makeTown(page,{gold:1000,stress:100});
+ await page.evaluate(async ()=>{
+  const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const {upgradeRecoveryActivity}=await import('./src/town-week.js');
+  const saved=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  saved.settlement.crests=20;saved.settlement.deeds=20;
+  upgradeRecoveryActivity(saved.settlement,'abbeyTransept');
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(saved.settlement,saved.expedition));
+ });
+ await page.reload();
+ const panel=page.locator('#settlement-panel');
+ await expect(panel).toContainText('Abbey Transept activity upgrade Lv 1/2');
+ await expect(page.getByRole('button',{name:/Upgrade Abbey Recovery \(/})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:/Upgrade Tavern Recovery \(/})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Upgrade Abbey Transept activity (6 crests, 4 deeds)'})).toBeEnabled();
+});
