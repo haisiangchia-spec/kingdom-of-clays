@@ -9,7 +9,7 @@ import {HERO_CLASSES,ROSTER_CAPACITY,rosterCapacity,RECRUITMENT_COST,RESURRECTIO
 test('initial four heroes have persistent IDs, classes, and independent combat units',()=>{
  const s=createCampaignSettlement();
  assert.deepEqual(s.squad,['r1','r2','r3','r4']);
- assert.deepEqual(s.roster.map(h=>h.heroClass),HERO_CLASSES);
+ assert.deepEqual(s.roster.map(h=>h.heroClass),HERO_CLASSES.slice(0,4));
  assert.equal(s.nextHeroId,5);
  const roster=createHeroRoster();
  roster[0].unit.hp=1;
@@ -284,4 +284,25 @@ test('DD1 Resolve XP scales with quest length and tier, never on defeat',()=>{
  d.phase='defeat';
  returnPartyToRoster(s,d);
  assert.equal(s.roster[0].xp,0);
+});
+
+test('all fifteen base-game reskin classes are recruitable, independent and saveable',()=>{
+ const s=createCampaignSettlement();
+ assert.equal(HERO_CLASSES.length,15);
+ s.stageCoach.barracks=5;
+ for(const kind of HERO_CLASSES.slice(4)){
+  const hero=recruitHero(s,kind);
+  assert.equal(hero.heroClass,kind);
+  assert.equal(hero.unit.side,'hero');
+  assert.equal(hero.unit.dead,false);
+  assert.ok(hero.unit.hp>0);
+  assert.ok(hero.unit.maxHp>0);
+ }
+ assert.equal(s.roster.length,15);
+ const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ assert.deepEqual(loaded.roster.map(h=>h.heroClass),s.roster.map(h=>h.heroClass));
+ selectHero(loaded,0,loaded.roster.at(-1).rosterId);
+ assert.equal(prepareRosterParty(loaded)[0].heroClass,'Spiritbound');
+ const duplicate=recruitHero(loaded,'Spiritbound');
+ assert.notEqual(duplicate.rosterId,loaded.roster.at(-2).rosterId);
 });
