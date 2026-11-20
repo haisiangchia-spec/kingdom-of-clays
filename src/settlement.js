@@ -91,6 +91,7 @@ export function nextFacilityCost(settlement,id){
  return Object.fromEntries(Object.entries(facility.baseCost).map(([kind,amount])=>[kind,amount*multiplier]));
 }
 export function upgradeFacility(settlement,id){
+ if(settlement.recoveryTracks&&['abbey','tavern'].includes(id))throw Error('Use individual recovery activity upgrades');
  const cost=nextFacilityCost(settlement,id);
  if(!cost)throw Error('Facility is already at maximum level');
  if(Object.keys(cost).some(k=>!safeNumber(settlement[k])||settlement[k]<cost[k]))throw Error('Insufficient settlement resources');
