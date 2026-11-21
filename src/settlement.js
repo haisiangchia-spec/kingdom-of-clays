@@ -60,24 +60,6 @@ export function normalizeCampaignSettlement(input){
    base.treatmentUpgradeTracks[service]=level;
   }
  }
- if(input.recoveryTracks!==undefined){
-  if(!isObject(input.recoveryTracks)||Object.keys(input.recoveryTracks).some(k=>!RECOVERY_TRACKS.includes(k)))throw Error('Invalid recovery activity upgrades');
-  base.recoveryTracks={};
-  for(const service of RECOVERY_TRACKS){
-   const level=input.recoveryTracks[service];
-   if(!safeNumber(level)||level>2)throw Error('Invalid recovery activity level');
-   base.recoveryTracks[service]=level;
-  }
- }
- if(input.treatmentCostTracks!==undefined){
-  if(!isObject(input.treatmentCostTracks)||Object.keys(input.treatmentCostTracks).some(k=>!RECOVERY_TRACKS.includes(k)))throw Error('Invalid treatment cost upgrades');
-  base.treatmentCostTracks={};
-  for(const service of RECOVERY_TRACKS){
-   const level=input.treatmentCostTracks[service];
-   if(!safeNumber(level)||level>2)throw Error('Invalid treatment cost upgrade level');
-   base.treatmentCostTracks[service]=level;
-  }
- }
  if(input.campaignVictories!==undefined){
   if(!Array.isArray(input.campaignVictories)||input.campaignVictories.some(x=>!['veteran-victory','champion-victory'].includes(x))||new Set(input.campaignVictories).size!==input.campaignVictories.length)throw Error('Invalid campaign victories');
   base.campaignVictories=[...input.campaignVictories];
@@ -109,7 +91,7 @@ export function nextFacilityCost(settlement,id){
  return Object.fromEntries(Object.entries(facility.baseCost).map(([kind,amount])=>[kind,amount*multiplier]));
 }
 export function upgradeFacility(settlement,id){
- if(settlement.recoveryTracks&&['abbey','tavern'].includes(id))throw Error('Use individual recovery activity upgrades');
+ if(['abbey','tavern'].includes(id))throw Error('Use six-stage treatment upgrades');
  const cost=nextFacilityCost(settlement,id);
  if(!cost)throw Error('Facility is already at maximum level');
  if(Object.keys(cost).some(k=>!safeNumber(settlement[k])||settlement[k]<cost[k]))throw Error('Insufficient settlement resources');
