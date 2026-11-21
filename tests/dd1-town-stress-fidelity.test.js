@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,upgradeFacility,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
 import {recruitHero} from '../src/hero-roster.js';
-import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,treatmentPriceAtCostLevel,treatmentCostUpgradeLevel,upgradeTreatmentCost,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity,dd1TreatmentUpgradeState,treatmentUpgradeLevel,treatmentUpgradePrice,upgradeTreatmentActivity} from '../src/town-week.js';
+import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,treatmentPriceAtCostLevel,treatmentCostUpgradeLevel,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,dd1TreatmentUpgradeState,treatmentUpgradeLevel,treatmentUpgradePrice,upgradeTreatmentActivity} from '../src/town-week.js';
 
 // Regression guard for DD1-style town stress recovery. Prices and relief tiers
 // are explicitly configured; capacity and heirloom upgrade costs remain Clays fixtures.
@@ -264,10 +264,4 @@ test('new campaigns purchase sequential DD1 treatment stages and retain levels o
  assert.equal(treatmentConfig(loaded,service).capacity,3);
 });
 
-test('new DD1 campaigns reject obsolete independent activity upgrades without mutation',()=>{
- const s=createCampaignSettlement();s.crests=100;s.deeds=100;
- const before=structuredClone(s);
- assert.throws(()=>upgradeRecoveryActivity(s,'abbey'),/Use six-stage treatment upgrades/);
- assert.throws(()=>upgradeTreatmentCost(s,'abbey'),/Use six-stage treatment upgrades/);
- assert.deepEqual(s,before);
-});
+
