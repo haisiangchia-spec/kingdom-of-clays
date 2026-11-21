@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,upgradeFacility,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
 import {recruitHero} from '../src/hero-roster.js';
-import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity} from '../src/town-week.js';
+import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,treatmentPriceAtCostLevel,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity} from '../src/town-week.js';
 
 // Regression guard for DD1-style town stress recovery. Prices and relief tiers
 // are explicitly configured; capacity and heirloom upgrade costs remain Clays fixtures.
@@ -179,4 +179,24 @@ test('DD1 Apprentice, Veteran and Champion resolve tiers scale treatment prices'
  assert.equal(s.gold,1799);assert.deepEqual(s.town.treatments,[]);
  s.gold=1800;bookStressTreatment(s,hero.rosterId,'abbey');
  assert.equal(s.gold,0);
+});
+
+test('source-backed DD1 treatment discount tables cover all six services and three hero tiers',()=>{
+ const prices={
+  abbey:[[1000,850,700],[1400,1190,980],[1800,1530,1260]],
+  abbeyTransept:[[1250,1050,900],[1750,1470,1260],[2250,1890,1620]],
+  abbeyPenance:[[1500,1300,1100],[2100,1820,1540],[2700,2340,1980]],
+  tavern:[[1000,850,700],[1400,1190,980],[1800,1530,1260]],
+  tavernGambling:[[1250,1050,900],[1750,1470,1260],[2250,1890,1620]],
+  tavernBrothel:[[1500,1300,1110],[2100,1820,1554],[2700,2340,1998]]
+ };
+ for(const [service,tiers] of Object.entries(prices)){
+  for(const [tier,resolve] of [0,3,5].entries()){
+   for(let discount=0;discount<=2;discount++)
+    assert.equal(treatmentPriceAtCostLevel(service,resolve,discount),tiers[tier][discount]);
+  }
+ }
+ assert.throws(()=>treatmentPriceAtCostLevel('abbey',0,3),/Invalid treatment cost upgrade/);
+ assert.throws(()=>treatmentPriceAtCostLevel('abbey',7,0),/Invalid hero resolve level/);
+ assert.throws(()=>treatmentPriceAtCostLevel('unknown',0,0),/Unknown stress treatment/);
 });
