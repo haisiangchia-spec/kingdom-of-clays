@@ -59,26 +59,6 @@ export function dd1TreatmentUpgradeState(level){
   next:DD1_TREATMENT_UPGRADE_SEQUENCE[level]??null
  };
 }
-// Existing saves store recovery and discount purchases independently.
-// A combined six-stage DD1 track cannot always represent that history: e.g.
-// a discount without the preceding recovery purchase. Report compatibility
-// explicitly rather than silently removing purchased upgrades.
-export function dd1UpgradeMigrationAssessment(settlement,service){
- if(!Object.hasOwn(TREATMENTS,service))throw Error('Unknown stress treatment');
- const recovery=treatmentConfig(settlement,service).level;
- const discount=treatmentCostUpgradeLevel(settlement,service);
- const capacity=treatmentConfig(settlement,service).capacity;
- const matches=[];
- for(let level=0;level<=6;level++){
-  const state=dd1TreatmentUpgradeState(level);
-  if(state.recoveryLevel===recovery&&state.costLevel===discount&&state.capacity===capacity)matches.push(level);
- }
- return Object.freeze({
-  service,recoveryLevel:recovery,costLevel:discount,capacity,
-  compatible:matches.length>0,
-  level:matches.length?matches[0]:null
- });
-}
 // Vanilla DD1 forced and prohibited activity quirks. Contradictory quirks
 // deliberately leave no valid treatment until a quirk is removed.
 const FORCED_ACTIVITIES=Object.freeze({
