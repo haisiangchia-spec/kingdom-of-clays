@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,upgradeFacility,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
 import {recruitHero} from '../src/hero-roster.js';
-import {bookStressTreatment,advanceTownWeek,treatmentConfig,stageCoachOffers} from '../src/town-week.js';
+import {bookStressTreatment,advanceTownWeek,treatmentConfig,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment} from '../src/town-week.js';
 
 // Regression guard for DD1-style town stress recovery. The treatment magnitudes
 // and upgrade structure are current Clays fixtures, not claims of exact DD1 values.
@@ -43,4 +43,26 @@ test('weekly recruits refresh deterministically and treatment state survives sav
  advanceTownWeek(loaded,finished());
  assert.deepEqual(loaded.town.offers,stageCoachOffers(2,loaded.roster,loaded.stageCoach.network));
  assert.equal(loaded.roster[0].unit.stress,15);
+});
+
+test('DD1 forced treatment quirks prohibit alternative services and conflicting quirks cannot bypass restrictions',()=>{
+ const s=createCampaignSettlement();s.gold=5000;
+ const h=s.roster[0];h.unit.stress=90;
+ h.quirks.negative=[{id:'enlightened',locked:false}];
+ assert.equal(canUseStressTreatment(h,'abbey'),true);
+ assert.equal(canUseStressTreatment(h,'abbeyTransept'),false);
+ assert.match(stressTreatmentRestriction(h,'tavern'),/requires Abbey Cloister/);
+ h.quirks.negative.push({id:'unquietMind',locked:false});
+ for(const service of ['abbey','abbeyTransept','abbeyPenance','tavern','tavernGambling','tavernBrothel'])
+  assert.equal(canUseStressTreatment(h,service),false,service);
+ const before=s.gold;
+ assert.throws(()=>bookStressTreatment(s,h.rosterId,'abbey'),/quirk forbids/);
+ assert.equal(s.gold,before);
+ assert.deepEqual(s.town.treatments,[]);
+});
+test('unknown treatment requests do not mutate settlement resources or bookings',()=>{
+ const s=createCampaignSettlement();s.gold=3000;s.roster[0].unit.stress=90;
+ assert.throws(()=>bookStressTreatment(s,s.roster[0].rosterId,'unknown'),/Unknown stress treatment/);
+ assert.equal(s.gold,3000);
+ assert.deepEqual(s.town.treatments,[]);
 });
