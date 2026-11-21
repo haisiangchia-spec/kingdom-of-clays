@@ -198,7 +198,7 @@ function render(){
  for(const goal of campaignMilestoneProgress(settlement))el('p',(goal.complete?'✓ ':'○ ')+goal.name+' — '+goal.description+' ('+goal.current+'/'+goal.target+')'+(goal.complete?'':' · Next: '+goal.nextStep),settlementPanel);
  el('p',`Treasury: ${settlement.gold} gold · ${settlement.crests} crests · ${settlement.deeds} deeds · ${settlement.trinkets.length} trinkets · ${settlement.completedExpeditions} completed · ${settlement.busts??0} busts`,settlementPanel);
  for(const [id,facility] of Object.entries(SETTLEMENT_FACILITIES)){
-  if(settlement.recoveryTracks&&['abbey','tavern'].includes(id))continue; // migrated campaigns use individual activity tracks
+  if(['abbey','tavern'].includes(id))continue; // all campaigns upgrade these six activities independently; legacy levels remain as migration defaults
   const level=settlement.facilities[id];
   const row=el('div',`${facility.name} Lv ${level}/${facility.maxLevel}: ${facility.description}`,settlementPanel);
   row.className='dungeon-unit';
