@@ -76,14 +76,14 @@ test('all six Abbey and Tavern activities are visible and independent in the Ham
  await page.reload();
  const names=['Abbey Cloister','Abbey Transept','Abbey Penance Hall','Tavern Bar','Tavern Gambling Hall','Tavern Brothel'];
  for(const name of names){
-  await expect(page.getByRole('button',{name:`Treat at ${name} · 1000 gold`,exact:false}).first()).toBeVisible();
+  await expect(page.getByRole('button',{name:`Treat at ${name} · ${['Abbey Transept','Tavern Gambling Hall'].includes(name)?1250:['Abbey Penance Hall','Tavern Brothel'].includes(name)?1500:1000} gold`,exact:false}).first()).toBeVisible();
  }
  await page.getByRole('button',{name:/Treat at Abbey Cloister · 1000 gold/}).first().click();
- await page.getByRole('button',{name:/Treat at Tavern Gambling Hall · 1000 gold/}).first().click();
+ await page.getByRole('button',{name:/Treat at Tavern Gambling Hall · 1250 gold/}).first().click();
  await expect(page.locator('#hero-roster')).toContainText('Treatment rooms: 2/6');
  await page.reload();
  await expect(page.locator('#hero-roster')).toContainText('Treatment rooms: 2/6');
- await expect(page.locator('#settlement-panel')).toContainText('Treasury: 4000 gold');
+ await expect(page.locator('#settlement-panel')).toContainText('Treasury: 3750 gold');
 });
 
 test('Hamlet activity upgrades are independently visible and persist across reload',async ({page})=>{
@@ -96,16 +96,16 @@ test('Hamlet activity upgrades are independently visible and persist across relo
  });
  await page.reload();
  const panel=page.locator('#settlement-panel');
- await expect(panel).toContainText('Abbey Transept activity upgrade Lv 0/2 · 1 slots · -45 stress');
- await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -45 stress');
+ await expect(panel).toContainText('Abbey Transept activity upgrade Lv 0/2 · 1 slots · -55 stress');
+ await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -65 stress');
  await page.getByRole('button',{name:'Upgrade Abbey Transept activity (3 crests, 2 deeds)'}).click();
- await expect(panel).toContainText('Abbey Transept activity upgrade Lv 1/2 · 1 slots · -56 stress');
- await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -45 stress');
+ await expect(panel).toContainText('Abbey Transept activity upgrade Lv 1/2 · 1 slots · -69 stress');
+ await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -65 stress');
  await page.reload();
- await expect(panel).toContainText('Abbey Transept activity upgrade Lv 1/2 · 1 slots · -56 stress');
+ await expect(panel).toContainText('Abbey Transept activity upgrade Lv 1/2 · 1 slots · -69 stress');
  await page.getByRole('button',{name:'Upgrade Abbey Transept activity (6 crests, 4 deeds)'}).click();
- await expect(panel).toContainText('Abbey Transept activity upgrade Lv 2/2 · 2 slots · -70 stress');
- await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -45 stress');
+ await expect(panel).toContainText('Abbey Transept activity upgrade Lv 2/2 · 2 slots · -86 stress');
+ await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -65 stress');
 });
 
 test('migrated recovery tracks hide obsolete shared Abbey and Tavern upgrades',async ({page})=>{
@@ -135,11 +135,11 @@ test('hero treatment quirks disable forbidden Hamlet activities in the browser',
   localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(saved.settlement,saved.expedition));
  });
  await page.reload();
- await expect(page.getByRole('button',{name:/Treat at Tavern Gambling Hall · 1000 gold/}).first()).toBeEnabled();
+ await expect(page.getByRole('button',{name:/Treat at Tavern Gambling Hall · 1250 gold/}).first()).toBeEnabled();
  await expect(page.getByRole('button',{name:/Treat at Abbey Cloister · 1000 gold/}).first()).toBeDisabled();
  await expect(page.getByRole('button',{name:/Treat at Tavern Bar · 1000 gold/}).first()).toBeDisabled();
- await page.getByRole('button',{name:/Treat at Tavern Gambling Hall · 1000 gold/}).first().click();
- await expect(page.locator('#settlement-panel')).toContainText('Treasury: 5000 gold');
+ await page.getByRole('button',{name:/Treat at Tavern Gambling Hall · 1250 gold/}).first().click();
+ await expect(page.locator('#settlement-panel')).toContainText('Treasury: 4750 gold');
  await expect(page.locator('#hero-roster')).toContainText('Treatment rooms: 1/6');
 });
 
