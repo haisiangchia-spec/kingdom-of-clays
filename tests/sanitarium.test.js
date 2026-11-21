@@ -77,3 +77,18 @@ test('trait rolls resolve once per victory, treatment completion advances with t
  assert.equal(advanceTownWeek(s,d),false);
  assert.equal(JSON.stringify(s.roster),snapshot);
 });
+
+test('expedition rewards can naturally generate treatment-restricting quirks',()=>{
+ const s=town(),hero=s.roster[0];
+ const restricted=new Set(['enlightened','unquietMind','godFearing','witness','flagellant','faithless','tippler','resolution','gambler','knownCheat','loveInterest','deviantTastes']);
+ let obtained=null;
+ for(let seed=1;seed<=500&&!obtained;seed++){
+  hero.quirks.negative=[];
+  const expedition={seed,phase:'victory',rosterReturned:true,party:[{rosterId:hero.rosterId}]};
+  applyQuestTraitRolls(s,expedition);
+  obtained=hero.quirks.negative.find(q=>restricted.has(q.id))?.id??null;
+ }
+ assert.ok(obtained,'at least one expedition seed should yield a treatment-restricting quirk');
+ assert.doesNotThrow(()=>validateSanitarium(s));
+ assert.doesNotThrow(()=>encodeCampaignSave(s,null));
+});
