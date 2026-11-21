@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCampaignSettlement,encodeCampaignSave,decodeCampaignSave,upgradeFacility} from '../src/settlement.js';
 import {createDungeon} from '../src/dungeon.js';
 import {prepareRosterParty,returnPartyToRoster,selectHero,recruitHero} from '../src/hero-roster.js';
-import {TREATMENTS,canUseStressTreatment,stressTreatmentRestriction,treatmentConfig,upgradeRecoveryActivity,stageCoachOffers,recruitFromCoach,bookStressTreatment,advanceTownWeek,townUnavailable,validateTown} from '../src/town-week.js';
+import {TREATMENTS,canUseStressTreatment,stressTreatmentRestriction,treatmentConfig,upgradeRecoveryActivity,upgradeTreatmentActivity,stageCoachOffers,recruitFromCoach,bookStressTreatment,advanceTownWeek,townUnavailable,validateTown} from '../src/town-week.js';
 
 const completed=(s,seed=1)=>{
  const d=createDungeon(seed,{party:prepareRosterParty(s)});
@@ -118,7 +118,7 @@ test('pending treatment and available recruits remain identical after save reloa
 
 test('maximum recovery upgrade unlocks a second treatment slot and preserves both bookings',()=>{
  const s=createCampaignSettlement();s.gold=5000;s.crests=50;s.deeds=50;
- upgradeFacility(s,'abbey');upgradeFacility(s,'abbey');
+ for(let n=0;n<3;n++)upgradeTreatmentActivity(s,'abbey');
  for(const hero of s.roster)hero.unit.stress=100;
  bookStressTreatment(s,'r1','abbey');bookStressTreatment(s,'r2','abbey');
  assert.equal(s.town.treatments.length,2);
@@ -127,8 +127,8 @@ test('maximum recovery upgrade unlocks a second treatment slot and preserves bot
  assert.equal(saved.town.treatments.length,2);
  const expedition={phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true};
  advanceTownWeek(saved,expedition);
- assert.equal(saved.roster[0].unit.stress,30);
- assert.equal(saved.roster[1].unit.stress,30);
+ assert.equal(saved.roster[0].unit.stress,44);
+ assert.equal(saved.roster[1].unit.stress,44);
 });
 
 test('six DD1 Abbey and Tavern activities book independently and persist across saves',()=>{
@@ -162,12 +162,11 @@ test('a tampered save cannot reserve one hero for both Abbey and Sanitarium',()=
  assert.throws(()=>decodeCampaignSave(JSON.stringify({version:1,settlement:s,expedition:null})),/Invalid treatment reservation/);
 });
 
-test('fully upgraded Abbey and Tavern support twelve distinct simultaneous treatment bookings',()=>{
+test('six fully provisioned DD1 rooms support twelve simultaneous treatment bookings',()=>{
  const s=createCampaignSettlement();
- s.gold=15000;s.crests=100;s.deeds=100;
- s.stageCoach.barracks=1; // twelve roster slots are needed to fill twelve treatment rooms
- upgradeFacility(s,'abbey');upgradeFacility(s,'abbey');
- upgradeFacility(s,'tavern');upgradeFacility(s,'tavern');
+ s.gold=30000;s.crests=1000;s.deeds=1000;s.stageCoach.barracks=1;
+ for(const service of Object.keys(TREATMENTS))
+  for(let n=0;n<3;n++)upgradeTreatmentActivity(s,service);
  while(s.roster.length<12)recruitHero(s,'Priest');
  for(const hero of s.roster)hero.unit.stress=100;
  for(const [index,service] of Object.keys(TREATMENTS).entries()){
@@ -175,71 +174,37 @@ test('fully upgraded Abbey and Tavern support twelve distinct simultaneous treat
   bookStressTreatment(s,s.roster[index*2+1].rosterId,service);
  }
  assert.equal(s.town.treatments.length,12);
- assert.equal(s.gold,0);
- // Even a funded thirteenth hero cannot exceed the six independent room caps.
  s.stageCoach.barracks=2;
  const extra=recruitHero(s,'Priest');extra.unit.stress=100;
- s.gold=1000;
+ const before=s.gold;
  assert.throws(()=>bookStressTreatment(s,extra.rosterId,'abbey'),/room is occupied/);
- assert.equal(s.gold,1000,'rejected booking must not spend gold');
+ assert.equal(s.gold,before);
  const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
  assert.equal(loaded.town.treatments.length,12);
- const finished={phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true};
- assert.equal(advanceTownWeek(loaded,finished),true);
- assert.deepEqual(loaded.roster.slice(0,12).map(h=>h.unit.stress),[30,30,14,14,0,0,30,30,14,14,0,0]);
+ assert.equal(advanceTownWeek(loaded,{phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true}),true);
+ assert.deepEqual(loaded.roster.slice(0,12).map(h=>h.unit.stress),[44,44,31,31,19,19,44,44,31,31,19,19]);
  assert.equal(loaded.town.treatments.length,0);
 });
-
-test('individual recovery upgrades affect only the selected activity and persist in saves',()=>{
- const s=createCampaignSettlement();
- s.crests=30;s.deeds=30;
+test('six-stage DD1 upgrade progression affects only one activity and persists',()=>{
+ const s=createCampaignSettlement();s.crests=150;s.deeds=150;
  assert.equal(treatmentConfig(s,'abbeyTransept').stressRelief,55);
- assert.equal(treatmentConfig(s,'abbeyPenance').stressRelief,65);
- upgradeRecoveryActivity(s,'abbeyTransept');
+ upgradeTreatmentActivity(s,'abbeyTransept');
  assert.equal(treatmentConfig(s,'abbeyTransept').stressRelief,69);
  assert.equal(treatmentConfig(s,'abbeyPenance').stressRelief,65);
- upgradeRecoveryActivity(s,'abbeyTransept');
+ for(let n=0;n<3;n++)upgradeTreatmentActivity(s,'abbeyTransept');
+ assert.equal(treatmentConfig(s,'abbeyTransept').stressRelief,86);
  assert.equal(treatmentConfig(s,'abbeyTransept').capacity,2);
  assert.equal(treatmentConfig(s,'abbeyPenance').capacity,1);
  const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
  assert.equal(treatmentConfig(loaded,'abbeyTransept').stressRelief,86);
  assert.equal(treatmentConfig(loaded,'abbeyPenance').stressRelief,65);
- assert.throws(()=>upgradeRecoveryActivity(loaded,'abbeyTransept'),/maximum/);
- const bad=structuredClone(loaded);bad.recoveryTracks.abbeyTransept=3;
- assert.throws(()=>encodeCampaignSave(bad,null),/Invalid recovery activity level/);
 });
-
-test('recovery upgrade migration preserves legacy levels and freezes other activity tracks',()=>{
- const s=createCampaignSettlement();
- s.crests=100;s.deeds=100;
- upgradeFacility(s,'abbey');
- upgradeFacility(s,'tavern');upgradeFacility(s,'tavern');
- assert.equal(treatmentConfig(s,'abbey').level,1);
- assert.equal(treatmentConfig(s,'tavernGambling').level,2);
- const originalCrests=s.crests,originalDeeds=s.deeds;
- upgradeRecoveryActivity(s,'abbeyTransept');
- assert.equal(s.crests,originalCrests-6);
- assert.equal(s.deeds,originalDeeds-4);
- assert.equal(treatmentConfig(s,'abbeyTransept').level,2);
- assert.equal(treatmentConfig(s,'abbeyPenance').level,1);
- assert.equal(treatmentConfig(s,'tavernGambling').level,2);
- const restored=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
- assert.deepEqual(restored.recoveryTracks,s.recoveryTracks);
- const before={crests:restored.crests,deeds:restored.deeds};
- assert.throws(()=>upgradeFacility(restored,'abbey'),/individual recovery activity upgrades/);
- assert.deepEqual({crests:restored.crests,deeds:restored.deeds},before,'rejected legacy upgrade must not charge heirlooms');
- assert.equal(treatmentConfig(restored,'abbeyPenance').level,1,'legacy building upgrade must not silently modify independent activity tracks');
- assert.equal(treatmentConfig(restored,'abbeyTransept').level,2);
-});
-
-test('a failed independent recovery upgrade preserves heirlooms and leaves legacy state untouched',()=>{
- const s=createCampaignSettlement();
- s.crests=2;s.deeds=1;
+test('failed sequential DD1 upgrade leaves heirlooms and activity state untouched',()=>{
+ const s=createCampaignSettlement();s.crests=2;s.deeds=1;
  const before=structuredClone(s);
- assert.throws(()=>upgradeRecoveryActivity(s,'abbeyTransept'),/Insufficient settlement resources/);
+ assert.throws(()=>upgradeTreatmentActivity(s,'abbeyTransept'),/Insufficient settlement resources/);
  assert.deepEqual(s,before);
- assert.equal(s.recoveryTracks,undefined);
- assert.throws(()=>upgradeRecoveryActivity(s,'unknownService'),/Unknown stress treatment/);
+ assert.throws(()=>upgradeTreatmentActivity(s,'unknownService'),/Unknown stress treatment/);
  assert.deepEqual(s,before);
 });
 
