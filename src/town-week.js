@@ -112,8 +112,8 @@ export function recruitFromCoach(settlement,offerId){
 }
 export function bookStressTreatment(settlement,rosterId,service){
  validateHeroRoster(settlement);
+ if(!Object.hasOwn(TREATMENTS,service))throw Error('Unknown stress treatment');
  const town=validateTown(settlement),config=treatmentConfig(settlement,service);
- if(!config)throw Error('Unknown stress treatment');
  const hero=settlement.roster.find(h=>h.rosterId===rosterId);
  if(!hero||hero.unit.dead)throw Error('Hero is unavailable');
  if(hero.unit.stress<=0)throw Error('Hero has no stress to treat');
