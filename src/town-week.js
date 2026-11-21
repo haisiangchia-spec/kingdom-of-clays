@@ -86,6 +86,30 @@ export const TREATMENT_PRICE_TABLE=Object.freeze({
  tavernGambling:Object.freeze([[1250,1050,900],[1750,1470,1260],[2250,1890,1620]].map(Object.freeze)),
  tavernBrothel:Object.freeze([[1500,1300,1110],[2100,1820,1554],[2700,2340,1998]].map(Object.freeze))
 });
+// Independent treatment-price upgrade track. The heirloom costs below are
+// provisional Clays values; the resulting prices use the DD1 price table.
+export function treatmentCostUpgradeLevel(settlement,service){
+ if(!Object.hasOwn(TREATMENTS,service))throw Error('Unknown stress treatment');
+ const level=settlement.treatmentCostTracks?.[service]??0;
+ if(!Number.isSafeInteger(level)||level<0||level>2)throw Error('Invalid treatment cost upgrade');
+ return level;
+}
+export function treatmentCostUpgradePrice(settlement,service){
+ const level=treatmentCostUpgradeLevel(settlement,service);
+ if(level>=2)return null;
+ return {crests:3*(level+1),deeds:2*(level+1)};
+}
+export function upgradeTreatmentCost(settlement,service){
+ const level=treatmentCostUpgradeLevel(settlement,service);
+ if(level>=2)throw Error('Treatment cost is already at maximum discount');
+ const cost=treatmentCostUpgradePrice(settlement,service);
+ if(Object.entries(cost).some(([key,amount])=>!Number.isSafeInteger(settlement[key])||settlement[key]<amount))
+  throw Error('Insufficient settlement resources');
+ for(const [key,amount] of Object.entries(cost))settlement[key]-=amount;
+ settlement.treatmentCostTracks??=Object.fromEntries(Object.keys(TREATMENTS).map(key=>[key,0]));
+ settlement.treatmentCostTracks[service]=level+1;
+ return {service,level:level+1,cost};
+}
 export function treatmentPriceAtCostLevel(service,heroLevel,costLevel=0){
  if(!Object.hasOwn(TREATMENT_PRICE_TABLE,service))throw Error('Unknown stress treatment');
  if(!Number.isSafeInteger(heroLevel)||heroLevel<0||heroLevel>6)throw Error('Invalid hero resolve level');
@@ -96,7 +120,7 @@ export function treatmentPriceAtCostLevel(service,heroLevel,costLevel=0){
 // use the verified base column; recovery upgrades do not discount treatment.
 export function treatmentCostForHero(settlement,service,hero){
  treatmentConfig(settlement,service);
- return treatmentPriceAtCostLevel(service,hero?.level??0,0);
+ return treatmentPriceAtCostLevel(service,hero?.level??0,treatmentCostUpgradeLevel(settlement,service));
 }
 const goodInt=n=>Number.isSafeInteger(n)&&n>=0;
 const names=Object.keys(TREATMENTS);
