@@ -265,3 +265,25 @@ test('new campaigns purchase sequential DD1 treatment stages and retain levels o
 });
 
 
+
+test('six fully upgraded vanilla DD1 stress rooms admit eighteen heroes and reject a nineteenth',()=>{
+ const town=createCampaignSettlement();
+ town.crests=1000;town.deeds=1000;town.gold=40000;
+ town.stageCoach.barracks=3;
+ for(const service of Object.keys(TREATMENTS)){
+  for(let stage=0;stage<6;stage++)upgradeTreatmentActivity(town,service);
+  assert.equal(treatmentConfig(town,service).capacity,3);
+ }
+ while(town.roster.length<19)recruitHero(town,'Priest');
+ for(const hero of town.roster)hero.unit.stress=100;
+ const services=Object.keys(TREATMENTS);
+ for(let i=0;i<18;i++)bookStressTreatment(town,town.roster[i].rosterId,services[Math.floor(i/3)]);
+ assert.equal(town.town.treatments.length,18);
+ const beforeGold=town.gold;
+ assert.throws(()=>bookStressTreatment(town,town.roster[18].rosterId,services[0]),/room is occupied/);
+ assert.equal(town.gold,beforeGold);
+ const saved=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
+ assert.equal(saved.town.treatments.length,18);
+ assert.equal(saved.treatmentUpgradeTracks.abbey,6);
+ assert.equal(saved.treatmentUpgradeTracks.tavernBrothel,6);
+});
