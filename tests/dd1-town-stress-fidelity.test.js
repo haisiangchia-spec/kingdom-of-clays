@@ -127,3 +127,34 @@ test('a forced-activity quirk explains a rejected booking without charging gold'
  assert.equal(s.gold,2000);
  assert.deepEqual(s.town.treatments,[]);
 });
+
+test('stress treatment rooms enforce per-activity capacity without charging failed bookings',()=>{
+ const s=createCampaignSettlement();s.gold=10000;
+ const heroes=[s.roster[0],recruitHero(s,'Priest'),recruitHero(s,'Priest')];
+ for(const h of heroes)h.unit.stress=100;
+ bookStressTreatment(s,heroes[0].rosterId,'abbey');
+ assert.throws(()=>bookStressTreatment(s,heroes[1].rosterId,'abbey'),/room is occupied/);
+ assert.equal(s.gold,9000);
+ assert.equal(s.town.treatments.length,1);
+ bookStressTreatment(s,heroes[1].rosterId,'abbeyTransept');
+ assert.equal(s.gold,7750);
+ assert.throws(()=>bookStressTreatment(s,heroes[1].rosterId,'tavern'),/already receiving treatment/);
+ assert.equal(s.gold,7750);
+ s.crests=100;s.deeds=100;
+ upgradeRecoveryActivity(s,'abbey');
+ upgradeRecoveryActivity(s,'abbey');
+ assert.equal(treatmentConfig(s,'abbey').capacity,2);
+ assert.equal(treatmentConfig(s,'abbeyTransept').capacity,1);
+ bookStressTreatment(s,heroes[2].rosterId,'abbey');
+ assert.equal(s.town.treatments.length,3);
+ assert.equal(s.gold,6750);
+ assert.throws(()=>bookStressTreatment(s,heroes[2].rosterId,'abbeyTransept'),/already receiving treatment/);
+ assert.equal(s.gold,6750);
+ const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ assert.equal(loaded.town.treatments.length,3);
+ advanceTownWeek(loaded,finished());
+ assert.deepEqual(loaded.town.treatments,[]);
+ assert.equal(loaded.roster.find(h=>h.rosterId===heroes[0].rosterId).unit.stress,30);
+ assert.equal(loaded.roster.find(h=>h.rosterId===heroes[1].rosterId).unit.stress,45);
+ assert.equal(loaded.roster.find(h=>h.rosterId===heroes[2].rosterId).unit.stress,30);
+});
