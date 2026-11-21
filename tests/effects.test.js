@@ -73,3 +73,19 @@ test('cleansing does not remove negative quirks or mortality',()=>{
  cleanseUnit(u,['bleed','blight','debuff']);
  assert.equal(u.mortality,'deathDoorRecovery');assert.equal(u.affliction,'Panic');
 });
+
+
+test('cleanse safely handles an effect-only target with no DOT array',()=>{
+ const u={marked:2,effects:[{kind:'debuff',turns:2,modifiers:{dodge:-10}}],horror:[{type:'horror',turns:2}]};
+ assert.equal(cleanseUnit(u,['bleed','blight','mark','debuff','horror']),3);
+ assert.deepEqual(u.dot,[]);
+ assert.equal(u.marked,0);
+ assert.deepEqual(u.effects,[]);
+ assert.deepEqual(u.horror,[]);
+});
+test('single-status cleanse preserves unrelated DD1 damage-over-time stacks',()=>{
+ const u={dot:[{type:'bleed',value:2,turns:2},{type:'blight',value:3,turns:3}],marked:2};
+ assert.equal(cleanseUnit(u,['bleed']),1);
+ assert.deepEqual(u.dot,[{type:'blight',value:3,turns:3}]);
+ assert.equal(u.marked,2);
+});
