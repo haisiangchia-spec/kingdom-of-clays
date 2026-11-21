@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,upgradeFacility,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
 import {recruitHero} from '../src/hero-roster.js';
-import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,treatmentPriceAtCostLevel,treatmentCostUpgradeLevel,upgradeTreatmentCost,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity,dd1TreatmentUpgradeState} from '../src/town-week.js';
+import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,treatmentPriceAtCostLevel,treatmentCostUpgradeLevel,upgradeTreatmentCost,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity,dd1TreatmentUpgradeState,treatmentUpgradeLevel,treatmentUpgradePrice,upgradeTreatmentActivity} from '../src/town-week.js';
 
 // Regression guard for DD1-style town stress recovery. Prices and relief tiers
 // are explicitly configured; capacity and heirloom upgrade costs remain Clays fixtures.
@@ -239,3 +239,27 @@ test('vanilla DD1 stress activity upgrades follow recovery, cost, slot, recovery
 });
 
 
+
+test('new campaigns purchase sequential DD1 treatment stages and retain levels on save',()=>{
+ const s=createCampaignSettlement();s.crests=200;s.deeds=200;
+ const service='abbey';
+ assert.equal(treatmentUpgradeLevel(s,service),0);
+ for(let level=1;level<=6;level++){
+  const before=treatmentUpgradePrice(s,service);
+  const oldCrests=s.crests,oldDeeds=s.deeds;
+  upgradeTreatmentActivity(s,service);
+  assert.equal(s.crests,oldCrests-before.crests);
+  assert.equal(s.deeds,oldDeeds-before.deeds);
+  assert.equal(treatmentUpgradeLevel(s,service),level);
+  const expected=dd1TreatmentUpgradeState(level);
+  assert.equal(treatmentConfig(s,service).capacity,expected.capacity);
+  assert.equal(treatmentConfig(s,service).level,expected.recoveryLevel);
+  assert.equal(treatmentCostUpgradeLevel(s,service),expected.costLevel);
+  assert.equal(treatmentUpgradeLevel(s,'tavern'),0);
+ }
+ assert.equal(treatmentUpgradePrice(s,service),null);
+ assert.throws(()=>upgradeTreatmentActivity(s,service),/fully upgraded/);
+ const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ assert.equal(treatmentUpgradeLevel(loaded,service),6);
+ assert.equal(treatmentConfig(loaded,service).capacity,3);
+});
