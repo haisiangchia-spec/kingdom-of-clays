@@ -59,6 +59,30 @@ export function dd1TreatmentUpgradeState(level){
   next:DD1_TREATMENT_UPGRADE_SEQUENCE[level]??null
  };
 }
+// New campaigns use one sequential six-stage upgrade track per activity.
+// Heirloom costs are provisional pending source verification.
+export function treatmentUpgradeLevel(settlement,service){
+ if(!RECOVERY_TRACKS.includes(service))throw Error('Unknown stress treatment');
+ const level=settlement.treatmentUpgradeTracks?.[service]??0;
+ if(!Number.isSafeInteger(level)||level<0||level>6)throw Error('Invalid treatment upgrade level');
+ return level;
+}
+export function treatmentUpgradePrice(settlement,service){
+ const level=treatmentUpgradeLevel(settlement,service);
+ if(level===6)return null;
+ return {crests:3*(level+1),deeds:2*(level+1)};
+}
+export function upgradeTreatmentActivity(settlement,service){
+ const level=treatmentUpgradeLevel(settlement,service);
+ const cost=treatmentUpgradePrice(settlement,service);
+ if(!cost)throw Error('Treatment activity already fully upgraded');
+ if(Object.entries(cost).some(([key,amount])=>!Number.isSafeInteger(settlement[key])||settlement[key]<amount))
+  throw Error('Insufficient settlement resources');
+ for(const [key,amount] of Object.entries(cost))settlement[key]-=amount;
+ settlement.treatmentUpgradeTracks??=Object.fromEntries(RECOVERY_TRACKS.map(key=>[key,0]));
+ settlement.treatmentUpgradeTracks[service]=level+1;
+ return {service,level:level+1,cost};
+}
 // Vanilla DD1 forced and prohibited activity quirks. Contradictory quirks
 // deliberately leave no valid treatment until a quirk is removed.
 const FORCED_ACTIVITIES=Object.freeze({
@@ -85,11 +109,12 @@ export function canUseStressTreatment(hero,service){
 export function treatmentConfig(settlement,service){
  const base=TREATMENTS[service];
  if(!base)throw Error('Unknown stress treatment');
+ const unified=settlement.treatmentUpgradeTracks;
  const legacy=settlement.facilities?.[base.facility]??0;
  const independent=settlement.recoveryTracks?.[service];
- const level=independent===undefined?legacy:independent;
+ const level=unified?dd1TreatmentUpgradeState(treatmentUpgradeLevel(settlement,service)).recoveryLevel:(independent===undefined?legacy:independent);
  if(!Number.isInteger(level)||level<0||level>2)throw Error('Invalid recovery upgrade');
- return {...base,level,stressRelief:TREATMENT_RELIEF_BY_LEVEL[service][level],capacity:level===2?2:1};
+ return {...base,level,stressRelief:TREATMENT_RELIEF_BY_LEVEL[service][level],capacity:unified?dd1TreatmentUpgradeState(treatmentUpgradeLevel(settlement,service)).capacity:(level===2?2:1)};
 }
 // Official vanilla DD1 Abbey/Tavern price tables: Apprentice, Veteran,
 // Champion rows; base, first discount, second discount columns.
@@ -108,7 +133,7 @@ export const TREATMENT_PRICE_TABLE=Object.freeze({
 // provisional Clays values; the resulting prices use the DD1 price table.
 export function treatmentCostUpgradeLevel(settlement,service){
  if(!Object.hasOwn(TREATMENTS,service))throw Error('Unknown stress treatment');
- const level=settlement.treatmentCostTracks?.[service]??0;
+ const level=settlement.treatmentUpgradeTracks?dd1TreatmentUpgradeState(treatmentUpgradeLevel(settlement,service)).costLevel:(settlement.treatmentCostTracks?.[service]??0);
  if(!Number.isSafeInteger(level)||level<0||level>2)throw Error('Invalid treatment cost upgrade');
  return level;
 }
