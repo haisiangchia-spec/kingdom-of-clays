@@ -6,7 +6,7 @@ import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
 import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
 import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,upgradeHeroSkill} from './hero-roster.js';
-import {TREATMENTS,canUseStressTreatment,stressTreatmentRestriction,treatmentConfig,treatmentCostForHero,treatmentCostUpgradeLevel,treatmentCostUpgradePrice,upgradeTreatmentCost,upgradeRecoveryActivity,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
+import {TREATMENTS,canUseStressTreatment,stressTreatmentRestriction,treatmentConfig,treatmentCostForHero,treatmentCostUpgradeLevel,treatmentCostUpgradePrice,upgradeTreatmentCost,upgradeRecoveryActivity,treatmentUpgradeLevel,treatmentUpgradePrice,upgradeTreatmentActivity,dd1TreatmentUpgradeState,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
 import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits,sanitariumTreatmentCost,sanitariumWardBookings} from './sanitarium.js';
 import {DUNGEON_REGIONS,regionRoomName,regionCurio} from './dungeon-regions.js';
 import {availableVerifiedLevels} from './skill-progression.js';
@@ -213,23 +213,14 @@ function render(){
   }
  }
  for(const [service,activity] of Object.entries(TREATMENTS)){
+  const level=treatmentUpgradeLevel(settlement,service);
+  const stage=dd1TreatmentUpgradeState(level);
   const rule=treatmentConfig(settlement,service);
-  const row=el('div',`${activity.name} activity upgrade Lv ${rule.level}/2 · ${rule.capacity} slots · -${rule.stressRelief} stress`,settlementPanel);
-  if(rule.level<2){
-   const cost={crests:3*(rule.level+1),deeds:2*(rule.level+1)};
-   const upgrade=el('button',`Upgrade ${activity.name} activity (${cost.crests} crests, ${cost.deeds} deeds)`,row,()=>{
-    try{upgradeRecoveryActivity(settlement,service);}catch(e){expedition.log.push(e.message);}render();
-   });
-   upgrade.disabled=!['victory','defeat'].includes(expedition.phase)||Object.entries(cost).some(([key,amount])=>settlement[key]<amount);
-  }
- }
- for(const [service,activity] of Object.entries(TREATMENTS)){
-  const level=treatmentCostUpgradeLevel(settlement,service);
-  const row=el('div',`${activity.name} treatment discount Lv ${level}/2`,settlementPanel);
-  const cost=treatmentCostUpgradePrice(settlement,service);
+  const row=el('div',`${activity.name} Lv ${level}/6 · ${rule.capacity} slots · -${rule.stressRelief} stress · discount ${stage.costLevel}/2`,settlementPanel);
+  const cost=treatmentUpgradePrice(settlement,service);
   if(cost){
-   const upgrade=el('button',`Discount ${activity.name} (${cost.crests} crests, ${cost.deeds} deeds)`,row,()=>{
-    try{upgradeTreatmentCost(settlement,service);}catch(e){expedition.log.push(e.message);}render();
+   const upgrade=el('button',`Upgrade ${activity.name} ${stage.next} (${cost.crests} crests, ${cost.deeds} deeds)`,row,()=>{
+    try{upgradeTreatmentActivity(settlement,service);}catch(e){expedition.log.push(e.message);}render();
    });
    upgrade.disabled=!['victory','defeat'].includes(expedition.phase)||Object.entries(cost).some(([key,amount])=>settlement[key]<amount);
   }
