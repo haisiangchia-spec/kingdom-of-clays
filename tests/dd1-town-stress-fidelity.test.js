@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,upgradeFacility,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
 import {recruitHero} from '../src/hero-roster.js';
-import {bookStressTreatment,advanceTownWeek,treatmentConfig,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment} from '../src/town-week.js';
+import {bookStressTreatment,advanceTownWeek,treatmentConfig,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity} from '../src/town-week.js';
 
 // Regression guard for DD1-style town stress recovery. The treatment magnitudes
 // and upgrade structure are current Clays fixtures, not claims of exact DD1 values.
@@ -65,4 +65,33 @@ test('unknown treatment requests do not mutate settlement resources or bookings'
  assert.throws(()=>bookStressTreatment(s,s.roster[0].rosterId,'unknown'),/Unknown stress treatment/);
  assert.equal(s.gold,3000);
  assert.deepEqual(s.town.treatments,[]);
+});
+
+test('all six DD1 treatment services use explicit prices and three independent relief tiers',()=>{
+ const expected={
+  abbey:{gold:1000,relief:[45,56,70]},
+  abbeyTransept:{gold:1250,relief:[55,69,86]},
+  abbeyPenance:{gold:1500,relief:[65,81,100]},
+  tavern:{gold:1000,relief:[45,56,70]},
+  tavernGambling:{gold:1250,relief:[55,69,86]},
+  tavernBrothel:{gold:1500,relief:[65,81,100]}
+ };
+ assert.deepEqual(Object.keys(TREATMENTS).sort(),Object.keys(expected).sort());
+ const s=createCampaignSettlement();s.crests=200;s.deeds=200;
+ for(const [service,rule] of Object.entries(expected)){
+  assert.deepEqual([...TREATMENT_RELIEF_BY_LEVEL[service]],rule.relief);
+  for(let level=0;level<=2;level++){
+   const config=treatmentConfig(s,service);
+   assert.equal(config.level,level,service);
+   assert.equal(config.gold,rule.gold,service);
+   assert.equal(config.stressRelief,rule.relief[level],service);
+   assert.equal(config.capacity,level===2?2:1,service);
+   if(level<2)upgradeRecoveryActivity(s,service);
+  }
+ }
+ const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ for(const [service,rule] of Object.entries(expected)){
+  assert.equal(treatmentConfig(loaded,service).stressRelief,rule.relief[2]);
+  assert.equal(treatmentConfig(loaded,service).gold,rule.gold);
+ }
 });
