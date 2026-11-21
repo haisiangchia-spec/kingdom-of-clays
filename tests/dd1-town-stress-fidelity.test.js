@@ -4,8 +4,8 @@ import {createCampaignSettlement,upgradeFacility,encodeCampaignSave,decodeCampai
 import {recruitHero} from '../src/hero-roster.js';
 import {bookStressTreatment,advanceTownWeek,treatmentConfig,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity} from '../src/town-week.js';
 
-// Regression guard for DD1-style town stress recovery. The treatment magnitudes
-// and upgrade structure are current Clays fixtures, not claims of exact DD1 values.
+// Regression guard for DD1-style town stress recovery. Prices and relief tiers
+// are explicitly configured; capacity and heirloom upgrade costs remain Clays fixtures.
 const finished=()=>({phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true});
 test('stress recovery upgrades are monotonic and cap treatment stress at zero',()=>{
  const s=createCampaignSettlement();s.crests=100;s.deeds=100;s.gold=10000;
@@ -93,5 +93,28 @@ test('all six DD1 treatment services use explicit prices and three independent r
  for(const [service,rule] of Object.entries(expected)){
   assert.equal(treatmentConfig(loaded,service).stressRelief,rule.relief[2]);
   assert.equal(treatmentConfig(loaded,service).gold,rule.gold);
+ }
+});
+
+test('all twelve named DD1 treatment quirks restrict only their specified activities',()=>{
+ const services=Object.keys(TREATMENTS);
+ const forced={
+  enlightened:'abbey',godFearing:'abbeyTransept',flagellant:'abbeyPenance',
+  tippler:'tavern',gambler:'tavernGambling',loveInterest:'tavernBrothel'
+ };
+ const blocked={
+  unquietMind:['abbey'],witness:['abbeyTransept'],
+  faithless:['abbeyTransept','abbeyPenance'],resolution:['tavern'],
+  knownCheat:['tavernGambling'],deviantTastes:['tavernBrothel']
+ };
+ for(const [id,required] of Object.entries(forced)){
+  const hero={quirks:{negative:[{id,locked:false}]}};
+  for(const service of services)
+   assert.equal(canUseStressTreatment(hero,service),service===required,id+' '+service);
+ }
+ for(const [id,excluded] of Object.entries(blocked)){
+  const hero={quirks:{negative:[{id,locked:false}]}};
+  for(const service of services)
+   assert.equal(canUseStressTreatment(hero,service),!excluded.includes(service),id+' '+service);
  }
 });
