@@ -263,3 +263,11 @@ test('new campaigns purchase sequential DD1 treatment stages and retain levels o
  assert.equal(treatmentUpgradeLevel(loaded,service),6);
  assert.equal(treatmentConfig(loaded,service).capacity,3);
 });
+
+test('new DD1 campaigns reject obsolete independent activity upgrades without mutation',()=>{
+ const s=createCampaignSettlement();s.crests=100;s.deeds=100;
+ const before=structuredClone(s);
+ assert.throws(()=>upgradeRecoveryActivity(s,'abbey'),/Use six-stage treatment upgrades/);
+ assert.throws(()=>upgradeTreatmentCost(s,'abbey'),/Use six-stage treatment upgrades/);
+ assert.deepEqual(s,before);
+});
