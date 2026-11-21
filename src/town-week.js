@@ -41,6 +41,24 @@ export function upgradeRecoveryActivity(settlement,service){
  settlement.recoveryTracks[service]=level+1;
  return {service,level:level+1,cost};
 }
+// Vanilla DD1 upgrades are sequential, not three freely interchangeable
+// branches. This source-backed sequence is the target for migration of the
+// legacy independent recovery and cost tracks.
+// https://darkestdungeon.wiki.gg/wiki/Abbey
+// https://darkestdungeon.wiki.gg/wiki/Tavern
+export const DD1_TREATMENT_UPGRADE_SEQUENCE=Object.freeze([
+ 'recovery','discount','capacity','recovery','discount','capacity'
+]);
+export function dd1TreatmentUpgradeState(level){
+ if(!Number.isSafeInteger(level)||level<0||level>6)throw Error('Invalid DD1 treatment upgrade level');
+ return {
+  level,
+  recoveryLevel:Number(level>=1)+Number(level>=4),
+  costLevel:Number(level>=2)+Number(level>=5),
+  capacity:1+Number(level>=3)+Number(level>=6),
+  next:DD1_TREATMENT_UPGRADE_SEQUENCE[level]??null
+ };
+}
 // Vanilla DD1 forced and prohibited activity quirks. Contradictory quirks
 // deliberately leave no valid treatment until a quirk is removed.
 const FORCED_ACTIVITIES=Object.freeze({
