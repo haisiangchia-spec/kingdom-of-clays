@@ -7,7 +7,8 @@ import {sanitariumUnavailable,completeSanitariumWeek,applyQuestTraitRolls} from 
 
 // DD1's three Abbey and three Tavern activities are separate treatment slots.
 // The original 'abbey' and 'tavern' keys are retained for existing campaign saves.
-// Costs, relief amounts and facility-wide upgrades are still Clays fixtures.
+// Base costs and recovery tiers are activity-specific. Capacity and heirloom
+// upgrade costs remain Clays fixtures pending DD1 source verification.
 export const TREATMENTS=Object.freeze({
  abbey:Object.freeze({name:'Abbey Cloister',facility:'abbey',gold:1000,stressRelief:45}),
  abbeyTransept:Object.freeze({name:'Abbey Transept',facility:'abbey',gold:1250,stressRelief:55}),
