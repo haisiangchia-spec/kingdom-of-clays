@@ -4,7 +4,7 @@ import {createCampaignSettlement,expeditionBonuses,encodeCampaignSave,decodeCamp
 import {selectQuest} from '../src/quest-board.js';
 import {completeCampaignExpedition,campaignProgress} from '../src/campaign-progression.js';
 import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero,rosterCapacity,upgradeHeroEquipment,upgradeHeroSkill} from '../src/hero-roster.js';
-import {advanceTownWeek,recruitFromCoach,bookStressTreatment,canUseStressTreatment,TREATMENTS} from '../src/town-week.js';
+import {advanceTownWeek,recruitFromCoach,bookStressTreatment,canUseStressTreatment,treatmentConfig,TREATMENTS} from '../src/town-week.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger,purchaseProvision,campMeal,useCampSkill,finishCamp,CAMP_SKILLS} from '../src/dungeon.js';
 import {leaveLoot,collectLoot,inventoryCanAdd} from '../src/inventory.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from '../src/engine.js';
@@ -228,12 +228,23 @@ function prepareTown(town){
  };
  const stressed=town.roster.filter(h=>!h.unit.dead&&h.unit.stress>=80)
   .sort((a,b)=>b.level-a.level||b.unit.stress-a.unit.stress);
- for(const service of ['abbey','tavern'].flatMap(name=>Array.from({length:town.facilities?.[name]===2?2:1},()=>name))){
-  const hero=stressed.find(h=>canUseStressTreatment(h,service)&&!town.town.treatments.some(t=>t.rosterId===h.rosterId));
-  if(hero&&town.gold>=TREATMENTS[service].gold+1500)
-   {const before=town.gold;bookStressTreatment(town,hero.rosterId,service);spending.treatments+=before-town.gold;
-    town._organicTreatmentAudit.booked.push({rosterId:hero.rosterId,level:hero.level,stress:hero.unit.stress,
-     equippedVeteran:hero.level>=3&&(hero.equipment?.weapon??0)>=3&&(hero.equipment?.armor??0)>=3});}
+ // Use the full vanilla Abbey/Tavern activity menu. Keep the original
+ // two-treatment spending limit and 1500-gold expedition reserve, but
+ // match each stressed hero to a service their quirks actually permit.
+ const services=Object.keys(TREATMENTS);
+ let bookedCount=0;
+ for(const hero of stressed){
+  if(bookedCount>=2)break;
+  if(town.town.treatments.some(t=>t.rosterId===hero.rosterId))continue;
+  const service=services.find(id=>canUseStressTreatment(hero,id)&&
+   town.town.treatments.filter(t=>t.service===id).length<treatmentConfig(town,id).capacity);
+  if(!service||town.gold<TREATMENTS[service].gold+1500)continue;
+  const before=town.gold;
+  bookStressTreatment(town,hero.rosterId,service);
+  spending.treatments+=before-town.gold;
+  bookedCount++;
+  town._organicTreatmentAudit.booked.push({rosterId:hero.rosterId,level:hero.level,stress:hero.unit.stress,
+   equippedVeteran:hero.level>=3&&(hero.equipment?.weapon??0)>=3&&(hero.equipment?.armor??0)>=3});
  }
  for(const hero of town.roster){
   if(hero.unit.dead&&town.facilities.temple>0&&town.gold>=1750){const before=town.gold;resurrectHero(town,hero.rosterId);spending.resurrection+=before-town.gold;}
