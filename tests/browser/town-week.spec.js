@@ -142,3 +142,18 @@ test('hero treatment quirks disable forbidden Hamlet activities in the browser',
  await expect(page.locator('#settlement-panel')).toContainText('Treasury: 5000 gold');
  await expect(page.locator('#hero-roster')).toContainText('Treatment rooms: 1/6');
 });
+
+test('Hamlet displays the negative quirk that restricts stress treatment',async ({page})=>{
+ await makeTown(page,{gold:3000,stress:90});
+ await page.evaluate(async ()=>{
+  const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
+  const save=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
+  save.settlement.roster[0].quirks.negative=[{id:'knownCheat',locked:false}];
+  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(save.settlement,save.expedition));
+ });
+ await page.reload();
+ await expect(page.locator('#hero-roster')).toContainText('Negative quirks: Known Cheat');
+ const forbidden=page.getByRole('button',{name:/Treat at Tavern Gambling Hall/}).first();
+ await expect(forbidden).toBeDisabled();
+ await expect(forbidden).toHaveAttribute('title',/knownCheat prohibits Tavern Gambling Hall/);
+});
