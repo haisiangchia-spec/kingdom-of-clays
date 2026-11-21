@@ -334,10 +334,11 @@ function render(){
    if(!u.dead&&u.stress>0&&!townUnavailable(settlement,h.rosterId)){
     for(const [service] of Object.entries(TREATMENTS)){
      const rule=treatmentConfig(settlement,service);
-     const book=el('button',`Treat at ${rule.name} · ${rule.gold} gold · -${rule.stressRelief} stress`,row,()=>{
+     const occupied=settlement.town.treatments.filter(t=>t.service===service).length;
+     const book=el('button',`Treat at ${rule.name} · ${rule.gold} gold · -${rule.stressRelief} stress · ${occupied}/${rule.capacity} slots`,row,()=>{
       try{bookStressTreatment(settlement,h.rosterId,service);}catch(e){expedition.log.push(e.message);}render();
      });
-     book.disabled=!canUseStressTreatment(h,service)||settlement.gold<rule.gold||settlement.town.treatments.filter(t=>t.service===service).length>=rule.capacity;
+     book.disabled=!canUseStressTreatment(h,service)||settlement.gold<rule.gold||occupied>=rule.capacity;
      if(!canUseStressTreatment(h,service))book.title=stressTreatmentRestriction(h,service);
     }
    }
