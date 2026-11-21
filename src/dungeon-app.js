@@ -6,7 +6,7 @@ import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
 import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
 import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,upgradeHeroSkill} from './hero-roster.js';
-import {TREATMENTS,canUseStressTreatment,stressTreatmentRestriction,treatmentConfig,upgradeRecoveryActivity,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
+import {TREATMENTS,canUseStressTreatment,stressTreatmentRestriction,treatmentConfig,treatmentCostForHero,upgradeRecoveryActivity,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
 import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits,sanitariumTreatmentCost,sanitariumWardBookings} from './sanitarium.js';
 import {DUNGEON_REGIONS,regionRoomName,regionCurio} from './dungeon-regions.js';
 import {availableVerifiedLevels} from './skill-progression.js';
@@ -335,10 +335,11 @@ function render(){
     for(const [service] of Object.entries(TREATMENTS)){
      const rule=treatmentConfig(settlement,service);
      const occupied=settlement.town.treatments.filter(t=>t.service===service).length;
-     const book=el('button',`Treat at ${rule.name} · ${rule.gold} gold · -${rule.stressRelief} stress · ${occupied}/${rule.capacity} slots`,row,()=>{
+     const price=treatmentCostForHero(settlement,service,h);
+     const book=el('button',`Treat at ${rule.name} · ${price} gold · -${rule.stressRelief} stress · ${occupied}/${rule.capacity} slots`,row,()=>{
       try{bookStressTreatment(settlement,h.rosterId,service);}catch(e){expedition.log.push(e.message);}render();
      });
-     book.disabled=!canUseStressTreatment(h,service)||settlement.gold<rule.gold||occupied>=rule.capacity;
+     book.disabled=!canUseStressTreatment(h,service)||settlement.gold<price||occupied>=rule.capacity;
      if(!canUseStressTreatment(h,service))book.title=stressTreatmentRestriction(h,service);
     }
    }
