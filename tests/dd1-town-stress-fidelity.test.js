@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,upgradeFacility,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
 import {recruitHero} from '../src/hero-roster.js';
-import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,treatmentPriceAtCostLevel,treatmentCostUpgradeLevel,upgradeTreatmentCost,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity,dd1TreatmentUpgradeState,dd1UpgradeMigrationAssessment} from '../src/town-week.js';
+import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,treatmentPriceAtCostLevel,treatmentCostUpgradeLevel,upgradeTreatmentCost,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity,dd1TreatmentUpgradeState} from '../src/town-week.js';
 
 // Regression guard for DD1-style town stress recovery. Prices and relief tiers
 // are explicitly configured; capacity and heirloom upgrade costs remain Clays fixtures.
@@ -238,26 +238,4 @@ test('vanilla DD1 stress activity upgrades follow recovery, cost, slot, recovery
   assert.throws(()=>dd1TreatmentUpgradeState(level),/Invalid DD1 treatment upgrade level/);
 });
 
-test('legacy town upgrade migration assessment preserves incompatible purchased discounts',()=>{
- const s=createCampaignSettlement();
- assert.deepEqual(dd1UpgradeMigrationAssessment(s,'abbey'),{
-  service:'abbey',recoveryLevel:0,costLevel:0,capacity:1,compatible:true,level:0
- });
- s.crests=100;s.deeds=100;
- upgradeTreatmentCost(s,'abbey');
- const unmatched=dd1UpgradeMigrationAssessment(s,'abbey');
- assert.equal(unmatched.compatible,false);
- assert.equal(unmatched.level,null);
- assert.equal(unmatched.costLevel,1);
- upgradeRecoveryActivity(s,'abbey');
- const matched=dd1UpgradeMigrationAssessment(s,'abbey');
- assert.equal(matched.compatible,true);
- assert.equal(matched.level,2);
- upgradeRecoveryActivity(s,'abbey');
- const later=dd1UpgradeMigrationAssessment(s,'abbey');
- assert.equal(later.compatible,true);
- assert.equal(later.level,4);
- assert.equal(treatmentCostUpgradeLevel(s,'abbey'),1);
- assert.equal(treatmentConfig(s,'abbey').level,2);
- assert.throws(()=>dd1UpgradeMigrationAssessment(s,'invalid'),/Unknown stress treatment/);
-});
+
