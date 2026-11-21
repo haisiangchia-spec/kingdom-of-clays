@@ -19,7 +19,7 @@ export const DISEASES=Object.freeze({
 });
 export const SANITARIUM_COSTS=Object.freeze({negative:1500,lockedNegative:5000,lockPositive:7500,disease:750});
 const copy=x=>structuredClone(x);
-const positive=['sturdy','eagleEye'],negative=['nervous','slowReflexes'],diseases=Object.keys(DISEASES);
+const positive=['sturdy','eagleEye'],negative=['nervous','slowReflexes','enlightened','unquietMind','godFearing','witness','flagellant','faithless','tippler','resolution','gambler','knownCheat','loveInterest','deviantTastes'],diseases=Object.keys(DISEASES);
 function goodTrait(entry,kind){
  return !!entry&&typeof entry.id==='string'&&!!QUIRKS[entry.id]&&QUIRKS[entry.id].kind===kind&&typeof entry.locked==='boolean';
 }
