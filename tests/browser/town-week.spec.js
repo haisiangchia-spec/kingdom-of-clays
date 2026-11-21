@@ -157,3 +157,11 @@ test('Hamlet displays the negative quirk that restricts stress treatment',async 
  await expect(forbidden).toBeDisabled();
  await expect(forbidden).toHaveAttribute('title',/knownCheat prohibits Tavern Gambling Hall/);
 });
+
+test('new campaigns show six independent stress upgrades without obsolete shared upgrade buttons',async ({page})=>{
+ await makeTown(page,{gold:4000,stress:90});
+ await expect(page.getByRole('button',{name:/Upgrade Abbey \(/})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:/Upgrade Tavern \(/})).toHaveCount(0);
+ for(const activity of ['Abbey Cloister','Abbey Transept','Abbey Penance Hall','Tavern Bar','Tavern Gambling Hall','Tavern Brothel'])
+  await expect(page.getByRole('button',{name:new RegExp('Upgrade '+activity+' activity')})).toHaveCount(1);
+});
