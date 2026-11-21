@@ -258,6 +258,9 @@ function render(){
   ensureTraits(h);
   const row=el('div',`${h.name} [${h.rosterId}] · ${h.heroClass} Lv ${h.level} · ${u.dead?'FALLEN':u.hp+'/'+u.maxHp+' HP'} · ${u.stress} stress${townUnavailable(settlement,h.rosterId)?' · IN TREATMENT':''} · +${h.quirks.positive.length}/-${h.quirks.negative.length} quirks · ${h.diseases.length} diseases${h.equippedTrinket?' · Ward Charm':''}`,roster);
   row.className='dungeon-unit';
+  if(h.quirks.negative.length){
+   el('span',' · Negative quirks: '+h.quirks.negative.map(q=>QUIRKS[q.id]?.name??q.id).join(', '),row);
+  }
   if(u.dead){
    const revive=el('button','Resurrect '+h.name,row,()=>{
     try{resurrectHero(settlement,h.rosterId);}catch(e){expedition.log.push(e.message);}
