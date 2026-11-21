@@ -6,7 +6,7 @@ import {chooseEnemyAction} from './enemy-ai.js';
 import {inventoryStacks,inventoryUsed,INVENTORY_CAPACITY,ITEM_RULES,collectLoot,leaveLoot,discardInventoryStack,expeditionRewardSummary,claimExpeditionRewards} from './inventory.js';
 import {CAMPAIGN_SAVE_KEY,SETTLEMENT_FACILITIES,createCampaignSettlement,decodeCampaignSave,encodeCampaignSave,nextFacilityCost,upgradeFacility,expeditionBonuses} from './settlement.js';
 import {HERO_CLASSES,RECRUITMENT_COST,RESURRECTION_COST,ROSTER_CAPACITY,recruitHero,selectHero,availableParty,prepareRosterParty,returnPartyToRoster,resurrectHero,dismissHero,equipTrinket,unequipTrinket,upgradeHeroEquipment,upgradeHeroSkill} from './hero-roster.js';
-import {TREATMENTS,canUseStressTreatment,stressTreatmentRestriction,treatmentConfig,treatmentCostForHero,treatmentCostUpgradeLevel,treatmentCostUpgradePrice,upgradeTreatmentCost,upgradeRecoveryActivity,treatmentUpgradeLevel,treatmentUpgradePrice,upgradeTreatmentActivity,dd1TreatmentUpgradeState,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
+import {TREATMENTS,canUseStressTreatment,stressTreatmentRestriction,treatmentConfig,treatmentCostForHero,treatmentCostUpgradeLevel,treatmentUpgradeLevel,treatmentUpgradePrice,upgradeTreatmentActivity,dd1TreatmentUpgradeState,recruitFromCoach,bookStressTreatment,townUnavailable,advanceTownWeek} from './town-week.js';
 import {QUIRKS,DISEASES,SANITARIUM_COSTS,bookSanitarium,sanitariumUnavailable,ensureTraits,sanitariumTreatmentCost,sanitariumWardBookings} from './sanitarium.js';
 import {DUNGEON_REGIONS,regionRoomName,regionCurio} from './dungeon-regions.js';
 import {availableVerifiedLevels} from './skill-progression.js';
