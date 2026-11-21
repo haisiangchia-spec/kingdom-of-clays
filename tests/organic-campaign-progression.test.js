@@ -4,7 +4,7 @@ import {createCampaignSettlement,expeditionBonuses,encodeCampaignSave,decodeCamp
 import {selectQuest} from '../src/quest-board.js';
 import {completeCampaignExpedition,campaignProgress} from '../src/campaign-progression.js';
 import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero,rosterCapacity,upgradeHeroEquipment,upgradeHeroSkill} from '../src/hero-roster.js';
-import {advanceTownWeek,recruitFromCoach,bookStressTreatment,canUseStressTreatment,treatmentConfig,TREATMENTS,upgradeTreatmentActivity,treatmentUpgradeLevel} from '../src/town-week.js';
+import {advanceTownWeek,recruitFromCoach,bookStressTreatment,canUseStressTreatment,treatmentConfig,TREATMENTS,upgradeTreatmentActivity,treatmentUpgradeLevel,treatmentUpgradePrice} from '../src/town-week.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger,purchaseProvision,campMeal,useCampSkill,finishCamp,CAMP_SKILLS} from '../src/dungeon.js';
 import {leaveLoot,collectLoot,inventoryCanAdd} from '../src/inventory.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from '../src/engine.js';
@@ -174,10 +174,17 @@ function prepareTown(town){
   if(affordable)upgradeStageCoach(town,track);
  }
  // All upgrades and services go through public gameplay actions, using earned resources.
- for(const facility of ['guild','temple','market','abbey','tavern']){
+ for(const facility of ['guild','temple','market']){
   const cost=nextFacilityCost(town,facility);
   if(cost&&Object.entries(cost).every(([resource,amount])=>(town[resource]??0)>=amount))
    upgradeFacility(town,facility);
+ }
+ // Abbey and Tavern use the six-stage activity tracks, not facility upgrades.
+ for(const service of ['abbey','tavern']){
+  if(treatmentUpgradeLevel(town,service)>=6)continue;
+  const cost=treatmentUpgradePrice(town,service);
+  if(cost&&Object.entries(cost).every(([resource,amount])=>(town[resource]??0)>=amount))
+   upgradeTreatmentActivity(town,service);
  }
  // Spend earned gold on available level-gated equipment before Veteran runs.
  const upgradeCandidates=town.roster.filter(h=>!h.unit.dead&&h.level>=1)
