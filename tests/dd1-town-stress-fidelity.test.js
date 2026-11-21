@@ -56,7 +56,7 @@ test('DD1 forced treatment quirks prohibit alternative services and conflicting 
  for(const service of ['abbey','abbeyTransept','abbeyPenance','tavern','tavernGambling','tavernBrothel'])
   assert.equal(canUseStressTreatment(h,service),false,service);
  const before=s.gold;
- assert.throws(()=>bookStressTreatment(s,h.rosterId,'abbey'),/quirk forbids/);
+ assert.throws(()=>bookStressTreatment(s,h.rosterId,'abbey'),/quirk forbids this stress treatment: unquietMind prohibits Abbey Cloister/);
  assert.equal(s.gold,before);
  assert.deepEqual(s.town.treatments,[]);
 });
@@ -117,4 +117,13 @@ test('all twelve named DD1 treatment quirks restrict only their specified activi
   for(const service of services)
    assert.equal(canUseStressTreatment(hero,service),!excluded.includes(service),id+' '+service);
  }
+});
+
+test('a forced-activity quirk explains a rejected booking without charging gold',()=>{
+ const s=createCampaignSettlement();s.gold=2000;
+ const h=s.roster[0];h.unit.stress=75;
+ h.quirks.negative=[{id:'godFearing',locked:false}];
+ assert.throws(()=>bookStressTreatment(s,h.rosterId,'tavern'),/godFearing requires Abbey Transept/);
+ assert.equal(s.gold,2000);
+ assert.deepEqual(s.town.treatments,[]);
 });
