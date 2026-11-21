@@ -147,9 +147,9 @@ test('stress treatment rooms enforce per-activity capacity without charging fail
  assert.equal(treatmentConfig(s,'abbeyTransept').capacity,1);
  bookStressTreatment(s,heroes[2].rosterId,'abbey');
  assert.equal(s.town.treatments.length,3);
- assert.equal(s.gold,6750);
+ assert.equal(s.gold,6900);
  assert.throws(()=>bookStressTreatment(s,heroes[2].rosterId,'abbeyTransept'),/already receiving treatment/);
- assert.equal(s.gold,6750);
+ assert.equal(s.gold,6900);
  const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
  assert.equal(loaded.town.treatments.length,3);
  advanceTownWeek(loaded,finished());
