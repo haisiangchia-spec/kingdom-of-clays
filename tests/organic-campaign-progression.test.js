@@ -4,7 +4,7 @@ import {createCampaignSettlement,expeditionBonuses,encodeCampaignSave,decodeCamp
 import {selectQuest} from '../src/quest-board.js';
 import {completeCampaignExpedition,campaignProgress} from '../src/campaign-progression.js';
 import {prepareRosterParty,returnPartyToRoster,selectHero,resurrectHero,equipTrinket,dismissHero,rosterCapacity,upgradeHeroEquipment,upgradeHeroSkill} from '../src/hero-roster.js';
-import {advanceTownWeek,recruitFromCoach,bookStressTreatment,canUseStressTreatment,treatmentConfig,TREATMENTS} from '../src/town-week.js';
+import {advanceTownWeek,recruitFromCoach,bookStressTreatment,canUseStressTreatment,treatmentConfig,TREATMENTS,upgradeTreatmentActivity,treatmentUpgradeLevel} from '../src/town-week.js';
 import {createDungeon,beginCorridor,advanceCorridor,dungeonBattle,resolveDungeonBattle,resolveHunger,purchaseProvision,campMeal,useCampSkill,finishCamp,CAMP_SKILLS} from '../src/dungeon.js';
 import {leaveLoot,collectLoot,inventoryCanAdd} from '../src/inventory.js';
 import {rng,startRound,currentActor,prepareActorTurn,passActorTurn,takeTurn,availableTargets,status,ABILITIES} from '../src/engine.js';
@@ -17,11 +17,10 @@ test('Abbey and Tavern upgrades increase treatment relief and survive campaign s
  const hero=town.roster.find(h=>!h.unit.dead);
  assert.ok(hero,'starting roster has a living hero');
  hero.unit.stress=120;
- upgradeFacility(town,'abbey');
- upgradeFacility(town,'abbey');
- assert.equal(town.facilities.abbey,2);
+ for(let n=0;n<4;n++)upgradeTreatmentActivity(town,'abbey');
+ assert.equal(treatmentUpgradeLevel(town,'abbey'),4);
  const saved=decodeCampaignSave(encodeCampaignSave(town,null)).settlement;
- assert.equal(saved.facilities.abbey,2);
+ assert.equal(treatmentUpgradeLevel(saved,'abbey'),4);
  bookStressTreatment(saved,hero.rosterId,'abbey');
  const expedition={phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true};
  advanceTownWeek(saved,expedition);
