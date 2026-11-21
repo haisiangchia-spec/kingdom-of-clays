@@ -134,7 +134,7 @@ test('maximum recovery upgrade unlocks a second treatment slot and preserves bot
 test('six DD1 Abbey and Tavern activities book independently and persist across saves',()=>{
  const s=createCampaignSettlement();
  assert.equal(Object.keys(TREATMENTS).length,6);
- s.gold=6000;
+ s.gold=7500;
  for(let i=0;i<6;i++){
   const hero=i<s.roster.length?s.roster[i]:recruitHero(s,'Priest');
   hero.unit.stress=100;
@@ -148,7 +148,7 @@ test('six DD1 Abbey and Tavern activities book independently and persist across 
  assert.equal(loaded.town.treatments.length,6);
  const finished={phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true};
  advanceTownWeek(loaded,finished);
- assert.deepEqual(loaded.roster.slice(0,6).map(h=>h.unit.stress),Array(6).fill(55));
+ assert.deepEqual(loaded.roster.slice(0,6).map(h=>h.unit.stress),[55,45,35,55,45,35]);
  assert.equal(loaded.town.treatments.length,0);
 });
 
@@ -164,7 +164,7 @@ test('a tampered save cannot reserve one hero for both Abbey and Sanitarium',()=
 
 test('fully upgraded Abbey and Tavern support twelve distinct simultaneous treatment bookings',()=>{
  const s=createCampaignSettlement();
- s.gold=12000;s.crests=100;s.deeds=100;
+ s.gold=15000;s.crests=100;s.deeds=100;
  s.stageCoach.barracks=1; // twelve roster slots are needed to fill twelve treatment rooms
  upgradeFacility(s,'abbey');upgradeFacility(s,'abbey');
  upgradeFacility(s,'tavern');upgradeFacility(s,'tavern');
@@ -186,7 +186,7 @@ test('fully upgraded Abbey and Tavern support twelve distinct simultaneous treat
  assert.equal(loaded.town.treatments.length,12);
  const finished={phase:'victory',rosterReturned:true,party:[],townWeekProcessed:false,traitsProcessed:true};
  assert.equal(advanceTownWeek(loaded,finished),true);
- assert.deepEqual(loaded.roster.slice(0,12).map(h=>h.unit.stress),Array(12).fill(30));
+ assert.deepEqual(loaded.roster.slice(0,12).map(h=>h.unit.stress),[30,30,14,14,0,0,30,30,14,14,0,0]);
  assert.equal(loaded.town.treatments.length,0);
 });
 
