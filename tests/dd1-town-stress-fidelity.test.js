@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,upgradeFacility,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
 import {recruitHero} from '../src/hero-roster.js';
-import {bookStressTreatment,advanceTownWeek,treatmentConfig,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity} from '../src/town-week.js';
+import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity} from '../src/town-week.js';
 
 // Regression guard for DD1-style town stress recovery. Prices and relief tiers
 // are explicitly configured; capacity and heirloom upgrade costs remain Clays fixtures.
@@ -157,4 +157,26 @@ test('stress treatment rooms enforce per-activity capacity without charging fail
  assert.equal(loaded.roster.find(h=>h.rosterId===heroes[0].rosterId).unit.stress,30);
  assert.equal(loaded.roster.find(h=>h.rosterId===heroes[1].rosterId).unit.stress,45);
  assert.equal(loaded.roster.find(h=>h.rosterId===heroes[2].rosterId).unit.stress,30);
+});
+
+test('DD1 Apprentice, Veteran and Champion resolve tiers scale treatment prices',()=>{
+ const s=createCampaignSettlement();
+ const cases={
+  abbey:[1000,1400,1800],
+  abbeyTransept:[1250,1750,2250],
+  abbeyPenance:[1500,2100,2700],
+  tavern:[1000,1400,1800],
+  tavernGambling:[1250,1750,2250],
+  tavernBrothel:[1500,2100,2700]
+ };
+ for(const [service,prices] of Object.entries(cases)){
+  for(const [level,index] of [[0,0],[2,0],[3,1],[4,1],[5,2],[6,2]]){
+   assert.equal(treatmentCostForHero(s,service,{level}),prices[index],service+' level '+level);
+  }
+ }
+ const hero=s.roster[0];hero.level=5;hero.unit.stress=80;s.gold=1799;
+ assert.throws(()=>bookStressTreatment(s,hero.rosterId,'abbey'),/Insufficient gold/);
+ assert.equal(s.gold,1799);assert.deepEqual(s.town.treatments,[]);
+ s.gold=1800;bookStressTreatment(s,hero.rosterId,'abbey');
+ assert.equal(s.gold,0);
 });
