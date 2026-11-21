@@ -730,3 +730,27 @@ Primary syntax reference: https://steamcommunity.com/sharedfiles/filedetails/?id
 **CI policy:** Run all workflows; do not change DD1 gameplay to make an organic campaign test pass. If an organic progression test fails while fidelity tests pass, report it as a separate progression issue until fidelity is complete.
 
 **Current limitations:** Town treatment costs and relief, treatment side effects, recovery upgrade economics, quest trait acquisition, and broad dungeon/content coverage remain provisional. The previously attempted wider negative-quirk acquisition pool was reverted after it affected organic progression; this is not a completed DD1 trait system.
+
+
+## Town stress-recovery implementation inventory — 21 November 2026
+
+The following is an **implementation audit**, not a claim of complete vanilla DD1 parity. Inspected `src/town-week.js`, `src/settlement.js`, and `tests/dd1-town-stress-fidelity.test.js`.
+
+| DD1 mechanic / content | Current Clays implementation | Fidelity status / next action |
+| --- | --- | --- |
+| Abbey: Cloister, Transept, Penance Hall | Six named activity IDs across Abbey/Tavern; separate booking capacity | Structural coverage; verify actual room/upgrade counts |
+| Tavern: Bar, Gambling Hall, Brothel | All three available | Structural coverage; verify pricing and effects |
+| Activity-specific access quirks | Twelve forced/prohibited quirk IDs; incompatible combinations block all services | Implemented with regression tests; source-verify individual quirk semantics |
+| One-week treatment | Booking consumes gold immediately; recovery resolves on next completed expedition week | Structural coverage; validate exact DD1 timing |
+| Room capacity | 1 slot initially, 2 at activity level 2 | **Provisional**; DD1 capacity upgrades need source mapping |
+| Treatment stress relief | 45/56/70 per activity level | **Provisional**; source-verify each activity and upgrade |
+| Treatment price | 1,000 gold at all activity levels | **Provisional**; implement individual base costs and cost-reduction upgrades |
+| Abbey/Tavern upgrades | Six independent tracks, levels 0–2; 3/6 crests and 2/4 deeds | **Provisional**; align heirloom costs and upgrade branches |
+| Activity side effects | None | **Missing**; add deterministic, seeded outcomes with DD1-specific tables only after source verification |
+| Quirk-based automatic forced activity | Restrictions enforced on booking; not auto-booked | **Partial**; verify DD1 automatic behavior |
+| Idle weekly stress recovery | -5 stress for nondeployed untreated heroes | Source-backed baseline; verify exceptions |
+| Stress treatment and afflictions | Affliction clears when stress drops below 100 | Verify exact DD1 persistence/threshold rules |
+| Weekly Stage Coach | Free deterministic candidates, 2–7 offers, network level 0–5 | **Provisional** candidate counts, class probabilities and upgrade tiers |
+| Save and reload | Treatment bookings and six independent upgrade tracks persisted | Tested |
+
+**Next implementation gate:** Obtain reliable vanilla DD1 cost/recovery/capacity/side-effect tables, then update configuration, town UI and unit/browser tests together. Do not label current 1,000 gold or 45/56/70 as DD1-exact. Preserve deliberate Clays exceptions and do not change campaign tuning merely to satisfy progression tests.
