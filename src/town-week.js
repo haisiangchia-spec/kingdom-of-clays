@@ -128,7 +128,8 @@ export function bookStressTreatment(settlement,rosterId,service){
  const hero=settlement.roster.find(h=>h.rosterId===rosterId);
  if(!hero||hero.unit.dead)throw Error('Hero is unavailable');
  if(hero.unit.stress<=0)throw Error('Hero has no stress to treat');
- if(!canUseStressTreatment(hero,service))throw Error('Hero quirk forbids this stress treatment');
+ const restriction=stressTreatmentRestriction(hero,service);
+ if(restriction)throw Error('Hero quirk forbids this stress treatment: '+restriction);
  if(town.treatments.some(t=>t.rosterId===rosterId)||sanitariumUnavailable(settlement,rosterId))throw Error('Hero is already receiving treatment');
  if(town.treatments.filter(t=>t.service===service).length>=config.capacity)throw Error('Treatment room is occupied');
  if(settlement.gold<config.gold)throw Error('Insufficient gold for treatment');
