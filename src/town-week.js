@@ -31,6 +31,7 @@ export const TREATMENT_RELIEF_BY_LEVEL=Object.freeze({
 // recoveryTracks continue to use their existing Abbey/Tavern building levels.
 export const RECOVERY_TRACKS=Object.freeze(Object.keys(TREATMENTS));
 export function upgradeRecoveryActivity(settlement,service){
+ if(settlement.treatmentUpgradeTracks)throw Error('Use six-stage treatment upgrades');
  if(!RECOVERY_TRACKS.includes(service))throw Error('Unknown stress treatment');
  const level=treatmentConfig(settlement,service).level;
  if(level>=2)throw Error('Recovery activity is already at maximum level');
@@ -143,6 +144,7 @@ export function treatmentCostUpgradePrice(settlement,service){
  return {crests:3*(level+1),deeds:2*(level+1)};
 }
 export function upgradeTreatmentCost(settlement,service){
+ if(settlement.treatmentUpgradeTracks)throw Error('Use six-stage treatment upgrades');
  const level=treatmentCostUpgradeLevel(settlement,service);
  if(level>=2)throw Error('Treatment cost is already at maximum discount');
  const cost=treatmentCostUpgradePrice(settlement,service);
