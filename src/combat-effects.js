@@ -17,9 +17,9 @@ export function resolveTargets(state,actor,skill,selectedId){
 export function cleanseUnit(unit,types=['bleed','blight']){
   let count=0;
   if(types.some(type=>type==='bleed'||type==='blight')){
-    const before=unit.dot.length;
-    unit.dot=unit.dot.filter(dot=>!types.includes(dot.type));
-    count+=before-unit.dot.length;
+    const dots=unit.dot??[];
+    unit.dot=dots.filter(dot=>!types.includes(dot.type));
+    count+=dots.length-unit.dot.length;
   }
   if(types.includes('horror')){
     const before=(unit.horror??[]).length;
