@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,upgradeFacility,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
 import {recruitHero} from '../src/hero-roster.js';
-import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,treatmentPriceAtCostLevel,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity} from '../src/town-week.js';
+import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,treatmentPriceAtCostLevel,treatmentCostUpgradeLevel,upgradeTreatmentCost,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity} from '../src/town-week.js';
 
 // Regression guard for DD1-style town stress recovery. Prices and relief tiers
 // are explicitly configured; capacity and heirloom upgrade costs remain Clays fixtures.
@@ -199,4 +199,29 @@ test('source-backed DD1 treatment discount tables cover all six services and thr
  assert.throws(()=>treatmentPriceAtCostLevel('abbey',0,3),/Invalid treatment cost upgrade/);
  assert.throws(()=>treatmentPriceAtCostLevel('abbey',7,0),/Invalid hero resolve level/);
  assert.throws(()=>treatmentPriceAtCostLevel('unknown',0,0),/Unknown stress treatment/);
+});
+
+test('independent DD1 treatment discount upgrades charge heirlooms and survive saves',()=>{
+ const s=createCampaignSettlement();s.crests=30;s.deeds=30;s.gold=10000;
+ const hero=s.roster[0];hero.level=5;hero.unit.stress=90;
+ assert.equal(treatmentCostForHero(s,'abbey',hero),1800);
+ assert.equal(treatmentCostForHero(s,'tavern',hero),1800);
+ upgradeTreatmentCost(s,'abbey');
+ assert.equal(treatmentCostUpgradeLevel(s,'abbey'),1);
+ assert.equal(treatmentCostForHero(s,'abbey',hero),1530);
+ assert.equal(treatmentCostForHero(s,'tavern',hero),1800);
+ upgradeTreatmentCost(s,'abbey');
+ assert.equal(treatmentCostForHero(s,'abbey',hero),1260);
+ assert.throws(()=>upgradeTreatmentCost(s,'abbey'),/maximum discount/);
+ const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
+ assert.equal(treatmentCostForHero(loaded,'abbey',hero),1260);
+ assert.equal(treatmentCostForHero(loaded,'tavern',hero),1800);
+ bookStressTreatment(loaded,hero.rosterId,'abbey');
+ assert.equal(loaded.gold,8740);
+});
+test('failed treatment discount upgrade is atomic',()=>{
+ const s=createCampaignSettlement();s.crests=2;s.deeds=20;
+ assert.throws(()=>upgradeTreatmentCost(s,'abbeyTransept'),/Insufficient settlement resources/);
+ assert.equal(s.crests,2);assert.equal(s.deeds,20);
+ assert.equal(s.treatmentCostTracks,undefined);
 });
