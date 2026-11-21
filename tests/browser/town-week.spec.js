@@ -78,8 +78,10 @@ test('all six Abbey and Tavern activities are visible and independent in the Ham
  for(const name of names){
   await expect(page.getByRole('button',{name:`Treat at ${name} · ${['Abbey Transept','Tavern Gambling Hall'].includes(name)?1250:['Abbey Penance Hall','Tavern Brothel'].includes(name)?1500:1000} gold`,exact:false}).first()).toBeVisible();
  }
+ await expect(page.getByRole('button',{name:/Treat at Abbey Cloister · 1000 gold · -45 stress · 0\/1 slots/}).first()).toBeEnabled();
  await page.getByRole('button',{name:/Treat at Abbey Cloister · 1000 gold/}).first().click();
  await page.getByRole('button',{name:/Treat at Tavern Gambling Hall · 1250 gold/}).first().click();
+ await expect(page.getByRole('button',{name:/Treat at Abbey Cloister · 1000 gold · -45 stress · 1\/1 slots/}).first()).toBeDisabled();
  await expect(page.locator('#hero-roster')).toContainText('Treatment rooms: 2/6');
  await page.reload();
  await expect(page.locator('#hero-roster')).toContainText('Treatment rooms: 2/6');
