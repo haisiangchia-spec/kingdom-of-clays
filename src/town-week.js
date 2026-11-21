@@ -16,6 +16,16 @@ export const TREATMENTS=Object.freeze({
  tavernGambling:Object.freeze({name:'Tavern Gambling Hall',facility:'tavern',gold:1250,stressRelief:55}),
  tavernBrothel:Object.freeze({name:'Tavern Brothel',facility:'tavern',gold:1500,stressRelief:65})
 });
+// Explicit recovery progression for each DD1 activity. Keep this data separate
+// from the base price: upgrading recovery does not implicitly discount booking.
+export const TREATMENT_RELIEF_BY_LEVEL=Object.freeze({
+ abbey:Object.freeze([45,56,70]),
+ abbeyTransept:Object.freeze([55,69,86]),
+ abbeyPenance:Object.freeze([65,81,100]),
+ tavern:Object.freeze([45,56,70]),
+ tavernGambling:Object.freeze([55,69,86]),
+ tavernBrothel:Object.freeze([65,81,100])
+});
 // New campaigns may upgrade each activity independently. Older saves without
 // recoveryTracks continue to use their existing Abbey/Tavern building levels.
 export const RECOVERY_TRACKS=Object.freeze(Object.keys(TREATMENTS));
@@ -60,8 +70,7 @@ export function treatmentConfig(settlement,service){
  const independent=settlement.recoveryTracks?.[service];
  const level=independent===undefined?legacy:independent;
  if(!Number.isInteger(level)||level<0||level>2)throw Error('Invalid recovery upgrade');
- const relief=base.stressRelief===45?[45,56,70]:base.stressRelief===55?[55,69,86]:[65,81,100];
- return {...base,level,stressRelief:relief[level],capacity:level===2?2:1};
+ return {...base,level,stressRelief:TREATMENT_RELIEF_BY_LEVEL[service][level],capacity:level===2?2:1};
 }
 const goodInt=n=>Number.isSafeInteger(n)&&n>=0;
 const names=Object.keys(TREATMENTS);
