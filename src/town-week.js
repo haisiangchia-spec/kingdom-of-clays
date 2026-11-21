@@ -116,8 +116,8 @@ export function treatmentPriceAtCostLevel(service,heroLevel,costLevel=0){
  if(!Number.isSafeInteger(costLevel)||costLevel<0||costLevel>2)throw Error('Invalid treatment cost upgrade');
  return TREATMENT_PRICE_TABLE[service][heroLevel>=5?2:heroLevel>=3?1:0][costLevel];
 }
-// Cost-reduction upgrades are not yet purchasable. Until implemented, bookings
-// use the verified base column; recovery upgrades do not discount treatment.
+// Bookings use the purchased activity-specific discount tier. Recovery
+// upgrades remain independent and never change the treatment price.
 export function treatmentCostForHero(settlement,service,hero){
  treatmentConfig(settlement,service);
  return treatmentPriceAtCostLevel(service,hero?.level??0,treatmentCostUpgradeLevel(settlement,service));
