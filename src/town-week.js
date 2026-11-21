@@ -73,14 +73,30 @@ export function treatmentConfig(settlement,service){
  if(!Number.isInteger(level)||level<0||level>2)throw Error('Invalid recovery upgrade');
  return {...base,level,stressRelief:TREATMENT_RELIEF_BY_LEVEL[service][level],capacity:level===2?2:1};
 }
-// Vanilla DD1 charges more for Veteran (resolve 3-4) and Champion
-// (resolve 5+) heroes. The current Clays recovery-upgrade track does not
-// yet model DD1's separate cost-reduction upgrades.
+// Official vanilla DD1 Abbey/Tavern price tables: Apprentice, Veteran,
+// Champion rows; base, first discount, second discount columns.
+// https://darkestdungeon.wiki.gg/wiki/Abbey
+// https://darkestdungeon.wiki.gg/wiki/Tavern
+// The Tavern Brothel has slightly different displayed discounts than Penance.
+export const TREATMENT_PRICE_TABLE=Object.freeze({
+ abbey:Object.freeze([[1000,850,700],[1400,1190,980],[1800,1530,1260]].map(Object.freeze)),
+ abbeyTransept:Object.freeze([[1250,1050,900],[1750,1470,1260],[2250,1890,1620]].map(Object.freeze)),
+ abbeyPenance:Object.freeze([[1500,1300,1100],[2100,1820,1540],[2700,2340,1980]].map(Object.freeze)),
+ tavern:Object.freeze([[1000,850,700],[1400,1190,980],[1800,1530,1260]].map(Object.freeze)),
+ tavernGambling:Object.freeze([[1250,1050,900],[1750,1470,1260],[2250,1890,1620]].map(Object.freeze)),
+ tavernBrothel:Object.freeze([[1500,1300,1110],[2100,1820,1554],[2700,2340,1998]].map(Object.freeze))
+});
+export function treatmentPriceAtCostLevel(service,heroLevel,costLevel=0){
+ if(!Object.hasOwn(TREATMENT_PRICE_TABLE,service))throw Error('Unknown stress treatment');
+ if(!Number.isSafeInteger(heroLevel)||heroLevel<0||heroLevel>6)throw Error('Invalid hero resolve level');
+ if(!Number.isSafeInteger(costLevel)||costLevel<0||costLevel>2)throw Error('Invalid treatment cost upgrade');
+ return TREATMENT_PRICE_TABLE[service][heroLevel>=5?2:heroLevel>=3?1:0][costLevel];
+}
+// Cost-reduction upgrades are not yet purchasable. Until implemented, bookings
+// use the verified base column; recovery upgrades do not discount treatment.
 export function treatmentCostForHero(settlement,service,hero){
- const config=treatmentConfig(settlement,service);
- const level=hero?.level??0;
- if(!Number.isSafeInteger(level)||level<0)throw Error('Invalid hero resolve level');
- return Math.round(config.gold*(level>=5?1.8:level>=3?1.4:1));
+ treatmentConfig(settlement,service);
+ return treatmentPriceAtCostLevel(service,hero?.level??0,0);
 }
 const goodInt=n=>Number.isSafeInteger(n)&&n>=0;
 const names=Object.keys(TREATMENTS);
