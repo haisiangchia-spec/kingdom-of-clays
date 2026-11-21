@@ -88,44 +88,27 @@ test('all six Abbey and Tavern activities are visible and independent in the Ham
  await expect(page.locator('#settlement-panel')).toContainText('Treasury: 3750 gold');
 });
 
-test('Hamlet activity upgrades are independently visible and persist across reload',async ({page})=>{
+test('Hamlet presents sequential DD1 treatment upgrades and persists them across reload',async ({page})=>{
  await makeTown(page,{gold:1000,stress:100});
  await page.evaluate(async ()=>{
   const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
   const saved=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
-  saved.settlement.crests=20;saved.settlement.deeds=20;
+  saved.settlement.crests=100;saved.settlement.deeds=100;
   localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(saved.settlement,saved.expedition));
  });
  await page.reload();
  const panel=page.locator('#settlement-panel');
- await expect(panel).toContainText('Abbey Transept activity upgrade Lv 0/2 · 1 slots · -55 stress');
- await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -65 stress');
- await page.getByRole('button',{name:'Upgrade Abbey Transept activity (3 crests, 2 deeds)'}).click();
- await expect(panel).toContainText('Abbey Transept activity upgrade Lv 1/2 · 1 slots · -69 stress');
- await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -65 stress');
+ await expect(panel).toContainText('Abbey Transept Lv 0/6 · 1 slots · -55 stress · discount 0/2');
+ await expect(panel).toContainText('Abbey Penance Hall Lv 0/6 · 1 slots · -65 stress · discount 0/2');
+ await page.getByRole('button',{name:'Upgrade Abbey Transept recovery (3 crests, 2 deeds)'}).click();
+ await expect(panel).toContainText('Abbey Transept Lv 1/6 · 1 slots · -69 stress · discount 0/2');
  await page.reload();
- await expect(panel).toContainText('Abbey Transept activity upgrade Lv 1/2 · 1 slots · -69 stress');
- await page.getByRole('button',{name:'Upgrade Abbey Transept activity (6 crests, 4 deeds)'}).click();
- await expect(panel).toContainText('Abbey Transept activity upgrade Lv 2/2 · 2 slots · -86 stress');
- await expect(panel).toContainText('Abbey Penance Hall activity upgrade Lv 0/2 · 1 slots · -65 stress');
-});
-
-test('migrated recovery tracks hide obsolete shared Abbey and Tavern upgrades',async ({page})=>{
- await makeTown(page,{gold:1000,stress:100});
- await page.evaluate(async ()=>{
-  const {decodeCampaignSave,encodeCampaignSave,CAMPAIGN_SAVE_KEY}=await import('./src/settlement.js');
-  const {upgradeRecoveryActivity}=await import('./src/town-week.js');
-  const saved=decodeCampaignSave(localStorage.getItem(CAMPAIGN_SAVE_KEY));
-  saved.settlement.crests=20;saved.settlement.deeds=20;
-  upgradeRecoveryActivity(saved.settlement,'abbeyTransept');
-  localStorage.setItem(CAMPAIGN_SAVE_KEY,encodeCampaignSave(saved.settlement,saved.expedition));
- });
- await page.reload();
- const panel=page.locator('#settlement-panel');
- await expect(panel).toContainText('Abbey Transept activity upgrade Lv 1/2');
- await expect(page.getByRole('button',{name:/Upgrade Abbey Recovery \(/})).toHaveCount(0);
- await expect(page.getByRole('button',{name:/Upgrade Tavern Recovery \(/})).toHaveCount(0);
- await expect(page.getByRole('button',{name:'Upgrade Abbey Transept activity (6 crests, 4 deeds)'})).toBeEnabled();
+ await expect(panel).toContainText('Abbey Transept Lv 1/6 · 1 slots · -69 stress · discount 0/2');
+ await page.getByRole('button',{name:'Upgrade Abbey Transept discount (6 crests, 4 deeds)'}).click();
+ await expect(panel).toContainText('Abbey Transept Lv 2/6 · 1 slots · -69 stress · discount 1/2');
+ await page.getByRole('button',{name:'Upgrade Abbey Transept capacity (9 crests, 6 deeds)'}).click();
+ await expect(panel).toContainText('Abbey Transept Lv 3/6 · 2 slots · -69 stress · discount 1/2');
+ await expect(panel).toContainText('Abbey Penance Hall Lv 0/6 · 1 slots · -65 stress · discount 0/2');
 });
 
 test('hero treatment quirks disable forbidden Hamlet activities in the browser',async ({page})=>{
@@ -160,10 +143,10 @@ test('Hamlet displays the negative quirk that restricts stress treatment',async 
  await expect(forbidden).toHaveAttribute('title',/knownCheat prohibits Tavern Gambling Hall/);
 });
 
-test('new campaigns show six independent stress upgrades without obsolete shared upgrade buttons',async ({page})=>{
+test('new campaigns show six sequential treatment upgrades without obsolete shared upgrade buttons',async ({page})=>{
  await makeTown(page,{gold:4000,stress:90});
  await expect(page.getByRole('button',{name:/Upgrade Abbey \(/})).toHaveCount(0);
  await expect(page.getByRole('button',{name:/Upgrade Tavern \(/})).toHaveCount(0);
  for(const activity of ['Abbey Cloister','Abbey Transept','Abbey Penance Hall','Tavern Bar','Tavern Gambling Hall','Tavern Brothel'])
-  await expect(page.getByRole('button',{name:new RegExp('Upgrade '+activity+' activity')})).toHaveCount(1);
+  await expect(page.getByRole('button',{name:new RegExp('Upgrade '+activity+' recovery')})).toHaveCount(1);
 });
