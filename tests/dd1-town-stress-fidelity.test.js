@@ -11,8 +11,9 @@ test('stress recovery upgrades are monotonic and cap treatment stress at zero',(
  const s=createCampaignSettlement();s.crests=100;s.deeds=100;s.gold=10000;
  for(const service of ['abbey','tavern']){
   const relief=[treatmentConfig(s,service).stressRelief];
-  upgradeFacility(s,service);relief.push(treatmentConfig(s,service).stressRelief);
-  upgradeFacility(s,service);relief.push(treatmentConfig(s,service).stressRelief);
+  upgradeTreatmentActivity(s,service);relief.push(treatmentConfig(s,service).stressRelief);
+  for(let n=0;n<3;n++)upgradeTreatmentActivity(s,service);
+  relief.push(treatmentConfig(s,service).stressRelief);
   assert.ok(relief[0]<relief[1]&&relief[1]<relief[2]);
   assert.equal(treatmentConfig(s,service).capacity,2);
  }
@@ -86,7 +87,7 @@ test('all six DD1 treatment services use explicit prices and three independent r
    assert.equal(config.gold,rule.gold,service);
    assert.equal(config.stressRelief,rule.relief[level],service);
    assert.equal(config.capacity,level===2?2:1,service);
-   if(level<2)upgradeRecoveryActivity(s,service);
+   if(level<2){const count=level===0?1:3;for(let n=0;n<count;n++)upgradeTreatmentActivity(s,service);}
   }
  }
  const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
@@ -141,8 +142,7 @@ test('stress treatment rooms enforce per-activity capacity without charging fail
  assert.throws(()=>bookStressTreatment(s,heroes[1].rosterId,'tavern'),/already receiving treatment/);
  assert.equal(s.gold,7750);
  s.crests=100;s.deeds=100;
- upgradeRecoveryActivity(s,'abbey');
- upgradeRecoveryActivity(s,'abbey');
+ for(let n=0;n<3;n++)upgradeTreatmentActivity(s,'abbey');
  assert.equal(treatmentConfig(s,'abbey').capacity,2);
  assert.equal(treatmentConfig(s,'abbeyTransept').capacity,1);
  bookStressTreatment(s,heroes[2].rosterId,'abbey');
@@ -154,9 +154,9 @@ test('stress treatment rooms enforce per-activity capacity without charging fail
  assert.equal(loaded.town.treatments.length,3);
  advanceTownWeek(loaded,finished());
  assert.deepEqual(loaded.town.treatments,[]);
- assert.equal(loaded.roster.find(h=>h.rosterId===heroes[0].rosterId).unit.stress,30);
+ assert.equal(loaded.roster.find(h=>h.rosterId===heroes[0].rosterId).unit.stress,44);
  assert.equal(loaded.roster.find(h=>h.rosterId===heroes[1].rosterId).unit.stress,45);
- assert.equal(loaded.roster.find(h=>h.rosterId===heroes[2].rosterId).unit.stress,30);
+ assert.equal(loaded.roster.find(h=>h.rosterId===heroes[2].rosterId).unit.stress,44);
 });
 
 test('DD1 Apprentice, Veteran and Champion resolve tiers scale treatment prices',()=>{
@@ -201,29 +201,29 @@ test('source-backed DD1 treatment discount tables cover all six services and thr
  assert.throws(()=>treatmentPriceAtCostLevel('unknown',0,0),/Unknown stress treatment/);
 });
 
-test('independent DD1 treatment discount upgrades charge heirlooms and survive saves',()=>{
- const s=createCampaignSettlement();s.crests=30;s.deeds=30;s.gold=10000;
+test('DD1 treatment discounts require sequential activity purchases and survive saves',()=>{
+ const s=createCampaignSettlement();s.crests=100;s.deeds=100;s.gold=10000;
  const hero=s.roster[0];hero.level=5;hero.unit.stress=90;
  assert.equal(treatmentCostForHero(s,'abbey',hero),1800);
- assert.equal(treatmentCostForHero(s,'tavern',hero),1800);
- upgradeTreatmentCost(s,'abbey');
+ upgradeTreatmentActivity(s,'abbey'); // recovery first
+ assert.equal(treatmentCostUpgradeLevel(s,'abbey'),0);
+ upgradeTreatmentActivity(s,'abbey'); // discount
  assert.equal(treatmentCostUpgradeLevel(s,'abbey'),1);
  assert.equal(treatmentCostForHero(s,'abbey',hero),1530);
  assert.equal(treatmentCostForHero(s,'tavern',hero),1800);
- upgradeTreatmentCost(s,'abbey');
+ for(let n=0;n<3;n++)upgradeTreatmentActivity(s,'abbey');
  assert.equal(treatmentCostForHero(s,'abbey',hero),1260);
- assert.throws(()=>upgradeTreatmentCost(s,'abbey'),/maximum discount/);
  const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
  assert.equal(treatmentCostForHero(loaded,'abbey',hero),1260);
  assert.equal(treatmentCostForHero(loaded,'tavern',hero),1800);
  bookStressTreatment(loaded,hero.rosterId,'abbey');
  assert.equal(loaded.gold,8740);
 });
-test('failed treatment discount upgrade is atomic',()=>{
+test('failed sequential treatment upgrade is atomic',()=>{
  const s=createCampaignSettlement();s.crests=2;s.deeds=20;
- assert.throws(()=>upgradeTreatmentCost(s,'abbeyTransept'),/Insufficient settlement resources/);
+ assert.throws(()=>upgradeTreatmentActivity(s,'abbeyTransept'),/Insufficient settlement resources/);
  assert.equal(s.crests,2);assert.equal(s.deeds,20);
- assert.equal(s.treatmentCostTracks,undefined);
+ assert.equal(treatmentUpgradeLevel(s,'abbeyTransept'),0);
 });
 
 test('vanilla DD1 stress activity upgrades follow recovery, cost, slot, recovery, cost, slot',()=>{
