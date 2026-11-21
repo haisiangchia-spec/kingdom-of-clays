@@ -715,3 +715,18 @@ Sources describing mash layout and difficulty mapping:
 The initial audit parser incorrectly expected `.monster` tokens. The official Red Hook modding guide documents the real syntax as `hall: .chance 1 .types skeleton_common_A skeleton_common_A ...`, with space-separated IDs after `.types`. Parser and fixtures have been corrected to this format. It now recognizes `hall`, `room`, `stall`, `boss`, and `named` encounter kinds and excludes trailing optional fields from monster IDs. This parser is **audit-only**, not wired into campaign generation.
 
 Primary syntax reference: https://steamcommunity.com/sharedfiles/filedetails/?id=819597757 (official Darkest Dungeon modding guide, Monster Encounter Groups). File-presence corroboration: https://steamdb.info/depot/262061/manifests/ (lists `dungeons/warrens/warrens.3.mash.darkest`). Source file contents and game version remain to be acquired; no Veteran probabilities have been promoted to verified.
+
+
+## Development priority decision — 21 November 2026
+
+**User directive:** Complete vanilla DD1 mechanics fidelity before using campaign progression or survivability as a tuning target.
+
+**Priority order:** (1) audit and implement missing source-backed combat mechanics, skills, enemy behaviours and status interactions; (2) town activities, stress relief, quirks, sanitarium, Stage Coach and upgrade economy; (3) dungeon generation, provisions, inventory, curios, camping, scouting, traps and quest objectives; (4) content completeness for vanilla regions, encounters and bosses; (5) only then full organic Apprentice → Veteran → Champion progression and balance.
+
+**Acceptance standard:** Every fidelity claim requires a DD1 reference, a concrete code implementation, and a targeted automated regression. Distinguish exact parity from approximation; do not silently treat provisional fixtures as DD1 values. Track any deliberate Clays deviation separately.
+
+**Locked deviations:** Clays names/art, duplicate heroes, Temple resurrection at 250 gold with 100 stress and half HP, and approximately half of Veteran/Champion encounters one tier lower. Preserve user-approved survivability and camping strategy while auditing fidelity.
+
+**CI policy:** Run all workflows; do not change DD1 gameplay to make an organic campaign test pass. If an organic progression test fails while fidelity tests pass, report it as a separate progression issue until fidelity is complete.
+
+**Current limitations:** Town treatment costs and relief, treatment side effects, recovery upgrade economics, quest trait acquisition, and broad dungeon/content coverage remain provisional. The previously attempted wider negative-quirk acquisition pool was reverted after it affected organic progression; this is not a completed DD1 trait system.
