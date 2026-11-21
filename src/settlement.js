@@ -60,6 +60,15 @@ export function normalizeCampaignSettlement(input){
    base.recoveryTracks[service]=level;
   }
  }
+ if(input.treatmentCostTracks!==undefined){
+  if(!isObject(input.treatmentCostTracks)||Object.keys(input.treatmentCostTracks).some(k=>!RECOVERY_TRACKS.includes(k)))throw Error('Invalid treatment cost upgrades');
+  base.treatmentCostTracks={};
+  for(const service of RECOVERY_TRACKS){
+   const level=input.treatmentCostTracks[service];
+   if(!safeNumber(level)||level>2)throw Error('Invalid treatment cost upgrade level');
+   base.treatmentCostTracks[service]=level;
+  }
+ }
  if(input.campaignVictories!==undefined){
   if(!Array.isArray(input.campaignVictories)||input.campaignVictories.some(x=>!['veteran-victory','champion-victory'].includes(x))||new Set(input.campaignVictories).size!==input.campaignVictories.length)throw Error('Invalid campaign victories');
   base.campaignVictories=[...input.campaignVictories];
