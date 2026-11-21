@@ -193,17 +193,17 @@ test('fully upgraded Abbey and Tavern support twelve distinct simultaneous treat
 test('individual recovery upgrades affect only the selected activity and persist in saves',()=>{
  const s=createCampaignSettlement();
  s.crests=30;s.deeds=30;
- assert.equal(treatmentConfig(s,'abbeyTransept').stressRelief,45);
- assert.equal(treatmentConfig(s,'abbeyPenance').stressRelief,45);
+ assert.equal(treatmentConfig(s,'abbeyTransept').stressRelief,55);
+ assert.equal(treatmentConfig(s,'abbeyPenance').stressRelief,65);
  upgradeRecoveryActivity(s,'abbeyTransept');
- assert.equal(treatmentConfig(s,'abbeyTransept').stressRelief,56);
- assert.equal(treatmentConfig(s,'abbeyPenance').stressRelief,45);
+ assert.equal(treatmentConfig(s,'abbeyTransept').stressRelief,69);
+ assert.equal(treatmentConfig(s,'abbeyPenance').stressRelief,65);
  upgradeRecoveryActivity(s,'abbeyTransept');
  assert.equal(treatmentConfig(s,'abbeyTransept').capacity,2);
  assert.equal(treatmentConfig(s,'abbeyPenance').capacity,1);
  const loaded=decodeCampaignSave(encodeCampaignSave(s,null)).settlement;
- assert.equal(treatmentConfig(loaded,'abbeyTransept').stressRelief,70);
- assert.equal(treatmentConfig(loaded,'abbeyPenance').stressRelief,45);
+ assert.equal(treatmentConfig(loaded,'abbeyTransept').stressRelief,86);
+ assert.equal(treatmentConfig(loaded,'abbeyPenance').stressRelief,65);
  assert.throws(()=>upgradeRecoveryActivity(loaded,'abbeyTransept'),/maximum/);
  const bad=structuredClone(loaded);bad.recoveryTracks.abbeyTransept=3;
  assert.throws(()=>encodeCampaignSave(bad,null),/Invalid recovery activity level/);
