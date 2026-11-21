@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCampaignSettlement,upgradeFacility,encodeCampaignSave,decodeCampaignSave} from '../src/settlement.js';
 import {recruitHero} from '../src/hero-roster.js';
-import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,treatmentPriceAtCostLevel,treatmentCostUpgradeLevel,upgradeTreatmentCost,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity} from '../src/town-week.js';
+import {bookStressTreatment,advanceTownWeek,treatmentConfig,treatmentCostForHero,treatmentPriceAtCostLevel,treatmentCostUpgradeLevel,upgradeTreatmentCost,stageCoachOffers,stressTreatmentRestriction,canUseStressTreatment,TREATMENT_RELIEF_BY_LEVEL,TREATMENTS,upgradeRecoveryActivity,dd1TreatmentUpgradeState} from '../src/town-week.js';
 
 // Regression guard for DD1-style town stress recovery. Prices and relief tiers
 // are explicitly configured; capacity and heirloom upgrade costs remain Clays fixtures.
@@ -224,4 +224,16 @@ test('failed treatment discount upgrade is atomic',()=>{
  assert.throws(()=>upgradeTreatmentCost(s,'abbeyTransept'),/Insufficient settlement resources/);
  assert.equal(s.crests,2);assert.equal(s.deeds,20);
  assert.equal(s.treatmentCostTracks,undefined);
+});
+
+test('vanilla DD1 stress activity upgrades follow recovery, cost, slot, recovery, cost, slot',()=>{
+ const states=[
+  [0,0,0,1,'recovery'],[1,1,0,1,'discount'],[2,1,1,1,'capacity'],
+  [3,1,1,2,'recovery'],[4,2,1,2,'discount'],[5,2,2,2,'capacity'],
+  [6,2,2,3,null]
+ ];
+ for(const [level,recoveryLevel,costLevel,capacity,next] of states)
+  assert.deepEqual(dd1TreatmentUpgradeState(level),{level,recoveryLevel,costLevel,capacity,next});
+ for(const level of [-1,7,1.5,'2'])
+  assert.throws(()=>dd1TreatmentUpgradeState(level),/Invalid DD1 treatment upgrade level/);
 });
