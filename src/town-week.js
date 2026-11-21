@@ -73,6 +73,15 @@ export function treatmentConfig(settlement,service){
  if(!Number.isInteger(level)||level<0||level>2)throw Error('Invalid recovery upgrade');
  return {...base,level,stressRelief:TREATMENT_RELIEF_BY_LEVEL[service][level],capacity:level===2?2:1};
 }
+// Vanilla DD1 charges more for Veteran (resolve 3-4) and Champion
+// (resolve 5+) heroes. The current Clays recovery-upgrade track does not
+// yet model DD1's separate cost-reduction upgrades.
+export function treatmentCostForHero(settlement,service,hero){
+ const config=treatmentConfig(settlement,service);
+ const level=hero?.level??0;
+ if(!Number.isSafeInteger(level)||level<0)throw Error('Invalid hero resolve level');
+ return Math.round(config.gold*(level>=5?1.8:level>=3?1.4:1));
+}
 const goodInt=n=>Number.isSafeInteger(n)&&n>=0;
 const names=Object.keys(TREATMENTS);
 export function stageCoachOffers(week,roster=[],network=0){
@@ -132,8 +141,9 @@ export function bookStressTreatment(settlement,rosterId,service){
  if(restriction)throw Error('Hero quirk forbids this stress treatment: '+restriction);
  if(town.treatments.some(t=>t.rosterId===rosterId)||sanitariumUnavailable(settlement,rosterId))throw Error('Hero is already receiving treatment');
  if(town.treatments.filter(t=>t.service===service).length>=config.capacity)throw Error('Treatment room is occupied');
- if(settlement.gold<config.gold)throw Error('Insufficient gold for treatment');
- settlement.gold-=config.gold;
+ const price=treatmentCostForHero(settlement,service,hero);
+ if(settlement.gold<price)throw Error('Insufficient gold for treatment');
+ settlement.gold-=price;
  town.treatments.push({rosterId,service});
  return hero;
 }
