@@ -29,7 +29,7 @@ export const QUEST_TRINKET_IDS=Object.freeze(['ward-charm','ward-charm-common','
 const safeNumber=x=>Number.isSafeInteger(x)&&x>=0;
 const isObject=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 export function createCampaignSettlement(){
- return initSanitarium(initTown(setupHeroRoster({...createSettlement(),busts:0,stageCoach:{barracks:0,network:0},facilities:{market:0,guild:0,temple:0,abbey:0,tavern:0},completedExpeditions:0,campaignVictories:[]})));
+ return initSanitarium(initTown(setupHeroRoster({...createSettlement(),busts:0,treatmentUpgradeTracks:Object.fromEntries(RECOVERY_TRACKS.map(key=>[key,0])),stageCoach:{barracks:0,network:0},facilities:{market:0,guild:0,temple:0,abbey:0,tavern:0},completedExpeditions:0,campaignVictories:[]})));
 }
 export function normalizeCampaignSettlement(input){
  if(!isObject(input))throw Error('Invalid settlement');
@@ -50,6 +50,15 @@ export function normalizeCampaignSettlement(input){
   const level=fields[key]??0;
   if(!safeNumber(level)||level>rule.maxLevel)throw Error('Invalid facility level');
   base.facilities[key]=level;
+ }
+ if(input.treatmentUpgradeTracks!==undefined){
+  if(!isObject(input.treatmentUpgradeTracks)||Object.keys(input.treatmentUpgradeTracks).some(k=>!RECOVERY_TRACKS.includes(k)))throw Error('Invalid treatment upgrade tracks');
+  base.treatmentUpgradeTracks={};
+  for(const service of RECOVERY_TRACKS){
+   const level=input.treatmentUpgradeTracks[service];
+   if(!safeNumber(level)||level>6)throw Error('Invalid treatment upgrade level');
+   base.treatmentUpgradeTracks[service]=level;
+  }
  }
  if(input.recoveryTracks!==undefined){
   if(!isObject(input.recoveryTracks)||Object.keys(input.recoveryTracks).some(k=>!RECOVERY_TRACKS.includes(k)))throw Error('Invalid recovery activity upgrades');
