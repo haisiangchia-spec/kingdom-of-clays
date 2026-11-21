@@ -10,11 +10,11 @@ import {sanitariumUnavailable,completeSanitariumWeek,applyQuestTraitRolls} from 
 // Costs, relief amounts and facility-wide upgrades are still Clays fixtures.
 export const TREATMENTS=Object.freeze({
  abbey:Object.freeze({name:'Abbey Cloister',facility:'abbey',gold:1000,stressRelief:45}),
- abbeyTransept:Object.freeze({name:'Abbey Transept',facility:'abbey',gold:1000,stressRelief:45}),
- abbeyPenance:Object.freeze({name:'Abbey Penance Hall',facility:'abbey',gold:1000,stressRelief:45}),
+ abbeyTransept:Object.freeze({name:'Abbey Transept',facility:'abbey',gold:1250,stressRelief:55}),
+ abbeyPenance:Object.freeze({name:'Abbey Penance Hall',facility:'abbey',gold:1500,stressRelief:65}),
  tavern:Object.freeze({name:'Tavern Bar',facility:'tavern',gold:1000,stressRelief:45}),
- tavernGambling:Object.freeze({name:'Tavern Gambling Hall',facility:'tavern',gold:1000,stressRelief:45}),
- tavernBrothel:Object.freeze({name:'Tavern Brothel',facility:'tavern',gold:1000,stressRelief:45})
+ tavernGambling:Object.freeze({name:'Tavern Gambling Hall',facility:'tavern',gold:1250,stressRelief:55}),
+ tavernBrothel:Object.freeze({name:'Tavern Brothel',facility:'tavern',gold:1500,stressRelief:65})
 });
 // New campaigns may upgrade each activity independently. Older saves without
 // recoveryTracks continue to use their existing Abbey/Tavern building levels.
@@ -60,7 +60,8 @@ export function treatmentConfig(settlement,service){
  const independent=settlement.recoveryTracks?.[service];
  const level=independent===undefined?legacy:independent;
  if(!Number.isInteger(level)||level<0||level>2)throw Error('Invalid recovery upgrade');
- return {...base,level,stressRelief:[45,56,70][level],capacity:level===2?2:1};
+ const relief=base.stressRelief===45?[45,56,70]:base.stressRelief===55?[55,69,86]:[65,81,100];
+ return {...base,level,stressRelief:relief[level],capacity:level===2?2:1};
 }
 const goodInt=n=>Number.isSafeInteger(n)&&n>=0;
 const names=Object.keys(TREATMENTS);
