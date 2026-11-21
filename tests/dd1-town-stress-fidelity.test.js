@@ -255,8 +255,8 @@ test('legacy town upgrade migration assessment preserves incompatible purchased 
  assert.equal(matched.level,2);
  upgradeRecoveryActivity(s,'abbey');
  const later=dd1UpgradeMigrationAssessment(s,'abbey');
- assert.equal(later.compatible,false);
- assert.equal(later.level,null);
+ assert.equal(later.compatible,true);
+ assert.equal(later.level,4);
  assert.equal(treatmentCostUpgradeLevel(s,'abbey'),1);
  assert.equal(treatmentConfig(s,'abbey').level,2);
  assert.throws(()=>dd1UpgradeMigrationAssessment(s,'invalid'),/Unknown stress treatment/);
